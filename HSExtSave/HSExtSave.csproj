@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\ILMerge.3.0.29\build\ILMerge.props" Condition="Exists('..\packages\ILMerge.3.0.29\build\ILMerge.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{27695E5F-8D1E-41DC-A81C-1F0C1814627C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HSExtSave</RootNamespace>
+    <AssemblyName Condition="'$(Configuration)|$(Platform)' == 'HS|AnyCPU'">HSExtSave</AssemblyName>
+    <AssemblyName Condition="'$(Configuration)|$(Platform)' == 'PH|AnyCPU'">PHExtSave</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'HS|AnyCPU'">
+    <OutputPath>bin\HoneySelect\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <DefineConstants>HONEYSELECT</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PH|AnyCPU'">
+    <OutputPath>bin\PH\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <DefineConstants>PLAYHOME</DefineConstants>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="HSExtSave.cs" />
+    <Compile Include="HarmonyPatches.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="'$(Configuration)|$(Platform)' == 'HS|AnyCPU'">
+      <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>..\Other Dependencies\0Harmony.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="IllusionPlugin">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\IllusionPlugin.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+          <SpecificVersion>True</SpecificVersion>
+        </Reference>
+        <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\System.Xml.dll</HintPath>
+          <Private>False</Private>
+          <SpecificVersion>True</SpecificVersion>
+        </Reference>
+        <Reference Include="System.Xml.Linq, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\System.Xml.Linq.dll</HintPath>
+          <Private>False</Private>
+          <SpecificVersion>True</SpecificVersion>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="'$(Configuration)|$(Platform)' == 'PH|AnyCPU'">
+      <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>..\Other Dependencies\0Harmony.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="IllusionPlugin">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\IllusionPlugin.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+          <SpecificVersion>True</SpecificVersion>
+        </Reference>
+        <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\System.Xml.dll</HintPath>
+          <Private>False</Private>
+          <SpecificVersion>True</SpecificVersion>
+        </Reference>
+        <Reference Include="System.Xml.Linq, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\System.Xml.Linq.dll</HintPath>
+          <Private>False</Private>
+          <SpecificVersion>True</SpecificVersion>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <ItemGroup>
+    <None Include="ILMergeConfig.json" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'HS|AnyCPU'">
+    <PostBuildEvent>copy /Y "$(TargetDir)ILMerge\$(TargetName)$(TargetExt)" "D:\Program Files (x86)\HoneySelect\Plugins"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PH|AnyCPU'">
+    <PostBuildEvent>copy /Y "$(TargetDir)ILMerge\$(TargetName)$(TargetExt)" "D:\Program Files (x86)\PlayHome\Plugins"</PostBuildEvent>
+  </PropertyGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Ce projet fait référence à des packages NuGet qui sont manquants sur cet ordinateur. Utilisez l'option de restauration des packages NuGet pour les télécharger. Pour plus d'informations, consultez http://go.microsoft.com/fwlink/?LinkID=322105. Le fichier manquant est : {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\ILMerge.3.0.29\build\ILMerge.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILMerge.3.0.29\build\ILMerge.props'))" />
+    <Error Condition="!Exists('..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets'))" />
+  </Target>
+  <Import Project="..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets" Condition="Exists('..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets')" />
+</Project>

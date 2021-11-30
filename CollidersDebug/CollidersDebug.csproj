@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">KOI</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E4B14F5E-38E8-4AAF-97CA-7E67DE35A83D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CollidersDebug</RootNamespace>
+    <AssemblyName>CollidersDebug</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'KOI|AnyCPU' ">
+    <OutputPath>bin\KOI\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>KOIKATSU;BEPINEX</DefineConstants>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="KKAPI">
+      <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\plugins\KKAPI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\System.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\System.Xml.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Vectrosity">
+      <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\Vectrosity.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\toolbox\GenericPlugin.cs">
+      <Link>ToolBox\GenericPlugin.cs</Link>
+    </Compile>
+    <Compile Include="..\toolbox\HarmonyExtensions.cs">
+      <Link>ToolBox\HarmonyExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\toolbox\IMGUIExtensions.cs">
+      <Link>ToolBox\IMGUIExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\toolbox\MonoBehaviourExtensions.cs">
+      <Link>ToolBox\MonoBehaviourExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\toolbox\ReflectionExtensions.cs">
+      <Link>ToolBox\ReflectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\toolbox\TimelineCompatibility.cs">
+      <Link>ToolBox\TimelineCompatibility.cs</Link>
+    </Compile>
+    <Compile Include="..\toolbox\TransformExtensions.cs">
+      <Link>ToolBox\TransformExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\toolbox\VariousExtensions.cs">
+      <Link>ToolBox\VariousExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\toolbox\XmlExtensions.cs">
+      <Link>ToolBox\XmlExtensions.cs</Link>
+    </Compile>
+    <Compile Include="CollidersDebug.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName)$(TargetExt)" "D:\Program Files (x86)\Koikatu\BepInEx\plugins"</PostBuildEvent>
+  </PropertyGroup>
+</Project>

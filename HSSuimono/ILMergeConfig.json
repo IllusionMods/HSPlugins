@@ -1,0 +1,9 @@
+{
+  "General": {
+
+  },
+  "Advanced": {
+    "AllowDuplicateType": "*",
+    "Internalize": true
+  }
+}

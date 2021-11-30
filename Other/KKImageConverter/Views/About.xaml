@@ -1,0 +1,69 @@
+﻿<Window x:Class="KKImageConverter.Views.About"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        mc:Ignorable="d"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Title="You fool! You fell victim to one of the classic blunders!" Height="610" Width="400"
+         ResizeMode="NoResize">
+    <StackPanel>
+        <FlowDocumentScrollViewer HorizontalAlignment="Center" VerticalScrollBarVisibility="Auto">
+            <FlowDocument IsOptimalParagraphEnabled="True" IsHyphenationEnabled="True">
+                <FlowDocument.Resources>
+                    <Style TargetType="{x:Type Paragraph}">
+                        <Setter Property="Margin" Value="10"/>
+                    </Style>
+                </FlowDocument.Resources>
+                <Section TextAlignment="Center">
+                    <Paragraph FontSize="22" FontWeight="Bold">
+                        KK Image Converter
+                    </Paragraph>
+                    <Paragraph FontSize="12">
+                        This program is a texture converter aimed at <Hyperlink RequestNavigate="Navigate" NavigateUri="http://www.illusion.jp/preview/koikatu/index.php">Koikatsu!</Hyperlink> a game made by Illusion.
+                    </Paragraph>
+                    <BlockUIContainer>
+                        <Image Width="200" Source="../Over_20lbs.png"></Image>
+                    </BlockUIContainer>
+                    <Paragraph FontSize="16" FontWeight="Bold">
+                        Made by
+                    </Paragraph>
+                    <Paragraph FontSize="12">
+                        <Hyperlink RequestNavigate="Navigate" NavigateUri="https://www.patreon.com/joan6694">Joan6694</Hyperlink>
+                    </Paragraph>
+                    <Paragraph FontSize="16" FontWeight="Bold">
+                        Commissioners
+                    </Paragraph>
+                    <Paragraph FontSize="12">
+                        <Hyperlink RequestNavigate="Navigate" NavigateUri="https://www.pixiv.net/en/users/5274046">Fateburn</Hyperlink>
+                    </Paragraph>
+                    <Paragraph FontSize="12">
+                        H_enry
+                    </Paragraph>
+                    <Paragraph FontSize="12">
+                        lesbianon
+                    </Paragraph>
+                    <Paragraph FontSize="16" FontWeight="Bold">
+                        Pivotal babe
+                    </Paragraph>
+                    <Paragraph FontSize="12">
+                        <Hyperlink RequestNavigate="Navigate" NavigateUri="https://www.pixiv.net/en/users/38787140">Augh</Hyperlink>
+                    </Paragraph>
+                    <Paragraph FontSize="16" FontWeight="Bold">
+                        Made with
+                    </Paragraph>
+                    <Paragraph FontSize="12">
+                        <Hyperlink RequestNavigate="Navigate" NavigateUri="https://github.com/Kinnara/ModernWpf">ModernWPF</Hyperlink>
+                    </Paragraph>
+                    <Paragraph FontSize="12">
+                        <Hyperlink RequestNavigate="Navigate" NavigateUri="https://github.com/deng0/DirectXTexNet">DirectXTexNet</Hyperlink>
+                    </Paragraph>
+                    <Paragraph FontSize="12">
+                        <Hyperlink RequestNavigate="Navigate" NavigateUri="https://github.com/dwmkerr/sharpgl">SharpGL</Hyperlink>
+                    </Paragraph>
+                </Section>
+            </FlowDocument>
+        </FlowDocumentScrollViewer>
+    </StackPanel>
+</Window>

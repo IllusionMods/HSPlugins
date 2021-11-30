@@ -1,0 +1,84 @@
+<root>
+  <string key="ScreenshotPlugin" value="Screenshot Plugin" />
+  <string key="CurrentSize" value="Current Size" />
+  <string key="Framerate" value="Framerate" />
+  <string key="AutoGenerateVideo" value="Auto Generate Video" />
+  <string key="AutoDeleteImages" value="Auto Delete Images" />
+  <string key="LimitBy" value="Limit By" />
+  <string key="LimitByFrames" value="Frames" />
+  <string key="LimitBySeconds" value="Seconds" />
+  <string key="LimitByAnimation" value="Animation" />
+  <string key="LimitByTimeline" value="Timeline" />
+  <string key="LimitByPrewarmLoopCount" value="Prewarm Loop Count" />
+  <string key="LimitByLoopsToRecord" value="Loops To Record" />
+  <string key="LimitByLimitCount" value="Limit Count" />
+  <string key="Estimated" value="Estimated" />
+  <string key="Seconds" value="seconds" />
+  <string key="Frames" value="frames" />
+  <string key="Resize" value="Resize" />
+  <string key="ResizeDefault" value="Default" />
+  <string key="Format" value="Format" />
+  <string key="DBUpdateMode" value="Dynamic Bones Update Mode" />
+  <string key="DBDefault" value="Default" />
+  <string key="DBEveryFrame" value="Every Frame" />
+  <string key="Prefix" value="Prefix" />
+  <string key="Suffix" value="Suffix" />
+  <string key="ExampleResult" value="Example Result" />
+  <string key="EmptyScene" value="Empty Scene Before Encoding" />
+  <string key="CloseStudio" value="Close Studio When Done" />
+  <string key="StartRecordingOnNextClick" value="Start Recording On Next Click" />
+  <string key="StartRecording" value="Start Recording" />
+  <string key="StopRecording" value="Stop Recording" />
+  <string key="PrewarmingAnimation" value="Prewarming animation" />
+  <string key="TakingScreenshot" value="Taking screenshot" />
+  <string key="ETA" value="ETA" />
+  <string key="Elapsed" value="Elapsed" />
+  <string key="GeneratingVideo" value="Generating video" />
+  <string key="Done" value="Done!" />
+  <string key="GeneratingError" value="Error while generating the video, please check your output_log.txt file." />
+  <string key="VideosFolderDesc" value="The folder where videos are stored" />
+  <string key="FramesFolderDesc" value="The folder where frames are stored" />
+  <string key="BuiltInCaptureTool" value="Built-in" />
+  <string key="SizeMultiplier" value="Size Multiplier" />
+  <string key="CaptureMode" value="Capture Mode" />
+  <string key="CaptureModeNormal" value="Normal" />
+  <string key="CaptureModeImmediate" value="Immediate" />
+  <string key="CaptureModeWin32" value="Win32" />
+  <string key="ImageFormat" value="Image Format" />
+  <string key="Transparent" value="Transparent" />
+  <string key="ScreencapCaptureType" value="Capture Type" />
+  <string key="ScreencapCaptureTypeNormal" value="Normal" />
+  <string key="ScreencapCaptureType360" value="360" />
+  <string key="Screencap3D" value="3D" />
+  <string key="Rotation" value="Rotation" />
+  <string key="RotationNone" value="None" />
+  <string key="Rotation90" value="90° CW" />
+  <string key="Rotation180" value="180°" />
+  <string key="Rotation270" value="90° CCW" />
+  <string key="BitDepthError" value="The current video format does not support this bit depth." />
+  <string key="AVIWarning" value="Only use this format if you want your video to be compatible with older systems, otherwise prefer MP4/WEBM" />
+  <string key="AVIQuality" value="Quality (lower is better)" />
+  <string key="GIFWarning" value="It is recommended to downscale your images when using the GIF format (use Resize). Also, GIF isn&apos;t a very good format, prefer using MP4 or WEBM." />
+  <string key="GIFError" value="GIF is only compatible with PNG images." />
+  <string key="MP4Codec" value="Codec" />
+  <string key="H265Warning" value="The H.265 codec will give you smaller file sizes for the same visual quality as H.264 but it will not embed correctly in most browsers/Discord." />
+  <string key="MP4Quality" value="Quality (lower is better but 18 is visually lossless)" />
+  <string key="MP4Preset" value="Encoding Preset (slower = better quality/filesize, &quot;Medium&quot; is a good compromise)" />
+  <string key="MP4PresetVerySlow" value="Very Slow" />
+  <string key="MP4PresetSlower" value="Slower" />
+  <string key="MP4PresetSlow" value="Slow" />
+  <string key="MP4PresetMedium" value="Medium" />
+  <string key="MP4PresetFast" value="Fast" />
+  <string key="MP4PresetFaster" value="Faster" />
+  <string key="MP4PresetVeryFast" value="Very Fast" />
+  <string key="MP4PresetSuperFast" value="Super Fast" />
+  <string key="MP4PresetUltraFast" value="Ultra Fast" />
+  <string key="WEBMCodec" value="Codec" />
+  <string key="VP9Warning" value="The VP9 codec will give you smaller file sizes and better quality than VP8 but it might not be supported on phones" />
+  <string key="VP8Quality" value="Quality (lower is better, 10 is a good starting point)" />
+  <string key="VP9Quality" value="Quality (lower is better, 15-35 is recommended)" />
+  <string key="WEBMDeadline" value="Encoding Deadline (slower deadline = better quality/filesize, &quot;Best&quot; = slower, &quot;Realtime&quot; = faster)" />
+  <string key="WEBMDeadlineBest" value="Best" />
+  <string key="WEBMDeadlineGood" value="Good" />
+  <string key="WEBMDeadlineRealtime" value="Realtime" />
+</root>

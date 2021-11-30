@@ -1,0 +1,85 @@
+<root>
+  <string key="ScreenshotPlugin" value="屏幕截图插件" />
+  <string key="CurrentSize" value="当前尺寸" />
+  <string key="Framerate" value="帧率" />
+  <string key="AutoGenerateVideo" value="自动生成视频" />
+  <string key="AutoDeleteImages" value="自动删除图片" />
+  <string key="LimitBy" value="限制" />
+  <string key="LimitByFrames" value="帧率" />
+  <string key="LimitBySeconds" value="时间" />
+  <string key="LimitByAnimation" value="动画" />
+  <string key="LimitByTimeline" value="Timeline" />
+  <string key="LimitByPrewarmLoopCount" value="预热循环计数" />
+  <string key="LimitByLoopsToRecord" value="循环记录" />
+  <string key="LimitByLimitCount" value="循环次数" />
+  <string key="Estimated" value="预测" />
+  <string key="Seconds" value="秒" />
+  <string key="Frames" value="帧" />
+  <string key="Resize" value="调整尺寸" />
+  <string key="ResizeDefault" value="默认" />
+  <string key="Format" value="格式" />
+  <string key="DBUpdateMode" value="动态骨骼更新模式" />
+  <string key="DBDefault" value="默认" />
+  <string key="DBEveryFrame" value="每帧" />
+  <string key="Prefix" value="前缀" />
+  <string key="Suffix" value="后缀" />
+  <string key="ExampleResult" value="比如" />
+  <string key="EmptyScene" value="比如" />
+  <string key="CloseStudio" value="完成后退出工作室" />
+  <string key="StartRecordingOnNextClick" value="下次点击时录制" />
+  <string key="StartRecording" value="开始录制" />
+  <string key="StopRecording" value="停止录制" />
+  <string key="PrewarmingAnimation" value="动画速率" />
+  <string key="TakingScreenshot" value="获取截图中" />
+  <string key="ETA" value="预计还需" />
+  <string key="Elapsed" value="已用时间" />
+  <string key="GeneratingVideo" value="生成进度" />
+  <string key="Done" value="完成" />
+  <string key="GeneratingError" value="视频生成出错，相关日志请检查 &apos;output_log.txt&apos; 文件..." />
+  <string key="VideosFolderDesc" value="视频存储目录" />
+  <string key="FramesFolderDesc" value="单帧存储目录" />
+  <string key="BuiltInCaptureTool" value="内置" />
+  <string key="SizeMultiplier" value="截图倍率" />
+  <string key="CaptureMode" value="截图模式" />
+  <string key="CaptureModeNormal" value="标准" />
+  <string key="CaptureModeImmediate" value="高速" />
+  <string key="CaptureModeWin32" value="普通" />
+  <string key="ImageFormat" value="图像格式" />
+  <string key="Transparent" value="Alpha透明通道" />
+  <string key="ScreencapCaptureType" value="截图类型" />
+  <string key="ScreencapCaptureTypeNormal" value="标准" />
+  <string key="ScreencapCaptureType360" value="360°环绕截图" />
+  <string key="Screencap3D" value="3D截图" />
+  <string key="Rotation" value="旋转" />
+  <string key="RotationNone" value="默认" />
+  <string key="Rotation90" value="旋转90°" />
+  <string key="Rotation180" value="旋转180°" />
+  <string key="Rotation270" value="旋转-90°" />
+  <string key="BitDepthError" value="当前视频格式无法支持此位深效果" />
+  <string key="AVIWarning" value="仅在希望在老电脑上播放此视频时使用本选项，否则优先使用MP4/WEBM视频格式..." />
+  <string key="AVIQuality" value="清晰度 ( 越低越好 ) " />
+  <string key="GIFWarning" value="由于仅支持PNG编码方案，建议在使用GIF格式时缩小图像尺寸，由于GIF图片会有失真，建议使用MP4/WEBM视频格式..." />
+  <string key="GIFError" value="GIF与PNG只能二选其一" />
+  <string key="MP4Codec" value="编码器" />
+  <string key="H265Warning" value="主流的视频编码器: H.265 拥有更好的压缩比，与H.264视频质量无异，但无法支持浏览器WEB前端嵌入使用
+          如果你需要使用浏览器播放此视频，建议不要使用此编码" />
+  <string key="MP4Quality" value="视频质量 ( 越低越好，当参数值为18的时候，视觉上与无损无异 )" />
+  <string key="MP4Preset" value="编码方案 ( 较慢: 更高的视频质量/更理想的文件大小，中: 折中方案 )" />
+  <string key="MP4PresetVerySlow" value="最慢" />
+  <string key="MP4PresetSlower" value="较慢" />
+  <string key="MP4PresetSlow" value="慢" />
+  <string key="MP4PresetMedium" value="中" />
+  <string key="MP4PresetFast" value="快" />
+  <string key="MP4PresetFaster" value="快" />
+  <string key="MP4PresetVeryFast" value="较快" />
+  <string key="MP4PresetSuperFast" value="极快" />
+  <string key="MP4PresetUltraFast" value="最快" />
+  <string key="WEBMCodec" value="编码器" />
+  <string key="VP9Warning" value="编码器: VP9 比VP8提供更高压缩比与更好饿的视频质量，但是部分手机可能无法支持" />
+  <string key="VP8Quality" value="质量 ( 越低越好，建议值: 10 使用VP8编码器 )" />
+  <string key="VP9Quality" value="质量 ( 越低越好，建议值: 15-35 使用VP9编码器 )" />
+  <string key="WEBMDeadline" value="编码时间戳 ( 最好: 时间最长，中等: 比较理想的编码时间，实时: 时间最快 )" />
+  <string key="WEBMDeadlineBest" value="最好" />
+  <string key="WEBMDeadlineGood" value="中等" />
+  <string key="WEBMDeadlineRealtime" value="实时" />
+</root>

@@ -1,0 +1,168 @@
+﻿<Window x:Class="KKImageConverter.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KKImageConverter"
+        xmlns:helpers="clr-namespace:KKImageConverter.Helpers"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:viewModels="clr-namespace:KKImageConverter.ViewModels"
+        mc:Ignorable="d"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Title="KK Image Converter" Height="860" Width="1280">
+    <Window.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.DataContext>
+        <viewModels:MainWindowViewModel></viewModels:MainWindowViewModel>
+    </Window.DataContext>
+    <DockPanel IsEnabled="{Binding IsNotConverting}" >
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="Add F_iles" Command="{Binding AddFilesCommand}"></MenuItem>
+                <MenuItem Header="Add F_older" Command="{Binding AddFoldersCommand}"></MenuItem>
+                <MenuItem Header="_Remove All" Command="{Binding RemoveAllCommand}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Theme">
+                <ui:RadioMenuItem IsChecked="{Binding UsingDarkTheme, Mode=TwoWay}" GroupName="Theme" Header="Dark"></ui:RadioMenuItem>
+                <ui:RadioMenuItem IsChecked="{Binding UsingLightTheme, Mode=TwoWay}" GroupName="Theme" Header="Light">Light</ui:RadioMenuItem>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="H_ot singles in your area..." Click="About_OnClick">
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <Grid AllowDrop="True">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Drop">
+                    <helpers:EventCommand Command="{Binding FileDropCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}"></helpers:EventCommand>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" MinWidth="100"></ColumnDefinition>
+                <ColumnDefinition Width="5"></ColumnDefinition>
+                <ColumnDefinition Width="400" MinWidth="200"></ColumnDefinition>
+                <ColumnDefinition Width="5"></ColumnDefinition>
+                <ColumnDefinition Width="*" MinWidth="200"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <ListView Grid.Column="0" ItemsSource="{Binding Files}" SelectedItem="{Binding SelectedFile, Mode=TwoWay}" SelectionMode="Single" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListView.InputBindings>
+                    <KeyBinding Key="Delete" Command="{Binding DeleteSelectedFileCommand}"></KeyBinding>
+                </ListView.InputBindings>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <TextBlock Text="{Binding FullPath}" TextWrapping="Wrap"></TextBlock>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <GridSplitter Grid.Column="1" Width="Auto" HorizontalAlignment="Stretch" Background="Transparent"></GridSplitter>
+            <DockPanel Grid.Column="2" Margin="5">
+                <Button HorizontalAlignment="Right" DockPanel.Dock="Bottom" Background="Transparent" Command="{Binding ConvertCommand}">
+                    <StackPanel>
+                        <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;"></ui:FontIcon>
+                        <TextBlock>Convert all</TextBlock>
+                    </StackPanel>
+                </Button>
+                <ScrollViewer >
+                    <StackPanel>
+                        <ui:ToggleSwitch x:Name="ColorCorrectionToggle" IsOn="{Binding ColorCorrectionEnabled, Mode=TwoWay}" OnContent="Color Correction" OffContent="Color Correction"></ui:ToggleSwitch>
+                        <StackPanel Visibility="{Binding ColorCorrectionEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0 5" HorizontalAlignment="Stretch">
+                            <ui:RadioButtons MaxColumns="2" ItemsSource="{Binding ColorCorrectionWorkflowOptions}" SelectedIndex="{Binding SelectedColorCorrectionWorkflowIndex, Mode=TwoWay}"></ui:RadioButtons>
+                            <TextBlock FontStyle="Italic" Foreground="Red" Visibility="{Binding LinearWorkflow, Converter={StaticResource BooleanToVisibilityConverter}}" TextWrapping="WrapWithOverflow" Margin="0 0 0 5">In Linear workflow, make sure your textures are set to Linear space in Unity ("sRGB (Color Texture)" disabled) and SB3U (Colorspace = 0).</TextBlock>
+                            <TextBlock FontStyle="Italic" Foreground="Red" Visibility="{Binding GammaWorkflow, Converter={StaticResource BooleanToVisibilityConverter}}" TextWrapping="WrapWithOverflow" Margin="0 0 0 5">In Gamma workflow, make sure your textures are set to Gamma space in Unity ("sRGB (Color Texture)" enabled) and SB3U (Colorspace = 1).</TextBlock>
+                            <TextBlock Margin="0 5" TextWrapping="WrapWithOverflow">Correction amount</TextBlock>
+                            <DockPanel>
+                                <TextBox Margin="5 0 0 0" Width="80" TextAlignment="Right" Text="{Binding ColorCorrectionAmount, Mode=TwoWay, StringFormat=N2}" DockPanel.Dock="Right"></TextBox>
+                                <Slider Minimum="0" IsSnapToTickEnabled="True" TickFrequency="0.01" Maximum="1" Value="{Binding ColorCorrectionAmount, Mode=TwoWay}"></Slider>
+                            </DockPanel>
+                            <TextBlock FontStyle="Italic" Foreground="Red" Margin="0 0 0 5">Only use it if you know what you're doing, otherwise set it to 1</TextBlock>
+                        </StackPanel>
+                        <ui:ToggleSwitch x:Name="ResizeToggle" IsOn="{Binding ResizeEnabled, Mode=TwoWay}" OnContent="Resize" OffContent="Resize"></ui:ToggleSwitch>
+                        <StackPanel Visibility="{Binding ResizeEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ComboBox Margin="0 5 0 0" ItemsSource="{Binding ResizeOptions}" SelectedIndex="{Binding SelectedResizeOptionIndex, Mode=TwoWay}"></ComboBox>
+                            <ui:RadioButtons Visibility="{Binding ResizeOptionPowerOfTwo, Converter={StaticResource BooleanToVisibilityConverter}}" MaxColumns="3" ItemsSource="{Binding ResizePowerOfTwoOptions}" SelectedIndex="{Binding SelectedResizePowerOfTwoOptionIndex, Mode=TwoWay}"></ui:RadioButtons>
+                            <StackPanel Orientation="Horizontal" Visibility="{Binding ResizeOptionExact, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0 5">
+                                <ui:NumberBox Header="Width" Value="{Binding ResizeExactWidth, Mode=TwoWay}" Minimum="32" Maximum="8192" SmallChange="2" AcceptsExpression="True" SpinButtonPlacementMode="Inline"></ui:NumberBox>
+                                <ui:NumberBox Header="Height" Value="{Binding ResizeExactHeight, Mode=TwoWay}" Minimum="32" Maximum="8192" SmallChange="2" AcceptsExpression="True" SpinButtonPlacementMode="Inline"></ui:NumberBox>
+                            </StackPanel>
+                            <TextBlock Visibility="{Binding ResizeOptionExact, Converter={StaticResource BooleanToVisibilityConverter}}" FontStyle="Italic" Foreground="Red" Margin="0 0 0 5" TextWrapping="WrapWithOverflow">This will be applied to all the textures in your list, meaning that they will all be resized to those dimensions.</TextBlock>
+                            <ui:RadioButtons Header="Texture filter" MaxColumns="2" ItemsSource="{Binding TextureFilterOptions}" SelectedIndex="{Binding SelectedTextureFilterIndex, Mode=TwoWay}" Margin="0 5"></ui:RadioButtons>
+                        </StackPanel>
+                        <ui:ToggleSwitch x:Name="RenameToggle" IsOn="{Binding RenameEnabled, Mode=TwoWay}" OnContent="Rename" OffContent="Rename"></ui:ToggleSwitch>
+                        <StackPanel Margin="0 5" Visibility="{Binding RenameEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <DockPanel>
+                                <TextBlock Margin="0 5 5 5" DockPanel.Dock="Left">Prefix</TextBlock>
+                                <TextBox Text="{Binding Prefix, Mode=TwoWay}"></TextBox>
+                            </DockPanel>
+                            <DockPanel>
+                                <TextBlock Margin="0 5 5 5" DockPanel.Dock="Left">Suffix</TextBlock>
+                                <TextBox Text="{Binding Suffix, Mode=TwoWay}"></TextBox>
+                            </DockPanel>
+                            <TextBlock Margin="0 5">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}Result: {0}">
+                                        <Binding Path="CurrentName" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </StackPanel>
+                        <TextBlock Margin="0 5">Output format</TextBlock>
+                        <ComboBox ItemsSource="{Binding OutputFormatsOptions}" SelectedIndex="{Binding SelectedOutputFormatIndex, Mode=TwoWay}"></ComboBox>
+                        <ui:RadioButtons Header="Compression speed" Visibility="{Binding OutputFormatDDS, Converter={StaticResource BooleanToVisibilityConverter}}" MaxColumns="2" ItemsSource="{Binding DDSCompressionSpeedOptions}" SelectedIndex="{Binding SelectedDDSCompressionSpeedIndex, Mode=TwoWay}"></ui:RadioButtons>
+                        <TextBlock Margin="0 5">Output folder</TextBlock>
+                        <DockPanel Margin="0 5">
+                            <Button DockPanel.Dock="Right" Command="{Binding BrowseOutputCommand}" Background="Transparent">
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xED25;"></ui:FontIcon>
+                            </Button>
+                            <TextBox Text="{Binding OutputFolder}"></TextBox>
+                        </DockPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+            <GridSplitter Grid.Column="3" Width="auto" HorizontalAlignment="Stretch" Background="Transparent"></GridSplitter>
+            <DockPanel Grid.Column="4">
+                <StackPanel DockPanel.Dock="Bottom">
+                    <StackPanel HorizontalAlignment="Center" Margin="0 5 10 0" Orientation="Horizontal">
+                        <CheckBox Content="R" IsChecked="{Binding ShowR}" MinWidth="50"></CheckBox>
+                        <CheckBox Content="G" IsChecked="{Binding ShowG}" MinWidth="50"></CheckBox>
+                        <CheckBox Content="B" IsChecked="{Binding ShowB}" MinWidth="50"></CheckBox>
+                        <CheckBox Content="A" IsChecked="{Binding ShowA}" MinWidth="50"></CheckBox>
+                        <CheckBox Content="Checker" IsChecked="{Binding ShowChecker}" MinWidth="50"></CheckBox>
+                        <TextBlock Margin="60 6 6 6">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}Size: {0} x {1}">
+                                    <Binding Path="CurrentSize.X" />
+                                    <Binding Path="CurrentSize.Y" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                    <ProgressBar Margin="0 5 10 10" Minimum="0" Maximum="1" Value="{Binding Progress}"></ProgressBar>
+                </StackPanel>
+                <sharpGL:OpenGLControl Margin="5 0" x:Name="OpenGLControl" RenderContextType="FBO" OpenGLVersion="OpenGL4_4">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="OpenGLDraw">
+                            <i:InvokeCommandAction Command="{Binding OpenGLDrawCommand}" CommandParameter="{Binding ElementName=OpenGLControl}"></i:InvokeCommandAction>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="Resized">
+                            <i:InvokeCommandAction Command="{Binding OpenGLResizedCommand}" CommandParameter="{Binding ElementName=OpenGLControl}"></i:InvokeCommandAction>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </sharpGL:OpenGLControl>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

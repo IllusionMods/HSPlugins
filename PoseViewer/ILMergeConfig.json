@@ -1,0 +1,9 @@
+{
+  "General": {
+    "TargetPlatform": "v2,C:\\Windows\\Microsoft.NET\\Framework\\v2.0.50727"
+  },
+  "Advanced": {
+    "AllowDuplicateType": "*",
+    "Internalize": true
+  }
+}

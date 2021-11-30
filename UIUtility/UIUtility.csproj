@@ -1,0 +1,256 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5FF39402-D216-42DE-9AAA-BA34103F1786}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>UILib</RootNamespace>
+    <AssemblyName>UIUtility</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'HS'">
+    <OutputPath>bin\HS\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>HONEYSELECT</DefineConstants>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'PH'">
+    <OutputPath>bin\PH\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>PLAYHOME</DefineConstants>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'KOI'">
+    <OutputPath>bin\KOI\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>KOIKATSU</DefineConstants>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'AI'">
+    <OutputPath>bin\AI\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>AISHOUJO</DefineConstants>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'HS2'">
+    <OutputPath>bin\HS2\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>HONEYSELECT2</DefineConstants>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="ConfirmationDialog.cs" />
+    <Compile Include="ContextMenu\AContextMenuElement.cs" />
+    <Compile Include="ContextMenu\ContextMenuUIElement.cs" />
+    <Compile Include="ContextMenu\GroupElement.cs" />
+    <Compile Include="ContextMenu\LeafElement.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="MovableWindow.cs" />
+    <Compile Include="OneTimeContentSizeFitter.cs" />
+    <Compile Include="OneTimeHorizontalLayoutGroup.cs" />
+    <Compile Include="OneTimeVerticalLayoutGroup.cs" />
+    <Compile Include="EventHandlers\PointerEnterHandler.cs" />
+    <Compile Include="EventHandlers\DragHandler.cs" />
+    <Compile Include="EventHandlers\ScrollHandler.cs" />
+    <Compile Include="EventHandlers\PointerDownHandler.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UIUtility.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Choose>
+    <When Condition=" '$(Configuration)' == 'HS' ">
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\DefaultResources.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI.Translation">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\UnityEngine.UI.Translation.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)' == 'PH' ">
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\DefaultResources.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI.Translation">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\UnityEngine.UI.Translation.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)' == 'KOI' ">
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\DefaultResourcesKOI.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)' == 'AI' ">
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\DefaultResourcesAI.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)' == 'HS2' ">
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\DefaultResourcesHS2.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,486 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\ILMerge.3.0.40\build\ILMerge.props" Condition="Exists('..\packages\ILMerge.3.0.40\build\ILMerge.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">HS</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B6448057-F9C2-4E9C-8E18-09C556CFCB46}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HSPE</RootNamespace>
+    <FileAlignment>512</FileAlignment>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="'$(Configuration)|$(Platform)' == 'HS|AnyCPU'">
+      <PropertyGroup>
+        <AssemblyName>HSPENeo</AssemblyName>
+        <OutputPath>bin\HS\</OutputPath>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <ErrorReport>prompt</ErrorReport>
+        <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+        <DefineConstants>HONEYSELECT;IPA</DefineConstants>
+        <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+        <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(Configuration)|$(Platform)' == 'PH|AnyCPU'">
+      <PropertyGroup>
+        <AssemblyName>PHPE</AssemblyName>
+        <OutputPath>bin\PH\</OutputPath>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <ErrorReport>prompt</ErrorReport>
+        <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+        <DefineConstants>PLAYHOME;IPA</DefineConstants>
+        <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+        <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(Configuration)|$(Platform)' == 'KOI|AnyCPU'">
+      <PropertyGroup>
+        <AssemblyName>KKPE</AssemblyName>
+        <OutputPath>bin\KOI\</OutputPath>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <ErrorReport>prompt</ErrorReport>
+        <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+        <DefineConstants>KOIKATSU;BEPINEX</DefineConstants>
+        <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+        <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(Configuration)|$(Platform)' == 'AI|AnyCPU'">
+      <PropertyGroup>
+        <AssemblyName>AIPE</AssemblyName>
+        <OutputPath>bin\AI\</OutputPath>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <ErrorReport>prompt</ErrorReport>
+        <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+        <DefineConstants>AISHOUJO;BEPINEX</DefineConstants>
+        <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(Configuration)|$(Platform)' == 'HS2|AnyCPU'">
+      <PropertyGroup>
+        <AssemblyName>HS2PE</AssemblyName>
+        <OutputPath>bin\HS2\</OutputPath>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <ErrorReport>prompt</ErrorReport>
+        <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+        <DefineConstants>HONEYSELECT2;BEPINEX</DefineConstants>
+        <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\ToolBox\GenericPlugin.cs">
+      <Link>ToolBox\GenericPlugin.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\HarmonyExtensions.cs">
+      <Link>ToolBox\HarmonyExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\IMGUIExtensions.cs">
+      <Link>ToolBox\IMGUIExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\MonoBehaviourExtensions.cs">
+      <Link>ToolBox\MonoBehaviourExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\ReflectionExtensions.cs">
+      <Link>ToolBox\ReflectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\TimelineCompatibility.cs">
+      <Link>ToolBox\TimelineCompatibility.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\TransformExtensions.cs">
+      <Link>ToolBox\TransformExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\VariousExtensions.cs">
+      <Link>ToolBox\VariousExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\XmlExtensions.cs">
+      <Link>ToolBox\XmlExtensions.cs</Link>
+    </Compile>
+    <Compile Include="AMModules\BlendShapesEditor.cs" />
+    <Compile Include="AMModules\CollidersEditor.cs" />
+    <Compile Include="AMModules\BonesEditor.cs" />
+    <Compile Include="AMModules\BoobsEditor.cs" />
+    <Compile Include="AMModules\GenericOCITarget.cs" />
+    <Compile Include="AMModules\IKEditor.cs" />
+    <Compile Include="CameraEventsDispatcher.cs" />
+    <Compile Include="Commands.cs" />
+    <Compile Include="AMModules\DynamicBonesEditor.cs" />
+    <Compile Include="EditableValue.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="HarmonyPatches.cs" />
+    <Compile Include="MainWindow.cs" />
+    <Compile Include="CharaPoseController.cs" />
+    <Compile Include="AMModules\AdvancedModeModule.cs" />
+    <Compile Include="PoseController.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="HSPE.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UIUtility\UIUtility.csproj">
+      <Project>{5ff39402-d216-42de-9aaa-ba34103f1786}</Project>
+      <Name>UIUtility</Name>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="ILMergeConfig.json" />
+  </ItemGroup>
+  <Choose>
+    <When Condition=" '$(Configuration)' == 'HS' ">
+      <ItemGroup>
+        <ProjectReference Include="..\HSExtSave\HSExtSave.csproj">
+          <Project>{27695e5f-8d1e-41dc-a81c-1f0c1814627c}</Project>
+          <Name>HSExtSave</Name>
+          <Private>False</Private>
+        </ProjectReference>
+      </ItemGroup>
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\HSPEResources.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>..\Other Dependencies\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="IllusionPlugin">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\IllusionPlugin.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="IllusionInjector">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\IllusionInjector.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\System.Xml.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI.Translation">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\UnityEngine.UI.Translation.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Vectrosity">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\Vectrosity.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)' == 'PH' ">
+      <ItemGroup>
+        <ProjectReference Include="..\HSExtSave\HSExtSave.csproj">
+          <Project>{27695e5f-8d1e-41dc-a81c-1f0c1814627c}</Project>
+          <Name>HSExtSave</Name>
+          <Private>False</Private>
+        </ProjectReference>
+      </ItemGroup>
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\HSPEResources.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>..\Other Dependencies\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="IllusionPlugin">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\IllusionPlugin.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="IllusionInjector">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\IllusionInjector.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\System.Xml.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI.Translation">
+          <HintPath>D:\Program Files (x86)\PlayHome\PlayHomeStudio64bit_Data\Managed\UnityEngine.UI.Translation.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Vectrosity">
+          <HintPath>D:\Program Files (x86)\HoneySelect\StudioNEO_64_Data\Managed\Vectrosity.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)' == 'KOI' ">
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\KKPEResources.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\core\0Harmony.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="BepInEx">
+          <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\core\BepInEx.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="ExtensibleSaveFormat">
+          <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\plugins\KK_BepisPlugins\ExtensibleSaveFormat.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\System.Xml.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml.Linq">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\System.Xml.Linq.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="TextMeshPro-1.0.55.56.0b12">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\TextMeshPro-1.0.55.56.0b12.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Vectrosity">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\Vectrosity.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)' == 'AI' ">
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\AIPEResources.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\BepInEx\core\0Harmony.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="BepInEx">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\BepInEx\core\BepInEx.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="AI_ExtensibleSaveFormat">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\BepInEx\plugins\AI_BepisPlugins\AI_ExtensibleSaveFormat.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\System.Xml.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml.Linq">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\System.Xml.Linq.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\AI-Syoujyo\StudioNEOV2_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)' == 'HS2' ">
+      <ItemGroup>
+        <EmbeddedResource Include="Resources\HS2PEResources.unity3d" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\BepInEx\core\0Harmony.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="BepInEx">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\BepInEx\core\BepInEx.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="AI_ExtensibleSaveFormat">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\BepInEx\plugins\HS2_BepisPlugins\HS2_ExtensibleSaveFormat.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="IL">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\IL.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\System.Xml.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml.Linq">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\System.Xml.Linq.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\HoneySelect2\StudioNEOV2_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition=" '$(Configuration)' == 'HS' ">
+    <PostBuildEvent>copy /Y "$(TargetDir)ILMerge\$(TargetName)$(TargetExt)" "D:\Program Files (x86)\HoneySelect\Plugins"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'PH' ">
+    <PostBuildEvent>copy /Y "$(TargetDir)ILMerge\$(TargetName)$(TargetExt)" "D:\Program Files (x86)\PlayHome\Plugins"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'KOI' ">
+    <PostBuildEvent>copy /Y "$(TargetDir)ILMerge\$(TargetName)$(TargetExt)" "D:\Program Files (x86)\Koikatu\BepInEx\plugins"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'AI' ">
+    <PostBuildEvent>copy /Y "$(TargetDir)ILMerge\$(TargetName)$(TargetExt)" "D:\Program Files (x86)\AI-Syoujyo\BepInEx\plugins"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'HS2' ">
+    <PostBuildEvent>copy /Y "$(TargetDir)ILMerge\$(TargetName)$(TargetExt)" "D:\Program Files (x86)\HoneySelect2\BepInEx\plugins"</PostBuildEvent>
+  </PropertyGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Ce projet fait référence à des packages NuGet qui sont manquants sur cet ordinateur. Utilisez l'option de restauration des packages NuGet pour les télécharger. Pour plus d'informations, consultez http://go.microsoft.com/fwlink/?LinkID=322105. Le fichier manquant est : {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets'))" />
+    <Error Condition="!Exists('..\packages\ILMerge.3.0.40\build\ILMerge.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILMerge.3.0.40\build\ILMerge.props'))" />
+  </Target>
+  <Import Project="..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets" Condition="Exists('..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

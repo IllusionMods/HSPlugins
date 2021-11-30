@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\ILMerge.3.0.40\build\ILMerge.props" Condition="Exists('..\packages\ILMerge.3.0.40\build\ILMerge.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration>Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{971E90E7-09BA-4FD3-A21D-054C7ABCE1A9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MoreAccessoriesKOI</RootNamespace>
+    <AssemblyName>MoreAccessories</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'KOI|AnyCPU'">
+    <OutputPath>bin\KOI\</OutputPath>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>KOIKATSU;BEPINEX</DefineConstants>
+    <Optimize>true</Optimize>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'EC|AnyCPU'">
+    <OutputPath>bin\EC\</OutputPath>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>EMOTIONCREATORS;BEPINEX</DefineConstants>
+    <Optimize>true</Optimize>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UIUtility\UIUtility.csproj">
+      <Project>{5ff39402-d216-42de-9aaa-ba34103f1786}</Project>
+      <Name>UIUtility</Name>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="'$(Configuration)' == 'KOI'">
+      <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\core\0Harmony.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="BepInEx">
+          <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\core\BepInEx.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="ExtensibleSaveFormat">
+          <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\plugins\KK_BepisPlugins\ExtensibleSaveFormat.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Sideloader">
+          <HintPath>D:\Program Files (x86)\Koikatu\BepInEx\plugins\KK_BepisPlugins\Sideloader.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\System.Xml.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="TextMeshPro-1.0.55.56.0b12">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\TextMeshPro-1.0.55.56.0b12.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\Koikatu\CharaStudio_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="'$(Configuration)' == 'EC'">
+      <ItemGroup>
+        <Reference Include="0Harmony">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\BepInEx\core\0Harmony.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="BepInEx">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\BepInEx\core\BepInEx.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="ExtensibleSaveFormat">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\BepInEx\plugins\EC_BepisPlugins\EC_ExtensibleSaveFormat.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Sideloader">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\BepInEx\plugins\EC_BepisPlugins\EC_Sideloader.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="IL">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\IL.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\System.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Xml">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\System.Xml.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="TextMeshPro-1.0.55.56.0b12">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\TextMeshPro-1.0.55.56.0b12.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UniRx">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\UniRx.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+          <HintPath>D:\Program Files (x86)\EmotionCreators\EmotionCreators_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <ItemGroup>
+    <Compile Include="..\toolbox\GenericPlugin.cs">
+      <Link>ToolBox\GenericPlugin.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\HarmonyExtensions.cs">
+      <Link>ToolBox\HarmonyExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\WeakKeyDictionary.cs">
+      <Link>ToolBox\WeakKeyDictionary.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\MonoBehaviourExtensions.cs">
+      <Link>ToolBox\MonoBehaviourExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\ReflectionExtensions.cs">
+      <Link>ToolBox\ReflectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\ToolBox\VariousExtensions.cs">
+      <Link>ToolBox\VariousExtensions.cs</Link>
+    </Compile>
+    <Compile Include="BackwardCompatibility.cs" />
+    <Compile Include="CvsAccessory.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="HarmonyPatches.cs" />
+    <Compile Include="MoreAccessories.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ILMergeConfig.json" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition="'$(Configuration)' == 'KOI'">
+    <PostBuildEvent>copy /Y "$(TargetDir)ILMerge\$(TargetName)$(TargetExt)" "D:\Program Files (x86)\Koikatu\BepInEx\plugins"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'EC'">
+    <PostBuildEvent>copy /Y "$(TargetDir)ILMerge\$(TargetName)$(TargetExt)" "D:\Program Files (x86)\EmotionCreators\BepInEx\plugins"</PostBuildEvent>
+  </PropertyGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Ce projet fait référence à des packages NuGet qui sont manquants sur cet ordinateur. Utilisez l'option de restauration des packages NuGet pour les télécharger. Pour plus d'informations, consultez http://go.microsoft.com/fwlink/?LinkID=322105. Le fichier manquant est : {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets'))" />
+    <Error Condition="!Exists('..\packages\ILMerge.3.0.40\build\ILMerge.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILMerge.3.0.40\build\ILMerge.props'))" />
+  </Target>
+  <Import Project="..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets" Condition="Exists('..\ILMerge.MSBuild.Task\build\ILMerge.MSBuild.Task.targets')" />
+</Project>

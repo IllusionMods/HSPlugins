@@ -1,0 +1,73 @@
+    <b>Welcome to Timeline, a plugin used to make advanced custom animations, here are some things you might want to know:</b>
+
+- Close this help by pressing <color=#00A000FF><b>Help</b></color> again.
+- Play, pause, and stop your animation with the buttons on the left of the main window. You can also use the shortcut <b>alt + t</b> to play/pause.
+- The playback time is represented by a <color=#FF0000FF><b>red bar</b></color> travelling through the window (called the <b>cursor</b>).
+- You can move the cursor to a specific time by clicking on the <b>black bar</b> above the grid.
+- You can also move the cursor to a specific time by changing the <b>time text</b> manually while paused.
+- You can <b>also</b> move the cursor by using the previous/next "frame" buttons (below play/pause/stop). Use the input field between them to set the "framerate". For example, with a value of 60, pressing the next button will move the cursor 1/60th of a second forward.
+- You can zoom in and out by holding <b>left control</b> and <b>scrolling</b> on the grid or just scrolling on the top black bar.
+- You can scroll horizontally on the grid by holding <b>left shift</b> and scrolling normally.
+
+- On the left of the window, you can see a list of <b>Interpolables</b>. In this context, an interpolable represents a variable that can be changed (interpolated between multiple values) over time.
+- Values are represented by <color=#FF0000FF><b>red diamonds</b></color> and are called <b>Keyframes</b>, do a <b>middle click</b> on the grid to add one. Protip; use <b>left shift</b> to snap a new keyframe to the grid. It can be used to snap things in other contexts too, try it!
+- Each interpolable has a set of keyframes, left click on one to open the Keyframe window:
+    - Here you can see the time of the keyframe, its value, and a curve that represents how the value will be interpolated between this keyframe and the next.
+    - The keyframe's timing can be modified by typing something in the input field or by clicking on <color=#2D9FA0FF><b>Use Current Time</b></color>, this has the effect to take the current playback time (where the cursor is) and set it to the keyframe. <color=#2D9FA0FF><b>Drag At Current Time</b></color> is almost the same except when multiple keyframes are selected. In this scenario, Use Current Time will try to set the same time for all the selected keyframes (if possible) while Drag At Current Time will keep the shape of the selection intact (that's why it's called Drag). More information later on what dragging in this context means.
+    - The value can be changed by clicking on <color=#2D9FA0FF><b>Use Current Value</b></color>, this has the effect to take the current value of what you're changing (the position of an object for example) and set it to the keyframe.
+    - The curve can be changed in multiple ways:
+        - Add a point by doing a <b>middle click</b> somewhere.
+        - You can drag and drop this point around to change its time and value.
+        - You can use the scrollwheel on the point to change the orientation of both tangents.
+        - For more precise changes, use the fields on the right.
+        - To remove a point, hold <b>left control</b> and <b>middle click</b> on the point.
+        - You can copy/paste curves between keyframes by using the two <b>Copy/Paste</b> buttons.
+        - You can invert a curve by using the <b>Invert</b> button.
+        - A few commonly used templates are available below those buttons, feel free to use them.
+    - Those parameters are saved automatically, so be careful when you're changing something.
+    - It's possible to select and <b>edit multiple keyframes</b> at the same time (however, some operations are limited, try it yourself and you'll see). Multi selection is done by holding <b>left control</b> or <b>left shift</b> or by simply using the selection box like you would select files in the explorer.
+- You can copy/cut/paste keyframes by selecting one or more, using the traditional shortcuts <b>control + c</b> or <b>control + x</b>, changing the position of the cursor, and using <b>control + v</b>. When doing this, the leftmost keyframe will be copied on the cursor, and the other keyframes will be copied after that.
+- Holding the <b>alt</b> key while pasting keyframes will <b>insert</b> them. This is a special kind of pasting operation that makes all the keyframes on the right of the cursor move so that what you're pasting has enough space to be there.
+- Keyframes can be dragged around by holding <b>alt</b> and using your mouse. Obviously you should be careful with this feature since it will change the time of the selected keyframe(s).
+- Selected keyframes can be scaled (i.e. you can make them closer or further apart) with <b>alt + scroll</b>
+- You can move the cursor to a specific keyframe by <b>right clicking</b> on it.
+- Keyframes can also be deleted by using <b>control + middle click</b> on them. Adding <b>shift</b> to the mix will delete all the selected keyframes plus the one clicked on.
+- Similar to <b>paste insert</b> described above, it's also possible to <b>void delete</b> keyframes. By holding the <b>alt</b> key while deleting keyframes, the ones on the right of the cursor will move back so it fills up the blank space that was left. This operation also work with <b>control + x</b>.
+- Interpolables can also be deleted by using <b>control + middle click</b> on them.
+
+- The list of available interpolables is linked to the object you have selected in your <b>Workspace</b>, so make sure to try and select everything.
+- Some interpolables are also linked to the selected <b>GuideObject</b> (that handle that allows you to move/rotate/scale an object or part of it). Which means that you can (for example) activate IK on a character and manipulate each node independently (each node will have a set of keyframes). 
+- If you're feeling hardcore, you can enable the "All" checkbox at the top of the interpolables list, it will display interpolables across all items in your scene. 
+
+- A lot of operations can be performed on interpolables via a special context menu. Try using <b>right click</b> on one:
+    - <b>Select linked GuideObject</b> <i>(single interpolable only)</i>: if you're confused and want to know the GuideObject linked to a certain interpolable, use this option and it will select the GuideObject (if applicable) or the character/item in the workspace. The same thing can be achieved by holding <b>alt</b> while clicking on the interpolable. The opposite can also be done when holding <b>alt</b> and selecting a GuideObject. This will highlight for a few seconds the linked interpolable (if any).
+    - <b>Rename</b> <i>(single interpolable only)</i>: allows you to change the name of an interpolable. If you already have a custom name set, emptying the text field will make the interpolable return to its original name.
+    - <b>Group together</b> <i>(multiple interpolables only)</i>: while having multiple interpolable selected (with either <b>control + click</b> or <b>shift + click</b>), you can group them together. This action will create a dedicated line that represents the group that can be collapsed or expanded (like a folder). More on that later.
+    - <b>Select keyframes</b>: selects all the keyframes of the selected interpolable(s).
+    - <b>Select keyframes before cursor</b>: selects all the keyframes of the selected interpolables(s) (only those before the cursor).
+    - <b>Select keyframes after cursor</b>: selects all the keyframes of the selected interpolables(s) (only those after the cursor).
+    - <b>Color</b> <i></i>: this allows you to change the background color of the interpolable, very useful for organisation.
+    - <b>Add keyframe(s) at cursor</b>: for each interpolable selected, this option adds one or several new keyframe(s) where the cursor is. A similar action can also be achieved through the shortcut <b>alt + middle click</b> on the grid. However, this one will add the keyframes where the <b>mouse</b> is, and not where the cursor is. This can also be combined with other shortcuts like shift.
+    - <b>Parent to</b>: used to parent interpolables to a certain group, or unparent them altogether.
+    - <b>Disable (all)/Enable (all)</b>: used to disable/enable all the selected interpolables.
+    - <b>Move up/down</b>: moves interpolables up or down in the list, also very useful for organisation.
+    - <b>Delete</b>: removes interpolables and their keyframes.
+- Groups also have a dedicated context menu:
+    - <b>Rename</b>: rename the group.
+    - <b>Select Interpolables under</b>: select all the interpolables under this group.
+    - <b>Select keyframes</b>: select all the keyframes of all the interpolables under this group.
+    - <b>Select keyframes before cursor</b>: select all the keyframes of all the interpolables under this group (only those before the cursor).
+    - <b>Select keyframes after cursor</b>: select all the keyframes of all the interpolables under this group (only those after the cursor).
+    - <b>Add keyframes at cursor</b>: same as above but for all the interpolables under this group.
+    - <b>Parent to</b>: parent the whole group to another group, or unparent it altogether.
+    - <b>Disable/Enable</b>: used disable/enable all the interpolables under this group.
+    - <b>Move up/down</b>: same as the one for interpolables.
+    - <b>Delete</b>: removes the whole group and <b>all the interpolables within!</b>.
+- Finally, groups can be collapsed/expanded via a single <b>left click</b> on them.
+
+- Interpolables on an object can be saved through the <b>Single Files</b> menu. If a character is selected, its active animation will also be saved in the same file.
+- Filter interpolables by their name with the text field below the list.
+- Different "time signatures" can be used if you change the <b>Block Length</b> and <b>Divisions</b> fields. Block Length determines the length in seconds of a block, and Divisions is the number of smaller parts in a block. This can be useful if you want your grid to sync up with a specific tempo, for example.
+- The whole UI can become semi transparent by holding <b>control</b> and using the scrollwheel on the word "Timeline" on the interface.
+
+That's it!
