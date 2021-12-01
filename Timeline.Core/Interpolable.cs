@@ -1,8 +1,6 @@
-﻿using System;
+﻿using Studio;
 using System.Collections.Generic;
-using System.Threading;
 using System.Xml;
-using Studio;
 using UnityEngine;
 
 namespace Timeline
@@ -11,7 +9,7 @@ namespace Timeline
     {
         private readonly int _hashCode;
 
-        public override string name { get { return this._getFinalName != null ? this._getFinalName(this._name, this.oci, this.parameter) : base.name; } }
+        public override string name { get { return _getFinalName != null ? _getFinalName(_name, oci, parameter) : base.name; } }
 
         public readonly ObjectCtrlInfo oci;
         public readonly SortedList<float, Keyframe> keyframes = new SortedList<float, Keyframe>();
@@ -21,32 +19,32 @@ namespace Timeline
 
         public Interpolable(ObjectCtrlInfo oci, InterpolableModel interpolableModel) : base(interpolableModel.GetParameter(oci), interpolableModel)
         {
-            if (this.useOciInHash)
+            if (useOciInHash)
                 this.oci = oci;
 
             unchecked
             {
                 int hash = base.GetHashCode();
-                this._hashCode = hash * 31 + (this.oci != null ? this.oci.GetHashCode() : 0);
+                _hashCode = hash * 31 + (this.oci != null ? this.oci.GetHashCode() : 0);
             }
         }
 
         public Interpolable(ObjectCtrlInfo oci, object parameter, InterpolableModel interpolableModel) : base(parameter, interpolableModel)
         {
-            if (this.useOciInHash)
+            if (useOciInHash)
                 this.oci = oci;
 
             unchecked
             {
                 int hash = base.GetHashCode();
-                this._hashCode = hash * 31 + (this.oci != null ? this.oci.GetHashCode() : 0);
+                _hashCode = hash * 31 + (this.oci != null ? this.oci.GetHashCode() : 0);
             }
         }
 
         public bool InterpolateBefore(object leftValue, object rightValue, float factor)
         {
-            if (this.CheckIntegrity(leftValue, rightValue))
-                this._interpolateBefore(this.oci, this.parameter, leftValue, rightValue, factor);
+            if (CheckIntegrity(leftValue, rightValue))
+                _interpolateBefore(oci, parameter, leftValue, rightValue, factor);
             else
                 return false;
             return true;
@@ -54,8 +52,8 @@ namespace Timeline
 
         public bool InterpolateAfter(object leftValue, object rightValue, float factor)
         {
-            if (this.CheckIntegrity(leftValue, rightValue))
-                this._interpolateAfter(this.oci, this.parameter, leftValue, rightValue, factor);
+            if (CheckIntegrity(leftValue, rightValue))
+                _interpolateAfter(oci, parameter, leftValue, rightValue, factor);
             else
                 return false;
             return true;
@@ -63,29 +61,29 @@ namespace Timeline
 
         public object ReadValueFromXml(XmlNode node)
         {
-            return this._readValueFromXml(this.parameter, node);
+            return _readValueFromXml(parameter, node);
         }
 
         public void WriteValueToXml(XmlTextWriter writer, object value)
         {
-            this._writeValueToXml(this.parameter, writer, value);
+            _writeValueToXml(parameter, writer, value);
         }
 
         public object GetValue()
         {
-            return this._getValue(this.oci, this.parameter);
+            return _getValue(oci, parameter);
         }
 
         private bool CheckIntegrity(object leftValue, object rightValue)
         {
-            return (this.useOciInHash == false || this.oci != null) && (this._checkIntegrity == null || this._checkIntegrity(this.oci, this.parameter, leftValue, rightValue));
+            return (useOciInHash == false || oci != null) && (_checkIntegrity == null || _checkIntegrity(oci, parameter, leftValue, rightValue));
         }
 
         public bool ShouldShow()
         {
-            if (this._shouldShow == null)
+            if (_shouldShow == null)
                 return true;
-            return this._shouldShow(this.oci, this.parameter);
+            return _shouldShow(oci, parameter);
         }
 
         public int GetBaseHashCode()
@@ -95,12 +93,12 @@ namespace Timeline
 
         public override int GetHashCode()
         {
-            return this._hashCode;
+            return _hashCode;
         }
 
         public override string ToString()
         {
-            return $"oci: [{this.oci}] " + base.ToString();
+            return $"oci: [{oci}] " + base.ToString();
         }
     }
 }

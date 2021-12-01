@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Timeline
 {
@@ -18,9 +17,9 @@ namespace Timeline
 
         public Keyframe(Keyframe other)
         {
-            this.value = other.value;
-            this.parent = other.parent;
-            this.curve = new AnimationCurve(other.curve.keys);
+            value = other.value;
+            parent = other.parent;
+            curve = new AnimationCurve(other.curve.keys);
         }
     }
 }

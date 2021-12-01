@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Studio;
+using System;
 using System.Xml;
-using Studio;
 
 namespace Timeline
 {
@@ -13,7 +13,7 @@ namespace Timeline
         public readonly string id;
         public readonly object parameter;
         protected readonly string _name;
-        public virtual string name { get { return this._name;} }
+        public virtual string name { get { return _name; } }
         protected readonly InterpolableDelegate _interpolateBefore;
         protected readonly InterpolableDelegate _interpolateAfter;
         private readonly Func<ObjectCtrlInfo, bool> _isCompatibleWithTarget;
@@ -52,29 +52,29 @@ namespace Timeline
             this.owner = owner;
             this.id = id;
             this.parameter = parameter;
-            this._name = name;
-            this._interpolateBefore = interpolateBefore;
-            this._interpolateAfter = interpolateAfter;
-            this._isCompatibleWithTarget = isCompatibleWithTarget;
-            this._getValue = getValue;
-            this._readValueFromXml = readValueFromXml;
-            this._writeValueToXml = writeValueToXml;
-            this._getParameter = getParameter;
+            _name = name;
+            _interpolateBefore = interpolateBefore;
+            _interpolateAfter = interpolateAfter;
+            _isCompatibleWithTarget = isCompatibleWithTarget;
+            _getValue = getValue;
+            _readValueFromXml = readValueFromXml;
+            _writeValueToXml = writeValueToXml;
+            _getParameter = getParameter;
             this.readParameterFromXml = readParameterFromXml;
             this.writeParameterToXml = writeParameterToXml;
-            this._checkIntegrity = checkIntegrity;
+            _checkIntegrity = checkIntegrity;
             this.useOciInHash = useOciInHash;
-            this.canInterpolateBefore = this._interpolateBefore != null;
-            this.canInterpolateAfter = this._interpolateAfter != null;
-            this._getFinalName = getFinalName;
-            this._shouldShow = shouldShow;
+            canInterpolateBefore = _interpolateBefore != null;
+            canInterpolateAfter = _interpolateAfter != null;
+            _getFinalName = getFinalName;
+            _shouldShow = shouldShow;
 
             unchecked
             {
                 int hash = 17;
                 hash = hash * 31 + (this.owner != null ? this.owner.GetHashCode() : 0);
                 hash = hash * 31 + (this.id != null ? this.id.GetHashCode() : 0);
-                this._hashCode = hash * 31 + (this.parameter != null ? this.parameter.GetHashCode() : 0);
+                _hashCode = hash * 31 + (this.parameter != null ? this.parameter.GetHashCode() : 0);
             }
         }
 
@@ -93,8 +93,9 @@ namespace Timeline
                                  Func<ObjectCtrlInfo, object, object, object, bool> checkIntegrity = null,
                                  bool useOciInHash = true,
                                  Func<string, ObjectCtrlInfo, object, string> getFinalName = null,
-                                 Func<ObjectCtrlInfo, object, bool> shouldShow = null) : 
-                this(owner, id, parameter, name, interpolateBefore, interpolateAfter, isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, null, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow) { }
+                                 Func<ObjectCtrlInfo, object, bool> shouldShow = null) :
+                this(owner, id, parameter, name, interpolateBefore, interpolateAfter, isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, null, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow)
+        { }
 
         public InterpolableModel(string owner,
                                  string id,
@@ -111,8 +112,9 @@ namespace Timeline
                                  Func<ObjectCtrlInfo, object, object, object, bool> checkIntegrity = null,
                                  bool useOciInHash = true,
                                  Func<string, ObjectCtrlInfo, object, string> getFinalName = null,
-                                 Func<ObjectCtrlInfo, object, bool> shouldShow = null) : 
-                this(owner, id, null, name, interpolateBefore, interpolateAfter, isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, getParameter, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow) { }
+                                 Func<ObjectCtrlInfo, object, bool> shouldShow = null) :
+                this(owner, id, null, name, interpolateBefore, interpolateAfter, isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, getParameter, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow)
+        { }
 
         protected InterpolableModel(InterpolableModel other) : this(other.owner, other.id, other.parameter, other.name, other._interpolateBefore, other._interpolateAfter, other._isCompatibleWithTarget, other._getValue, other._readValueFromXml, other._writeValueToXml, other._getParameter, other.readParameterFromXml, other.writeParameterToXml, other._checkIntegrity, other.useOciInHash, other._getFinalName, other._shouldShow) { }
 
@@ -120,16 +122,16 @@ namespace Timeline
 
         internal object GetParameter(ObjectCtrlInfo oci)
         {
-            if (this._getParameter == null)
-                return this.parameter;
-            return this._getParameter(oci);
+            if (_getParameter == null)
+                return parameter;
+            return _getParameter(oci);
         }
 
         public bool IsCompatibleWithTarget(ObjectCtrlInfo oci)
         {
             try
             {
-                return this._isCompatibleWithTarget(oci);
+                return _isCompatibleWithTarget(oci);
             }
             catch (Exception e)
             {
@@ -140,12 +142,12 @@ namespace Timeline
 
         public override int GetHashCode()
         {
-            return this._hashCode;
+            return _hashCode;
         }
 
         public override string ToString()
         {
-            return $"owner: [{this.owner}], id: [{this.id}], parameter: [{this.parameter}], name: [{this.name}], interpolateBefore: [{this._interpolateBefore}], interpolateAfter: [{this._interpolateAfter}], isCompatibleWithTarget: [{this._isCompatibleWithTarget}], getValue: [{this._getValue}], readValueFromXml: [{this._readValueFromXml}], writeValueToXml: [{this._writeValueToXml}], getParameter: [{this._getParameter}], readParameterFromXml: [{this.readParameterFromXml}], writeParameterToXml: [{this.writeParameterToXml}], checkIntegrity: [{this._checkIntegrity}], useOciInHash: [{this.useOciInHash}], getFinalName: [{this._getFinalName}], shouldShow:[{this._shouldShow}]";
+            return $"owner: [{owner}], id: [{id}], parameter: [{parameter}], name: [{name}], interpolateBefore: [{_interpolateBefore}], interpolateAfter: [{_interpolateAfter}], isCompatibleWithTarget: [{_isCompatibleWithTarget}], getValue: [{_getValue}], readValueFromXml: [{_readValueFromXml}], writeValueToXml: [{_writeValueToXml}], getParameter: [{_getParameter}], readParameterFromXml: [{readParameterFromXml}], writeParameterToXml: [{writeParameterToXml}], checkIntegrity: [{_checkIntegrity}], useOciInHash: [{useOciInHash}], getFinalName: [{_getFinalName}], shouldShow:[{_shouldShow}]";
         }
 
     }
