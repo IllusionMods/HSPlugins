@@ -16,7 +16,7 @@ namespace UILib
         public RectTransform toDrag;
         public RectTransform limit;
 
-        protected override void Awake()
+        public override void Awake()
         {
             base.Awake();
             this._rectTransform = this.GetComponent<RectTransform>();

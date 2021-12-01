@@ -53,22 +53,8 @@ namespace UILib
         {
             if (_resourcesLoaded == false)
             {
-                AssetBundle bundle;
+                AssetBundle bundle = AssetBundle.LoadFromMemory(Resource.DefaultResources);
 
-#if HONEYSELECT || PLAYHOME
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UILib.Resources.DefaultResources.unity3d"))
-#elif KOIKATSU
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UILib.Resources.DefaultResourcesKOI.unity3d"))
-#elif AISHOUJO
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UILib.Resources.DefaultResourcesAI.unity3d"))
-#elif HONEYSELECT2
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UILib.Resources.DefaultResourcesHS2.unity3d"))
-#endif
-                {
-                    byte[] arr = new byte[stream.Length];
-                    stream.Read(arr, 0, arr.Length);
-                    bundle = AssetBundle.LoadFromMemory(arr);
-                }
                 foreach (Sprite sprite in bundle.LoadAllAssets<Sprite>())
                 {
                     switch (sprite.name)

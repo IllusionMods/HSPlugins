@@ -37,7 +37,7 @@ namespace ToolBox
                     }
                     catch (Exception e)
                     {
-                        Debug.LogWarning("Could not parse translation string " + node.OuterXml + " in " + resourceDictionary + "\n" + e);
+                        //Debug.LogWarning("Could not parse translation string " + node.OuterXml + " in " + resourceDictionary + "\n" + e);
                     }
                 }
             }
@@ -48,7 +48,7 @@ namespace ToolBox
             if (this._strings.TryGetValue(key, out string res) == false)
             {
                 res = "";
-                Debug.LogError("Could not find string " + key + " in translation dictionary.");
+                //Debug.LogError("Could not find string " + key + " in translation dictionary.");
             }
             return res;
         }

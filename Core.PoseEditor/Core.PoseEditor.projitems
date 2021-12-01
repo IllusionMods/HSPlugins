@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>607fcc24-1e15-4ff8-a662-21d28fe01671</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Core.PoseEditor</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AMModules\AdvancedModeModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AMModules\BlendShapesEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AMModules\BonesEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AMModules\BoobsEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AMModules\CollidersEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AMModules\DynamicBonesEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AMModules\GenericOCITarget.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AMModules\IKEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CameraEventsDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CharaPoseController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EditableValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HarmonyPatches.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HSPE.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MainWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PoseController.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\KKPEResources.unity3d" />
+  </ItemGroup>
+</Project>

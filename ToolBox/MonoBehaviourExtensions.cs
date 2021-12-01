@@ -81,6 +81,11 @@ namespace ToolBox.Extensions {
             return self.StartCoroutine(ExecuteDelayed_Routine(action, frameCount));
         }
 
+        public static Coroutine ExecuteDelayed2(this MonoBehaviour self, Action action, int frameCount = 1)
+        {
+            return self.StartCoroutine(ExecuteDelayed_Routine(action, frameCount));
+        }
+
         private static IEnumerator ExecuteDelayed_Routine(Action action, int frameCount = 1)
         {
             for (int i = 0; i < frameCount; i++)

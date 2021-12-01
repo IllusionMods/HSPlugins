@@ -6,14 +6,14 @@ namespace UILib
 {
     public class OneTimeContentSizeFitter : ContentSizeFitter
     {
-        protected override void OnEnable()
+        public override void OnEnable()
         {
             base.OnEnable();
             if (Application.isEditor == false || Application.isPlaying)
                 this.ExecuteDelayed(() => this.enabled = false, 2);
         }
 
-        protected override void OnDisable()
+        public override void OnDisable()
         {
         }
 

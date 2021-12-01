@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>34a5e7ce-5612-4fee-8290-2c4290363a40</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ToolBox</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)EditablePair.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GenericConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GenericPlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HarmonyExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMGUIExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MonoBehaviourExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ReflectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineCompatibility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TransformExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TranslationDictionary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VariousExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WeakKeyDictionary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XmlExtensions.cs" />
+  </ItemGroup>
+</Project>

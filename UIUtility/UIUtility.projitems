@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>074e95d7-3b9a-4cd9-b1b6-6f7273d400a4</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>UIUtility</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ConfirmationDialog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ContextMenu\AContextMenuElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ContextMenu\ContextMenuUIElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ContextMenu\GroupElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ContextMenu\LeafElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventHandlers\DragHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventHandlers\PointerDownHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventHandlers\PointerEnterHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventHandlers\ScrollHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoopListView\ClickEventListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoopListView\ItemPosMgr.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoopListView\LoopListView2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoopListView\LoopListViewItem2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MovableWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OneTimeContentSizeFitter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OneTimeHorizontalLayoutGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OneTimeVerticalLayoutGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Resources.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIUtility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\DefaultResources.unity3d" />
+  </ItemGroup>
+</Project>

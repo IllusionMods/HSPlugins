@@ -75,7 +75,7 @@ namespace ToolBox.Extensions
 				return !this._cameraControlEnabled;
 			}
 
-			protected override void OnDisable()
+			public override void OnDisable()
 			{
 				base.OnDisable();
 				if (this._cameraControlEnabled == false && Camera.main?.GetComponent<CameraControl>()?.NoCtrlCondition == this.NoCtrlCondition)

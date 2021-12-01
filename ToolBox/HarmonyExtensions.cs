@@ -25,32 +25,32 @@ namespace ToolBox.Extensions {
 #endif
         }
 
-#if IPA
-        public static void PatchAllSafe(this HarmonyInstance self)
-#elif BEPINEX
-        public static void PatchAllSafe(this Harmony self)
-#endif
-        {
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
-            {
-                try
-                {
-#if IPA
-                    List<HarmonyMethod> harmonyMethods = type.GetHarmonyMethods();
-#elif BEPINEX
-                    List<HarmonyMethod> harmonyMethods = HarmonyMethodExtensions.GetFromType(type);
-#endif
-                    if (harmonyMethods == null || harmonyMethods.Count <= 0)
-                        continue;
-                    HarmonyMethod attributes = HarmonyMethod.Merge(harmonyMethods);
-                    new PatchProcessor(self, type, attributes).Patch();
-                }
-                catch (Exception e)
-                {
-                    UnityEngine.Debug.LogError(self.Id + ": Exception occured when patching: " + e);
-                }
-            }
-        }
+//#if IPA
+//        public static void PatchAllSafe(this HarmonyInstance self)
+//#elif BEPINEX
+//        public static void PatchAllSafe(this Harmony self)
+//#endif
+//        {
+//            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+//            {
+//                try
+//                {
+//#if IPA
+//                    List<HarmonyMethod> harmonyMethods = type.GetHarmonyMethods();
+//#elif BEPINEX
+//                    List<HarmonyMethod> harmonyMethods = HarmonyMethodExtensions.GetFromType(type);
+//#endif
+//                    if (harmonyMethods == null || harmonyMethods.Count <= 0)
+//                        continue;
+//                    HarmonyMethod attributes = HarmonyMethod.Merge(harmonyMethods);
+//                    new PatchProcessor(self, type, attributes).Patch();
+//                }
+//                catch (Exception e)
+//                {
+//                    UnityEngine.Debug.LogError(self.Id + ": Exception occured when patching: " + e);
+//                }
+//            }
+//        }
 
         public class Replacement
         {
