@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-
-namespace HSPE
+﻿namespace HSPE
 {
     namespace Commands
     {
@@ -15,19 +9,19 @@ namespace HSPE
 
             public MoveRotateEqualsCommand(Studio.GuideCommand.EqualsInfo[] moveChangeAmountInfo, Studio.GuideCommand.EqualsInfo[] rotateChangeAmountInfo)
             {
-                this._moveChangeAmountInfo = moveChangeAmountInfo;
-                this._rotateChangeAmountInfo = rotateChangeAmountInfo;
+                _moveChangeAmountInfo = moveChangeAmountInfo;
+                _rotateChangeAmountInfo = rotateChangeAmountInfo;
             }
 
             public void Do()
             {
-                foreach (Studio.GuideCommand.EqualsInfo info in this._moveChangeAmountInfo)
+                foreach (Studio.GuideCommand.EqualsInfo info in _moveChangeAmountInfo)
                 {
                     Studio.ChangeAmount changeAmount = Studio.Studio.GetChangeAmount(info.dicKey);
                     if (changeAmount != null)
                         changeAmount.pos = info.newValue;
                 }
-                foreach (Studio.GuideCommand.EqualsInfo info in this._rotateChangeAmountInfo)
+                foreach (Studio.GuideCommand.EqualsInfo info in _rotateChangeAmountInfo)
                 {
                     Studio.ChangeAmount changeAmount = Studio.Studio.GetChangeAmount(info.dicKey);
                     if (changeAmount != null)
@@ -37,18 +31,18 @@ namespace HSPE
 
             public void Redo()
             {
-                this.Do();
+                Do();
             }
 
             public void Undo()
             {
-                foreach (Studio.GuideCommand.EqualsInfo info in this._moveChangeAmountInfo)
+                foreach (Studio.GuideCommand.EqualsInfo info in _moveChangeAmountInfo)
                 {
                     Studio.ChangeAmount changeAmount = Studio.Studio.GetChangeAmount(info.dicKey);
                     if (changeAmount != null)
                         changeAmount.pos = info.oldValue;
                 }
-                foreach (Studio.GuideCommand.EqualsInfo info in this._rotateChangeAmountInfo)
+                foreach (Studio.GuideCommand.EqualsInfo info in _rotateChangeAmountInfo)
                 {
                     Studio.ChangeAmount changeAmount = Studio.Studio.GetChangeAmount(info.dicKey);
                     if (changeAmount != null)

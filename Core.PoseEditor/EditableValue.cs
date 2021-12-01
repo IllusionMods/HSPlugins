@@ -7,25 +7,25 @@
 
         public T value
         {
-            get { return this._value; }
+            get { return _value; }
             set
             {
-                this._value = value;
-                this._hasValue = true;
+                _value = value;
+                _hasValue = true;
             }
         }
 
-        public bool hasValue { get { return this._hasValue; } }
+        public bool hasValue { get { return _hasValue; } }
 
         public EditableValue(T v)
         {
-            this._value = v;
-            this._hasValue = true;
-        } 
+            _value = v;
+            _hasValue = true;
+        }
 
         public void Reset()
         {
-            this._hasValue = false;
+            _hasValue = false;
         }
 
         public static implicit operator T(EditableValue<T> v)

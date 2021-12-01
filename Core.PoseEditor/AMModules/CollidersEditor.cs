@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Studio;
-using ToolBox;
 using ToolBox.Extensions;
 using UnityEngine;
 using Vectrosity;
@@ -44,19 +43,19 @@ namespace HSPE.AMModules
                 position2.x += num;
                 Quaternion orientation = Quaternion.AngleAxis(90f, Vector3.up);
                 Vector3 dir = Vector3.right;
-                this._centerCircles = new List<VectorLine>();
+                _centerCircles = new List<VectorLine>();
                 for (int i = 1; i < 10; ++i)
                 {
                     VectorLine circle = VectorLine.SetLine(CollidersEditor._colliderColor, new Vector3[37]);
                     circle.MakeCircle(Vector3.Lerp(position1, position2, i / 10f), dir, radius);
-                    this._centerCircles.Add(circle);
+                    _centerCircles.Add(circle);
                 }
-                this._centerLines = new List<VectorLine>();
+                _centerLines = new List<VectorLine>();
                 for (int i = 0; i < 8; ++i)
                 {
                     float angle = 360 * (i / 8f) * Mathf.Deg2Rad;
                     Vector3 offset = orientation * (new Vector3(Mathf.Cos(angle), Mathf.Sin(angle))) * radius;
-                    this._centerLines.Add(VectorLine.SetLine(CollidersEditor._colliderColor, position1 + offset, position2 + offset));
+                    _centerLines.Add(VectorLine.SetLine(CollidersEditor._colliderColor, position1 + offset, position2 + offset));
                 }
                 Vector3[] prev = new Vector3[8];
                 Vector3 prevCenter1 = Vector3.zero;
@@ -66,8 +65,8 @@ namespace HSPE.AMModules
                     float angle = 360 * (i / 8f) * Mathf.Deg2Rad;
                     prev[i] = orientation * (new Vector3(Mathf.Cos(angle), Mathf.Sin(angle))) * radius;
                 }
-                this._capsCircles = new List<VectorLine>();
-                this._capsLines = new List<VectorLine>();
+                _capsCircles = new List<VectorLine>();
+                _capsLines = new List<VectorLine>();
                 for (int i = 0; i < 6; ++i)
                 {
                     float v = (i / 5f) * 0.95f;
@@ -77,31 +76,31 @@ namespace HSPE.AMModules
                     Vector3 center2 = position2 + dir * v * radius;
                     VectorLine circle = VectorLine.SetLine(CollidersEditor._colliderColor, new Vector3[37]);
                     circle.MakeCircle(center1, dir, radius2);
-                    this._capsCircles.Add(circle);
+                    _capsCircles.Add(circle);
 
                     circle = VectorLine.SetLine(CollidersEditor._colliderColor, new Vector3[37]);
                     circle.MakeCircle(center2, dir, radius2);
-                    this._capsCircles.Add(circle);
+                    _capsCircles.Add(circle);
 
                     if (i != 0)
                         for (int j = 0; j < 8; ++j)
                         {
                             float angle2 = 360 * (j / 8f) * Mathf.Deg2Rad;
                             Vector3 offset = orientation * (new Vector3(Mathf.Cos(angle2), Mathf.Sin(angle2))) * radius2;
-                            this._capsLines.Add(VectorLine.SetLine(CollidersEditor._colliderColor, prevCenter1 + prev[j], center1 + offset));
-                            this._capsLines.Add(VectorLine.SetLine(CollidersEditor._colliderColor, prevCenter2 + prev[j], center2 + offset));
+                            _capsLines.Add(VectorLine.SetLine(CollidersEditor._colliderColor, prevCenter1 + prev[j], center1 + offset));
+                            _capsLines.Add(VectorLine.SetLine(CollidersEditor._colliderColor, prevCenter2 + prev[j], center2 + offset));
                             prev[j] = offset;
                         }
                     prevCenter1 = center1;
                     prevCenter2 = center2;
                 }
-                foreach (VectorLine line in this._centerCircles)
+                foreach (VectorLine line in _centerCircles)
                     line.lineWidth = 2f;
-                foreach (VectorLine line in this._capsCircles)
+                foreach (VectorLine line in _capsCircles)
                     line.lineWidth = 2f;
-                foreach (VectorLine line in this._centerLines)
+                foreach (VectorLine line in _centerLines)
                     line.lineWidth = 2f;
-                foreach (VectorLine line in this._capsLines)
+                foreach (VectorLine line in _capsLines)
                     line.lineWidth = 2f;
             }
 
@@ -139,13 +138,13 @@ namespace HSPE.AMModules
                 dir = collider.transform.TransformDirection(dir);
                 for (int i = 0; i < 9; ++i)
                 {
-                    this._centerCircles[i].MakeCircle(Vector3.Lerp(position1, position2, (i + 1) / 10f), dir, radius);
+                    _centerCircles[i].MakeCircle(Vector3.Lerp(position1, position2, (i + 1) / 10f), dir, radius);
                 }
                 for (int i = 0; i < 8; ++i)
                 {
                     float angle = 360 * (i / 8f) * Mathf.Deg2Rad;
                     Vector3 offset = orientation * (new Vector3(Mathf.Cos(angle), Mathf.Sin(angle))) * radius;
-                    VectorLine line = this._centerLines[i];
+                    VectorLine line = _centerLines[i];
                     line.points3[0] = position1 + offset;
                     line.points3[1] = position2 + offset;
                 }
@@ -167,10 +166,10 @@ namespace HSPE.AMModules
                     float radius2 = radius * Mathf.Cos(angle);
                     Vector3 center1 = position1 - dir * v * radius;
                     Vector3 center2 = position2 + dir * v * radius;
-                    VectorLine circle = this._capsCircles[k++];
+                    VectorLine circle = _capsCircles[k++];
                     circle.MakeCircle(center1, dir, radius2);
 
-                    circle = this._capsCircles[k++];
+                    circle = _capsCircles[k++];
                     circle.MakeCircle(center2, dir, radius2);
 
                     if (i != 0)
@@ -178,11 +177,11 @@ namespace HSPE.AMModules
                         {
                             float angle2 = 360 * (j / 8f) * Mathf.Deg2Rad;
                             Vector3 offset = orientation * (new Vector3(Mathf.Cos(angle2), Mathf.Sin(angle2))) * radius2;
-                            VectorLine line = this._capsLines[l++];
+                            VectorLine line = _capsLines[l++];
                             line.points3[0] = prevCenter1 + prev[j];
                             line.points3[1] = center1 + offset;
 
-                            line = this._capsLines[l++];
+                            line = _capsLines[l++];
                             line.points3[0] = prevCenter2 + prev[j];
                             line.points3[1] = center2 + offset;
 
@@ -197,11 +196,11 @@ namespace HSPE.AMModules
             {
                 for (int i = 0; i < 9; ++i)
                 {
-                    this._centerCircles[i].Draw();
+                    _centerCircles[i].Draw();
                 }
                 for (int i = 0; i < 8; ++i)
                 {
-                    VectorLine line = this._centerLines[i];
+                    VectorLine line = _centerLines[i];
                     line.Draw();
                 }
 
@@ -209,19 +208,19 @@ namespace HSPE.AMModules
                 int l = 0;
                 for (int i = 0; i < 6; ++i)
                 {
-                    VectorLine circle = this._capsCircles[k++];
+                    VectorLine circle = _capsCircles[k++];
                     circle.Draw();
 
-                    circle = this._capsCircles[k++];
+                    circle = _capsCircles[k++];
                     circle.Draw();
 
                     if (i != 0)
                         for (int j = 0; j < 8; ++j)
                         {
-                            VectorLine line = this._capsLines[l++];
+                            VectorLine line = _capsLines[l++];
                             line.Draw();
 
-                            line = this._capsLines[l++];
+                            line = _capsLines[l++];
                             line.Draw();
                         }
                 }
@@ -229,22 +228,22 @@ namespace HSPE.AMModules
 
             public void SetActive(bool active)
             {
-                foreach (VectorLine line in this._centerCircles)
+                foreach (VectorLine line in _centerCircles)
                     line.active = active;
-                foreach (VectorLine line in this._capsCircles)
+                foreach (VectorLine line in _capsCircles)
                     line.active = active;
-                foreach (VectorLine line in this._centerLines)
+                foreach (VectorLine line in _centerLines)
                     line.active = active;
-                foreach (VectorLine line in this._capsLines)
+                foreach (VectorLine line in _capsLines)
                     line.active = active;
             }
 
             public void Destroy()
             {
-                VectorLine.Destroy(this._capsLines);
-                VectorLine.Destroy(this._centerLines);
-                VectorLine.Destroy(this._capsCircles);
-                VectorLine.Destroy(this._centerCircles);
+                VectorLine.Destroy(_capsLines);
+                VectorLine.Destroy(_centerLines);
+                VectorLine.Destroy(_capsCircles);
+                VectorLine.Destroy(_centerCircles);
             }
         }
 #if AISHOUJO || HONEYSELECT2
@@ -309,7 +308,7 @@ namespace HSPE.AMModules
             public EditableValue<DynamicBoneCollider.Bound> originalBound;
             public Dictionary<PoseController, HashSet<object>> ignoredDynamicBones = new Dictionary<PoseController, HashSet<object>>();
 
-            public virtual bool hasValue { get { return this.originalCenter.hasValue || this.originalDirection.hasValue || this.originalBound.hasValue; } }
+            public virtual bool hasValue { get { return originalCenter.hasValue || originalDirection.hasValue || originalBound.hasValue; } }
 
             public ColliderDataBase()
             {
@@ -318,16 +317,16 @@ namespace HSPE.AMModules
 
             public ColliderDataBase(ColliderDataBase other)
             {
-                this.originalCenter = other.originalCenter;
-                this.originalDirection = other.originalDirection;
-                this.originalBound = other.originalBound;
+                originalCenter = other.originalCenter;
+                originalDirection = other.originalDirection;
+                originalBound = other.originalBound;
                 foreach (KeyValuePair<PoseController, HashSet<object>> pair in other.ignoredDynamicBones)
                 {
                     HashSet<object> dbs;
-                    if (this.ignoredDynamicBones.TryGetValue(pair.Key, out dbs) == false)
+                    if (ignoredDynamicBones.TryGetValue(pair.Key, out dbs) == false)
                     {
                         dbs = new HashSet<object>();
-                        this.ignoredDynamicBones.Add(pair.Key, dbs);
+                        ignoredDynamicBones.Add(pair.Key, dbs);
                     }
                     foreach (DynamicBone db in pair.Value)
                     {
@@ -339,23 +338,23 @@ namespace HSPE.AMModules
 
             public virtual void ResetWithParent(DynamicBoneColliderBase collider)
             {
-                if (this.originalCenter.hasValue)
+                if (originalCenter.hasValue)
                 {
-                    collider.m_Center = this.originalCenter;
-                    this.originalCenter.Reset();
+                    collider.m_Center = originalCenter;
+                    originalCenter.Reset();
                 }
-                if (this.originalDirection.hasValue)
+                if (originalDirection.hasValue)
                 {
-                    collider.m_Direction = this.originalDirection;
-                    this.originalDirection.Reset();
+                    collider.m_Direction = originalDirection;
+                    originalDirection.Reset();
                 }
-                if (this.originalBound.hasValue)
+                if (originalBound.hasValue)
                 {
-                    collider.m_Bound = this.originalBound;
-                    this.originalBound.Reset();
+                    collider.m_Bound = originalBound;
+                    originalBound.Reset();
                 }
                 DynamicBoneCollider normalCollider = collider as DynamicBoneCollider;
-                foreach (KeyValuePair<PoseController, HashSet<object>> pair in this.ignoredDynamicBones)
+                foreach (KeyValuePair<PoseController, HashSet<object>> pair in ignoredDynamicBones)
                 {
                     foreach (object dynamicBone in pair.Value)
                     {
@@ -373,7 +372,7 @@ namespace HSPE.AMModules
                         }
                     }
                 }
-                this.ignoredDynamicBones.Clear();
+                ignoredDynamicBones.Clear();
 
             }
         }
@@ -383,7 +382,7 @@ namespace HSPE.AMModules
             public EditableValue<float> originalRadius;
             public EditableValue<float> originalHeight;
 
-            public override bool hasValue { get { return base.hasValue || this.originalRadius.hasValue || this.originalHeight.hasValue; } }
+            public override bool hasValue { get { return base.hasValue || originalRadius.hasValue || originalHeight.hasValue; } }
 
             public ColliderData()
             {
@@ -391,23 +390,23 @@ namespace HSPE.AMModules
 
             public ColliderData(ColliderData other) : base(other)
             {
-                this.originalRadius = other.originalRadius;
-                this.originalHeight = other.originalHeight;
+                originalRadius = other.originalRadius;
+                originalHeight = other.originalHeight;
             }
 
             public override void ResetWithParent(DynamicBoneColliderBase collider)
             {
                 base.ResetWithParent(collider);
                 DynamicBoneCollider normalCollider = (DynamicBoneCollider)collider;
-                if (this.originalRadius.hasValue)
+                if (originalRadius.hasValue)
                 {
-                    normalCollider.m_Radius = this.originalRadius;
-                    this.originalRadius.Reset();
+                    normalCollider.m_Radius = originalRadius;
+                    originalRadius.Reset();
                 }
-                if (this.originalHeight.hasValue)
+                if (originalHeight.hasValue)
                 {
-                    normalCollider.m_Height = this.originalHeight;
-                    this.originalHeight.Reset();
+                    normalCollider.m_Height = originalHeight;
+                    originalHeight.Reset();
                 }
 
             }
@@ -461,7 +460,7 @@ namespace HSPE.AMModules
                 UpdateDebugLinesState(this);
             }
         }
-        public override bool shouldDisplay { get { return this._colliders.Count > 0; } }
+        public override bool shouldDisplay { get { return _colliders.Count > 0; } }
         #endregion
 
         #region Unity Methods
@@ -473,18 +472,18 @@ namespace HSPE.AMModules
 
         public CollidersEditor(PoseController parent, GenericOCITarget target) : base(parent)
         {
-            this._target = target;
+            _target = target;
 
-            if (_loneColliderNames.Contains(this._parent.name))
+            if (_loneColliderNames.Contains(_parent.name))
             {
-                Transform colliderTransform = this._parent.transform.Find("Collider");
+                Transform colliderTransform = _parent.transform.Find("Collider");
                 if (colliderTransform != null)
                 {
                     DynamicBoneColliderBase collider = colliderTransform.GetComponent<DynamicBoneColliderBase>();
                     if (collider != null)
                     {
-                        this._parent.onUpdate += this.Update;
-                        this._isLoneCollider = true;
+                        _parent.onUpdate += Update;
+                        _isLoneCollider = true;
                         _loneColliders.Add(collider, this);
                         foreach (DynamicBone bone in Resources.FindObjectsOfTypeAll<DynamicBone>())
                         {
@@ -504,10 +503,10 @@ namespace HSPE.AMModules
                 }
             }
 
-            foreach (DynamicBoneColliderBase c in this._parent.GetComponentsInChildren<DynamicBoneColliderBase>(true))
-                if (this._colliders.ContainsKey(c.transform) == false)
-                    this._colliders.Add(c.transform, c);
-            this._colliderTarget = this._colliders.FirstOrDefault().Value;
+            foreach (DynamicBoneColliderBase c in _parent.GetComponentsInChildren<DynamicBoneColliderBase>(true))
+                if (_colliders.ContainsKey(c.transform) == false)
+                    _colliders.Add(c.transform, c);
+            _colliderTarget = _colliders.FirstOrDefault().Value;
 #if AISHOUJO || HONEYSELECT2
             this._isTargetNormalCollider = this._colliderTarget is DynamicBoneCollider;
 #endif
@@ -521,12 +520,12 @@ namespace HSPE.AMModules
 #endif
             }
 
-            this._incIndex = -2;
+            _incIndex = -2;
         }
 
         private void Update()
         {
-            foreach (KeyValuePair<DynamicBoneColliderBase, ColliderDataBase> colliderPair in this._dirtyColliders)
+            foreach (KeyValuePair<DynamicBoneColliderBase, ColliderDataBase> colliderPair in _dirtyColliders)
             {
                 Dictionary<PoseController, HashSet<object>> newIgnored = null;
                 foreach (KeyValuePair<PoseController, HashSet<object>> pair in colliderPair.Value.ignoredDynamicBones)
@@ -567,9 +566,9 @@ namespace HSPE.AMModules
         public override void OnDestroy()
         {
             base.OnDestroy();
-            if (this._isLoneCollider)
+            if (_isLoneCollider)
             {
-                DynamicBoneColliderBase collider = this._parent.transform.GetChild(0).GetComponent<DynamicBoneColliderBase>();
+                DynamicBoneColliderBase collider = _parent.transform.GetChild(0).GetComponent<DynamicBoneColliderBase>();
                 _loneColliders.Remove(collider);
                 foreach (DynamicBone bone in Resources.FindObjectsOfTypeAll<DynamicBone>())
                 {
@@ -587,7 +586,7 @@ namespace HSPE.AMModules
                             bone.Colliders.Remove(normalCollider);
                     }
                 }
-                this._parent.onUpdate -= this.Update;
+                _parent.onUpdate -= Update;
             }
         }
 
@@ -609,21 +608,21 @@ namespace HSPE.AMModules
             GUILayout.BeginHorizontal();
 
             GUILayout.BeginVertical();
-            this._collidersEditionScroll = GUILayout.BeginScrollView(this._collidersEditionScroll, false, true, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.ExpandWidth(false));
+            _collidersEditionScroll = GUILayout.BeginScrollView(_collidersEditionScroll, false, true, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.ExpandWidth(false));
             Color c;
-            foreach (KeyValuePair<Transform, DynamicBoneColliderBase> pair in this._colliders)
+            foreach (KeyValuePair<Transform, DynamicBoneColliderBase> pair in _colliders)
             {
                 if (pair.Key == null)
                     continue;
                 c = GUI.color;
-                if (this.IsColliderDirty(pair.Value))
+                if (IsColliderDirty(pair.Value))
                     GUI.color = Color.magenta;
-                if (pair.Value == this._colliderTarget)
+                if (pair.Value == _colliderTarget)
                     GUI.color = Color.cyan;
                 GUILayout.BeginHorizontal();
-                if (GUILayout.Button(pair.Value.name + (this.IsColliderDirty(pair.Value) ? "*" : "")))
+                if (GUILayout.Button(pair.Value.name + (IsColliderDirty(pair.Value) ? "*" : "")))
                 {
-                    this._colliderTarget = pair.Value;
+                    _colliderTarget = pair.Value;
 #if AISHOUJO || HONEYSELECT2
                     this._isTargetNormalCollider = this._colliderTarget is DynamicBoneCollider;
 #endif
@@ -638,7 +637,7 @@ namespace HSPE.AMModules
                 c = GUI.color;
                 GUI.color = Color.red;
                 if (GUILayout.Button("Reset all"))
-                    this.ResetAll();
+                    ResetAll();
                 GUI.color = c;
             }
             GUILayout.EndVertical();
@@ -649,30 +648,30 @@ namespace HSPE.AMModules
             if (this._isTargetNormalCollider)
 #endif
             {
-                this.DrawFields((DynamicBoneCollider)this._colliderTarget);
+                DrawFields((DynamicBoneCollider)_colliderTarget);
             }
 #if AISHOUJO || HONEYSELECT2
             else
                 this.DrawFields((DynamicBonePlaneCollider)this._colliderTarget);
 #endif
 
-            if (this._isLoneCollider)
+            if (_isLoneCollider)
             {
                 GUILayout.BeginVertical(GUI.skin.box);
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("Affected Dynamic Bones", GUILayout.ExpandWidth(false));
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("All off", GUILayout.ExpandWidth(false)))
-                    this.SetIgnoreAllDynamicBones(this._colliderTarget, true);
+                    SetIgnoreAllDynamicBones(_colliderTarget, true);
                 if (GUILayout.Button("All on", GUILayout.ExpandWidth(false)))
-                    this.SetIgnoreAllDynamicBones(this._colliderTarget, false);
+                    SetIgnoreAllDynamicBones(_colliderTarget, false);
                 GUILayout.EndHorizontal();
                 {
                     ColliderDataBase cd;
-                    if (this._dirtyColliders.TryGetValue(this._colliderTarget, out cd) == false)
+                    if (_dirtyColliders.TryGetValue(_colliderTarget, out cd) == false)
                         cd = null;
 
-                    this._ignoredDynamicBonesScroll = GUILayout.BeginScrollView(this._ignoredDynamicBonesScroll);
+                    _ignoredDynamicBonesScroll = GUILayout.BeginScrollView(_ignoredDynamicBonesScroll);
                     foreach (PoseController controller in PoseController._poseControllers)
                     {
                         int total = controller._dynamicBonesEditor._dynamicBones.Count;
@@ -703,7 +702,7 @@ namespace HSPE.AMModules
                             bool e = ignored == null || ignored.Contains(dynamicBone) == false;
                             bool newE = GUILayout.Toggle(e, dynamicBone.m_Root.name);
                             if (e != newE)
-                                this.SetIgnoreDynamicBone(this._colliderTarget, controller, dynamicBone, !newE);
+                                SetIgnoreDynamicBone(_colliderTarget, controller, dynamicBone, !newE);
                             if (i % 3 == 0)
                             {
                                 GUILayout.EndHorizontal();
@@ -716,7 +715,7 @@ namespace HSPE.AMModules
 #if AISHOUJO || HONEYSELECT2
                                 this._isTargetNormalCollider && 
 #endif
-                                charaPoseController != null && 
+                                charaPoseController != null &&
                                 charaPoseController._boobsEditor != null
                                 )
                         {
@@ -725,7 +724,7 @@ namespace HSPE.AMModules
                                 bool e = ignored == null || ignored.Contains(dynamicBone) == false;
                                 bool newE = GUILayout.Toggle(e, dynamicBone.Root.name);
                                 if (e != newE)
-                                    this.SetIgnoreDynamicBone(this._colliderTarget, controller, dynamicBone, !newE);
+                                    SetIgnoreDynamicBone(_colliderTarget, controller, dynamicBone, !newE);
                                 if (i % 3 == 0)
                                 {
                                     GUILayout.EndHorizontal();
@@ -744,13 +743,13 @@ namespace HSPE.AMModules
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Go to bone", GUILayout.ExpandWidth(false)))
             {
-                this._parent.EnableModule(this._parent._bonesEditor);
-                this._parent._bonesEditor.GoToObject(this._colliderTarget.gameObject);
+                _parent.EnableModule(_parent._bonesEditor);
+                _parent._bonesEditor.GoToObject(_colliderTarget.gameObject);
             }
             GUILayout.FlexibleSpace();
             GUI.color = AdvancedModeModule._redColor;
             if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
-                this.SetColliderNotDirty(this._colliderTarget);
+                SetColliderNotDirty(_colliderTarget);
             GUI.color = c;
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
@@ -764,7 +763,7 @@ namespace HSPE.AMModules
             {
                 foreach (KeyValuePair<DynamicBoneColliderBase, ColliderDataBase> kvp in other._dirtyColliders)
                 {
-                    Transform obj = this._parent.transform.Find(kvp.Key.transform.GetPathFrom(other._parent.transform));
+                    Transform obj = _parent.transform.Find(kvp.Key.transform.GetPathFrom(other._parent.transform));
                     if (obj != null)
                     {
                         DynamicBoneColliderBase col = obj.GetComponent<DynamicBoneColliderBase>();
@@ -793,22 +792,22 @@ namespace HSPE.AMModules
                             col.m_Bound = kvp.Key.m_Bound;
                         if (kvp.Value.originalDirection.hasValue)
                             col.m_Direction = kvp.Key.m_Direction;
-                        this._dirtyColliders.Add(col, newData);
+                        _dirtyColliders.Add(col, newData);
                     }
                 }
-                this._collidersEditionScroll = other._collidersEditionScroll;
+                _collidersEditionScroll = other._collidersEditionScroll;
             }, 2);
         }
 
         public override int SaveXml(XmlTextWriter xmlWriter)
         {
             int written = 0;
-            if (this._dirtyColliders.Count != 0)
+            if (_dirtyColliders.Count != 0)
             {
                 xmlWriter.WriteStartElement("colliders");
-                foreach (KeyValuePair<DynamicBoneColliderBase, ColliderDataBase> kvp in this._dirtyColliders)
+                foreach (KeyValuePair<DynamicBoneColliderBase, ColliderDataBase> kvp in _dirtyColliders)
                 {
-                    string n = kvp.Key.transform.GetPathFrom(this._parent.transform);
+                    string n = kvp.Key.transform.GetPathFrom(_parent.transform);
                     xmlWriter.WriteStartElement("collider");
                     xmlWriter.WriteAttributeString("name", n);
                     bool isNormalCollider = kvp.Key is DynamicBoneCollider;
@@ -875,7 +874,7 @@ namespace HSPE.AMModules
 
         public override bool LoadXml(XmlNode xmlNode)
         {
-            this.ResetAll();
+            ResetAll();
             bool changed = false;
             XmlNode colliders = xmlNode.FindChildNode("colliders");
             if (colliders != null)
@@ -884,7 +883,7 @@ namespace HSPE.AMModules
                 {
                     try
                     {
-                        Transform t = this._parent.transform.Find(node.Attributes["name"].Value);
+                        Transform t = _parent.transform.Find(node.Attributes["name"].Value);
                         if (t == null)
                             continue;
                         DynamicBoneColliderBase collider = t.GetComponent<DynamicBoneColliderBase>();
@@ -943,9 +942,9 @@ namespace HSPE.AMModules
                         if (node.HasChildNodes)
                             changed = true;
 
-                        if (this._isLoneCollider)
+                        if (_isLoneCollider)
                         {
-                            this._parent.ExecuteDelayed(() =>
+                            _parent.ExecuteDelayed(() =>
                             {
                                 foreach (XmlNode childNode in node.ChildNodes)
                                 {
@@ -959,14 +958,14 @@ namespace HSPE.AMModules
                                             DynamicBone db = controller._dynamicBonesEditor.SearchDynamicBone(childNode.Attributes["root"].Value);
                                             if (db == null)
                                                 break;
-                                            this.SetIgnoreDynamicBone(collider, controller, db, true);
+                                            SetIgnoreDynamicBone(collider, controller, db, true);
                                             break;
                                         case "ignoredDynamicBone2":
                                             CharaPoseController controller2 = CharaPoseController._charaPoseControllers.FirstOrDefault(e => e._oldInstanceId == id) as CharaPoseController;
                                             if (controller2 == null || controller2._boobsEditor == null)
                                                 break;
                                             DynamicBone_Ver02 db2 = controller2._boobsEditor.GetDynamicBone(childNode.Attributes["id"].Value);
-                                            this.SetIgnoreDynamicBone(collider, controller2, db2, true);
+                                            SetIgnoreDynamicBone(collider, controller2, db2, true);
                                             break;
                                     }
                                 }
@@ -975,12 +974,12 @@ namespace HSPE.AMModules
                         if (data.hasValue)
                         {
                             changed = true;
-                            this._dirtyColliders.Add(collider, data);
+                            _dirtyColliders.Add(collider, data);
                         }
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError("HSPE: Couldn't load collider for object " + this._parent.name + " " + node.OuterXml + "\n" + e);
+                        UnityEngine.Debug.LogError("HSPE: Couldn't load collider for object " + _parent.name + " " + node.OuterXml + "\n" + e);
                     }
                 }
             }
@@ -995,10 +994,10 @@ namespace HSPE.AMModules
             {
                 GUILayout.Label("Center");
                 GUILayout.BeginHorizontal();
-                Vector3 center = this.Vector3Editor(collider.m_Center);
+                Vector3 center = Vector3Editor(collider.m_Center);
                 if (center != collider.m_Center)
-                    this.SetColliderCenter(collider, center);
-                this.IncEditor();
+                    SetColliderCenter(collider, center);
+                IncEditor();
                 GUILayout.EndHorizontal();
             }
             GUILayout.EndVertical();
@@ -1008,7 +1007,7 @@ namespace HSPE.AMModules
                 GUILayout.Label("Direction\t", GUILayout.ExpandWidth(false));
                 DynamicBoneColliderBase.Direction direction = (DynamicBoneColliderBase.Direction)GUILayout.SelectionGrid((int)collider.m_Direction, _directionNames, 3);
                 if (direction != collider.m_Direction)
-                    this.SetColliderDirection(collider, direction);
+                    SetColliderDirection(collider, direction);
             }
             GUILayout.EndHorizontal();
 
@@ -1017,7 +1016,7 @@ namespace HSPE.AMModules
                 GUILayout.Label("Bound\t", GUILayout.ExpandWidth(false));
                 DynamicBoneColliderBase.Bound bound = (DynamicBoneColliderBase.Bound)GUILayout.SelectionGrid((int)collider.m_Bound, _boundNames, 2);
                 if (bound != collider.m_Bound)
-                    this.SetColliderBound(collider, bound);
+                    SetColliderBound(collider, bound);
             }
             GUILayout.EndHorizontal();
 
@@ -1026,21 +1025,21 @@ namespace HSPE.AMModules
 
         private void DrawFields(DynamicBoneCollider collider)
         {
-            this.DrawFieldsBase((DynamicBoneColliderBase)collider);
+            DrawFieldsBase((DynamicBoneColliderBase)collider);
 
 #if HONEYSELECT || KOIKATSU || PLAYHOME
-            float radius = this.FloatEditor(collider.m_Radius, 0f, 1f, "Radius\t");
+            float radius = FloatEditor(collider.m_Radius, 0f, 1f, "Radius\t");
 #elif AISHOUJO || HONEYSELECT2
             float radius = this.FloatEditor(collider.m_Radius, 0f, 10f, "Radius\t");
 #endif
             if (Mathf.Approximately(radius, collider.m_Radius) == false)
-                this.SetColliderRadius(collider, radius);
+                SetColliderRadius(collider, radius);
 
-            float height = this.FloatEditor(collider.m_Height, 2 * collider.m_Radius, Mathf.Max(4f, 4f * collider.m_Radius), "Height\t");
+            float height = FloatEditor(collider.m_Height, 2 * collider.m_Radius, Mathf.Max(4f, 4f * collider.m_Radius), "Height\t");
             if (height < collider.m_Radius * 2)
                 height = collider.m_Radius * 2;
             if (Mathf.Approximately(height, collider.m_Height) == false)
-                this.SetColliderHeight(collider, height);
+                SetColliderHeight(collider, height);
 
         }
 
@@ -1053,7 +1052,7 @@ namespace HSPE.AMModules
 
         private void SetColliderCenter(DynamicBoneColliderBase collider, Vector3 center)
         {
-            ColliderDataBase data = this.SetColliderDirty(collider);
+            ColliderDataBase data = SetColliderDirty(collider);
             if (data.originalCenter.hasValue == false)
                 data.originalCenter = collider.m_Center;
             collider.m_Center = center;
@@ -1061,7 +1060,7 @@ namespace HSPE.AMModules
 
         private void SetColliderDirection(DynamicBoneColliderBase collider, DynamicBoneColliderBase.Direction direction)
         {
-            ColliderDataBase data = this.SetColliderDirty(collider);
+            ColliderDataBase data = SetColliderDirty(collider);
             if (data.originalDirection.hasValue == false)
                 data.originalDirection = collider.m_Direction;
             collider.m_Direction = direction;
@@ -1069,7 +1068,7 @@ namespace HSPE.AMModules
 
         private void SetColliderBound(DynamicBoneColliderBase collider, DynamicBoneColliderBase.Bound bound)
         {
-            ColliderDataBase data = this.SetColliderDirty(collider);
+            ColliderDataBase data = SetColliderDirty(collider);
             if (data.originalBound.hasValue == false)
                 data.originalBound = collider.m_Bound;
             collider.m_Bound = bound;
@@ -1077,7 +1076,7 @@ namespace HSPE.AMModules
 
         private void SetColliderRadius(DynamicBoneCollider collider, float radius)
         {
-            ColliderData data = (ColliderData)this.SetColliderDirty(collider);
+            ColliderData data = (ColliderData)SetColliderDirty(collider);
             if (data.originalRadius.hasValue == false)
                 data.originalRadius = collider.m_Radius;
             collider.m_Radius = radius;
@@ -1085,7 +1084,7 @@ namespace HSPE.AMModules
 
         private void SetColliderHeight(DynamicBoneCollider collider, float height)
         {
-            ColliderData data = (ColliderData)this.SetColliderDirty(collider);
+            ColliderData data = (ColliderData)SetColliderDirty(collider);
             if (data.originalHeight.hasValue == false)
                 data.originalHeight = collider.m_Height;
             collider.m_Height = height;
@@ -1093,15 +1092,15 @@ namespace HSPE.AMModules
 
         private void ResetAll()
         {
-            foreach (KeyValuePair<DynamicBoneColliderBase, ColliderDataBase> pair in new Dictionary<DynamicBoneColliderBase, ColliderDataBase>(this._dirtyColliders))
-                this.SetColliderNotDirty(pair.Key);
-            this._dirtyColliders.Clear();
+            foreach (KeyValuePair<DynamicBoneColliderBase, ColliderDataBase> pair in new Dictionary<DynamicBoneColliderBase, ColliderDataBase>(_dirtyColliders))
+                SetColliderNotDirty(pair.Key);
+            _dirtyColliders.Clear();
         }
 
         private ColliderDataBase SetColliderDirty(DynamicBoneColliderBase collider)
         {
             ColliderDataBase data;
-            if (this._dirtyColliders.TryGetValue(collider, out data) == false)
+            if (_dirtyColliders.TryGetValue(collider, out data) == false)
             {
                 if (collider is DynamicBoneCollider)
                     data = new ColliderData();
@@ -1109,29 +1108,29 @@ namespace HSPE.AMModules
                 else
                     data = new ColliderPlaneData();
 #endif
-                this._dirtyColliders.Add(collider, data);
+                _dirtyColliders.Add(collider, data);
             }
             return data;
         }
 
         private bool IsColliderDirty(DynamicBoneColliderBase collider)
         {
-            return this._dirtyColliders.ContainsKey(collider);
+            return _dirtyColliders.ContainsKey(collider);
         }
 
         private void SetColliderNotDirty(DynamicBoneColliderBase collider)
         {
-            if (this.IsColliderDirty(collider))
+            if (IsColliderDirty(collider))
             {
-                ColliderDataBase data = this._dirtyColliders[collider];
+                ColliderDataBase data = _dirtyColliders[collider];
                 data.ResetWithParent(collider);
-                this._dirtyColliders.Remove(collider);
+                _dirtyColliders.Remove(collider);
             }
         }
 
         private void SetIgnoreDynamicBone(DynamicBoneColliderBase collider, PoseController dynamicBoneParent, object dynamicBone, bool ignore)
         {
-            ColliderDataBase colliderData = this.SetColliderDirty(collider);
+            ColliderDataBase colliderData = SetColliderDirty(collider);
             DynamicBoneCollider normalCollider = collider as DynamicBoneCollider;
             if (ignore)
             {
@@ -1199,7 +1198,7 @@ namespace HSPE.AMModules
                 {
                     if (dynamicBone.m_Root == null)
                         continue;
-                    this.SetIgnoreDynamicBone(collider, controller, dynamicBone, ignore);
+                    SetIgnoreDynamicBone(collider, controller, dynamicBone, ignore);
                 }
 
                 if (
@@ -1210,7 +1209,7 @@ namespace HSPE.AMModules
                         )
                 {
                     foreach (DynamicBone_Ver02 dynamicBone in charaPoseController._boobsEditor._dynamicBones)
-                        this.SetIgnoreDynamicBone(collider, controller, dynamicBone, ignore);
+                        SetIgnoreDynamicBone(collider, controller, dynamicBone, ignore);
                 }
             }
 
@@ -1218,16 +1217,16 @@ namespace HSPE.AMModules
 
         public override void UpdateGizmos()
         {
-            if (this.GizmosEnabled() == false)
+            if (GizmosEnabled() == false)
                 return;
 
-            if (MainWindow._self._poseTarget == this._parent)
+            if (MainWindow._self._poseTarget == _parent)
             {
 #if AISHOUJO || HONEYSELECT2
                 if (this._isTargetNormalCollider)
 #endif
                 {
-                    _colliderDebugLines.Update((DynamicBoneCollider)this._colliderTarget);
+                    _colliderDebugLines.Update((DynamicBoneCollider)_colliderTarget);
                 }
 #if AISHOUJO || HONEYSELECT2
                 else
@@ -1265,7 +1264,7 @@ namespace HSPE.AMModules
 
         private bool GizmosEnabled()
         {
-            return this._isEnabled && PoseController._drawAdvancedMode && this._colliderTarget != null;
+            return _isEnabled && PoseController._drawAdvancedMode && _colliderTarget != null;
         }
         #endregion
 

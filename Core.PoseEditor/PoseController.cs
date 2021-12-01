@@ -1,9 +1,9 @@
-﻿using System;
+﻿using HSPE.AMModules;
+using Studio;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
-using HSPE.AMModules;
-using Studio;
 using ToolBox.Extensions;
 using UnityEngine;
 
@@ -57,8 +57,8 @@ namespace HSPE
         #endregion
 
         #region Public Accessors
-        public virtual bool isDraggingDynamicBone { get { return this._dynamicBonesEditor.isDraggingDynamicBone; } }
-        public GenericOCITarget target { get { return this._target; } }
+        public virtual bool isDraggingDynamicBone { get { return _dynamicBonesEditor.isDraggingDynamicBone; } }
+        public GenericOCITarget target { get { return _target; } }
         #endregion
 
         #region Unity Methods
@@ -73,60 +73,60 @@ namespace HSPE
             _poseControllers.Add(this);
             foreach (KeyValuePair<int, ObjectCtrlInfo> pair in Studio.Studio.Instance.dicObjectCtrl)
             {
-                if (pair.Value.guideObject.transformTarget.gameObject == this.gameObject)
+                if (pair.Value.guideObject.transformTarget.gameObject == gameObject)
                 {
-                    this._target = new GenericOCITarget(pair.Value);
+                    _target = new GenericOCITarget(pair.Value);
                     break;
                 }
             }
 
-            this.FillChildObjects();
+            FillChildObjects();
 
-            this._bonesEditor = new BonesEditor(this, this._target);
-            this._modules.Add(this._bonesEditor);
+            _bonesEditor = new BonesEditor(this, _target);
+            _modules.Add(_bonesEditor);
 
-            this._collidersEditor = new CollidersEditor(this, this._target);
-            this._modules.Add(this._collidersEditor);
+            _collidersEditor = new CollidersEditor(this, _target);
+            _modules.Add(_collidersEditor);
 
-            this._dynamicBonesEditor = new DynamicBonesEditor(this, this._target);
-            this._modules.Add(this._dynamicBonesEditor);
+            _dynamicBonesEditor = new DynamicBonesEditor(this, _target);
+            _modules.Add(_dynamicBonesEditor);
 
-            this._blendShapesEditor = new BlendShapesEditor(this, this._target);
-            this._modules.Add(this._blendShapesEditor);
+            _blendShapesEditor = new BlendShapesEditor(this, _target);
+            _modules.Add(_blendShapesEditor);
 
-            this._ikEditor = new IKEditor(this, this._target);
-            this._modules.Add(this._ikEditor);
+            _ikEditor = new IKEditor(this, _target);
+            _modules.Add(_ikEditor);
 
-            if (this._collidersEditor._isLoneCollider)
-                this._currentModule = this._collidersEditor;
+            if (_collidersEditor._isLoneCollider)
+                _currentModule = _collidersEditor;
             else
-                this._currentModule = this._bonesEditor;
-            this._currentModule.isEnabled = true;
+                _currentModule = _bonesEditor;
+            _currentModule.isEnabled = true;
 
-            onParentage += this.OnParentage;
+            onParentage += OnParentage;
         }
 
         protected virtual void Start()
         {
-            this.FillChildObjects();
+            FillChildObjects();
         }
 
         protected virtual void Update()
         {
-            this.onUpdate();
+            onUpdate();
         }
 
         protected virtual void LateUpdate()
         {
-            this.onLateUpdate();
+            onLateUpdate();
         }
 
         private void OnGUI()
         {
             if (_drawAdvancedMode && MainWindow._self._poseTarget == this)
             {
-                if (this._blendShapesEditor._isEnabled)
-                    this._blendShapesEditor.OnGUI();
+                if (_blendShapesEditor._isEnabled)
+                    _blendShapesEditor.OnGUI();
             }
         }
 
@@ -139,19 +139,19 @@ namespace HSPE
 
         protected virtual void UpdateGizmos()
         {
-            foreach (AdvancedModeModule module in this._modules)
+            foreach (AdvancedModeModule module in _modules)
                 module.UpdateGizmos();
         }
 
         private void OnDisable()
         {
-            this.onDisable();
+            onDisable();
         }
 
         protected virtual void OnDestroy()
         {
-            onParentage -= this.OnParentage;
-            this.onDestroy();
+            onParentage -= OnParentage;
+            onDestroy();
             _poseControllers.Remove(this);
         }
         #endregion
@@ -161,24 +161,24 @@ namespace HSPE
         {
             if (other == null)
                 return;
-            this._bonesEditor.LoadFrom(other._bonesEditor);
-            this._collidersEditor.LoadFrom(other._collidersEditor);
-            this._dynamicBonesEditor.LoadFrom(other._dynamicBonesEditor);
-            this._blendShapesEditor.LoadFrom(other._blendShapesEditor);
-            this._ikEditor.LoadFrom(other._ikEditor);
+            _bonesEditor.LoadFrom(other._bonesEditor);
+            _collidersEditor.LoadFrom(other._collidersEditor);
+            _dynamicBonesEditor.LoadFrom(other._dynamicBonesEditor);
+            _blendShapesEditor.LoadFrom(other._blendShapesEditor);
+            _ikEditor.LoadFrom(other._ikEditor);
             foreach (GameObject ignoredObject in other._childObjects)
             {
                 if (ignoredObject == null)
                     continue;
-                Transform obj = this.transform.Find(ignoredObject.transform.GetPathFrom(other.transform));
-                if (obj != null && obj != this.transform)
-                    this._childObjects.Add(obj.gameObject);
+                Transform obj = transform.Find(ignoredObject.transform.GetPathFrom(other.transform));
+                if (obj != null && obj != transform)
+                    _childObjects.Add(obj.gameObject);
             }
         }
 
         public void AdvancedModeWindow(int id)
         {
-            if (this.enabled == false)
+            if (enabled == false)
             {
                 GUILayout.BeginVertical();
                 GUILayout.FlexibleSpace();
@@ -192,7 +192,7 @@ namespace HSPE
                 Color co = GUI.color;
                 GUI.color = Color.magenta;
                 if (GUILayout.Button("Enable", GUILayout.ExpandWidth(false)))
-                    this.enabled = true;
+                    enabled = true;
                 GUI.color = co;
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
@@ -203,31 +203,31 @@ namespace HSPE
             }
             GUILayout.BeginHorizontal();
             Color c = GUI.color;
-            foreach (AdvancedModeModule module in this._modules)
+            foreach (AdvancedModeModule module in _modules)
             {
-                if (module == this._currentModule)
+                if (module == _currentModule)
                     GUI.color = Color.cyan;
                 if (module.shouldDisplay && GUILayout.Button(module.displayName))
-                    this.EnableModule(module);
+                    EnableModule(module);
                 GUI.color = c;
             }
 
             GUI.color = Color.magenta;
             if (GUILayout.Button("Disable", GUILayout.ExpandWidth(false)))
-                this.enabled = false;
+                enabled = false;
             GUI.color = AdvancedModeModule._redColor;
             if (GUILayout.Button("Close", GUILayout.ExpandWidth(false)))
-                this.ToggleAdvancedMode();
+                ToggleAdvancedMode();
             GUI.color = c;
             GUILayout.EndHorizontal();
-            this._currentModule.GUILogic();
+            _currentModule.GUILogic();
             GUI.DragWindow();
         }
 
         public void ToggleAdvancedMode()
         {
             _drawAdvancedMode = !_drawAdvancedMode;
-            foreach (AdvancedModeModule module in this._modules)
+            foreach (AdvancedModeModule module in _modules)
                 module.DrawAdvancedModeChanged();
         }
 
@@ -235,9 +235,9 @@ namespace HSPE
         {
             if (module.shouldDisplay == false)
                 return;
-            this._currentModule = module;
+            _currentModule = module;
             module.isEnabled = true;
-            foreach (AdvancedModeModule module2 in this._modules)
+            foreach (AdvancedModeModule module2 in _modules)
             {
                 if (module2 != module)
                     module2.isEnabled = false;
@@ -272,20 +272,20 @@ namespace HSPE
 
         public void StartDrag(DragType dragType)
         {
-            if (this._lockDrag)
+            if (_lockDrag)
                 return;
-            this._currentDragType = dragType;
+            _currentDragType = dragType;
         }
 
         public void StopDrag()
         {
-            if (this._lockDrag)
+            if (_lockDrag)
                 return;
-            GuideCommand.EqualsInfo[] moveCommands = new GuideCommand.EqualsInfo[this._oldPosValues.Count];
+            GuideCommand.EqualsInfo[] moveCommands = new GuideCommand.EqualsInfo[_oldPosValues.Count];
             int i = 0;
-            if (this._currentDragType == DragType.Position || this._currentDragType == DragType.Both)
+            if (_currentDragType == DragType.Position || _currentDragType == DragType.Both)
             {
-                foreach (KeyValuePair<int, Vector3> kvp in this._oldPosValues)
+                foreach (KeyValuePair<int, Vector3> kvp in _oldPosValues)
                 {
                     moveCommands[i] = new GuideCommand.EqualsInfo()
                     {
@@ -296,11 +296,11 @@ namespace HSPE
                     ++i;
                 }
             }
-            GuideCommand.EqualsInfo[] rotateCommands = new GuideCommand.EqualsInfo[this._oldRotValues.Count + this._additionalRotationEqualsCommands.Count];
+            GuideCommand.EqualsInfo[] rotateCommands = new GuideCommand.EqualsInfo[_oldRotValues.Count + _additionalRotationEqualsCommands.Count];
             i = 0;
-            if (this._currentDragType == DragType.Rotation || this._currentDragType == DragType.Both)
+            if (_currentDragType == DragType.Rotation || _currentDragType == DragType.Both)
             {
-                foreach (KeyValuePair<int, Vector3> kvp in this._oldRotValues)
+                foreach (KeyValuePair<int, Vector3> kvp in _oldRotValues)
                 {
                     rotateCommands[i] = new GuideCommand.EqualsInfo()
                     {
@@ -311,29 +311,29 @@ namespace HSPE
                     ++i;
                 }
             }
-            foreach (GuideCommand.EqualsInfo info in this._additionalRotationEqualsCommands)
+            foreach (GuideCommand.EqualsInfo info in _additionalRotationEqualsCommands)
             {
                 rotateCommands[i] = info;
                 ++i;
             }
             UndoRedoManager.Instance.Push(new Commands.MoveRotateEqualsCommand(moveCommands, rotateCommands));
-            this._currentDragType = DragType.None;
-            this._oldPosValues.Clear();
-            this._oldRotValues.Clear();
-            this._additionalRotationEqualsCommands.Clear();
+            _currentDragType = DragType.None;
+            _oldPosValues.Clear();
+            _oldRotValues.Clear();
+            _additionalRotationEqualsCommands.Clear();
         }
 
         public void SeFKBoneTargetRotation(GuideObject bone, Quaternion targetRotation)
         {
             OCIChar.BoneInfo info;
-            if (this._target.fkObjects.TryGetValue(bone.transformTarget.gameObject, out info) == false)
+            if (_target.fkObjects.TryGetValue(bone.transformTarget.gameObject, out info) == false)
                 return;
-            if (this._target.fkEnabled && info.active)
+            if (_target.fkEnabled && info.active)
             {
-                if (this._currentDragType != DragType.None)
+                if (_currentDragType != DragType.None)
                 {
-                    if (this._oldRotValues.ContainsKey(info.guideObject.dicKey) == false)
-                        this._oldRotValues.Add(info.guideObject.dicKey, info.guideObject.changeAmount.rot);
+                    if (_oldRotValues.ContainsKey(info.guideObject.dicKey) == false)
+                        _oldRotValues.Add(info.guideObject.dicKey, info.guideObject.changeAmount.rot);
                     info.guideObject.changeAmount.rot = targetRotation.eulerAngles;
                 }
             }
@@ -342,20 +342,20 @@ namespace HSPE
         public Quaternion GetFKBoneTargetRotation(GuideObject bone)
         {
             OCIChar.BoneInfo info;
-            if (this._target.fkObjects.TryGetValue(bone.transformTarget.gameObject, out info) == false || !this._target.fkEnabled || info.active == false)
+            if (_target.fkObjects.TryGetValue(bone.transformTarget.gameObject, out info) == false || !_target.fkEnabled || info.active == false)
                 return Quaternion.identity;
             return info.guideObject.transformTarget.localRotation;
         }
 
         public void ScheduleLoad(XmlNode node, Action<bool> onLoadEnd)
         {
-            MainWindow._self.StartCoroutine(this.LoadDefaultVersion_Routine(node, onLoadEnd));
+            MainWindow._self.StartCoroutine(LoadDefaultVersion_Routine(node, onLoadEnd));
         }
 
         public virtual void SaveXml(XmlTextWriter xmlWriter)
         {
-            xmlWriter.WriteAttributeString("uniqueId", XmlConvert.ToString(this.GetInstanceID()));
-            foreach (AdvancedModeModule module in this._modules)
+            xmlWriter.WriteAttributeString("uniqueId", XmlConvert.ToString(GetInstanceID()));
+            foreach (AdvancedModeModule module in _modules)
                 module.SaveXml(xmlWriter);
         }
 
@@ -363,8 +363,8 @@ namespace HSPE
         public virtual bool LoadXml(XmlNode xmlNode)
         {
             bool changed = false;
-            this._oldInstanceId = xmlNode.Attributes["uniqueId"] == null ? 0 : XmlConvert.ToInt32(xmlNode.Attributes["uniqueId"].Value);
-            foreach (AdvancedModeModule module in this._modules)
+            _oldInstanceId = xmlNode.Attributes["uniqueId"] == null ? 0 : XmlConvert.ToInt32(xmlNode.Attributes["uniqueId"].Value);
+            foreach (AdvancedModeModule module in _modules)
                 changed = module.LoadXml(xmlNode) || changed;
             return changed;
         }
@@ -375,14 +375,14 @@ namespace HSPE
         {
             foreach (KeyValuePair<TreeNodeObject, ObjectCtrlInfo> pair in Studio.Studio.Instance.dicInfo)
             {
-                if (pair.Value.guideObject.transformTarget != this.transform)
+                if (pair.Value.guideObject.transformTarget != transform)
                     continue;
                 foreach (TreeNodeObject child in pair.Key.child)
                 {
-                    this.RecurseChildObjects(child, childInfo =>
+                    RecurseChildObjects(child, childInfo =>
                     {
-                        if (this._childObjects.Contains(childInfo.guideObject.transformTarget.gameObject) == false)
-                            this._childObjects.Add(childInfo.guideObject.transformTarget.gameObject);
+                        if (_childObjects.Contains(childInfo.guideObject.transformTarget.gameObject) == false)
+                            _childObjects.Add(childInfo.guideObject.transformTarget.gameObject);
                     });
                 }
                 break;
@@ -398,7 +398,7 @@ namespace HSPE
                 return; //When the first "real" object is found, return to ignore its children;
             }
             foreach (TreeNodeObject child in obj.child)
-                this.RecurseChildObjects(child, action);
+                RecurseChildObjects(child, action);
         }
 
         private void OnParentage(TreeNodeObject parent, TreeNodeObject child)
@@ -406,17 +406,17 @@ namespace HSPE
             if (parent == null)
             {
                 ObjectCtrlInfo info;
-                if (Studio.Studio.Instance.dicInfo.TryGetValue(child, out info) && this._childObjects.Contains(info.guideObject.transformTarget.gameObject))
-                    this._childObjects.Remove(info.guideObject.transformTarget.gameObject);
+                if (Studio.Studio.Instance.dicInfo.TryGetValue(child, out info) && _childObjects.Contains(info.guideObject.transformTarget.gameObject))
+                    _childObjects.Remove(info.guideObject.transformTarget.gameObject);
             }
             else
             {
                 ObjectCtrlInfo info;
-                if (Studio.Studio.Instance.dicInfo.TryGetValue(child, out info) && info.guideObject.transformTarget != this.transform && info.guideObject.transformTarget.IsChildOf(this.transform))
-                    this._childObjects.Add(info.guideObject.transformTarget.gameObject);
+                if (Studio.Studio.Instance.dicInfo.TryGetValue(child, out info) && info.guideObject.transformTarget != transform && info.guideObject.transformTarget.IsChildOf(transform))
+                    _childObjects.Add(info.guideObject.transformTarget.gameObject);
             }
 
-            foreach (AdvancedModeModule module in this._modules)
+            foreach (AdvancedModeModule module in _modules)
                 module.OnParentage(parent, child);
         }
 
@@ -425,7 +425,7 @@ namespace HSPE
             yield return null;
             yield return null;
             yield return null;
-            bool changed = this.LoadXml(xmlNode);
+            bool changed = LoadXml(xmlNode);
             if (onLoadEnd != null)
                 onLoadEnd(changed);
         }

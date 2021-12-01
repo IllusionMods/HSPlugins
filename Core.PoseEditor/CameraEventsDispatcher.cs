@@ -8,8 +8,8 @@ namespace HSPE
         public event Action onPreRender;
         private void OnPreRender()
         {
-            if (this.onPreRender != null)
-                this.onPreRender();
+            if (onPreRender != null)
+                onPreRender();
         }
     }
 }

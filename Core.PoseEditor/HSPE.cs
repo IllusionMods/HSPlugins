@@ -6,7 +6,6 @@ using IllusionPlugin;
 #elif BEPINEX
 using HarmonyLib;
 using BepInEx;
-using BepInEx.Logging;
 #endif
 
 namespace HSPE
@@ -55,12 +54,10 @@ namespace HSPE
         public override string[] Filter { get { return new[] { "PlayHomeStudio32bit", "PlayHomeStudio64bit" }; } }
 #endif
 #endif
-        internal static new ManualLogSource Logger;
 
         protected override void Awake()
         {
             base.Awake();
-            Logger = base.Logger;
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
             //HarmonyExtensions.CreateInstance(_guid).PatchAllSafe();
         }

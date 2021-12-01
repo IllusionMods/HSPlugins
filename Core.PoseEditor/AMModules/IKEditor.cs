@@ -1,12 +1,11 @@
-﻿using System;
+﻿using RootMotion.FinalIK;
+using Studio;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using RootMotion.FinalIK;
-using Studio;
 using ToolBox.Extensions;
 using UnityEngine;
-using UnityEngine.Assertions.Comparers;
 
 namespace HSPE.AMModules
 {
@@ -33,19 +32,19 @@ namespace HSPE.AMModules
             public IKWrapper(IK ik)
             {
                 this.ik = ik;
-                this.solver = this.ik.GetIKSolver();
+                solver = this.ik.GetIKSolver();
                 if (this.ik is CCDIK)
-                    this.type = IKType.CCDIK;
+                    type = IKType.CCDIK;
                 else if (this.ik is FABRIK)
-                    this.type = IKType.FABRIK;
+                    type = IKType.FABRIK;
                 else if (this.ik is FABRIKRoot)
-                    this.type = IKType.FABRIKRoot;
+                    type = IKType.FABRIKRoot;
                 else if (this.ik is AimIK)
-                    this.type = IKType.AimIK;
+                    type = IKType.AimIK;
                 else if (this.ik is FullBodyBipedIK)
-                    this.type = IKType.FullBodyBipedIK;
+                    type = IKType.FullBodyBipedIK;
                 else if (this.ik is LimbIK)
-                    this.type = IKType.LimbIK;
+                    type = IKType.LimbIK;
             }
         }
 
@@ -59,9 +58,9 @@ namespace HSPE.AMModules
 
             protected IKData(IKData other)
             {
-                this.originalEnabled = other.originalEnabled;
-                this.originalWeight = other.originalWeight;
-                this.originalFixTransforms = other.originalFixTransforms;
+                originalEnabled = other.originalEnabled;
+                originalWeight = other.originalWeight;
+                originalFixTransforms = other.originalFixTransforms;
             }
         }
 
@@ -74,8 +73,8 @@ namespace HSPE.AMModules
 
             public CCDIKData(CCDIKData other) : base(other)
             {
-                this.originalTolerance = other.originalTolerance;
-                this.originalMaxIterations = other.originalMaxIterations;
+                originalTolerance = other.originalTolerance;
+                originalMaxIterations = other.originalMaxIterations;
             }
         }
 
@@ -88,8 +87,8 @@ namespace HSPE.AMModules
 
             public FABRIKData(FABRIKData other) : base(other)
             {
-                this.originalTolerance = other.originalTolerance;
-                this.originalMaxIterations = other.originalMaxIterations;
+                originalTolerance = other.originalTolerance;
+                originalMaxIterations = other.originalMaxIterations;
             }
         }
 
@@ -102,8 +101,8 @@ namespace HSPE.AMModules
 
             public FABRIKRootData(FABRIKRootData other) : base(other)
             {
-                this.originalRootPin = other.originalRootPin;
-                this.originalIterations = other.originalIterations;
+                originalRootPin = other.originalRootPin;
+                originalIterations = other.originalIterations;
             }
         }
 
@@ -122,14 +121,14 @@ namespace HSPE.AMModules
 
             public AimIKData(AimIKData other) : base(other)
             {
-                this.originalTolerance = other.originalTolerance;
-                this.originalMaxIterations = other.originalMaxIterations;
-                this.originalAxis = other.originalAxis;
-                this.originalClampWeight = other.originalClampWeight;
-                this.originalClampSmoothing = other.originalClampSmoothing;
-                this.originalPoleAxis = other.originalPoleAxis;
-                this.originalPolePosition = other.originalPolePosition;
-                this.originalPoleWeight = other.originalPoleWeight;
+                originalTolerance = other.originalTolerance;
+                originalMaxIterations = other.originalMaxIterations;
+                originalAxis = other.originalAxis;
+                originalClampWeight = other.originalClampWeight;
+                originalClampSmoothing = other.originalClampSmoothing;
+                originalPoleAxis = other.originalPoleAxis;
+                originalPolePosition = other.originalPolePosition;
+                originalPoleWeight = other.originalPoleWeight;
             }
         }
 
@@ -146,11 +145,11 @@ namespace HSPE.AMModules
 
                 public EffectorData(EffectorData other)
                 {
-                    this.originalPositionWeight = other.originalPositionWeight;
-                    this.originalRotationWeight = other.originalRotationWeight;
+                    originalPositionWeight = other.originalPositionWeight;
+                    originalRotationWeight = other.originalRotationWeight;
 
-                    this.currentPositionWeight = other.currentPositionWeight;
-                    this.currentRotationWeight = other.currentRotationWeight;
+                    currentPositionWeight = other.currentPositionWeight;
+                    currentRotationWeight = other.currentRotationWeight;
                 }
             }
 
@@ -163,8 +162,8 @@ namespace HSPE.AMModules
 
                 public ConstraintBendData(ConstraintBendData other)
                 {
-                    this.originalWeight = other.originalWeight;
-                    this.currentWeight = other.currentWeight;
+                    originalWeight = other.originalWeight;
+                    currentWeight = other.currentWeight;
                 }
             }
 
@@ -184,36 +183,36 @@ namespace HSPE.AMModules
 
             public FullBodyBipedIKData()
             {
-                this.body = new EffectorData();
-                this.leftShoulder = new EffectorData();
-                this.leftHand = new EffectorData();
-                this.leftArm = new ConstraintBendData();
-                this.rightShoulder = new EffectorData();
-                this.rightHand = new EffectorData();
-                this.rightArm = new ConstraintBendData();
-                this.leftThigh = new EffectorData();
-                this.leftFoot = new EffectorData();
-                this.leftLeg = new ConstraintBendData();
-                this.rightThigh = new EffectorData();
-                this.rightFoot = new EffectorData();
-                this.rightLeg = new ConstraintBendData();
+                body = new EffectorData();
+                leftShoulder = new EffectorData();
+                leftHand = new EffectorData();
+                leftArm = new ConstraintBendData();
+                rightShoulder = new EffectorData();
+                rightHand = new EffectorData();
+                rightArm = new ConstraintBendData();
+                leftThigh = new EffectorData();
+                leftFoot = new EffectorData();
+                leftLeg = new ConstraintBendData();
+                rightThigh = new EffectorData();
+                rightFoot = new EffectorData();
+                rightLeg = new ConstraintBendData();
             }
 
             public FullBodyBipedIKData(FullBodyBipedIKData other) : base(other)
             {
-                this.body = new EffectorData(other.body);
-                this.leftShoulder = new EffectorData(other.leftShoulder);
-                this.leftHand = new EffectorData(other.leftHand);
-                this.leftArm = new ConstraintBendData(other.leftArm);
-                this.rightShoulder = new EffectorData(other.rightShoulder);
-                this.rightHand = new EffectorData(other.rightHand);
-                this.rightArm = new ConstraintBendData(other.rightArm);
-                this.leftThigh = new EffectorData(other.leftThigh);
-                this.leftFoot = new EffectorData(other.leftFoot);
-                this.leftLeg = new ConstraintBendData(other.leftLeg);
-                this.rightThigh = new EffectorData(other.rightThigh);
-                this.rightFoot = new EffectorData(other.rightFoot);
-                this.rightLeg = new ConstraintBendData(other.rightLeg);
+                body = new EffectorData(other.body);
+                leftShoulder = new EffectorData(other.leftShoulder);
+                leftHand = new EffectorData(other.leftHand);
+                leftArm = new ConstraintBendData(other.leftArm);
+                rightShoulder = new EffectorData(other.rightShoulder);
+                rightHand = new EffectorData(other.rightHand);
+                rightArm = new ConstraintBendData(other.rightArm);
+                leftThigh = new EffectorData(other.leftThigh);
+                leftFoot = new EffectorData(other.leftFoot);
+                leftLeg = new ConstraintBendData(other.leftLeg);
+                rightThigh = new EffectorData(other.rightThigh);
+                rightFoot = new EffectorData(other.rightFoot);
+                rightLeg = new ConstraintBendData(other.rightLeg);
             }
         }
 
@@ -226,8 +225,8 @@ namespace HSPE.AMModules
 
             public LimbIKData(LimbIKData other) : base(other)
             {
-                this.originalRotationWeight = other.originalRotationWeight;
-                this.originalBendModifierWeight = other.originalBendModifierWeight;
+                originalRotationWeight = other.originalRotationWeight;
+                originalBendModifierWeight = other.originalBendModifierWeight;
             }
         }
         #endregion
@@ -247,22 +246,22 @@ namespace HSPE.AMModules
         #region Public Accessors
         public override AdvancedModeModuleType type { get { return AdvancedModeModuleType.IK; } }
         public override string displayName { get { return "IK"; } }
-        public override bool shouldDisplay { get { return this._iks.Count != 0; } }
+        public override bool shouldDisplay { get { return _iks.Count != 0; } }
         #endregion
 
         #region Unity Methods
         public IKEditor(PoseController parent, GenericOCITarget target) : base(parent)
         {
-            this._target = target;
-            this.RefreshIKList();
+            _target = target;
+            RefreshIKList();
 
-            if (this._iks.Any(ik => ik.Value.type == IKType.FullBodyBipedIK))
+            if (_iks.Any(ik => ik.Value.type == IKType.FullBodyBipedIK))
             {
-                this._parent.onLateUpdate += this.LateUpdate;
-                this._registered = true;
+                _parent.onLateUpdate += LateUpdate;
+                _registered = true;
             }
-            this._isCharacter = this._target.type == GenericOCITarget.Type.Character;
-            this._incIndex = -1;
+            _isCharacter = _target.type == GenericOCITarget.Type.Character;
+            _incIndex = -1;
         }
 
         private void Update()
@@ -271,39 +270,39 @@ namespace HSPE.AMModules
 
         private void LateUpdate()
         {
-            foreach (KeyValuePair<IKWrapper, IKData> pair in this._dirtyIks)
+            foreach (KeyValuePair<IKWrapper, IKData> pair in _dirtyIks)
             {
                 if (pair.Key.type != IKType.FullBodyBipedIK)
                     continue;
                 IKSolverFullBodyBiped solver = (IKSolverFullBodyBiped)pair.Key.solver;
                 FullBodyBipedIKData data = (FullBodyBipedIKData)pair.Value;
-                if (this._isCharacter == false || this._target.ociChar.oiCharInfo.enableIK)
+                if (_isCharacter == false || _target.ociChar.oiCharInfo.enableIK)
                 {
-                    if (this._isCharacter == false || this._target.ociChar.oiCharInfo.activeIK[0])
-                        this.ApplyFullBodyBipedEffectorData(solver.bodyEffector, data.body);
-                    if (this._isCharacter == false || this._target.ociChar.oiCharInfo.activeIK[4])
+                    if (_isCharacter == false || _target.ociChar.oiCharInfo.activeIK[0])
+                        ApplyFullBodyBipedEffectorData(solver.bodyEffector, data.body);
+                    if (_isCharacter == false || _target.ociChar.oiCharInfo.activeIK[4])
                     {
-                        this.ApplyFullBodyBipedEffectorData(solver.leftShoulderEffector, data.leftShoulder);
-                        this.ApplyFullBodyBipedConstraintBendData(solver.leftArmChain.bendConstraint, data.leftArm);
-                        this.ApplyFullBodyBipedEffectorData(solver.leftHandEffector, data.leftHand);
+                        ApplyFullBodyBipedEffectorData(solver.leftShoulderEffector, data.leftShoulder);
+                        ApplyFullBodyBipedConstraintBendData(solver.leftArmChain.bendConstraint, data.leftArm);
+                        ApplyFullBodyBipedEffectorData(solver.leftHandEffector, data.leftHand);
                     }
-                    if (this._isCharacter == false || this._target.ociChar.oiCharInfo.activeIK[3])
+                    if (_isCharacter == false || _target.ociChar.oiCharInfo.activeIK[3])
                     {
-                        this.ApplyFullBodyBipedEffectorData(solver.rightShoulderEffector, data.rightShoulder);
-                        this.ApplyFullBodyBipedConstraintBendData(solver.rightArmChain.bendConstraint, data.rightArm);
-                        this.ApplyFullBodyBipedEffectorData(solver.rightHandEffector, data.rightHand);
+                        ApplyFullBodyBipedEffectorData(solver.rightShoulderEffector, data.rightShoulder);
+                        ApplyFullBodyBipedConstraintBendData(solver.rightArmChain.bendConstraint, data.rightArm);
+                        ApplyFullBodyBipedEffectorData(solver.rightHandEffector, data.rightHand);
                     }
-                    if (this._isCharacter == false || this._target.ociChar.oiCharInfo.activeIK[2])
+                    if (_isCharacter == false || _target.ociChar.oiCharInfo.activeIK[2])
                     {
-                        this.ApplyFullBodyBipedEffectorData(solver.leftThighEffector, data.leftThigh);
-                        this.ApplyFullBodyBipedConstraintBendData(solver.leftLegChain.bendConstraint, data.leftLeg);
-                        this.ApplyFullBodyBipedEffectorData(solver.leftFootEffector, data.leftFoot);
+                        ApplyFullBodyBipedEffectorData(solver.leftThighEffector, data.leftThigh);
+                        ApplyFullBodyBipedConstraintBendData(solver.leftLegChain.bendConstraint, data.leftLeg);
+                        ApplyFullBodyBipedEffectorData(solver.leftFootEffector, data.leftFoot);
                     }
-                    if (this._isCharacter == false || this._target.ociChar.oiCharInfo.activeIK[1])
+                    if (_isCharacter == false || _target.ociChar.oiCharInfo.activeIK[1])
                     {
-                        this.ApplyFullBodyBipedEffectorData(solver.rightThighEffector, data.rightThigh);
-                        this.ApplyFullBodyBipedConstraintBendData(solver.rightLegChain.bendConstraint, data.rightLeg);
-                        this.ApplyFullBodyBipedEffectorData(solver.rightFootEffector, data.rightFoot);
+                        ApplyFullBodyBipedEffectorData(solver.rightThighEffector, data.rightThigh);
+                        ApplyFullBodyBipedConstraintBendData(solver.rightLegChain.bendConstraint, data.rightLeg);
+                        ApplyFullBodyBipedEffectorData(solver.rightFootEffector, data.rightFoot);
                     }
                 }
             }
@@ -314,21 +313,21 @@ namespace HSPE.AMModules
             Color c = GUI.color;
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
-            this._iksScroll = GUILayout.BeginScrollView(this._iksScroll, false, true, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.ExpandWidth(false));
-            foreach (KeyValuePair<IK, IKWrapper> pair in this._iks)
+            _iksScroll = GUILayout.BeginScrollView(_iksScroll, false, true, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.ExpandWidth(false));
+            foreach (KeyValuePair<IK, IKWrapper> pair in _iks)
             {
-                if (this._dirtyIks.ContainsKey(pair.Value))
+                if (_dirtyIks.ContainsKey(pair.Value))
                     GUI.color = Color.magenta;
-                if (ReferenceEquals(pair.Value, this._ikTarget))
+                if (ReferenceEquals(pair.Value, _ikTarget))
                     GUI.color = Color.cyan;
                 string dName = pair.Value.solver.GetRoot().name;
                 string newName;
                 if (BonesEditor._boneAliases.TryGetValue(dName, out newName))
                     dName = newName;
                 GUILayout.BeginHorizontal();
-                if (GUILayout.Button(dName + (this._dirtyIks.ContainsKey(pair.Value) ? "*" : "")))
+                if (GUILayout.Button(dName + (_dirtyIks.ContainsKey(pair.Value) ? "*" : "")))
                 {
-                    this._ikTarget = pair.Value;
+                    _ikTarget = pair.Value;
                     ToolBox.TimelineCompatibility.RefreshInterpolablesList();
                 }
                 GUILayout.Space(GUI.skin.verticalScrollbar.fixedWidth);
@@ -338,33 +337,33 @@ namespace HSPE.AMModules
             GUILayout.EndScrollView();
 
             if (GUILayout.Button("Copy to FK"))
-                this.CopyToFK();
+                CopyToFK();
             if (GUILayout.Button("Force refresh list"))
-                this.RefreshIKList();
+                RefreshIKList();
 
             {
                 GUI.color = Color.red;
-                if (GUILayout.Button("Reset all") && this._ikTarget != null)
-                    this.ResetAll();
+                if (GUILayout.Button("Reset all") && _ikTarget != null)
+                    ResetAll();
                 GUI.color = c;
             }
             GUILayout.EndVertical();
 
             GUILayout.BeginVertical(GUI.skin.box, GUILayout.ExpandWidth(true));
-            this._scroll = GUILayout.BeginScrollView(this._scroll);
-            if (this._ikTarget != null)
+            _scroll = GUILayout.BeginScrollView(_scroll);
+            if (_ikTarget != null)
             {
                 IKData data;
-                this._dirtyIks.TryGetValue(this._ikTarget, out data);
-                if (this._isCharacter == false)
+                _dirtyIks.TryGetValue(_ikTarget, out data);
+                if (_isCharacter == false)
                 {
-                    bool b = this.GetIKEnabled(this._ikTarget); ;
+                    bool b = GetIKEnabled(_ikTarget); ;
                     GUILayout.BeginHorizontal();
                     if (data != null && data.originalEnabled.hasValue)
                         GUI.color = Color.magenta;
                     b = GUILayout.Toggle(b, "Enabled", GUILayout.ExpandWidth(false));
-                    if (b != this._ikTarget.ik.enabled)
-                        this.SetIKEnabled(this._ikTarget, b);
+                    if (b != _ikTarget.ik.enabled)
+                        SetIKEnabled(_ikTarget, b);
                     GUI.color = c;
 
                     GUILayout.FlexibleSpace();
@@ -374,10 +373,10 @@ namespace HSPE.AMModules
                     {
                         if (data != null && data.originalEnabled.hasValue)
                         {
-                            this._ikTarget.ik.enabled = data.originalEnabled;
+                            _ikTarget.ik.enabled = data.originalEnabled;
                             data.originalEnabled.Reset();
-                            if (this._ikTarget.ik.enabled == false)
-                                this._ikTarget.solver.FixTransforms();
+                            if (_ikTarget.ik.enabled == false)
+                                _ikTarget.solver.FixTransforms();
                         }
                     }
                     GUI.color = c;
@@ -386,13 +385,13 @@ namespace HSPE.AMModules
                 }
 
                 {
-                    bool b = this.GetIKFixTransforms(this._ikTarget);
+                    bool b = GetIKFixTransforms(_ikTarget);
                     GUILayout.BeginHorizontal();
                     if (data != null && data.originalFixTransforms.hasValue)
                         GUI.color = Color.magenta;
                     b = GUILayout.Toggle(b, "Fix Transforms", GUILayout.ExpandWidth(false));
-                    if (b != this._ikTarget.ik.fixTransforms)
-                        this.SetIKFixTransforms(this._ikTarget, b);
+                    if (b != _ikTarget.ik.fixTransforms)
+                        SetIKFixTransforms(_ikTarget, b);
                     GUI.color = c;
 
                     GUILayout.FlexibleSpace();
@@ -402,7 +401,7 @@ namespace HSPE.AMModules
                     {
                         if (data != null && data.originalFixTransforms.hasValue)
                         {
-                            this._ikTarget.ik.fixTransforms = data.originalFixTransforms;
+                            _ikTarget.ik.fixTransforms = data.originalFixTransforms;
                             data.originalFixTransforms.Reset();
                         }
                     }
@@ -415,41 +414,41 @@ namespace HSPE.AMModules
                 {
                     if (data != null && data.originalWeight.hasValue)
                         GUI.color = Color.magenta;
-                    float v = this._ikTarget.solver.GetIKPositionWeight();
-                    v = this.FloatEditor(v, 0f, 1f, "Pos Weight\t", "0.0000", onReset: (value) =>
+                    float v = _ikTarget.solver.GetIKPositionWeight();
+                    v = FloatEditor(v, 0f, 1f, "Pos Weight\t", "0.0000", onReset: (value) =>
                     {
                         if (data != null && data.originalWeight.hasValue)
                         {
-                            this._ikTarget.solver.SetIKPositionWeight(data.originalWeight);
+                            _ikTarget.solver.SetIKPositionWeight(data.originalWeight);
                             data.originalWeight.Reset();
-                            return this._ikTarget.solver.GetIKPositionWeight();
+                            return _ikTarget.solver.GetIKPositionWeight();
                         }
                         return value;
                     });
                     GUI.color = c;
-                    if (!Mathf.Approximately(this._ikTarget.solver.GetIKPositionWeight(), v))
-                        this.SetIKPositionWeight(this._ikTarget, v);
+                    if (!Mathf.Approximately(_ikTarget.solver.GetIKPositionWeight(), v))
+                        SetIKPositionWeight(_ikTarget, v);
                 }
 
-                switch (this._ikTarget.type)
+                switch (_ikTarget.type)
                 {
                     case IKType.FABRIK:
-                        this.FABRIKFields(this._ikTarget, data);
+                        FABRIKFields(_ikTarget, data);
                         break;
                     case IKType.FABRIKRoot:
-                        this.FABRIKRootFields(this._ikTarget, data);
+                        FABRIKRootFields(_ikTarget, data);
                         break;
                     case IKType.CCDIK:
-                        this.CCDIKFields(this._ikTarget, data);
+                        CCDIKFields(_ikTarget, data);
                         break;
                     case IKType.AimIK:
-                        this.AimIKFields(this._ikTarget, data);
+                        AimIKFields(_ikTarget, data);
                         break;
                     case IKType.FullBodyBipedIK:
-                        this.FullBodyBipedIKFields(this._ikTarget, data);
+                        FullBodyBipedIKFields(_ikTarget, data);
                         break;
                     case IKType.LimbIK:
-                        this.LimbIKFields(this._ikTarget, data);
+                        LimbIKFields(_ikTarget, data);
                         break;
                 }
 
@@ -459,8 +458,8 @@ namespace HSPE.AMModules
             GUILayout.BeginHorizontal();
             GUI.color = Color.red;
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)) && this._ikTarget != null)
-                this.SetIKNotDirty(this._ikTarget);
+            if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)) && _ikTarget != null)
+                SetIKNotDirty(_ikTarget);
             GUI.color = c;
             GUILayout.EndHorizontal();
 
@@ -471,10 +470,10 @@ namespace HSPE.AMModules
 
         public override void UpdateGizmos()
         {
-            if (this._updateAction != null)
+            if (_updateAction != null)
             {
-                this._updateAction();
-                this._updateAction = null;
+                _updateAction();
+                _updateAction = null;
             }
         }
 
@@ -482,9 +481,9 @@ namespace HSPE.AMModules
         public override void OnDestroy()
         {
             base.OnDestroy();
-            if (this._registered)
-                this._parent.onLateUpdate -= this.LateUpdate;
-            this._parent.onUpdate -= this.Update;
+            if (_registered)
+                _parent.onLateUpdate -= LateUpdate;
+            _parent.onUpdate -= Update;
         }
         #endregion
 
@@ -495,8 +494,8 @@ namespace HSPE.AMModules
             {
                 foreach (KeyValuePair<IKWrapper, IKData> otherPair in other._dirtyIks)
                 {
-                    Transform t = this._parent.transform.Find(otherPair.Key.solver.GetRoot().GetPathFrom(other._parent.transform));
-                    IKWrapper ik = this._iks.FirstOrDefault(i => i.Value.solver.GetRoot() == t && this._dirtyIks.ContainsKey(i.Value) == false).Value;
+                    Transform t = _parent.transform.Find(otherPair.Key.solver.GetRoot().GetPathFrom(other._parent.transform));
+                    IKWrapper ik = _iks.FirstOrDefault(i => i.Value.solver.GetRoot() == t && _dirtyIks.ContainsKey(i.Value) == false).Value;
                     if (ik == null || ik.type != otherPair.Key.type || ik.type == IKType.Unknown)
                         continue;
 
@@ -589,7 +588,7 @@ namespace HSPE.AMModules
                                 break;
                             }
                     }
-                    this._dirtyIks.Add(ik, ikData);
+                    _dirtyIks.Add(ik, ikData);
                 }
 
             }, 2);
@@ -607,8 +606,8 @@ namespace HSPE.AMModules
             {
                 if (data != null && data.originalTolerance.hasValue)
                     GUI.color = Color.magenta;
-                float v = this.GetFABRIKTolerance(target);
-                v = this.FloatEditor(v, 0f, 1f, "Tolerance\t\t", "0.0000", onReset: (value) =>
+                float v = GetFABRIKTolerance(target);
+                v = FloatEditor(v, 0f, 1f, "Tolerance\t\t", "0.0000", onReset: (value) =>
                 {
                     if (data != null && data.originalTolerance.hasValue)
                     {
@@ -620,14 +619,14 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (!Mathf.Approximately(solver.tolerance, v))
-                    this.SetFABRIKTolerance(target, v);
+                    SetFABRIKTolerance(target, v);
             }
 
             {
                 if (data != null && data.originalMaxIterations.hasValue)
                     GUI.color = Color.magenta;
-                int v = this.GetFABRIKMaxIterations(target);
-                v = Mathf.RoundToInt(this.FloatEditor(v, 0f, 100f, "Max iterations\t", "0", onReset: (value) =>
+                int v = GetFABRIKMaxIterations(target);
+                v = Mathf.RoundToInt(FloatEditor(v, 0f, 100f, "Max iterations\t", "0", onReset: (value) =>
                 {
                     if (data != null && data.originalMaxIterations.hasValue)
                     {
@@ -639,7 +638,7 @@ namespace HSPE.AMModules
                 }));
                 GUI.color = c;
                 if (v != solver.maxIterations)
-                    this.SetFABRIKMaxIterations(target, v);
+                    SetFABRIKMaxIterations(target, v);
             }
         }
 
@@ -652,8 +651,8 @@ namespace HSPE.AMModules
             {
                 if (data != null && data.originalRootPin.hasValue)
                     GUI.color = Color.magenta;
-                float v = this.GetFABRIKRootRootPin(target);
-                v = this.FloatEditor(v, 0f, 1f, "Tolerance\t\t", "0.0000", onReset: (value) =>
+                float v = GetFABRIKRootRootPin(target);
+                v = FloatEditor(v, 0f, 1f, "Tolerance\t\t", "0.0000", onReset: (value) =>
                 {
                     if (data != null && data.originalRootPin.hasValue)
                     {
@@ -665,14 +664,14 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (!Mathf.Approximately(solver.rootPin, v))
-                    this.SetFABRIKRootRootPin(target, v);
+                    SetFABRIKRootRootPin(target, v);
             }
 
             {
                 if (data != null && data.originalIterations.hasValue)
                     GUI.color = Color.magenta;
-                int v = this.GetFABRIKRootIterations(target);
-                v = Mathf.RoundToInt(this.FloatEditor(v, 0f, 100f, "Max iterations\t", "0", onReset: (value) =>
+                int v = GetFABRIKRootIterations(target);
+                v = Mathf.RoundToInt(FloatEditor(v, 0f, 100f, "Max iterations\t", "0", onReset: (value) =>
                 {
                     if (data != null && data.originalIterations.hasValue)
                     {
@@ -684,7 +683,7 @@ namespace HSPE.AMModules
                 }));
                 GUI.color = c;
                 if (v != solver.iterations)
-                    this.SetFABRIKRootIterations(target, v);
+                    SetFABRIKRootIterations(target, v);
             }
         }
 
@@ -697,8 +696,8 @@ namespace HSPE.AMModules
             {
                 if (data != null && data.originalTolerance.hasValue)
                     GUI.color = Color.magenta;
-                float v = this.GetCCDIKTolerance(target);
-                v = this.FloatEditor(v, 0f, 1f, "Tolerance\t\t", "0.0000", onReset: (value) =>
+                float v = GetCCDIKTolerance(target);
+                v = FloatEditor(v, 0f, 1f, "Tolerance\t\t", "0.0000", onReset: (value) =>
                 {
                     if (data != null && data.originalTolerance.hasValue)
                     {
@@ -710,14 +709,14 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (!Mathf.Approximately(solver.tolerance, v))
-                    this.SetCCDIKTolerance(target, v);
+                    SetCCDIKTolerance(target, v);
             }
 
             {
                 if (data != null && data.originalMaxIterations.hasValue)
                     GUI.color = Color.magenta;
-                int v = this.GetCCDIKMaxIterations(target);
-                v = Mathf.RoundToInt(this.FloatEditor(v, 0f, 100f, "Max iterations\t", "0", onReset: (value) =>
+                int v = GetCCDIKMaxIterations(target);
+                v = Mathf.RoundToInt(FloatEditor(v, 0f, 100f, "Max iterations\t", "0", onReset: (value) =>
                 {
                     if (data != null && data.originalMaxIterations.hasValue)
                     {
@@ -729,7 +728,7 @@ namespace HSPE.AMModules
                 }));
                 GUI.color = c;
                 if (v != solver.maxIterations)
-                    this.SetCCDIKMaxIterations(target, v);
+                    SetCCDIKMaxIterations(target, v);
             }
         }
 
@@ -742,8 +741,8 @@ namespace HSPE.AMModules
             {
                 if (data != null && data.originalTolerance.hasValue)
                     GUI.color = Color.magenta;
-                float v = this.GetAimIKTolerance(target);
-                v = this.FloatEditor(v, 0f, 1f, "Tolerance\t\t", "0.0000", onReset: (value) =>
+                float v = GetAimIKTolerance(target);
+                v = FloatEditor(v, 0f, 1f, "Tolerance\t\t", "0.0000", onReset: (value) =>
                 {
                     if (data != null && data.originalTolerance.hasValue)
                     {
@@ -755,14 +754,14 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (!Mathf.Approximately(solver.tolerance, v))
-                    this.SetAimIKTolerance(target, v);
+                    SetAimIKTolerance(target, v);
             }
 
             {
                 if (data != null && data.originalMaxIterations.hasValue)
                     GUI.color = Color.magenta;
-                int v = this.GetAimIKMaxIterations(target);
-                v = Mathf.RoundToInt(this.FloatEditor(v, 0f, 100f, "Max iterations\t", "0", onReset: (value) =>
+                int v = GetAimIKMaxIterations(target);
+                v = Mathf.RoundToInt(FloatEditor(v, 0f, 100f, "Max iterations\t", "0", onReset: (value) =>
                 {
                     if (data != null && data.originalMaxIterations.hasValue)
                     {
@@ -774,7 +773,7 @@ namespace HSPE.AMModules
                 }));
                 GUI.color = c;
                 if (v != solver.maxIterations)
-                    this.SetAimIKMaxIterations(target, v);
+                    SetAimIKMaxIterations(target, v);
             }
 
             {
@@ -783,11 +782,11 @@ namespace HSPE.AMModules
                     GUI.color = Color.magenta;
                 GUILayout.Label("Axis");
                 GUILayout.BeginHorizontal();
-                Vector3 v = this.Vector3Editor(this.GetAimIKAxis(target));
+                Vector3 v = Vector3Editor(GetAimIKAxis(target));
                 if (v != solver.axis)
-                    this.SetAimIKAxis(target, v);
+                    SetAimIKAxis(target, v);
                 GUI.color = c;
-                this.IncEditor();
+                IncEditor();
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
@@ -806,8 +805,8 @@ namespace HSPE.AMModules
             {
                 if (data != null && data.originalClampWeight.hasValue)
                     GUI.color = Color.magenta;
-                float v = this.GetAimIKClampWeight(target);
-                v = this.FloatEditor(v, 0f, 1f, "Clamp Weight\t", "0.0000", onReset: (value) =>
+                float v = GetAimIKClampWeight(target);
+                v = FloatEditor(v, 0f, 1f, "Clamp Weight\t", "0.0000", onReset: (value) =>
                 {
                     if (data != null && data.originalClampWeight.hasValue)
                     {
@@ -819,14 +818,14 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (!Mathf.Approximately(solver.clampWeight, v))
-                    this.SetAimIKClampWeight(target, v);
+                    SetAimIKClampWeight(target, v);
             }
 
             {
                 if (data != null && data.originalClampSmoothing.hasValue)
                     GUI.color = Color.magenta;
-                int v = this.GetAimIKClampSmoothing(target);
-                v = Mathf.RoundToInt(this.FloatEditor(v, 0f, 2f, "Clamp Smoothing\t", "0", onReset: (value) =>
+                int v = GetAimIKClampSmoothing(target);
+                v = Mathf.RoundToInt(FloatEditor(v, 0f, 2f, "Clamp Smoothing\t", "0", onReset: (value) =>
                 {
                     if (data.originalClampSmoothing.hasValue)
                     {
@@ -838,7 +837,7 @@ namespace HSPE.AMModules
                 }));
                 GUI.color = c;
                 if (solver.clampSmoothing != v)
-                    this.SetAimIKClampSmoothing(target, v);
+                    SetAimIKClampSmoothing(target, v);
             }
 
             {
@@ -847,11 +846,11 @@ namespace HSPE.AMModules
                     GUI.color = Color.magenta;
                 GUILayout.Label("Pole Axis");
                 GUILayout.BeginHorizontal();
-                Vector3 v = this.Vector3Editor(this.GetAimIKPoleAxis(target));
+                Vector3 v = Vector3Editor(GetAimIKPoleAxis(target));
                 if (v != solver.poleAxis)
-                    this.SetAimIKPoleAxis(target, v);
+                    SetAimIKPoleAxis(target, v);
                 GUI.color = c;
-                this.IncEditor();
+                IncEditor();
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
@@ -875,11 +874,11 @@ namespace HSPE.AMModules
                 GUILayout.Label("Pole Position");
 
                 GUILayout.BeginHorizontal();
-                Vector3 v = this.Vector3Editor(this.GetAimIKPolePosition(target));
+                Vector3 v = Vector3Editor(GetAimIKPolePosition(target));
                 if (v != solver.polePosition)
-                    this.SetAimIKPolePosition(target, v);
+                    SetAimIKPolePosition(target, v);
                 GUI.color = c;
-                this.IncEditor();
+                IncEditor();
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
@@ -898,8 +897,8 @@ namespace HSPE.AMModules
             {
                 if (data != null && data.originalPoleWeight.hasValue)
                     GUI.color = Color.magenta;
-                float v = this.GetAimIKPoleWeight(target);
-                v = this.FloatEditor(v, 0f, 1f, "Pole Weight\t", "0.0000", onReset: (value) =>
+                float v = GetAimIKPoleWeight(target);
+                v = FloatEditor(v, 0f, 1f, "Pole Weight\t", "0.0000", onReset: (value) =>
                 {
                     if (data != null && data.originalPoleWeight.hasValue)
                     {
@@ -911,7 +910,7 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (!Mathf.Approximately(solver.poleWeight, v))
-                    this.SetAimIKPoleWeight(target, v);
+                    SetAimIKPoleWeight(target, v);
             }
         }
 
@@ -920,35 +919,35 @@ namespace HSPE.AMModules
             IKSolverFullBodyBiped solver = (IKSolverFullBodyBiped)target.solver;
             FullBodyBipedIKData data = d as FullBodyBipedIKData;
             GUILayout.BeginHorizontal();
-            this.DisplayEffectorFields("Right shoulder", solver.rightShoulderEffector, data?.rightShoulder, true, false);
-            this.DisplayEffectorFields("Left shoulder", solver.leftShoulderEffector, data?.leftShoulder, true, false);
+            DisplayEffectorFields("Right shoulder", solver.rightShoulderEffector, data?.rightShoulder, true, false);
+            DisplayEffectorFields("Left shoulder", solver.leftShoulderEffector, data?.leftShoulder, true, false);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            this.DisplayConstraintBendFields(solver.rightArmChain.bendConstraint, data?.rightArm);
-            this.DisplayConstraintBendFields(solver.leftArmChain.bendConstraint, data?.leftArm);
+            DisplayConstraintBendFields(solver.rightArmChain.bendConstraint, data?.rightArm);
+            DisplayConstraintBendFields(solver.leftArmChain.bendConstraint, data?.leftArm);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            this.DisplayEffectorFields("Right hand", solver.rightHandEffector, data?.rightHand);
-            this.DisplayEffectorFields("Left hand", solver.leftHandEffector, data?.leftHand);
+            DisplayEffectorFields("Right hand", solver.rightHandEffector, data?.rightHand);
+            DisplayEffectorFields("Left hand", solver.leftHandEffector, data?.leftHand);
             GUILayout.EndHorizontal();
 
-            this.DisplayEffectorFields("Body", solver.bodyEffector, data?.body, true, false);
+            DisplayEffectorFields("Body", solver.bodyEffector, data?.body, true, false);
 
             GUILayout.BeginHorizontal();
-            this.DisplayEffectorFields("Right thigh", solver.rightThighEffector, data?.rightThigh, true, false);
-            this.DisplayEffectorFields("Left thigh", solver.leftThighEffector, data?.leftThigh, true, false);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            this.DisplayConstraintBendFields(solver.rightLegChain.bendConstraint, data?.rightLeg);
-            this.DisplayConstraintBendFields(solver.leftLegChain.bendConstraint, data?.leftLeg);
+            DisplayEffectorFields("Right thigh", solver.rightThighEffector, data?.rightThigh, true, false);
+            DisplayEffectorFields("Left thigh", solver.leftThighEffector, data?.leftThigh, true, false);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            this.DisplayEffectorFields("Right foot", solver.rightFootEffector, data?.rightFoot);
-            this.DisplayEffectorFields("Left foot", solver.leftFootEffector, data?.leftFoot);
+            DisplayConstraintBendFields(solver.rightLegChain.bendConstraint, data?.rightLeg);
+            DisplayConstraintBendFields(solver.leftLegChain.bendConstraint, data?.leftLeg);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            DisplayEffectorFields("Right foot", solver.rightFootEffector, data?.rightFoot);
+            DisplayEffectorFields("Left foot", solver.leftFootEffector, data?.leftFoot);
             GUILayout.EndHorizontal();
         }
 
@@ -967,7 +966,7 @@ namespace HSPE.AMModules
             {
                 if (data != null && data.originalPositionWeight.hasValue)
                     GUI.color = Color.magenta;
-                float newWeight = this.FloatEditor(this.GetEffectorPositionWeight(effector), 0f, 1f, "Pos weight", onReset: value =>
+                float newWeight = FloatEditor(GetEffectorPositionWeight(effector), 0f, 1f, "Pos weight", onReset: value =>
                 {
                     if (data != null && data.originalPositionWeight.hasValue)
                     {
@@ -979,13 +978,13 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (Mathf.Approximately(newWeight, effector.positionWeight) == false)
-                    this.SetEffectorPositionWeight(newWeight, effector, data);
+                    SetEffectorPositionWeight(newWeight, effector, data);
             }
             if (showRot)
             {
                 if (data != null && data.originalRotationWeight.hasValue)
                     GUI.color = Color.magenta;
-                float newWeight = this.FloatEditor(this.GetEffectorRotationWeight(effector), 0f, 1f, "Rot weight", onReset: value =>
+                float newWeight = FloatEditor(GetEffectorRotationWeight(effector), 0f, 1f, "Rot weight", onReset: value =>
                 {
                     if (data != null && data.originalRotationWeight.hasValue)
                     {
@@ -997,7 +996,7 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (Mathf.Approximately(newWeight, effector.rotationWeight) == false)
-                    this.SetEffectorRotationWeight(newWeight, effector, data);
+                    SetEffectorRotationWeight(newWeight, effector, data);
             }
             GUILayout.EndVertical();
         }
@@ -1007,7 +1006,7 @@ namespace HSPE.AMModules
             Color c = GUI.color;
             if (data != null && data.originalWeight.hasValue)
                 GUI.color = Color.magenta;
-            float newWeight = this.FloatEditor(this.GetConstraintBendWeight(constraint), 0f, 1f, "Bend Weight", onReset: value =>
+            float newWeight = FloatEditor(GetConstraintBendWeight(constraint), 0f, 1f, "Bend Weight", onReset: value =>
             {
                 if (data != null && data.originalWeight.hasValue)
                 {
@@ -1019,7 +1018,7 @@ namespace HSPE.AMModules
             });
             GUI.color = c;
             if (Mathf.Approximately(newWeight, constraint.weight) == false)
-                this.SetConstraintBendWeight(newWeight, constraint, data);
+                SetConstraintBendWeight(newWeight, constraint, data);
         }
 
         private void LimbIKFields(IKWrapper target, IKData d)
@@ -1032,8 +1031,8 @@ namespace HSPE.AMModules
             {
                 if (data != null && data.originalRotationWeight.hasValue)
                     GUI.color = Color.magenta;
-                float v = this.GetLimbIKRotationWeight(target);
-                v = this.FloatEditor(v, 0f, 1f, "Rot Weight\t", "0.0000", onReset: (value) =>
+                float v = GetLimbIKRotationWeight(target);
+                v = FloatEditor(v, 0f, 1f, "Rot Weight\t", "0.0000", onReset: (value) =>
                 {
                     if (data != null && data.originalRotationWeight.hasValue)
                     {
@@ -1045,14 +1044,14 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (!Mathf.Approximately(solver.GetIKRotationWeight(), v))
-                    this.SetLimbIKRotationWeight(target, v);
+                    SetLimbIKRotationWeight(target, v);
             }
 
             {
                 if (data != null && data.originalBendModifierWeight.hasValue)
                     GUI.color = Color.magenta;
-                float v = this.GetLimbIKBendModifierWeight(target);
-                v = this.FloatEditor(v, 0f, 1f, "Bend Weight\t", "0.0000", onReset: (value) =>
+                float v = GetLimbIKBendModifierWeight(target);
+                v = FloatEditor(v, 0f, 1f, "Bend Weight\t", "0.0000", onReset: (value) =>
                 {
                     if (data != null && data.originalBendModifierWeight.hasValue)
                     {
@@ -1064,7 +1063,7 @@ namespace HSPE.AMModules
                 });
                 GUI.color = c;
                 if (!Mathf.Approximately(solver.bendModifierWeight, v))
-                    this.SetLimbIKBendModifierWeight(target, v);
+                    SetLimbIKBendModifierWeight(target, v);
             }
 
         }
@@ -1072,7 +1071,7 @@ namespace HSPE.AMModules
         private IKData SetIKDirty(IKWrapper ik)
         {
             IKData data;
-            if (this._dirtyIks.TryGetValue(ik, out data) == false)
+            if (_dirtyIks.TryGetValue(ik, out data) == false)
             {
                 switch (ik.type)
                 {
@@ -1097,7 +1096,7 @@ namespace HSPE.AMModules
                     default:
                         return null;
                 }
-                this._dirtyIks.Add(ik, data);
+                _dirtyIks.Add(ik, data);
             }
             return data;
         }
@@ -1109,7 +1108,7 @@ namespace HSPE.AMModules
 
         private void SetIKEnabled(IKWrapper ik, bool b)
         {
-            IKData data = this.SetIKDirty(ik);
+            IKData data = SetIKDirty(ik);
             if (data.originalEnabled.hasValue == false)
                 data.originalEnabled = ik.ik.enabled;
             ik.ik.enabled = b;
@@ -1124,7 +1123,7 @@ namespace HSPE.AMModules
 
         private void SetIKFixTransforms(IKWrapper ik, bool b)
         {
-            IKData data = this.SetIKDirty(ik);
+            IKData data = SetIKDirty(ik);
             if (data.originalFixTransforms.hasValue == false)
                 data.originalFixTransforms = ik.ik.fixTransforms;
             ik.ik.fixTransforms = b;
@@ -1137,7 +1136,7 @@ namespace HSPE.AMModules
 
         private void SetIKPositionWeight(IKWrapper ik, float v)
         {
-            IKData data = this.SetIKDirty(ik);
+            IKData data = SetIKDirty(ik);
             if (data.originalWeight.hasValue == false)
                 data.originalWeight = ik.solver.GetIKPositionWeight();
             ik.solver.SetIKPositionWeight(v);
@@ -1151,7 +1150,7 @@ namespace HSPE.AMModules
         private void SetFABRIKTolerance(IKWrapper ik, float v)
         {
             IKSolverFABRIK solver = (IKSolverFABRIK)ik.solver;
-            FABRIKData data = (FABRIKData)this.SetIKDirty(ik);
+            FABRIKData data = (FABRIKData)SetIKDirty(ik);
             if (data.originalTolerance.hasValue == false)
                 data.originalTolerance = solver.tolerance;
             solver.tolerance = v;
@@ -1165,7 +1164,7 @@ namespace HSPE.AMModules
         private void SetFABRIKMaxIterations(IKWrapper ik, int v)
         {
             IKSolverFABRIK solver = (IKSolverFABRIK)ik.solver;
-            FABRIKData data = (FABRIKData)this.SetIKDirty(ik);
+            FABRIKData data = (FABRIKData)SetIKDirty(ik);
             if (data.originalMaxIterations.hasValue == false)
                 data.originalMaxIterations = solver.maxIterations;
             solver.maxIterations = v;
@@ -1179,7 +1178,7 @@ namespace HSPE.AMModules
         private void SetFABRIKRootRootPin(IKWrapper ik, float v)
         {
             IKSolverFABRIKRoot solver = (IKSolverFABRIKRoot)ik.solver;
-            FABRIKRootData data = (FABRIKRootData)this.SetIKDirty(ik);
+            FABRIKRootData data = (FABRIKRootData)SetIKDirty(ik);
             if (data.originalRootPin.hasValue == false)
                 data.originalRootPin = solver.rootPin;
             solver.rootPin = v;
@@ -1193,7 +1192,7 @@ namespace HSPE.AMModules
         private void SetFABRIKRootIterations(IKWrapper ik, int v)
         {
             IKSolverFABRIKRoot solver = (IKSolverFABRIKRoot)ik.solver;
-            FABRIKRootData data = (FABRIKRootData)this.SetIKDirty(ik);
+            FABRIKRootData data = (FABRIKRootData)SetIKDirty(ik);
             if (data.originalIterations.hasValue == false)
                 data.originalIterations = solver.iterations;
             solver.iterations = v;
@@ -1207,7 +1206,7 @@ namespace HSPE.AMModules
         private void SetCCDIKTolerance(IKWrapper ik, float v)
         {
             IKSolverCCD solver = (IKSolverCCD)ik.solver;
-            CCDIKData data = (CCDIKData)this.SetIKDirty(ik);
+            CCDIKData data = (CCDIKData)SetIKDirty(ik);
             if (data.originalTolerance.hasValue == false)
                 data.originalTolerance = solver.tolerance;
             solver.tolerance = v;
@@ -1221,7 +1220,7 @@ namespace HSPE.AMModules
         private void SetCCDIKMaxIterations(IKWrapper ik, int v)
         {
             IKSolverCCD solver = (IKSolverCCD)ik.solver;
-            CCDIKData data = (CCDIKData)this.SetIKDirty(ik);
+            CCDIKData data = (CCDIKData)SetIKDirty(ik);
             if (data.originalMaxIterations.hasValue == false)
                 data.originalMaxIterations = solver.maxIterations;
             solver.maxIterations = v;
@@ -1235,7 +1234,7 @@ namespace HSPE.AMModules
         private void SetAimIKTolerance(IKWrapper ik, float v)
         {
             IKSolverAim solver = (IKSolverAim)ik.solver;
-            AimIKData data = (AimIKData)this.SetIKDirty(ik);
+            AimIKData data = (AimIKData)SetIKDirty(ik);
             if (data.originalTolerance.hasValue == false)
                 data.originalTolerance = solver.tolerance;
             solver.tolerance = v;
@@ -1249,7 +1248,7 @@ namespace HSPE.AMModules
         private void SetAimIKMaxIterations(IKWrapper ik, int v)
         {
             IKSolverAim solver = (IKSolverAim)ik.solver;
-            AimIKData data = (AimIKData)this.SetIKDirty(ik);
+            AimIKData data = (AimIKData)SetIKDirty(ik);
             if (data.originalMaxIterations.hasValue == false)
                 data.originalMaxIterations = solver.maxIterations;
             solver.maxIterations = v;
@@ -1263,7 +1262,7 @@ namespace HSPE.AMModules
         private void SetAimIKAxis(IKWrapper ik, Vector3 v)
         {
             IKSolverAim solver = (IKSolverAim)ik.solver;
-            AimIKData data = (AimIKData)this.SetIKDirty(ik);
+            AimIKData data = (AimIKData)SetIKDirty(ik);
             if (data.originalAxis.hasValue == false)
                 data.originalAxis = solver.axis;
             solver.axis = v;
@@ -1277,7 +1276,7 @@ namespace HSPE.AMModules
         private void SetAimIKClampWeight(IKWrapper ik, float v)
         {
             IKSolverAim solver = (IKSolverAim)ik.solver;
-            AimIKData data = (AimIKData)this.SetIKDirty(ik);
+            AimIKData data = (AimIKData)SetIKDirty(ik);
             if (data.originalClampWeight.hasValue == false)
                 data.originalClampWeight = solver.clampWeight;
             solver.clampWeight = v;
@@ -1291,7 +1290,7 @@ namespace HSPE.AMModules
         private void SetAimIKClampSmoothing(IKWrapper ik, int v)
         {
             IKSolverAim solver = (IKSolverAim)ik.solver;
-            AimIKData data = (AimIKData)this.SetIKDirty(ik);
+            AimIKData data = (AimIKData)SetIKDirty(ik);
             if (data.originalClampSmoothing.hasValue == false)
                 data.originalClampSmoothing = solver.clampSmoothing;
             solver.clampSmoothing = v;
@@ -1305,7 +1304,7 @@ namespace HSPE.AMModules
         private void SetAimIKPoleAxis(IKWrapper ik, Vector3 v)
         {
             IKSolverAim solver = (IKSolverAim)ik.solver;
-            AimIKData data = (AimIKData)this.SetIKDirty(ik);
+            AimIKData data = (AimIKData)SetIKDirty(ik);
             if (data.originalPoleAxis.hasValue == false)
                 data.originalPoleAxis = solver.poleAxis;
             solver.poleAxis = v;
@@ -1319,7 +1318,7 @@ namespace HSPE.AMModules
         private void SetAimIKPolePosition(IKWrapper ik, Vector3 v)
         {
             IKSolverAim solver = (IKSolverAim)ik.solver;
-            AimIKData data = (AimIKData)this.SetIKDirty(ik);
+            AimIKData data = (AimIKData)SetIKDirty(ik);
             if (data.originalPolePosition.hasValue == false)
                 data.originalPolePosition = solver.polePosition;
             solver.polePosition = v;
@@ -1333,7 +1332,7 @@ namespace HSPE.AMModules
         private void SetAimIKPoleWeight(IKWrapper ik, float v)
         {
             IKSolverAim solver = (IKSolverAim)ik.solver;
-            AimIKData data = (AimIKData)this.SetIKDirty(ik);
+            AimIKData data = (AimIKData)SetIKDirty(ik);
             if (data.originalPoleWeight.hasValue == false)
                 data.originalPoleWeight = solver.poleWeight;
             solver.poleWeight = v;
@@ -1383,7 +1382,7 @@ namespace HSPE.AMModules
         private void SetLimbIKRotationWeight(IKWrapper ik, float v)
         {
             IKSolverLimb solver = (IKSolverLimb)ik.solver;
-            LimbIKData data = (LimbIKData)this.SetIKDirty(ik);
+            LimbIKData data = (LimbIKData)SetIKDirty(ik);
             if (data.originalRotationWeight.hasValue == false)
                 data.originalRotationWeight = solver.GetIKRotationWeight();
             solver.SetIKRotationWeight(v);
@@ -1397,7 +1396,7 @@ namespace HSPE.AMModules
         private void SetLimbIKBendModifierWeight(IKWrapper ik, float v)
         {
             IKSolverLimb solver = (IKSolverLimb)ik.solver;
-            LimbIKData data = (LimbIKData)this.SetIKDirty(ik);
+            LimbIKData data = (LimbIKData)SetIKDirty(ik);
             if (data.originalBendModifierWeight.hasValue == false)
                 data.originalBendModifierWeight = solver.bendModifierWeight;
             solver.bendModifierWeight = v;
@@ -1405,9 +1404,9 @@ namespace HSPE.AMModules
 
         private void RefreshIKList()
         {
-            IK[] iks = this._parent.GetComponentsInChildren<IK>(true);
+            IK[] iks = _parent.GetComponentsInChildren<IK>(true);
             List<IK> toDelete = null;
-            foreach (KeyValuePair<IK, IKWrapper> pair in this._iks)
+            foreach (KeyValuePair<IK, IKWrapper> pair in _iks)
             {
                 if (iks.Contains(pair.Key) == false)
                 {
@@ -1419,12 +1418,12 @@ namespace HSPE.AMModules
             if (toDelete != null)
             {
                 foreach (IK ik in toDelete)
-                    this._iks.Remove(ik);
+                    _iks.Remove(ik);
             }
             List<IKWrapper> toAdd = null;
             foreach (IK ik in iks)
             {
-                if (this._iks.ContainsKey(ik) == false && this._parent._childObjects.All(child => ik.transform.IsChildOf(child.transform) == false))
+                if (_iks.ContainsKey(ik) == false && _parent._childObjects.All(child => ik.transform.IsChildOf(child.transform) == false))
                 {
                     if (toAdd == null)
                         toAdd = new List<IKWrapper>();
@@ -1436,47 +1435,47 @@ namespace HSPE.AMModules
             if (toAdd != null)
             {
                 foreach (IKWrapper ik in toAdd)
-                    this._iks.Add(ik.ik, ik);
+                    _iks.Add(ik.ik, ik);
             }
-            if (this._iks.Count != 0 && this._ikTarget == null)
-                this._ikTarget = this._iks.FirstOrDefault().Value;
+            if (_iks.Count != 0 && _ikTarget == null)
+                _ikTarget = _iks.FirstOrDefault().Value;
         }
 
         private void CopyToFK()
         {
-            this._updateAction = () =>
+            _updateAction = () =>
             {
                 List<GuideCommand.EqualsInfo> infos = new List<GuideCommand.EqualsInfo>();
                 {
-                    foreach (KeyValuePair<IK, IKWrapper> pair in this._iks)
+                    foreach (KeyValuePair<IK, IKWrapper> pair in _iks)
                     {
                         if (pair.Value.type == IKType.FullBodyBipedIK)
                         {
                             FullBodyBipedIK fbbik = (FullBodyBipedIK)pair.Value.ik;
 
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.pelvis));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.leftThigh));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.leftCalf));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.leftFoot));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.rightThigh));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.rightCalf));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.rightFoot));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.leftUpperArm));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.leftForearm));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.leftHand));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.rightUpperArm));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.rightForearm));
-                            infos.Add(this.GetEqualsCommandForTransform(fbbik.references.rightHand));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.pelvis));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.leftThigh));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.leftCalf));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.leftFoot));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.rightThigh));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.rightCalf));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.rightFoot));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.leftUpperArm));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.leftForearm));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.leftHand));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.rightUpperArm));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.rightForearm));
+                            infos.Add(GetEqualsCommandForTransform(fbbik.references.rightHand));
                             foreach (Transform transform in fbbik.references.spine)
                             {
-                                infos.Add(this.GetEqualsCommandForTransform(transform));
+                                infos.Add(GetEqualsCommandForTransform(transform));
                             }
                         }
                         else
                         {
                             foreach (IKSolver.Point point in pair.Value.solver.GetPoints())
                                 if (point != null)
-                                    infos.Add(this.GetEqualsCommandForTransform(point.transform));
+                                    infos.Add(GetEqualsCommandForTransform(point.transform));
                         }
                     }
                 }
@@ -1487,7 +1486,7 @@ namespace HSPE.AMModules
         private GuideCommand.EqualsInfo GetEqualsCommandForTransform(Transform t)
         {
             OCIChar.BoneInfo boneInfo;
-            if (this._target.fkObjects.TryGetValue(t.gameObject, out boneInfo))
+            if (_target.fkObjects.TryGetValue(t.gameObject, out boneInfo))
             {
                 Vector3 oldValue = boneInfo.guideObject.changeAmount.rot;
                 boneInfo.guideObject.changeAmount.rot = t.localEulerAngles;
@@ -1522,10 +1521,10 @@ namespace HSPE.AMModules
             int written = 0;
             {
                 xmlWriter.WriteStartElement("iks");
-                foreach (KeyValuePair<IKWrapper, IKData> pair in this._dirtyIks)
+                foreach (KeyValuePair<IKWrapper, IKData> pair in _dirtyIks)
                 {
                     xmlWriter.WriteStartElement("ik");
-                    xmlWriter.WriteAttributeString("root", pair.Key.solver.GetRoot().GetPathFrom(this._parent.transform));
+                    xmlWriter.WriteAttributeString("root", pair.Key.solver.GetRoot().GetPathFrom(_parent.transform));
                     xmlWriter.WriteAttributeString("type", XmlConvert.ToString((int)pair.Key.type));
 
                     if (pair.Value.originalEnabled.hasValue)
@@ -1606,55 +1605,55 @@ namespace HSPE.AMModules
                             {
                                 FullBodyBipedIKData data = (FullBodyBipedIKData)pair.Value;
                                 xmlWriter.WriteStartElement("bodyEffector");
-                                this.SaveFullBodyBipedEffectorData(xmlWriter, data.body);
+                                SaveFullBodyBipedEffectorData(xmlWriter, data.body);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("leftShoulderEffector");
-                                this.SaveFullBodyBipedEffectorData(xmlWriter, data.leftShoulder);
+                                SaveFullBodyBipedEffectorData(xmlWriter, data.leftShoulder);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("leftHandEffector");
-                                this.SaveFullBodyBipedEffectorData(xmlWriter, data.leftHand);
+                                SaveFullBodyBipedEffectorData(xmlWriter, data.leftHand);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("rightShoulderEffector");
-                                this.SaveFullBodyBipedEffectorData(xmlWriter, data.rightShoulder);
+                                SaveFullBodyBipedEffectorData(xmlWriter, data.rightShoulder);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("rightHandEffector");
-                                this.SaveFullBodyBipedEffectorData(xmlWriter, data.rightHand);
+                                SaveFullBodyBipedEffectorData(xmlWriter, data.rightHand);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("leftThighEffector");
-                                this.SaveFullBodyBipedEffectorData(xmlWriter, data.leftThigh);
+                                SaveFullBodyBipedEffectorData(xmlWriter, data.leftThigh);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("leftFootEffector");
-                                this.SaveFullBodyBipedEffectorData(xmlWriter, data.leftFoot);
+                                SaveFullBodyBipedEffectorData(xmlWriter, data.leftFoot);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("rightThighEffector");
-                                this.SaveFullBodyBipedEffectorData(xmlWriter, data.rightThigh);
+                                SaveFullBodyBipedEffectorData(xmlWriter, data.rightThigh);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("rightFootEffector");
-                                this.SaveFullBodyBipedEffectorData(xmlWriter, data.rightFoot);
+                                SaveFullBodyBipedEffectorData(xmlWriter, data.rightFoot);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("leftArmConstraint");
-                                this.SaveFullBodyBipedConstraintBend(xmlWriter, data.leftArm);
+                                SaveFullBodyBipedConstraintBend(xmlWriter, data.leftArm);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("rightArmConstraint");
-                                this.SaveFullBodyBipedConstraintBend(xmlWriter, data.rightArm);
+                                SaveFullBodyBipedConstraintBend(xmlWriter, data.rightArm);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("leftLegConstraint");
-                                this.SaveFullBodyBipedConstraintBend(xmlWriter, data.leftLeg);
+                                SaveFullBodyBipedConstraintBend(xmlWriter, data.leftLeg);
                                 xmlWriter.WriteEndElement();
 
                                 xmlWriter.WriteStartElement("rightLegConstraint");
-                                this.SaveFullBodyBipedConstraintBend(xmlWriter, data.rightLeg);
+                                SaveFullBodyBipedConstraintBend(xmlWriter, data.rightLeg);
                                 xmlWriter.WriteEndElement();
 
                                 break;
@@ -1697,8 +1696,8 @@ namespace HSPE.AMModules
         {
             bool changed = false;
 
-            this.ResetAll();
-            this.RefreshIKList();
+            ResetAll();
+            RefreshIKList();
 
             XmlNode ikNodes = xmlNode.FindChildNode("iks");
 
@@ -1709,8 +1708,8 @@ namespace HSPE.AMModules
                     try
                     {
                         string root = node.Attributes["root"].Value;
-                        Transform t = this._parent.transform.Find(root);
-                        IKWrapper ik = this._iks.FirstOrDefault(i => i.Value.solver.GetRoot() == t && this._dirtyIks.ContainsKey(i.Value) == false).Value;
+                        Transform t = _parent.transform.Find(root);
+                        IKWrapper ik = _iks.FirstOrDefault(i => i.Value.solver.GetRoot() == t && _dirtyIks.ContainsKey(i.Value) == false).Value;
                         if (ik == null)
                             continue;
 
@@ -1903,20 +1902,20 @@ namespace HSPE.AMModules
                                 {
                                     IKSolverFullBodyBiped solver = (IKSolverFullBodyBiped)ik.solver;
                                     FullBodyBipedIKData data = (FullBodyBipedIKData)d;
-                                    changed = this.LoadFullBodyBipedEffectorData(node.FindChildNode("bodyEffector"), solver.bodyEffector, data.body) || changed;
-                                    changed = this.LoadFullBodyBipedEffectorData(node.FindChildNode("leftShoulderEffector"), solver.leftShoulderEffector, data.leftShoulder) || changed;
-                                    changed = this.LoadFullBodyBipedEffectorData(node.FindChildNode("leftHandEffector"), solver.leftHandEffector, data.leftHand) || changed;
-                                    changed = this.LoadFullBodyBipedEffectorData(node.FindChildNode("rightShoulderEffector"), solver.rightShoulderEffector, data.rightShoulder) || changed;
-                                    changed = this.LoadFullBodyBipedEffectorData(node.FindChildNode("rightHandEffector"), solver.rightHandEffector, data.rightHand) || changed;
-                                    changed = this.LoadFullBodyBipedEffectorData(node.FindChildNode("leftThighEffector"), solver.leftThighEffector, data.leftThigh) || changed;
-                                    changed = this.LoadFullBodyBipedEffectorData(node.FindChildNode("leftFootEffector"), solver.leftFootEffector, data.leftFoot) || changed;
-                                    changed = this.LoadFullBodyBipedEffectorData(node.FindChildNode("rightThighEffector"), solver.rightThighEffector, data.rightThigh) || changed;
-                                    changed = this.LoadFullBodyBipedEffectorData(node.FindChildNode("rightFootEffector"), solver.rightFootEffector, data.rightFoot) || changed;
+                                    changed = LoadFullBodyBipedEffectorData(node.FindChildNode("bodyEffector"), solver.bodyEffector, data.body) || changed;
+                                    changed = LoadFullBodyBipedEffectorData(node.FindChildNode("leftShoulderEffector"), solver.leftShoulderEffector, data.leftShoulder) || changed;
+                                    changed = LoadFullBodyBipedEffectorData(node.FindChildNode("leftHandEffector"), solver.leftHandEffector, data.leftHand) || changed;
+                                    changed = LoadFullBodyBipedEffectorData(node.FindChildNode("rightShoulderEffector"), solver.rightShoulderEffector, data.rightShoulder) || changed;
+                                    changed = LoadFullBodyBipedEffectorData(node.FindChildNode("rightHandEffector"), solver.rightHandEffector, data.rightHand) || changed;
+                                    changed = LoadFullBodyBipedEffectorData(node.FindChildNode("leftThighEffector"), solver.leftThighEffector, data.leftThigh) || changed;
+                                    changed = LoadFullBodyBipedEffectorData(node.FindChildNode("leftFootEffector"), solver.leftFootEffector, data.leftFoot) || changed;
+                                    changed = LoadFullBodyBipedEffectorData(node.FindChildNode("rightThighEffector"), solver.rightThighEffector, data.rightThigh) || changed;
+                                    changed = LoadFullBodyBipedEffectorData(node.FindChildNode("rightFootEffector"), solver.rightFootEffector, data.rightFoot) || changed;
 
-                                    changed = this.LoadFullBodyBipedConstraintBendData(node.FindChildNode("leftArmConstraint"), solver.leftArmChain.bendConstraint, data.leftArm) || changed;
-                                    changed = this.LoadFullBodyBipedConstraintBendData(node.FindChildNode("rightArmConstraint"), solver.rightArmChain.bendConstraint, data.rightArm) || changed;
-                                    changed = this.LoadFullBodyBipedConstraintBendData(node.FindChildNode("leftLegConstraint"), solver.leftLegChain.bendConstraint, data.leftLeg) || changed;
-                                    changed = this.LoadFullBodyBipedConstraintBendData(node.FindChildNode("rightLegConstraint"), solver.rightLegChain.bendConstraint, data.rightLeg) || changed;
+                                    changed = LoadFullBodyBipedConstraintBendData(node.FindChildNode("leftArmConstraint"), solver.leftArmChain.bendConstraint, data.leftArm) || changed;
+                                    changed = LoadFullBodyBipedConstraintBendData(node.FindChildNode("rightArmConstraint"), solver.rightArmChain.bendConstraint, data.rightArm) || changed;
+                                    changed = LoadFullBodyBipedConstraintBendData(node.FindChildNode("leftLegConstraint"), solver.leftLegChain.bendConstraint, data.leftLeg) || changed;
+                                    changed = LoadFullBodyBipedConstraintBendData(node.FindChildNode("rightLegConstraint"), solver.rightLegChain.bendConstraint, data.rightLeg) || changed;
                                     break;
                                 }
                             case IKType.LimbIK:
@@ -1940,11 +1939,11 @@ namespace HSPE.AMModules
                                     break;
                                 }
                         }
-                        this._dirtyIks.Add(ik, d);
+                        _dirtyIks.Add(ik, d);
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError("HSPE: Couldn't load ik for object " + this._parent.name + " " + node.OuterXml + "\n" + e);
+                        UnityEngine.Debug.LogError("HSPE: Couldn't load ik for object " + _parent.name + " " + node.OuterXml + "\n" + e);
                     }
                 }
             }
@@ -1991,7 +1990,7 @@ namespace HSPE.AMModules
 
         private void SetIKNotDirty(IKWrapper ik)
         {
-            if (this._dirtyIks.TryGetValue(ik, out IKData d) == false)
+            if (_dirtyIks.TryGetValue(ik, out IKData d) == false)
                 return;
             if (d.originalEnabled.hasValue)
             {
@@ -2111,20 +2110,20 @@ namespace HSPE.AMModules
                     {
                         IKSolverFullBodyBiped solver = (IKSolverFullBodyBiped)ik.solver;
                         FullBodyBipedIKData data = (FullBodyBipedIKData)d;
-                        this.SetFullBodyBipedEffectorNotDirty(solver.bodyEffector, data.body);
-                        this.SetFullBodyBipedEffectorNotDirty(solver.leftShoulderEffector, data.leftShoulder);
-                        this.SetFullBodyBipedEffectorNotDirty(solver.leftHandEffector, data.leftHand);
-                        this.SetFullBodyBipedEffectorNotDirty(solver.rightShoulderEffector, data.rightShoulder);
-                        this.SetFullBodyBipedEffectorNotDirty(solver.rightHandEffector, data.rightHand);
-                        this.SetFullBodyBipedEffectorNotDirty(solver.leftThighEffector, data.leftThigh);
-                        this.SetFullBodyBipedEffectorNotDirty(solver.leftFootEffector, data.leftFoot);
-                        this.SetFullBodyBipedEffectorNotDirty(solver.rightThighEffector, data.rightThigh);
-                        this.SetFullBodyBipedEffectorNotDirty(solver.rightFootEffector, data.rightFoot);
+                        SetFullBodyBipedEffectorNotDirty(solver.bodyEffector, data.body);
+                        SetFullBodyBipedEffectorNotDirty(solver.leftShoulderEffector, data.leftShoulder);
+                        SetFullBodyBipedEffectorNotDirty(solver.leftHandEffector, data.leftHand);
+                        SetFullBodyBipedEffectorNotDirty(solver.rightShoulderEffector, data.rightShoulder);
+                        SetFullBodyBipedEffectorNotDirty(solver.rightHandEffector, data.rightHand);
+                        SetFullBodyBipedEffectorNotDirty(solver.leftThighEffector, data.leftThigh);
+                        SetFullBodyBipedEffectorNotDirty(solver.leftFootEffector, data.leftFoot);
+                        SetFullBodyBipedEffectorNotDirty(solver.rightThighEffector, data.rightThigh);
+                        SetFullBodyBipedEffectorNotDirty(solver.rightFootEffector, data.rightFoot);
 
-                        this.SetFullBodyBipedConstraintBendNotDirty(solver.leftArmChain.bendConstraint, data.leftArm);
-                        this.SetFullBodyBipedConstraintBendNotDirty(solver.rightArmChain.bendConstraint, data.rightArm);
-                        this.SetFullBodyBipedConstraintBendNotDirty(solver.leftLegChain.bendConstraint, data.leftLeg);
-                        this.SetFullBodyBipedConstraintBendNotDirty(solver.rightLegChain.bendConstraint, data.rightLeg);
+                        SetFullBodyBipedConstraintBendNotDirty(solver.leftArmChain.bendConstraint, data.leftArm);
+                        SetFullBodyBipedConstraintBendNotDirty(solver.rightArmChain.bendConstraint, data.rightArm);
+                        SetFullBodyBipedConstraintBendNotDirty(solver.leftLegChain.bendConstraint, data.leftLeg);
+                        SetFullBodyBipedConstraintBendNotDirty(solver.rightLegChain.bendConstraint, data.rightLeg);
                         break;
                     }
                 case IKType.LimbIK:
@@ -2144,7 +2143,7 @@ namespace HSPE.AMModules
                         break;
                     }
             }
-            this._dirtyIks.Remove(ik);
+            _dirtyIks.Remove(ik);
         }
 
         private void SetFullBodyBipedEffectorNotDirty(IKEffector effector, FullBodyBipedIKData.EffectorData data)
@@ -2172,8 +2171,8 @@ namespace HSPE.AMModules
 
         private void ResetAll()
         {
-            foreach (KeyValuePair<IKWrapper, IKData> pair in new Dictionary<IKWrapper, IKData>(this._dirtyIks))
-                this.SetIKNotDirty(pair.Key);
+            foreach (KeyValuePair<IKWrapper, IKData> pair in new Dictionary<IKWrapper, IKData>(_dirtyIks))
+                SetIKNotDirty(pair.Key);
         }
         #endregion
 
@@ -2191,8 +2190,8 @@ namespace HSPE.AMModules
                     unchecked
                     {
                         int hash = 17;
-                        hash = hash * 31 + (this.editor != null ? this.editor.GetHashCode() : 0);
-                        this._hashCode = hash * 31 + (this.ik != null ? this.ik.GetHashCode() : 0);
+                        hash = hash * 31 + (editor != null ? editor.GetHashCode() : 0);
+                        _hashCode = hash * 31 + (ik != null ? ik.GetHashCode() : 0);
                     }
                 }
 
@@ -2204,7 +2203,7 @@ namespace HSPE.AMModules
 
                 public override int GetHashCode()
                 {
-                    return this._hashCode;
+                    return _hashCode;
                 }
             }
 

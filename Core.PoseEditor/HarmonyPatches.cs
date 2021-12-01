@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Studio;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using RootMotion.FinalIK;
 #if IPA
 using Harmony;
 #elif BEPINEX
@@ -13,7 +13,6 @@ using HarmonyLib;
 #if PLAYHOME
 using SEXY;
 #endif
-using Studio;
 
 namespace HSPE
 {
@@ -36,7 +35,7 @@ namespace HSPE
         }
     }
 
-    [HarmonyPatch(typeof(ObjectInfo), "Load", new []{typeof(BinaryReader), typeof(Version), typeof(bool), typeof(bool)})]
+    [HarmonyPatch(typeof(ObjectInfo), "Load", new[] { typeof(BinaryReader), typeof(Version), typeof(bool), typeof(bool) })]
     internal static class ObjectInfo_Load_Patches
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -67,7 +66,7 @@ namespace HSPE
 
 
 
-    [HarmonyPatch(typeof(SceneInfo), "Import", new []{ typeof(BinaryReader), typeof(Version) } )]
+    [HarmonyPatch(typeof(SceneInfo), "Import", new[] { typeof(BinaryReader), typeof(Version) })]
     internal static class SceneInfo_Import_Patches //This is here because I fucked up the save format making it impossible to import scenes correctly
     {
         internal static Dictionary<int, int> _newToOldKeys = new Dictionary<int, int>();
@@ -104,7 +103,7 @@ namespace HSPE
 #if HONEYSELECT
     [HarmonyPatch(typeof(OCIChar), "SetCoordinateInfo", new[] { typeof(CharDefine.CoordinateType), typeof(bool) })]
 #elif KOIKATSU
-        [HarmonyPatch(typeof(OCIChar), "SetCoordinateInfo", new[] {typeof(ChaFileDefine.CoordinateType), typeof(bool) })]        
+    [HarmonyPatch(typeof(OCIChar), "SetCoordinateInfo", new[] { typeof(ChaFileDefine.CoordinateType), typeof(bool) })]
 #endif
     internal static class OCIChar_SetCoordinateInfo_Patches
     {
@@ -112,8 +111,8 @@ namespace HSPE
         public static event Action<OCIChar, CharDefine.CoordinateType, bool> onSetCoordinateInfo;
         public static void Postfix(OCIChar __instance, CharDefine.CoordinateType _type, bool _force)
 #elif KOIKATSU
-            public static event Action<OCIChar, ChaFileDefine.CoordinateType, bool> onSetCoordinateInfo;
-            public static void Postfix(OCIChar __instance, ChaFileDefine.CoordinateType _type, bool _force)
+        public static event Action<OCIChar, ChaFileDefine.CoordinateType, bool> onSetCoordinateInfo;
+        public static void Postfix(OCIChar __instance, ChaFileDefine.CoordinateType _type, bool _force)
 #endif
         {
             if (onSetCoordinateInfo != null)

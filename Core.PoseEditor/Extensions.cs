@@ -16,6 +16,5 @@ namespace HSPE
             for (int i = 0; i < self.points3.Count; i++)
                 self.points2[i] = points[i];
         }
-
     }
 }
