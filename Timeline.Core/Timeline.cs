@@ -25,7 +25,6 @@ using IllusionPlugin;
 #elif BEPINEX
 using HarmonyLib;
 using BepInEx;
-using BepInEx.Logging;
 #endif
 #if KOIKATSU
 using Expression = ExpressionBone;
@@ -60,7 +59,6 @@ namespace Timeline
         public override string Version { get { return _version; } }
         public override string[] Filter { get { return new[] { "StudioNEO_32", "StudioNEO_64" }; } }
 #endif
-        internal static new ManualLogSource Logger;
 
         #region Private Types
         private class HeaderDisplay
@@ -273,7 +271,6 @@ namespace Timeline
         protected override void Awake()
         {
             base.Awake();
-            Logger = base.Logger;
             _self = this;
 
             _assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
