@@ -1175,6 +1175,8 @@ namespace HSPE.AMModules
         {
             foreach (DynamicBone bone in _dynamicBones)
             {
+                if (bone == null)
+                    continue;
                 if (bone.m_Root)
                 {
                     if ((bone.m_Root.GetPathFrom(_parent.transform).Equals(root) || bone.m_Root.name.Equals(root)) && (ignoreDirty == false || _dirtyDynamicBones.ContainsKey(bone) == false))
