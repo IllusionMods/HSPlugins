@@ -1,4 +1,4 @@
-﻿//#define BETA
+﻿using Studio;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,9 +9,10 @@ using System.Reflection;
 using System.Text;
 using ToolBox;
 using ToolBox.Extensions;
+using UnityEngine;
 using VideoExport.Extensions;
 using VideoExport.ScreenshotPlugins;
-using Studio;
+using Resources = UnityEngine.Resources;
 #if IPA
 using IllusionPlugin;
 using Harmony;
@@ -19,8 +20,6 @@ using Harmony;
 using BepInEx;
 using HarmonyLib;
 #endif
-using UnityEngine;
-using Resources = UnityEngine.Resources;
 
 namespace VideoExport
 {
@@ -221,10 +220,10 @@ namespace VideoExport
         #endregion
 
         #region Public Accessors (for other plugins probably)
-        public bool isRecording { get { return this._isRecording; } }
-        public int currentRecordingFrame { get { return this._currentRecordingFrame; } }
-        public double currentRecordingTime { get { return this._currentRecordingTime; } }
-        public int recordingFrameLimit { get { return this._recordingFrameLimit; } }
+        public bool isRecording { get { return _isRecording; } }
+        public int currentRecordingFrame { get { return _currentRecordingFrame; } }
+        public double currentRecordingTime { get { return _currentRecordingTime; } }
+        public int recordingFrameLimit { get { return _recordingFrameLimit; } }
         #endregion
 
         #region Unity Methods
@@ -239,23 +238,23 @@ namespace VideoExport
             var harmony = HarmonyExtensions.CreateInstance(_guid);
 
             _configFile = new GenericConfig(_name, this);
-            this._selectedPlugin = _configFile.AddInt("selectedScreenshotPlugin", 0, true);
-            this._fps = _configFile.AddInt("framerate", 60, true);
-            this._autoGenerateVideo = _configFile.AddBool("autoGenerateVideo", true, true);
-            this._autoDeleteImages = _configFile.AddBool("autoDeleteImages", true, true);
-            this._limitDuration = _configFile.AddBool("limitDuration", false, true);
-            this._selectedLimitDuration = (LimitDurationType)_configFile.AddInt("selectedLimitDurationType", (int)LimitDurationType.Frames, true);
-            this._limitDurationNumber = _configFile.AddFloat("limitDurationNumber", 0, true);
-            this._selectedExtension = (ExtensionsType)_configFile.AddInt("selectedExtension", (int)ExtensionsType.MP4, true);
-            this._resize = _configFile.AddBool("resize", false, true);
-            this._resizeX = _configFile.AddInt("resizeX", Screen.width, true);
-            this._resizeY = _configFile.AddInt("resizeY", Screen.height, true);
-            this._selectedUpdateDynamicBones = (UpdateDynamicBonesType)_configFile.AddInt("selectedUpdateDynamicBonesMode", (int)UpdateDynamicBonesType.Default, true);
-            this._prewarmLoopCount = _configFile.AddInt("prewarmLoopCount", 3, true);
-            this._imagesPrefix = _configFile.AddString("imagesPrefix", "", true);
-            this._imagesPostfix = _configFile.AddString("imagesPostfix", "", true);
-            this._language = (Language)_configFile.AddInt("language", (int)Language.English, true);
-            this.SetLanguage(this._language);
+            _selectedPlugin = _configFile.AddInt("selectedScreenshotPlugin", 0, true);
+            _fps = _configFile.AddInt("framerate", 60, true);
+            _autoGenerateVideo = _configFile.AddBool("autoGenerateVideo", true, true);
+            _autoDeleteImages = _configFile.AddBool("autoDeleteImages", true, true);
+            _limitDuration = _configFile.AddBool("limitDuration", false, true);
+            _selectedLimitDuration = (LimitDurationType)_configFile.AddInt("selectedLimitDurationType", (int)LimitDurationType.Frames, true);
+            _limitDurationNumber = _configFile.AddFloat("limitDurationNumber", 0, true);
+            _selectedExtension = (ExtensionsType)_configFile.AddInt("selectedExtension", (int)ExtensionsType.MP4, true);
+            _resize = _configFile.AddBool("resize", false, true);
+            _resizeX = _configFile.AddInt("resizeX", Screen.width, true);
+            _resizeY = _configFile.AddInt("resizeY", Screen.height, true);
+            _selectedUpdateDynamicBones = (UpdateDynamicBonesType)_configFile.AddInt("selectedUpdateDynamicBonesMode", (int)UpdateDynamicBonesType.Default, true);
+            _prewarmLoopCount = _configFile.AddInt("prewarmLoopCount", 3, true);
+            _imagesPrefix = _configFile.AddString("imagesPrefix", "", true);
+            _imagesPostfix = _configFile.AddString("imagesPostfix", "", true);
+            _language = (Language)_configFile.AddInt("language", (int)Language.English, true);
+            SetLanguage(_language);
             string newOutputFolder = _configFile.AddString("outputFolder", _outputFolder, true, _currentDictionary.GetString(TranslationKey.VideosFolderDesc));
             if (Directory.Exists(newOutputFolder))
                 _outputFolder = newOutputFolder;
@@ -263,14 +262,14 @@ namespace VideoExport
             if (Directory.Exists(newGlobalFramesFolder))
                 _globalFramesFolder = newGlobalFramesFolder;
 
-            this._extensions.Add(new MP4Extension());
-            this._extensions.Add(new WEBMExtension());
-            this._extensions.Add(new GIFExtension());
-            this._extensions.Add(new AVIExtension());
+            _extensions.Add(new MP4Extension());
+            _extensions.Add(new WEBMExtension());
+            _extensions.Add(new GIFExtension());
+            _extensions.Add(new AVIExtension());
 
-            this._extensionsNames = Enum.GetNames(typeof(ExtensionsType));
+            _extensionsNames = Enum.GetNames(typeof(ExtensionsType));
 
-            this._timelinePresent = TimelineCompatibility.Init();
+            _timelinePresent = TimelineCompatibility.Init();
 
             this.ExecuteDelayed(() =>
             {
@@ -280,9 +279,9 @@ namespace VideoExport
 #endif
                 this.AddScreenshotPlugin(new Screencap(), harmony);
                 this.AddScreenshotPlugin(new Bitmap(), harmony);
-                if (this._screenshotPlugins.Count == 0)
+                if (_screenshotPlugins.Count == 0)
                     UnityEngine.Debug.LogError("VideoExport: No compatible screenshot plugin found, please install one.");
-                this.SetLanguage(this._language);
+                SetLanguage(_language);
             }, 5);
         }
 
@@ -290,98 +289,98 @@ namespace VideoExport
         {
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.E))
             {
-                if (this._isRecording == false)
-                    this.RecordVideo();
+                if (_isRecording == false)
+                    RecordVideo();
                 else
-                    this.StopRecording();
+                    StopRecording();
             }
             else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.E))
             {
                 _showUi = !_showUi;
-                if (this._imguiBackground == null)
-                    this._imguiBackground = IMGUIExtensions.CreateUGUIPanelForIMGUI();
+                if (_imguiBackground == null)
+                    _imguiBackground = IMGUIExtensions.CreateUGUIPanelForIMGUI();
             }
-            if (this._startOnNextClick && Input.GetMouseButtonDown(0))
+            if (_startOnNextClick && Input.GetMouseButtonDown(0))
             {
-                this.RecordVideo();
-                this._startOnNextClick = false;
+                RecordVideo();
+                _startOnNextClick = false;
             }
             TreeNodeObject treeNode = Studio.Studio.Instance?.treeNodeCtrl.selectNode;
-            this._currentAnimator = null;
+            _currentAnimator = null;
             if (treeNode != null)
             {
                 ObjectCtrlInfo info;
                 if (Studio.Studio.Instance.dicInfo.TryGetValue(treeNode, out info))
-                    this._currentAnimator = info.guideObject.transformTarget.GetComponentInChildren<Animator>();
+                    _currentAnimator = info.guideObject.transformTarget.GetComponentInChildren<Animator>();
             }
 
-            if (this._currentAnimator == null && this._selectedLimitDuration == LimitDurationType.Animation)
-                this._selectedLimitDuration = LimitDurationType.Seconds;
-            if (this._timelinePresent == false && this._selectedLimitDuration == LimitDurationType.Timeline)
-                this._selectedLimitDuration = LimitDurationType.Seconds;
+            if (_currentAnimator == null && _selectedLimitDuration == LimitDurationType.Animation)
+                _selectedLimitDuration = LimitDurationType.Seconds;
+            if (_timelinePresent == false && _selectedLimitDuration == LimitDurationType.Timeline)
+                _selectedLimitDuration = LimitDurationType.Seconds;
         }
 
         protected override void LateUpdate()
         {
-            if (this._currentAnimator != null)
+            if (_currentAnimator != null)
             {
-                AnimatorStateInfo stateInfo = this._currentAnimator.GetCurrentAnimatorStateInfo(0);
-                this._animationIsPlaying = stateInfo.normalizedTime > this._lastAnimationNormalizedTime;
+                AnimatorStateInfo stateInfo = _currentAnimator.GetCurrentAnimatorStateInfo(0);
+                _animationIsPlaying = stateInfo.normalizedTime > _lastAnimationNormalizedTime;
                 if (stateInfo.loop == false)
-                    this._animationIsPlaying = this._animationIsPlaying && stateInfo.normalizedTime < 1f;
-                this._lastAnimationNormalizedTime = stateInfo.normalizedTime;
+                    _animationIsPlaying = _animationIsPlaying && stateInfo.normalizedTime < 1f;
+                _lastAnimationNormalizedTime = stateInfo.normalizedTime;
             }
-            if (this._imguiBackground != null)
+            if (_imguiBackground != null)
             {
                 if (_showUi)
                 {
-                    this._imguiBackground.gameObject.SetActive(true);
-                    IMGUIExtensions.FitRectTransformToRect(this._imguiBackground, this._windowRect);
+                    _imguiBackground.gameObject.SetActive(true);
+                    IMGUIExtensions.FitRectTransformToRect(_imguiBackground, _windowRect);
                 }
-                else if (this._imguiBackground != null)
-                    this._imguiBackground.gameObject.SetActive(false);
+                else if (_imguiBackground != null)
+                    _imguiBackground.gameObject.SetActive(false);
             }
             if (_showUi)
-                this._windowRect.height = 10f;
+                _windowRect.height = 10f;
         }
 
         protected override void OnGUI()
         {
             if (_showUi == false)
                 return;
-            this._windowRect = GUILayout.Window(_uniqueId, this._windowRect, this.Window, "Video Export " + _versionNum
+            _windowRect = GUILayout.Window(_uniqueId, _windowRect, this.Window, "Video Export " + _versionNum
 #if BETA
                                                                                                + "b"
 #endif
             );
-            IMGUIExtensions.DrawBackground(this._windowRect);
+            IMGUIExtensions.DrawBackground(_windowRect);
         }
 
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            _configFile.SetInt("language", (int)this._language);
-            _configFile.SetInt("selectedScreenshotPlugin", this._selectedPlugin);
-            _configFile.SetInt("framerate", this._fps);
-            _configFile.SetBool("autoGenerateVideo", this._autoGenerateVideo);
-            _configFile.SetBool("autoDeleteImages", this._autoDeleteImages);
-            _configFile.SetBool("limitDuration", this._limitDuration);
-            _configFile.SetInt("selectedLimitDurationType", (int)this._selectedLimitDuration);
-            _configFile.SetFloat("limitDurationNumber", this._limitDurationNumber);
-            _configFile.SetInt("selectedExtension", (int)this._selectedExtension);
-            _configFile.SetBool("resize", this._resize);
-            _configFile.SetInt("resizeX", this._resizeX);
-            _configFile.SetInt("resizeY", this._resizeY);
-            _configFile.SetInt("selectedUpdateDynamicBonesMode", (int)this._selectedUpdateDynamicBones);
-            _configFile.SetInt("prewarmLoopCount", this._prewarmLoopCount);
-            _configFile.SetString("imagesPrefix", this._imagesPrefix);
-            _configFile.SetString("imagesPostfix", this._imagesPostfix);
-            _configFile.SetInt("language", (int)this._language);
+            _configFile.SetInt("language", (int)_language);
+            _configFile.SetInt("selectedScreenshotPlugin", _selectedPlugin);
+            _configFile.SetInt("framerate", _fps);
+            _configFile.SetBool("autoGenerateVideo", _autoGenerateVideo);
+            _configFile.SetBool("autoDeleteImages", _autoDeleteImages);
+            _configFile.SetBool("limitDuration", _limitDuration);
+            _configFile.SetInt("selectedLimitDurationType", (int)_selectedLimitDuration);
+            _configFile.SetFloat("limitDurationNumber", _limitDurationNumber);
+            _configFile.SetInt("selectedExtension", (int)_selectedExtension);
+            _configFile.SetBool("resize", _resize);
+            _configFile.SetInt("resizeX", _resizeX);
+            _configFile.SetInt("resizeY", _resizeY);
+            _configFile.SetInt("selectedUpdateDynamicBonesMode", (int)_selectedUpdateDynamicBones);
+            _configFile.SetInt("prewarmLoopCount", _prewarmLoopCount);
+            _configFile.SetString("imagesPrefix", _imagesPrefix);
+            _configFile.SetString("imagesPostfix", _imagesPostfix);
+            _configFile.SetInt("language", (int)_language);
             _configFile.SetString("outputFolder", _outputFolder);
             _configFile.SetString("framesFolder", _globalFramesFolder);
-            foreach (IScreenshotPlugin plugin in this._screenshotPlugins)
+            foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.SaveParams();
-            foreach (IExtension extension in this._extensions)
+            foreach (IExtension extension in _extensions)
                 extension.SaveParams();
             _configFile.Save();
         }
@@ -390,13 +389,13 @@ namespace VideoExport
         #region Public Methods
         public void RecordVideo()
         {
-            if (this._isRecording == false)
-                this.StartCoroutine(this.RecordVideo_Routine());
+            if (_isRecording == false)
+                StartCoroutine(RecordVideo_Routine());
         }
 
         public void StopRecording()
         {
-            this._breakRecording = true;
+            _breakRecording = true;
         }
         #endregion
 
@@ -410,7 +409,7 @@ namespace VideoExport
             try
             {
                 if (plugin.Init(harmony))
-                    this._screenshotPlugins.Add(plugin);
+                    _screenshotPlugins.Add(plugin);
             }
             catch (Exception e)
             {
@@ -425,20 +424,20 @@ namespace VideoExport
             {
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button(Language.English.ToString()))
-                    this.SetLanguage(Language.English);
+                    SetLanguage(Language.English);
                 if (GUILayout.Button(Language.中文.ToString()))
-                    this.SetLanguage(Language.中文);
+                    SetLanguage(Language.中文);
                 GUILayout.EndHorizontal();
 
-                GUI.enabled = this._isRecording == false;
+                GUI.enabled = _isRecording == false;
 
-                if (this._screenshotPlugins.Count > 1)
+                if (_screenshotPlugins.Count > 1)
                 {
                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.ScreenshotPlugin));
-                    this._selectedPlugin = GUILayout.SelectionGrid(this._selectedPlugin, this._screenshotPlugins.Select(p => p.name).ToArray(), Mathf.Clamp(this._screenshotPlugins.Count, 1, 3));
+                    _selectedPlugin = GUILayout.SelectionGrid(_selectedPlugin, _screenshotPlugins.Select(p => p.name).ToArray(), Mathf.Clamp(_screenshotPlugins.Count, 1, 3));
                 }
 
-                IScreenshotPlugin plugin = this._screenshotPlugins[this._selectedPlugin];
+                IScreenshotPlugin plugin = _screenshotPlugins[_selectedPlugin];
                 plugin.DisplayParams();
 
                 Vector2 currentSize = plugin.currentSize;
@@ -447,12 +446,12 @@ namespace VideoExport
                 GUILayout.BeginHorizontal();
                 {
                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.Framerate), GUILayout.ExpandWidth(false));
-                    this._fps = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._fps, 1, 120));
-                    string s = GUILayout.TextField(this._fps.ToString(), GUILayout.Width(50));
+                    _fps = Mathf.RoundToInt(GUILayout.HorizontalSlider(_fps, 1, 120));
+                    string s = GUILayout.TextField(_fps.ToString(), GUILayout.Width(50));
                     int res;
                     if (int.TryParse(s, out res) == false || res < 1)
                         res = 1;
-                    this._fps = res;
+                    _fps = res;
                 }
                 GUILayout.EndHorizontal();
 
@@ -461,8 +460,8 @@ namespace VideoExport
 
                 GUILayout.BeginHorizontal();
                 {
-                    this._autoGenerateVideo = GUILayout.Toggle(this._autoGenerateVideo, _currentDictionary.GetString(TranslationKey.AutoGenerateVideo));
-                    this._autoDeleteImages = GUILayout.Toggle(this._autoDeleteImages, _currentDictionary.GetString(TranslationKey.AutoDeleteImages));
+                    _autoGenerateVideo = GUILayout.Toggle(_autoGenerateVideo, _currentDictionary.GetString(TranslationKey.AutoGenerateVideo));
+                    _autoDeleteImages = GUILayout.Toggle(_autoDeleteImages, _currentDictionary.GetString(TranslationKey.AutoDeleteImages));
                 }
                 GUILayout.EndHorizontal();
 
@@ -470,10 +469,10 @@ namespace VideoExport
 
                 GUILayout.BeginHorizontal();
                 {
-                    this._limitDuration = GUILayout.Toggle(this._limitDuration, _currentDictionary.GetString(TranslationKey.LimitBy), GUILayout.ExpandWidth(false));
+                    _limitDuration = GUILayout.Toggle(_limitDuration, _currentDictionary.GetString(TranslationKey.LimitBy), GUILayout.ExpandWidth(false));
                     guiEnabled = GUI.enabled;
-                    GUI.enabled = this._limitDuration && guiEnabled;
-                    this._selectedLimitDuration = (LimitDurationType)GUILayout.SelectionGrid((int)this._selectedLimitDuration, this._limitDurationNames, 2);
+                    GUI.enabled = _limitDuration && guiEnabled;
+                    _selectedLimitDuration = (LimitDurationType)GUILayout.SelectionGrid((int)_selectedLimitDuration, _limitDurationNames, 2);
 
                     GUI.enabled = guiEnabled;
                 }
@@ -481,8 +480,8 @@ namespace VideoExport
 
                 {
                     guiEnabled = GUI.enabled;
-                    GUI.enabled = this._limitDuration && guiEnabled;
-                    switch (this._selectedLimitDuration)
+                    GUI.enabled = _limitDuration && guiEnabled;
+                    switch (_selectedLimitDuration)
                     {
                         case LimitDurationType.Frames:
                             {
@@ -490,17 +489,17 @@ namespace VideoExport
 
                                 {
                                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByLimitCount), GUILayout.ExpandWidth(false));
-                                    string s = GUILayout.TextField(this._limitDurationNumber.ToString("0"));
+                                    string s = GUILayout.TextField(_limitDurationNumber.ToString("0"));
                                     int res;
                                     if (int.TryParse(s, out res) == false || res < 1)
                                         res = 1;
-                                    this._limitDurationNumber = res;
+                                    _limitDurationNumber = res;
 
                                 }
                                 GUILayout.EndHorizontal();
 
-                                float totalSeconds = this._limitDurationNumber / this._fps;
-                                GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.Estimated)} {totalSeconds:0.0000} {_currentDictionary.GetString(TranslationKey.Seconds)}, {Mathf.RoundToInt(this._limitDurationNumber)} {_currentDictionary.GetString(TranslationKey.Frames)}");
+                                float totalSeconds = _limitDurationNumber / _fps;
+                                GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.Estimated)} {totalSeconds:0.0000} {_currentDictionary.GetString(TranslationKey.Seconds)}, {Mathf.RoundToInt(_limitDurationNumber)} {_currentDictionary.GetString(TranslationKey.Frames)}");
 
                                 break;
                             }
@@ -510,16 +509,16 @@ namespace VideoExport
 
                                 {
                                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByLimitCount), GUILayout.ExpandWidth(false));
-                                    string s = GUILayout.TextField(this._limitDurationNumber.ToString("0.000"));
+                                    string s = GUILayout.TextField(_limitDurationNumber.ToString("0.000"));
                                     float res;
                                     if (float.TryParse(s, out res) == false || res <= 0f)
                                         res = 0.001f;
-                                    this._limitDurationNumber = res;
+                                    _limitDurationNumber = res;
                                 }
                                 GUILayout.EndHorizontal();
 
-                                float totalFrames = this._limitDurationNumber * this._fps;
-                                GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.Estimated)} {this._limitDurationNumber:0.0000} {_currentDictionary.GetString(TranslationKey.Seconds)}, {Mathf.RoundToInt(totalFrames)} {_currentDictionary.GetString(TranslationKey.Frames)} ({totalFrames:0.000})");
+                                float totalFrames = _limitDurationNumber * _fps;
+                                GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.Estimated)} {_limitDurationNumber:0.0000} {_currentDictionary.GetString(TranslationKey.Seconds)}, {Mathf.RoundToInt(totalFrames)} {_currentDictionary.GetString(TranslationKey.Frames)} ({totalFrames:0.000})");
 
                                 break;
                             }
@@ -528,30 +527,30 @@ namespace VideoExport
                                 GUILayout.BeginHorizontal();
                                 {
                                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCount), GUILayout.ExpandWidth(false));
-                                    string s = GUILayout.TextField(this._prewarmLoopCount.ToString());
+                                    string s = GUILayout.TextField(_prewarmLoopCount.ToString());
                                     int res;
                                     if (int.TryParse(s, out res) == false || res < 0)
                                         res = 1;
-                                    this._prewarmLoopCount = res;
+                                    _prewarmLoopCount = res;
                                 }
                                 GUILayout.EndHorizontal();
 
                                 GUILayout.BeginHorizontal();
                                 {
                                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByLoopsToRecord), GUILayout.ExpandWidth(false));
-                                    string s = GUILayout.TextField(this._limitDurationNumber.ToString("0.000"));
+                                    string s = GUILayout.TextField(_limitDurationNumber.ToString("0.000"));
                                     float res;
                                     if (float.TryParse(s, out res) == false || res <= 0)
                                         res = 0.001f;
-                                    this._limitDurationNumber = res;
+                                    _limitDurationNumber = res;
                                 }
                                 GUILayout.EndHorizontal();
 
-                                if (this._currentAnimator != null)
+                                if (_currentAnimator != null)
                                 {
-                                    AnimatorStateInfo info = this._currentAnimator.GetCurrentAnimatorStateInfo(0);
-                                    float totalLength = info.length * this._limitDurationNumber;
-                                    float totalFrames = totalLength * this._fps;
+                                    AnimatorStateInfo info = _currentAnimator.GetCurrentAnimatorStateInfo(0);
+                                    float totalLength = info.length * _limitDurationNumber;
+                                    float totalFrames = totalLength * _fps;
                                     GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.Estimated)} {totalLength:0.0000} {_currentDictionary.GetString(TranslationKey.Seconds)}, {Mathf.RoundToInt(totalFrames)} {_currentDictionary.GetString(TranslationKey.Frames)} ({totalFrames:0.000})");
                                 }
                                 break;
@@ -561,29 +560,29 @@ namespace VideoExport
                                 GUILayout.BeginHorizontal();
                                 {
                                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCount), GUILayout.ExpandWidth(false));
-                                    string s = GUILayout.TextField(this._prewarmLoopCount.ToString());
+                                    string s = GUILayout.TextField(_prewarmLoopCount.ToString());
                                     int res;
                                     if (int.TryParse(s, out res) == false || res < 0)
                                         res = 1;
-                                    this._prewarmLoopCount = res;
+                                    _prewarmLoopCount = res;
                                 }
                                 GUILayout.EndHorizontal();
 
                                 GUILayout.BeginHorizontal();
                                 {
                                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByLoopsToRecord), GUILayout.ExpandWidth(false));
-                                    string s = GUILayout.TextField(this._limitDurationNumber.ToString("0.000"));
+                                    string s = GUILayout.TextField(_limitDurationNumber.ToString("0.000"));
                                     float res;
                                     if (float.TryParse(s, out res) == false || res <= 0)
                                         res = 0.001f;
-                                    this._limitDurationNumber = res;
+                                    _limitDurationNumber = res;
                                 }
                                 GUILayout.EndHorizontal();
 
-                                if (this._timelinePresent)
+                                if (_timelinePresent)
                                 {
-                                    float totalLength = TimelineCompatibility.GetDuration() * this._limitDurationNumber;
-                                    float totalFrames = totalLength * this._fps;
+                                    float totalLength = TimelineCompatibility.GetDuration() * _limitDurationNumber;
+                                    float totalFrames = totalLength * _fps;
                                     GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.Estimated)} {totalLength:0.0000} {_currentDictionary.GetString(TranslationKey.Seconds)}, {Mathf.RoundToInt(totalFrames)} {_currentDictionary.GetString(TranslationKey.Frames)} ({totalFrames:0.000})");
                                 }
                                 break;
@@ -593,38 +592,38 @@ namespace VideoExport
                     GUI.enabled = guiEnabled;
                 }
 
-                IExtension extension = this._extensions[(int)this._selectedExtension];
+                IExtension extension = _extensions[(int)_selectedExtension];
 
-                if (this._autoGenerateVideo)
+                if (_autoGenerateVideo)
                 {
                     GUILayout.BeginHorizontal();
                     {
-                        this._resize = GUILayout.Toggle(this._resize, _currentDictionary.GetString(TranslationKey.Resize), GUILayout.ExpandWidth(false));
+                        _resize = GUILayout.Toggle(_resize, _currentDictionary.GetString(TranslationKey.Resize), GUILayout.ExpandWidth(false));
                         guiEnabled = GUI.enabled;
-                        GUI.enabled = this._resize && guiEnabled;
+                        GUI.enabled = _resize && guiEnabled;
 
                         GUILayout.FlexibleSpace();
 
-                        string s = GUILayout.TextField(this._resizeX.ToString(), GUILayout.Width(50));
+                        string s = GUILayout.TextField(_resizeX.ToString(), GUILayout.Width(50));
                         int res;
                         if (int.TryParse(s, out res) == false || res < 1)
                             res = 1;
-                        this._resizeX = res;
+                        _resizeX = res;
 
-                        s = GUILayout.TextField(this._resizeY.ToString(), GUILayout.Width(50));
+                        s = GUILayout.TextField(_resizeY.ToString(), GUILayout.Width(50));
                         if (int.TryParse(s, out res) == false || res < 1)
                             res = 1;
-                        this._resizeY = res;
+                        _resizeY = res;
 
                         if (GUILayout.Button(_currentDictionary.GetString(TranslationKey.ResizeDefault), GUILayout.ExpandWidth(false)))
                         {
-                            this._resizeX = Screen.width;
-                            this._resizeY = Screen.height;
+                            _resizeX = Screen.width;
+                            _resizeY = Screen.height;
                         }
-                        if (this._resizeX > currentSize.x)
-                            this._resizeX = (int)currentSize.x;
-                        if (this._resizeY > currentSize.y)
-                            this._resizeY = (int)currentSize.y;
+                        if (_resizeX > currentSize.x)
+                            _resizeX = (int)currentSize.x;
+                        if (_resizeY > currentSize.y)
+                            _resizeY = (int)currentSize.y;
 
                         GUI.enabled = guiEnabled;
                     }
@@ -633,7 +632,7 @@ namespace VideoExport
                     GUILayout.BeginHorizontal();
                     {
                         GUILayout.Label(_currentDictionary.GetString(TranslationKey.Format), GUILayout.ExpandWidth(false));
-                        this._selectedExtension = (ExtensionsType)GUILayout.SelectionGrid((int)this._selectedExtension, this._extensionsNames, 4);
+                        _selectedExtension = (ExtensionsType)GUILayout.SelectionGrid((int)_selectedExtension, _extensionsNames, 4);
                     }
                     GUILayout.EndHorizontal();
 
@@ -641,20 +640,20 @@ namespace VideoExport
                 }
 
                 GUILayout.Label(_currentDictionary.GetString(TranslationKey.DBUpdateMode));
-                this._selectedUpdateDynamicBones = (UpdateDynamicBonesType)GUILayout.SelectionGrid((int)this._selectedUpdateDynamicBones, this._updateDynamicBonesTypeNames, 2);
+                _selectedUpdateDynamicBones = (UpdateDynamicBonesType)GUILayout.SelectionGrid((int)_selectedUpdateDynamicBones, _updateDynamicBonesTypeNames, 2);
 
                 GUILayout.BeginHorizontal();
                 {
                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.Prefix), GUILayout.ExpandWidth(false));
-                    string s = GUILayout.TextField(this._imagesPrefix);
-                    if (s != this._imagesPrefix)
+                    string s = GUILayout.TextField(_imagesPrefix);
+                    if (s != _imagesPrefix)
                     {
                         StringBuilder builder = new StringBuilder(s);
                         foreach (char chr in Path.GetInvalidFileNameChars())
                             builder.Replace(chr.ToString(), "");
                         foreach (char chr in Path.GetInvalidPathChars())
                             builder.Replace(chr.ToString(), "");
-                        this._imagesPrefix = builder.ToString();
+                        _imagesPrefix = builder.ToString();
                     }
                 }
                 GUILayout.EndHorizontal();
@@ -662,53 +661,53 @@ namespace VideoExport
                 GUILayout.BeginHorizontal();
                 {
                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.Suffix), GUILayout.ExpandWidth(false));
-                    string s = GUILayout.TextField(this._imagesPostfix);
-                    if (s != this._imagesPostfix)
+                    string s = GUILayout.TextField(_imagesPostfix);
+                    if (s != _imagesPostfix)
                     {
                         StringBuilder builder = new StringBuilder(s);
                         foreach (char chr in Path.GetInvalidFileNameChars())
                             builder.Replace(chr.ToString(), "");
                         foreach (char chr in Path.GetInvalidPathChars())
                             builder.Replace(chr.ToString(), "");
-                        this._imagesPostfix = builder.ToString();
+                        _imagesPostfix = builder.ToString();
                     }
                 }
                 GUILayout.EndHorizontal();
 
                 string actualExtension = plugin.extension;
 
-                GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.ExampleResult)}: {this._imagesPrefix}123{this._imagesPostfix}.{actualExtension}");
+                GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.ExampleResult)}: {_imagesPrefix}123{_imagesPostfix}.{actualExtension}");
 
                 guiEnabled = GUI.enabled;
                 GUI.enabled = true;
                 Color c = GUI.color;
                 GUI.color = Color.red;
 
-                this._clearSceneBeforeEncoding = GUILayout.Toggle(this._clearSceneBeforeEncoding, _currentDictionary.GetString(TranslationKey.EmptyScene));
-                this._closeWhenDone = GUILayout.Toggle(this._closeWhenDone, _currentDictionary.GetString(TranslationKey.CloseStudio));
+                _clearSceneBeforeEncoding = GUILayout.Toggle(_clearSceneBeforeEncoding, _currentDictionary.GetString(TranslationKey.EmptyScene));
+                _closeWhenDone = GUILayout.Toggle(_closeWhenDone, _currentDictionary.GetString(TranslationKey.CloseStudio));
 
                 GUI.color = c;
                 GUI.enabled = guiEnabled;
 
-                this._startOnNextClick = GUILayout.Toggle(this._startOnNextClick, _currentDictionary.GetString(TranslationKey.StartRecordingOnNextClick));
+                _startOnNextClick = GUILayout.Toggle(_startOnNextClick, _currentDictionary.GetString(TranslationKey.StartRecordingOnNextClick));
 
-                GUI.enabled = this._generatingVideo == false && this._startOnNextClick == false &&
-                              (this._limitDuration == false || this._selectedLimitDuration != LimitDurationType.Animation || (this._currentAnimator.speed > 0.001f && this._animationIsPlaying));
+                GUI.enabled = _generatingVideo == false && _startOnNextClick == false &&
+                              (_limitDuration == false || _selectedLimitDuration != LimitDurationType.Animation || (_currentAnimator.speed > 0.001f && _animationIsPlaying));
 
                 GUILayout.BeginHorizontal();
                 {
                     string reason;
-                    if (this._autoGenerateVideo == false || extension.IsCompatibleWithPlugin(plugin, out reason))
+                    if (_autoGenerateVideo == false || extension.IsCompatibleWithPlugin(plugin, out reason))
                     {
-                        if (this._isRecording == false)
+                        if (_isRecording == false)
                         {
                             if (GUILayout.Button(_currentDictionary.GetString(TranslationKey.StartRecording)))
-                                this.RecordVideo();
+                                RecordVideo();
                         }
                         else
                         {
                             if (GUILayout.Button(_currentDictionary.GetString(TranslationKey.StopRecording)))
-                                this.StopRecording();
+                                StopRecording();
                         }
                     }
                     else
@@ -723,17 +722,17 @@ namespace VideoExport
 
                 GUILayout.EndHorizontal();
                 c = GUI.color;
-                GUI.color = this._messageColor;
+                GUI.color = _messageColor;
 
                 GUIStyle customLabel = GUI.skin.label;
                 TextAnchor cachedAlignment = customLabel.alignment;
                 customLabel.alignment = TextAnchor.UpperCenter;
-                GUILayout.Label(this._currentMessage);
+                GUILayout.Label(_currentMessage);
                 customLabel.alignment = cachedAlignment;
 
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                GUILayout.Box("", _customBoxStyle, GUILayout.Width((this._windowRect.width - 20) * this._progressBarPercentage), GUILayout.Height(10));
+                GUILayout.Box("", _customBoxStyle, GUILayout.Width((_windowRect.width - 20) * _progressBarPercentage), GUILayout.Height(10));
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
 
@@ -746,8 +745,8 @@ namespace VideoExport
 
         private void SetLanguage(Language language)
         {
-            this._language = language;
-            switch (this._language)
+            _language = language;
+            switch (_language)
             {
                 case Language.English:
                     _currentDictionary = _englishDictionary;
@@ -757,7 +756,7 @@ namespace VideoExport
                     break;
             }
 
-            this._limitDurationNames = new[]
+            _limitDurationNames = new[]
             {
                 _currentDictionary.GetString(TranslationKey.LimitByFrames),
                 _currentDictionary.GetString(TranslationKey.LimitBySeconds),
@@ -765,26 +764,26 @@ namespace VideoExport
                 _currentDictionary.GetString(TranslationKey.LimitByTimeline)
             };
 
-            this._updateDynamicBonesTypeNames = new[]
+            _updateDynamicBonesTypeNames = new[]
             {
                 _currentDictionary.GetString(TranslationKey.DBDefault),
                 _currentDictionary.GetString(TranslationKey.DBEveryFrame)
             };
 
-            foreach (IScreenshotPlugin plugin in this._screenshotPlugins)
+            foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.UpdateLanguage();
-            foreach (IExtension extension in this._extensions)
+            foreach (IExtension extension in _extensions)
                 extension.UpdateLanguage();
         }
 
         private IEnumerator RecordVideo_Routine()
         {
-            this._isRecording = true;
-            this._messageColor = Color.white;
+            _isRecording = true;
+            _messageColor = Color.white;
 
-            Animator currentAnimator = this._currentAnimator;
+            Animator currentAnimator = _currentAnimator;
 
-            IScreenshotPlugin screenshotPlugin = this._screenshotPlugins[this._selectedPlugin];
+            IScreenshotPlugin screenshotPlugin = _screenshotPlugins[_selectedPlugin];
 
             string tempName = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
             string framesFolder = Path.Combine(_globalFramesFolder, tempName);
@@ -793,9 +792,9 @@ namespace VideoExport
                 Directory.CreateDirectory(framesFolder);
 
             int cachedCaptureFramerate = Time.captureFramerate;
-            Time.captureFramerate = this._fps;
+            Time.captureFramerate = _fps;
 
-            if (this._selectedUpdateDynamicBones == UpdateDynamicBonesType.EveryFrame)
+            if (_selectedUpdateDynamicBones == UpdateDynamicBonesType.EveryFrame)
             {
                 foreach (DynamicBone dynamicBone in Resources.FindObjectsOfTypeAll<DynamicBone>())
                     dynamicBone.m_UpdateRate = -1;
@@ -803,15 +802,15 @@ namespace VideoExport
                     dynamicBone.UpdateRate = -1;
             }
 
-            this._currentRecordingFrame = 0;
-            this._currentRecordingTime = 0;
+            _currentRecordingFrame = 0;
+            _currentRecordingTime = 0;
             screenshotPlugin.OnStartRecording();
 
-            if (this._limitDuration)
+            if (_limitDuration)
             {
-                if (this._prewarmLoopCount > 0)
+                if (_prewarmLoopCount > 0)
                 {
-                    switch (this._selectedLimitDuration)
+                    switch (_selectedLimitDuration)
                     {
                         case LimitDurationType.Animation:
                             int j = 0;
@@ -823,15 +822,15 @@ namespace VideoExport
                                 if (lastNormalizedTime > 0.5f && currentNormalizedTime < lastNormalizedTime)
                                     j++;
                                 lastNormalizedTime = currentNormalizedTime;
-                                if (j == this._prewarmLoopCount)
+                                if (j == _prewarmLoopCount)
                                 {
                                     if (!info.loop)
                                         yield return new WaitForEndOfFrame();
                                     break;
                                 }
                                 yield return new WaitForEndOfFrame();
-                                this._currentMessage = $"{_currentDictionary.GetString(TranslationKey.PrewarmingAnimation)} {j + 1}/{this._prewarmLoopCount}";
-                                this._progressBarPercentage = lastNormalizedTime;
+                                _currentMessage = $"{_currentDictionary.GetString(TranslationKey.PrewarmingAnimation)} {j + 1}/{_prewarmLoopCount}";
+                                _progressBarPercentage = lastNormalizedTime;
                             }
                             break;
                         case LimitDurationType.Timeline:
@@ -846,11 +845,11 @@ namespace VideoExport
                                 if (currentTime < lastTime)
                                     j++;
                                 lastTime = currentTime;
-                                if (j == this._prewarmLoopCount)
+                                if (j == _prewarmLoopCount)
                                     break;
                                 yield return new WaitForEndOfFrame();
-                                this._currentMessage = $"{_currentDictionary.GetString(TranslationKey.PrewarmingAnimation)} {j + 1}/{this._prewarmLoopCount}";
-                                this._progressBarPercentage = lastTime / duration;
+                                _currentMessage = $"{_currentDictionary.GetString(TranslationKey.PrewarmingAnimation)} {j + 1}/{_prewarmLoopCount}";
+                                _progressBarPercentage = lastTime / duration;
                             }
                             break;
                     }
@@ -862,42 +861,42 @@ namespace VideoExport
             }
 
             DateTime startTime = DateTime.Now;
-            this._progressBarPercentage = 0f;
+            _progressBarPercentage = 0f;
 
             int limit = 1;
-            if (this._limitDuration)
+            if (_limitDuration)
             {
-                switch (this._selectedLimitDuration)
+                switch (_selectedLimitDuration)
                 {
                     case LimitDurationType.Frames:
-                        limit = Mathf.RoundToInt(this._limitDurationNumber);
+                        limit = Mathf.RoundToInt(_limitDurationNumber);
                         break;
                     case LimitDurationType.Seconds:
-                        limit = Mathf.RoundToInt(this._limitDurationNumber * this._fps);
+                        limit = Mathf.RoundToInt(_limitDurationNumber * _fps);
                         break;
                     case LimitDurationType.Animation:
-                        limit = Mathf.RoundToInt(currentAnimator.GetCurrentAnimatorStateInfo(0).length * this._limitDurationNumber * this._fps);
+                        limit = Mathf.RoundToInt(currentAnimator.GetCurrentAnimatorStateInfo(0).length * _limitDurationNumber * _fps);
                         break;
                     case LimitDurationType.Timeline:
-                        limit = Mathf.RoundToInt(TimelineCompatibility.GetDuration() * this._limitDurationNumber * this._fps);
+                        limit = Mathf.RoundToInt(TimelineCompatibility.GetDuration() * _limitDurationNumber * _fps);
                         break;
                 }
-                this._recordingFrameLimit = limit;
+                _recordingFrameLimit = limit;
             }
             else
             {
-                this._recordingFrameLimit = -1;
+                _recordingFrameLimit = -1;
             }
             TimeSpan elapsed = TimeSpan.Zero;
             int i = 0;
             string imageExtension = screenshotPlugin.extension;
             for (; ; i++)
             {
-                if (this._limitDuration && i >= limit)
-                    this.StopRecording();
-                if (this._breakRecording)
+                if (_limitDuration && i >= limit)
+                    StopRecording();
+                if (_breakRecording)
                 {
-                    this._breakRecording = false;
+                    _breakRecording = false;
                     break;
                 }
 
@@ -906,7 +905,7 @@ namespace VideoExport
                     Resources.UnloadUnusedAssets();
                     GC.Collect();
                 }
-                string savePath = Path.Combine(framesFolder, $"{this._imagesPrefix}{i}{this._imagesPostfix}.{imageExtension}");
+                string savePath = Path.Combine(framesFolder, $"{_imagesPrefix}{i}{_imagesPostfix}.{imageExtension}");
                 byte[] frame = screenshotPlugin.Capture(savePath);
                 if (frame != null)
                     File.WriteAllBytes(savePath, frame);
@@ -915,15 +914,15 @@ namespace VideoExport
 
                 TimeSpan remaining = TimeSpan.FromSeconds((limit - i - 1) * elapsed.TotalSeconds / (i + 1));
 
-                if (this._limitDuration)
-                    this._progressBarPercentage = (i + 1f) / limit;
+                if (_limitDuration)
+                    _progressBarPercentage = (i + 1f) / limit;
                 else
-                    this._progressBarPercentage = (i % this._fps) / (float)this._fps;
+                    _progressBarPercentage = (i % _fps) / (float)_fps;
 
-                this._currentMessage = $"{_currentDictionary.GetString(TranslationKey.TakingScreenshot)} {i + 1}{(this._limitDuration ? $"/{limit} {this._progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {remaining.Hours:0}:{remaining.Minutes:00}:{remaining.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}" : "")}";
+                _currentMessage = $"{_currentDictionary.GetString(TranslationKey.TakingScreenshot)} {i + 1}{(_limitDuration ? $"/{limit} {_progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {remaining.Hours:0}:{remaining.Minutes:00}:{remaining.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}" : "")}";
 
-                this._currentRecordingFrame = i + 1;
-                this._currentRecordingTime = (i + 1) / (double)this._fps;
+                _currentRecordingFrame = i + 1;
+                _currentRecordingTime = (i + 1) / (double)_fps;
                 yield return new WaitForEndOfFrame();
             }
             screenshotPlugin.OnEndRecording();
@@ -937,23 +936,23 @@ namespace VideoExport
                 dynamicBone.UpdateRate = 60;
 
             bool error = false;
-            if (this._autoGenerateVideo && i != 0)
+            if (_autoGenerateVideo && i != 0)
             {
-                this._generatingVideo = true;
+                _generatingVideo = true;
 
-                if (this._clearSceneBeforeEncoding)
+                if (_clearSceneBeforeEncoding)
                     Studio.Studio.Instance.InitScene(false);
 
-                this._messageColor = Color.yellow;
+                _messageColor = Color.yellow;
                 if (Directory.Exists(_outputFolder) == false)
                     Directory.CreateDirectory(_outputFolder);
-                this._currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
+                _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
                 yield return null;
-                IExtension extension = this._extensions[(int)this._selectedExtension];
+                IExtension extension = _extensions[(int)_selectedExtension];
 
-                string arguments = extension.GetArguments(this.SimplifyPath(framesFolder), this._imagesPrefix, this._imagesPostfix, imageExtension, screenshotPlugin.bitDepth, this._fps, screenshotPlugin.transparency, this._resize, this._resizeX, this._resizeY, this.SimplifyPath(Path.Combine(_outputFolder, tempName)));
+                string arguments = extension.GetArguments(SimplifyPath(framesFolder), _imagesPrefix, _imagesPostfix, imageExtension, screenshotPlugin.bitDepth, _fps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder, tempName)));
                 startTime = DateTime.Now;
-                Process proc = this.StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
+                Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
                 while (proc.HasExited == false)
                 {
                     if (extension.canProcessStandardOutput)
@@ -969,11 +968,11 @@ namespace VideoExport
                     if (extension.progress != 0)
                     {
                         TimeSpan eta = TimeSpan.FromSeconds((i - extension.progress) * elapsed.TotalSeconds / extension.progress);
-                        this._progressBarPercentage = extension.progress / (float)i;
-                        this._currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {extension.progress}/{i} {this._progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {eta.Hours:0}:{eta.Minutes:00}:{eta.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
+                        _progressBarPercentage = extension.progress / (float)i;
+                        _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {extension.progress}/{i} {_progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {eta.Hours:0}:{eta.Minutes:00}:{eta.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
                     }
                     else
-                        this._progressBarPercentage = (float)((elapsed.TotalSeconds % 6) / 6);
+                        _progressBarPercentage = (float)((elapsed.TotalSeconds % 6) / 6);
 
                     Resources.UnloadUnusedAssets();
                     GC.Collect();
@@ -987,34 +986,34 @@ namespace VideoExport
                 yield return null;
                 if (proc.ExitCode == 0)
                 {
-                    this._messageColor = Color.green;
-                    this._currentMessage = _currentDictionary.GetString(TranslationKey.Done);
+                    _messageColor = Color.green;
+                    _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
                 }
                 else
                 {
-                    this._messageColor = Color.red;
-                    this._currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
+                    _messageColor = Color.red;
+                    _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
                     error = true;
                 }
                 proc.Close();
-                this._generatingVideo = false;
+                _generatingVideo = false;
                 UnityEngine.Debug.Log($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
             }
             else
             {
-                this._messageColor = Color.green;
-                this._currentMessage = _currentDictionary.GetString(TranslationKey.Done);
+                _messageColor = Color.green;
+                _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
             }
-            this._progressBarPercentage = 1;
+            _progressBarPercentage = 1;
 
-            if (this._autoDeleteImages && error == false)
+            if (_autoDeleteImages && error == false)
                 Directory.Delete(framesFolder, true);
-            this._isRecording = false;
+            _isRecording = false;
             Resources.UnloadUnusedAssets();
             GC.Collect();
 
-            if (this._closeWhenDone)
-#if HONEYSELECT2
+            if (_closeWhenDone)
+#if HONEYSELECT2 || SUNSHINE
                 Illusion.Game.Utils.Scene.GameEnd(false);
 #else
                 Manager.Scene.Instance.GameEnd(false);
