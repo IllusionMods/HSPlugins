@@ -1,10 +1,7 @@
 ﻿using HSUS.Features;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using System.Text;
-using System.Xml;
 using ToolBox;
 using ToolBox.Extensions;
 using UILib;
@@ -14,6 +11,7 @@ using IllusionPlugin;
 using Harmony;
 #elif BEPINEX
 using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 #endif
 #if PLAYHOME || KOIKATSU || AISHOUJO || HONEYSELECT2
@@ -37,6 +35,9 @@ namespace HSUS
 #elif PLAYHOME
         internal const string _name = "PHUS";
         internal const string _guid = "com.joan6694.illusionplugins.phus";
+#elif SUNSHINE
+        internal const string _name = "KKSUS";
+        internal const string _guid = "com.joan6694.illusionplugins.kksus";
 #elif KOIKATSU
         internal const string _name = "KKUS";
         internal const string _guid = "com.joan6694.illusionplugins.kkus";
@@ -47,7 +48,6 @@ namespace HSUS
         internal const string _name = "HS2US";
         internal const string _guid = "com.joan6694.illusionplugins.hs2us";
 #endif
-        private const string _config = "config.xml";
 
         #region Private Types
         internal delegate bool TranslationDelegate(ref string text);
@@ -75,13 +75,7 @@ namespace HSUS
         private readonly AutomaticMemoryClean _automaticMemoryClean = new AutomaticMemoryClean();
         internal event Action _onUpdate;
 
-        //Kept for old plugins interaction;
-        private float _gameUIScale;
-
-        private bool _vSyncEnabled = true;
-
         internal static HSUS _self;
-        private string _assemblyLocation;
         private int _lastScreenWidth;
         private int _lastScreenHeight;
 #if HONEYSELECT
@@ -113,16 +107,78 @@ namespace HSUS
         }
         public override string[] Filter { get { return new[] { "HoneySelect_64", "HoneySelect_32", "StudioNEO_32", "StudioNEO_64", "Honey Select Unlimited_64", "Honey Select Unlimited_32" }; } }
 #endif
-#if HONEYSELECT || KOIKATSU
-        public bool optimizeCharaMaker { get { return OptimizeCharaMaker._optimizeCharaMaker; } }
-#endif
         public static HSUS self { get { return _self; } }
+
+        internal static ConfigEntry<float> UIScaleGame { get; private set; }
+        internal static ConfigEntry<float> UIScaleStudio { get; private set; }
+        internal static ConfigEntry<bool> OptimizeCharaMaker { get; private set; }
+        internal static ConfigEntry<bool> DeleteConfirmationKey { get; private set; }
+        internal static ConfigEntry<bool> DeleteConfirmationButton { get; private set; }
+        internal static ConfigEntry<string> DefaultFemaleChar { get; private set; }
+        internal static ConfigEntry<string> DefaultMaleChar { get; private set; }
+        internal static ConfigEntry<bool> ImproveStudioUI { get; private set; }
+        internal static ConfigEntry<bool> OptimizeStudio { get; private set; }
+        internal static ConfigEntry<bool> GenericFK { get; private set; }
+        internal static ConfigEntry<bool> Debug { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> DebugHotkey { get; private set; }
+        internal static ConfigEntry<bool> ImprovedTransformOperations { get; private set; }
+        internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
+        internal static ConfigEntry<bool> EyesBlink { get; private set; }
+        internal static ConfigEntry<bool> CameraShortcuts { get; private set; }
+        internal static ConfigEntry<bool> AlternativeCenterToObjects { get; private set; }
+        internal static ConfigEntry<bool> PostProcessingDepthOfField { get; private set; }
+        internal static ConfigEntry<bool> PostProcessingSSAO { get; private set; }
+        internal static ConfigEntry<bool> PostProcessingBloom { get; private set; }
+        internal static ConfigEntry<bool> PostProcessingSelfShadow { get; private set; }
+        internal static ConfigEntry<bool> PostProcessingVignette { get; private set; }
+        internal static ConfigEntry<bool> PostProcessingFog { get; private set; }
+        internal static ConfigEntry<bool> PostProcessingSunShafts { get; private set; }
+        internal static ConfigEntry<bool> AutomaticMemoryClean { get; private set; }
+        internal static ConfigEntry<int> AutomaticMemoryCleanInterval { get; private set; }
+        internal static ConfigEntry<bool> VSync { get; private set; }
+
+#if HONEYSELECT
+        internal static ConfigEntry<bool> FingersFKCopyButtons { get; private set; }
+#endif
+
         #endregion
 
         #region Unity Methods
         protected override void Awake()
         {
             base.Awake();
+
+            UIScaleGame = Config.Bind("Config", "UIScaleGame", 1f);
+            UIScaleStudio = Config.Bind("Config", "UIScaleStudio", 1f);
+            OptimizeCharaMaker = Config.Bind("Config", "OptimizeCharaMaker", true);
+            DeleteConfirmationKey = Config.Bind("Config", "DeleteConfirmationKey", true);
+            DeleteConfirmationButton = Config.Bind("Config", "DeleteConfirmationButton", true);
+            DefaultFemaleChar = Config.Bind("Config", "DefaultFemaleChar", "");
+            DefaultMaleChar = Config.Bind("Config", "DefaultMaleChar", "");
+            ImproveStudioUI = Config.Bind("Config", "ImproveStudioUI", true);
+            OptimizeStudio = Config.Bind("Config", "OptimizeStudio", true);
+            GenericFK = Config.Bind("Config", "GenericFK", true);
+            Debug = Config.Bind("Config", "Debug", false);
+            DebugHotkey = Config.Bind("Config", "DebugHotkey", new KeyboardShortcut(KeyCode.RightControl));
+            ImprovedTransformOperations = Config.Bind("Config", "ImprovedTransformOperations", true);
+            AutoJointCorrection = Config.Bind("Config", "AutoJointCorrection", true);
+            EyesBlink = Config.Bind("Config", "EyesBlink", true);
+            CameraShortcuts = Config.Bind("Config", "CameraShortcuts", true);
+            AlternativeCenterToObjects = Config.Bind("Config", "CameraShortcuts", true);
+            PostProcessingDepthOfField = Config.Bind("Config", "PostProcessingDepthOfField", false);
+            PostProcessingSSAO = Config.Bind("Config", "PostProcessingSSAO", true);
+            PostProcessingBloom = Config.Bind("Config", "PostProcessingBloom", true);
+            PostProcessingSelfShadow = Config.Bind("Config", "CameraShortcuts", true);
+            PostProcessingVignette = Config.Bind("Config", "PostProcessingSelfShadow", true);
+            PostProcessingFog = Config.Bind("Config", "PostProcessingFog", false);
+            PostProcessingSunShafts = Config.Bind("Config", "PostProcessingSunShafts", false);
+            AutomaticMemoryClean = Config.Bind("Config", "AutomaticMemoryClean", true);
+            AutomaticMemoryCleanInterval = Config.Bind("Config", "AutomaticMemoryCleanInterval", 300);
+            VSync = Config.Bind("Config", "VSync", true);
+#if HONEYSELECT
+            FingersFKCopyButtons = Config.Bind("Config", "FingersFKCopyButtons", true);
+#endif
+
             _self = this;
 
 #if HONEYSELECT
@@ -153,31 +209,7 @@ namespace HSUS
             _features.Add(_postProcessing);
             _features.Add(_automaticMemoryClean);
 
-            _assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string path = Path.Combine(Path.Combine(_assemblyLocation, _name), _config);
-            if (File.Exists(path))
-            {
-                XmlDocument doc = new XmlDocument();
-                doc.Load(path);
-
-                foreach (IFeature feature in _features)
-                    feature.LoadParams(doc.DocumentElement);
-
-                foreach (XmlNode node in doc.DocumentElement.ChildNodes)
-                {
-                    switch (node.Name)
-                    {
-                        case "vsync":
-                            if (node.Attributes["enabled"] != null)
-                                _vSyncEnabled = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-                            break;
-                    }
-                }
-            }
-
             UIUtility.Init();
-
-            _gameUIScale = _uiScale._gameUIScale;
 
             _harmonyInstance = HarmonyExtensions.CreateInstance(_guid);
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
@@ -203,40 +235,6 @@ namespace HSUS
                 _uiScale.RefreshCanvases();
         }
 #endif
-        protected override void OnDestroy()
-        {
-            string folder = Path.Combine(_assemblyLocation, _name);
-            if (Directory.Exists(folder) == false)
-                Directory.CreateDirectory(folder);
-            string path = Path.Combine(folder, _config);
-            using (FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
-            {
-                using (XmlTextWriter xmlWriter = new XmlTextWriter(fileStream, Encoding.UTF8))
-                {
-                    xmlWriter.Formatting = Formatting.Indented;
-
-                    xmlWriter.WriteStartElement("root");
-                    xmlWriter.WriteAttributeString("version", _version
-#if BETA
-                                                              + "b"
-#endif
-                    );
-
-                    foreach (IFeature feature in _features)
-                    {
-                        feature.SaveParams(xmlWriter);
-                    }
-
-                    {
-                        xmlWriter.WriteStartElement("vsync");
-                        xmlWriter.WriteAttributeString("enabled", XmlConvert.ToString(_vSyncEnabled));
-                        xmlWriter.WriteEndElement();
-                    }
-
-                    xmlWriter.WriteEndElement();
-                }
-            }
-        }
 
         protected override void LevelLoaded(int level)
         {
@@ -258,7 +256,7 @@ namespace HSUS
 
         protected override void Update()
         {
-            if (_vSyncEnabled == false)
+            if (VSync.Value == false)
                 QualitySettings.vSyncCount = 0;
 
             if (_lastScreenWidth != Screen.width || _lastScreenHeight != Screen.height)

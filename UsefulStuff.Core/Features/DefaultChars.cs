@@ -1,5 +1,4 @@
-﻿using System.Xml;
-using ToolBox;
+﻿using ToolBox;
 using ToolBox.Extensions;
 #if HONEYSELECT
 using System.IO;
@@ -14,9 +13,6 @@ namespace HSUS.Features
 {
     public class DefaultChars : IFeature
     {
-        private string _defaultFemaleChar;
-        private string _defaultMaleChar;
-
         public void Awake()
         {
         }
@@ -48,12 +44,12 @@ namespace HSUS.Features
                     switch (CustomBase.Instance.modeSex)
                     {
                         case 0:
-                            if (string.IsNullOrEmpty(_defaultMaleChar) == false)
-                                LoadCustomDefault(UserData.Path + "chara/male/" + _defaultMaleChar);
+                            if (string.IsNullOrEmpty(HSUS.DefaultMaleChar.Value) == false)
+                                LoadCustomDefault(UserData.Path + "chara/male/" + HSUS.DefaultMaleChar.Value);
                             break;
                         case 1:
-                            if (string.IsNullOrEmpty(_defaultFemaleChar) == false)
-                                LoadCustomDefault(UserData.Path + "chara/female/" + _defaultFemaleChar);
+                            if (string.IsNullOrEmpty(HSUS.DefaultFemaleChar.Value) == false)
+                                LoadCustomDefault(UserData.Path + "chara/female/" + HSUS.DefaultFemaleChar.Value);
                             break;
                     }
 #elif AISHOUJO || HONEYSELECT2
@@ -71,34 +67,6 @@ namespace HSUS.Features
 #endif
                 }, 2);
             }
-#endif
-        }
-
-
-        public void LoadParams(XmlNode node)
-        {
-#if !PLAYHOME
-            XmlNode femaleNode = node.FindChildNode("defaultFemaleChar");
-            if (femaleNode != null && femaleNode.Attributes["path"] != null)
-                _defaultFemaleChar = femaleNode.Attributes["path"].Value;
-            XmlNode maleNode = node.FindChildNode("defaultMaleChar");
-            if (maleNode != null && maleNode.Attributes["path"] != null)
-                _defaultMaleChar = maleNode.Attributes["path"].Value;
-#endif
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if !PLAYHOME
-            writer.WriteStartElement("defaultFemaleChar");
-            writer.WriteAttributeString("path", _defaultFemaleChar);
-            writer.WriteEndElement();
-
-#if KOIKATSU || AISHOUJO
-            writer.WriteStartElement("defaultMaleChar");
-            writer.WriteAttributeString("path", _defaultMaleChar);
-            writer.WriteEndElement();
-#endif
 #endif
         }
 

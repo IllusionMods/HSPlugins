@@ -26,6 +26,8 @@ using Illusion.Extensions;
 using Harmony;
 #elif BEPINEX
 using HarmonyLib;
+using BepInEx;
+using BepInEx.Configuration;
 #endif
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
 using ExtensibleSaveFormat;
@@ -73,7 +75,6 @@ namespace HSPE
         internal PoseController _poseTarget;
         internal CameraEventsDispatcher _cameraEventsDispatcher;
         internal const int _uniqueId = ('H' << 24) | ('S' << 16) | ('P' << 8) | 'E';
-        private string _assemblyLocation;
         private HashSet<TreeNodeObject> _selectedNodes;
         private TreeNodeObject _lastSelectedNode;
         private readonly List<FullBodyBipedEffector> _ikBoneTargets = new List<FullBodyBipedEffector>();
@@ -81,7 +82,6 @@ namespace HSPE
         private readonly Quaternion[] _lastIKBonesRotations = new Quaternion[14];
         private readonly List<FullBodyBipedChain> _ikBendGoalTargets = new List<FullBodyBipedChain>();
         private readonly Vector3[] _lastIKBendGoalsPositions = new Vector3[4];
-        private KeyCode _mainWindowKeyCode = KeyCode.H;
         private int _lastObjectCount = 0;
         private int _lastIndex = 0;
         private Vector2 _delta;
@@ -92,7 +92,6 @@ namespace HSPE
         private bool _yRot;
         private bool _zRot;
         internal Rect _advancedModeRect = new Rect(Screen.width - 650, Screen.height - 370, 650, 370);
-        private float _mainWindowSize = 1f;
         private Canvas _ui;
         private GameObject _nothingText;
         private Transform _controls;
@@ -116,8 +115,6 @@ namespace HSPE
         private Toggle _rightFootCorrectionToggle;
         private Toggle _crotchCorrectionByDefaultToggle;
         private Toggle _anklesCorrectionByDefaultToggle;
-        private bool _crotchCorrectionByDefault;
-        private bool _anklesCorrectionByDefault;
         private int _lastScreenWidth = Screen.width;
         private int _lastScreenHeight = Screen.height;
         private Button _copyLeftArmButton;
@@ -154,9 +151,7 @@ namespace HSPE
             if (Resources.FindObjectsOfTypeAll<IKExecutionOrder>().Length == 0)
                 gameObject.AddComponent<IKExecutionOrder>().IKComponents = new IK[0];
 
-            _assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-            string path = Path.Combine(Path.Combine(_assemblyLocation, HSPE._name), _config);
+            string path = Path.Combine(Path.Combine(Paths.ConfigPath, HSPE._name), _config);
             if (File.Exists(path))
             {
                 XmlDocument doc = new XmlDocument();
@@ -166,20 +161,6 @@ namespace HSPE
                 {
                     switch (node.Name)
                     {
-                        case "mainWindowSize":
-                            if (node.Attributes["value"] != null)
-                                _mainWindowSize = XmlConvert.ToSingle(node.Attributes["value"].Value);
-                            break;
-                        case "mainWindowShortcut":
-                            if (node.Attributes["value"] != null)
-                            {
-                                try
-                                {
-                                    _mainWindowKeyCode = (KeyCode)Enum.Parse(typeof(KeyCode), node.Attributes["value"].Value);
-                                }
-                                catch { }
-                            }
-                            break;
                         case "advancedModeWindowSize":
                             if (node.Attributes["x"] != null && node.Attributes["y"] != null)
                             {
@@ -211,14 +192,6 @@ namespace HSPE
                             foreach (XmlNode alias in node.ChildNodes)
                                 if (alias.Attributes["key"] != null && alias.Attributes["value"] != null)
                                     BlendShapesEditor._blendShapeAliases.Add(alias.Attributes["key"].Value, alias.Attributes["value"].Value);
-                            break;
-                        case "crotchCorrectionByDefault":
-                            if (node.Attributes["value"] != null)
-                                _crotchCorrectionByDefault = XmlConvert.ToBoolean(node.Attributes["value"].Value);
-                            break;
-                        case "anklesCorrectionByDefault":
-                            if (node.Attributes["value"] != null)
-                                _anklesCorrectionByDefault = XmlConvert.ToBoolean(node.Attributes["value"].Value);
                             break;
                     }
                 }
@@ -255,8 +228,8 @@ namespace HSPE
         {
             _cameraEventsDispatcher = Camera.main.gameObject.AddComponent<CameraEventsDispatcher>();
             SpawnGUI();
-            _crotchCorrectionByDefaultToggle.isOn = _crotchCorrectionByDefault;
-            _anklesCorrectionByDefaultToggle.isOn = _anklesCorrectionByDefault;
+            _crotchCorrectionByDefaultToggle.isOn = HSPE.ConfigCrotchCorrectionByDefault.Value;
+            _anklesCorrectionByDefaultToggle.isOn = HSPE.ConfigAnklesCorrectionByDefault.Value;
             _selectedNodes = (HashSet<TreeNodeObject>)Studio.Studio.Instance.treeNodeCtrl.GetPrivate("hashSelectNode");
         }
 
@@ -324,7 +297,7 @@ namespace HSPE
 
         protected virtual void OnDestroy()
         {
-            string folder = Path.Combine(_assemblyLocation, HSPE._name);
+            string folder = Path.Combine(Paths.ConfigPath, HSPE._name);
             if (Directory.Exists(folder) == false)
                 Directory.CreateDirectory(folder);
             string path = Path.Combine(folder, _config);
@@ -335,13 +308,6 @@ namespace HSPE
                     xmlWriter.Formatting = Formatting.Indented;
                     xmlWriter.WriteStartElement("root");
                     xmlWriter.WriteAttributeString("version", HSPE._versionNum.ToString());
-                    xmlWriter.WriteStartElement("mainWindowSize");
-                    xmlWriter.WriteAttributeString("value", XmlConvert.ToString(_mainWindowSize));
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("mainWindowShortcut");
-                    xmlWriter.WriteAttributeString("value", _mainWindowKeyCode.ToString());
-                    xmlWriter.WriteEndElement();
 
                     xmlWriter.WriteStartElement("advancedModeWindowSize");
                     xmlWriter.WriteAttributeString("x", XmlConvert.ToString((int)_advancedModeRect.width));
@@ -393,14 +359,6 @@ namespace HSPE
                         xmlWriter.WriteAttributeString("value", kvp.Value);
                         xmlWriter.WriteEndElement();
                     }
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("crotchCorrectionByDefault");
-                    xmlWriter.WriteAttributeString("value", XmlConvert.ToString(_crotchCorrectionByDefaultToggle.isOn));
-                    xmlWriter.WriteEndElement();
-
-                    xmlWriter.WriteStartElement("anklesCorrectionByDefault");
-                    xmlWriter.WriteAttributeString("value", XmlConvert.ToString(_anklesCorrectionByDefaultToggle.isOn));
                     xmlWriter.WriteEndElement();
 
                     xmlWriter.WriteEndElement();
@@ -755,8 +713,8 @@ namespace HSPE
             Button normalButton = _ui.transform.Find("Options Window/Options/Main Window Size Container/Normal Button").GetComponent<Button>();
             normalButton.onClick.AddListener(() =>
             {
-                _mainWindowSize = 1f;
-                bg.sizeDelta = sizeDelta * _mainWindowSize;
+                HSPE.ConfigMainWindowSize.Value = 1f;
+                bg.sizeDelta = sizeDelta * HSPE.ConfigMainWindowSize.Value;
 #if HONEYSELECT
                 xMoveText.fontSize = (int)(moveFontSize * this._mainWindowSize);
                 yMoveText.fontSize = (int)(moveFontSize * this._mainWindowSize);
@@ -770,8 +728,8 @@ namespace HSPE
             Button largeButton = _ui.transform.Find("Options Window/Options/Main Window Size Container/Large Button").GetComponent<Button>();
             largeButton.onClick.AddListener(() =>
             {
-                _mainWindowSize = 1.25f;
-                bg.sizeDelta = sizeDelta * _mainWindowSize;
+                HSPE.ConfigMainWindowSize.Value = 1.25f;
+                bg.sizeDelta = sizeDelta * HSPE.ConfigMainWindowSize.Value;
 #if HONEYSELECT
                 xMoveText.fontSize = (int)(moveFontSize * this._mainWindowSize);
                 yMoveText.fontSize = (int)(moveFontSize * this._mainWindowSize);
@@ -785,8 +743,8 @@ namespace HSPE
             Button veryLargeButton = _ui.transform.Find("Options Window/Options/Main Window Size Container/Very Large Button").GetComponent<Button>();
             veryLargeButton.onClick.AddListener(() =>
             {
-                _mainWindowSize = 1.5f;
-                bg.sizeDelta = sizeDelta * _mainWindowSize;
+                HSPE.ConfigMainWindowSize.Value = 1.5f;
+                bg.sizeDelta = sizeDelta * HSPE.ConfigMainWindowSize.Value;
 #if HONEYSELECT
                 xMoveText.fontSize = (int)(moveFontSize * this._mainWindowSize);
                 yMoveText.fontSize = (int)(moveFontSize * this._mainWindowSize);
@@ -796,7 +754,7 @@ namespace HSPE
                 zRotText.fontSize = (int)(rotFontSize * this._mainWindowSize);
 #endif
             });
-            bg.sizeDelta = sizeDelta * _mainWindowSize;
+            bg.sizeDelta = sizeDelta * HSPE.ConfigMainWindowSize.Value;
 #if HONEYSELECT
             xMoveText.fontSize = (int)(moveFontSize * this._mainWindowSize);
             yMoveText.fontSize = (int)(moveFontSize * this._mainWindowSize);
@@ -805,7 +763,7 @@ namespace HSPE
             yRotText.fontSize = (int)(rotFontSize * this._mainWindowSize);
             zRotText.fontSize = (int)(rotFontSize * this._mainWindowSize);
 #endif
-            _optionsWindow.anchoredPosition += new Vector2((sizeDelta.x * _mainWindowSize) - sizeDelta.x, 0f);
+            _optionsWindow.anchoredPosition += new Vector2((sizeDelta.x * HSPE.ConfigMainWindowSize.Value) - sizeDelta.x, 0f);
 
             Slider xSlider = _ui.transform.Find("Options Window/Options/Advanced Mode Window Size Container/Width Slider").GetComponent<Slider>();
             xSlider.onValueChanged.AddListener((f) =>
@@ -828,12 +786,14 @@ namespace HSPE
             _shortcutKeyButton.onClick.AddListener(() =>
             {
                 _shortcutRegisterMode = !_shortcutRegisterMode;
-                text.text = _shortcutRegisterMode ? "Press a Key" : _mainWindowKeyCode.ToString();
+                text.text = _shortcutRegisterMode ? "Press a Key" : HSPE.ConfigMainWindowShortcut.Value.ToString();
             });
 
             _crotchCorrectionByDefaultToggle = _ui.transform.Find("Options Window/Options/Joint Correction Container/Crotch/Toggle").GetComponent<Toggle>();
-
             _anklesCorrectionByDefaultToggle = _ui.transform.Find("Options Window/Options/Joint Correction Container/Ankles/Toggle").GetComponent<Toggle>();
+
+            _crotchCorrectionByDefaultToggle.onValueChanged.AddListener(x => HSPE.ConfigCrotchCorrectionByDefault.Value = x);
+            _anklesCorrectionByDefaultToggle.onValueChanged.AddListener(x => HSPE.ConfigAnklesCorrectionByDefault.Value = x);
 
             _optionsWindow.gameObject.SetActive(false);
             LayoutRebuilder.ForceRebuildLayoutImmediate(_ui.transform.GetChild(0).transform as RectTransform);
@@ -1090,14 +1050,14 @@ namespace HSPE
                         KeyCode kc = (KeyCode)Enum.Parse(typeof(KeyCode), Input.inputString.ToUpper());
                         if (kc != KeyCode.Escape && kc != KeyCode.Return && kc != KeyCode.Mouse0 && kc != KeyCode.Mouse1 && kc != KeyCode.Mouse2 && kc != KeyCode.Mouse3 && kc != KeyCode.Mouse4 && kc != KeyCode.Mouse5 && kc != KeyCode.Mouse6)
                         {
-                            _mainWindowKeyCode = kc;
+                            HSPE.ConfigMainWindowShortcut.Value = new KeyboardShortcut(kc);
                             _shortcutKeyButton.onClick.Invoke();
                         }
                     }
                     catch { }
                 }
             }
-            else if (Input.GetKeyDown(_mainWindowKeyCode))
+            else if (HSPE.ConfigMainWindowShortcut.Value.IsDown())
             {
                 _ui.gameObject.SetActive(!_ui.gameObject.activeSelf);
                 _hspeButtonImage.color = _ui.gameObject.activeSelf ? Color.green : Color.white;

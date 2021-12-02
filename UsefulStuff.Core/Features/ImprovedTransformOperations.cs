@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Xml;
 using ToolBox;
 using ToolBox.Extensions;
 using UILib;
@@ -25,37 +24,15 @@ namespace HSUS.Features
 {
     public class ImprovedTransformOperations : IFeature
     {
-        private static bool _improvedTransformOperations = true;
-
         public void Awake()
         {
-        }
-
-        public void LoadParams(XmlNode node)
-        {
-#if !PLAYHOME
-            node = node.FindChildNode("improvedTransformOperations");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _improvedTransformOperations = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-#endif
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if !PLAYHOME
-            writer.WriteStartElement("improvedTransformOperations");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_improvedTransformOperations));
-            writer.WriteEndElement();
-#endif
         }
 
         public void LevelLoaded()
         {
 #if !PLAYHOME
             GameObject canvasGuideInput = GameObject.Find("StudioScene/Canvas Guide Input");
-            if (_improvedTransformOperations && HSUS._self.binary == Binary.Studio && canvasGuideInput != null)
+            if (HSUS.ImprovedTransformOperations.Value && HSUS._self.binary == Binary.Studio && canvasGuideInput != null)
                 canvasGuideInput.AddComponent<TransformOperations>();
 #endif
         }
@@ -81,7 +58,7 @@ namespace HSUS.Features
 
             private static bool Prepare()
             {
-                return HSUS._self.binary == Binary.Studio && _improvedTransformOperations;
+                return HSUS._self.binary == Binary.Studio && HSUS.ImprovedTransformOperations.Value;
             }
 
             private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -129,7 +106,7 @@ namespace HSUS.Features
 
             private static bool Prepare()
             {
-                return HSUS._self.binary == Binary.Studio && _improvedTransformOperations;
+                return HSUS._self.binary == Binary.Studio && HSUS.ImprovedTransformOperations.Value;
             }
 
             private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)

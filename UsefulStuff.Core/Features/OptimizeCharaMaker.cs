@@ -1,5 +1,4 @@
-﻿using System.Xml;
-using ToolBox.Extensions;
+﻿using ToolBox.Extensions;
 using UnityEngine;
 using UnityEngine.UI;
 #if IPA
@@ -20,8 +19,6 @@ namespace HSUS.Features
 {
     public class OptimizeCharaMaker : IFeature
     {
-#if HONEYSELECT || KOIKATSU
-        internal static bool _optimizeCharaMaker = true;
 #if HONEYSELECT
         internal static bool _removeIsNew = true;
         internal static bool _asyncLoading = false;
@@ -29,7 +26,6 @@ namespace HSUS.Features
 
         internal static string _currentCharaPathGame = "";
         internal static string _currentClothesPathGame = "";
-#endif
 #endif
 
         public void Awake()
@@ -120,57 +116,57 @@ namespace HSUS.Features
 #endif
         }
 
-        public void LoadParams(XmlNode node)
-        {
-#if HONEYSELECT || KOIKATSU
-            node = node.FindChildNode("optimizeCharaMaker");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _optimizeCharaMaker = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-#if HONEYSELECT
-            foreach (XmlNode childNode in node.ChildNodes)
-            {
-                switch (childNode.Name)
-                {
-                    case "asyncLoading":
-                        if (childNode.Attributes["enabled"] != null)
-                            _asyncLoading = XmlConvert.ToBoolean(childNode.Attributes["enabled"].Value);
-                        break;
-                    case "removeIsNew":
-                        if (childNode.Attributes["enabled"] != null)
-                            _removeIsNew = XmlConvert.ToBoolean(childNode.Attributes["enabled"].Value);
-                        break;
-                    case "subFoldersColor":
-                        ColorUtility.TryParseHtmlString("#" + childNode.Attributes["value"].Value, out _subFoldersColor);
-                        break;
-                }
-            }
-#endif
-#endif
-        }
+        //        public void LoadParams(XmlNode node)
+        //        {
+        //#if HONEYSELECT || KOIKATSU
+        //            node = node.FindChildNode("optimizeCharaMaker");
+        //            if (node == null)
+        //                return;
+        //            if (node.Attributes["enabled"] != null)
+        //                _optimizeCharaMaker = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
+        //#if HONEYSELECT
+        //            foreach (XmlNode childNode in node.ChildNodes)
+        //            {
+        //                switch (childNode.Name)
+        //                {
+        //                    case "asyncLoading":
+        //                        if (childNode.Attributes["enabled"] != null)
+        //                            _asyncLoading = XmlConvert.ToBoolean(childNode.Attributes["enabled"].Value);
+        //                        break;
+        //                    case "removeIsNew":
+        //                        if (childNode.Attributes["enabled"] != null)
+        //                            _removeIsNew = XmlConvert.ToBoolean(childNode.Attributes["enabled"].Value);
+        //                        break;
+        //                    case "subFoldersColor":
+        //                        ColorUtility.TryParseHtmlString("#" + childNode.Attributes["value"].Value, out _subFoldersColor);
+        //                        break;
+        //                }
+        //            }
+        //#endif
+        //#endif
+        //        }
 
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if HONEYSELECT || KOIKATSU
-            writer.WriteStartElement("optimizeCharaMaker");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_optimizeCharaMaker));
-#if HONEYSELECT
-            writer.WriteStartElement("asyncLoading");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_asyncLoading));
-            writer.WriteEndElement();
+        //        public void SaveParams(XmlTextWriter writer)
+        //        {
+        //#if HONEYSELECT || KOIKATSU
+        //            writer.WriteStartElement("optimizeCharaMaker");
+        //            writer.WriteAttributeString("enabled", XmlConvert.ToString(_optimizeCharaMaker));
+        //#if HONEYSELECT
+        //            writer.WriteStartElement("asyncLoading");
+        //            writer.WriteAttributeString("enabled", XmlConvert.ToString(_asyncLoading));
+        //            writer.WriteEndElement();
 
-            writer.WriteStartElement("removeIsNew");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_removeIsNew));
-            writer.WriteEndElement();
+        //            writer.WriteStartElement("removeIsNew");
+        //            writer.WriteAttributeString("enabled", XmlConvert.ToString(_removeIsNew));
+        //            writer.WriteEndElement();
 
-            writer.WriteStartElement("subFoldersColor");
-            writer.WriteAttributeString("value", ColorUtility.ToHtmlStringRGB(_subFoldersColor));
-            writer.WriteEndElement();
-#endif
-            writer.WriteEndElement();
-#endif
-        }
+        //            writer.WriteStartElement("subFoldersColor");
+        //            writer.WriteAttributeString("value", ColorUtility.ToHtmlStringRGB(_subFoldersColor));
+        //            writer.WriteEndElement();
+        //#endif
+        //            writer.WriteEndElement();
+        //#endif
+        //        }
 
 #if KOIKATSU
         [HarmonyPatch(typeof(CustomFileWindow), "Start")]
@@ -178,7 +174,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeCharaMaker;
+                return HSUS.OptimizeCharaMaker.Value;
             }
 
             private static void Prefix(CustomFileWindow __instance)

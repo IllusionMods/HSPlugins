@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
-using System.Xml;
 using Studio;
 using ToolBox;
 using ToolBox.Extensions;
@@ -20,7 +17,7 @@ namespace HSUS.Features
 {
     public class DeleteConfirmation : IFeature
     {
-        private static readonly HarmonyExtensions.Replacement[] _replacements = 
+        private static readonly HarmonyExtensions.Replacement[] _replacements =
         {
             new HarmonyExtensions.Replacement()
             {
@@ -35,9 +32,6 @@ namespace HSUS.Features
             },
         };
 
-        private static bool _deleteConfirmationButton = true;
-        private static bool _deleteConfirmationKey = true;
-
         public void Awake()
         {
         }
@@ -45,7 +39,7 @@ namespace HSUS.Features
         public void LevelLoaded()
         {
 #if !PLAYHOME
-            if (_deleteConfirmationButton && HSUS._self.binary == Binary.Studio &&
+            if (HSUS.DeleteConfirmationButton.Value && HSUS._self.binary == Binary.Studio &&
 #if HONEYSELECT
             HSUS._self.level == 3
 #elif SUNSHINE
@@ -86,30 +80,6 @@ namespace HSUS.Features
             }
         }
 
-        public void LoadParams(XmlNode node)
-        {
-#if !PLAYHOME
-            node = node.FindChildNode("deleteConfirmation");
-            if (node == null)
-                return;
-            if (node.Attributes["buttonEnabled"] != null)
-                _deleteConfirmationButton = XmlConvert.ToBoolean(node.Attributes["buttonEnabled"].Value);
-            else if (node.Attributes["enabled"] != null)
-                _deleteConfirmationButton = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-            if (node.Attributes["keyEnabled"] != null)
-                _deleteConfirmationKey = XmlConvert.ToBoolean(node.Attributes["keyEnabled"].Value);
-#endif
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if !PLAYHOME
-            writer.WriteStartElement("deleteConfirmation");
-            writer.WriteAttributeString("buttonEnabled", XmlConvert.ToString(_deleteConfirmationButton));
-            writer.WriteAttributeString("keyEnabled", XmlConvert.ToString(_deleteConfirmationKey));
-            writer.WriteEndElement();
-#endif
-        }
 
 #if !PLAYHOME
         [HarmonyPatch(typeof(ShortcutKeyCtrl), "Update")]
@@ -117,7 +87,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return HSUS._self.binary == Binary.Studio && _deleteConfirmationKey;
+                return HSUS._self.binary == Binary.Studio && HSUS.DeleteConfirmationKey.Value;
             }
 
             private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)

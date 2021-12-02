@@ -1,11 +1,13 @@
 ﻿using System.Reflection;
 using ToolBox;
+using UnityEngine;
 #if IPA
 using Harmony;
 using IllusionPlugin;
 #elif BEPINEX
 using HarmonyLib;
 using BepInEx;
+using BepInEx.Configuration;
 #endif
 
 namespace HSPE
@@ -30,6 +32,10 @@ namespace HSPE
 #elif PLAYHOME
         internal const string _name = "PHPE";
         internal const string _guid = "com.joan6694.illusionplugins.poseeditor";
+#elif SUNSHINE
+        internal const string _name = "KKSPE";
+        internal const string _guid = "com.joan6694.kkplugins.kkspe";
+        internal const int saveVersion = 0;
 #elif KOIKATSU
         internal const string _name = "KKPE";
         internal const string _guid = "com.joan6694.kkplugins.kkpe";
@@ -55,11 +61,21 @@ namespace HSPE
 #endif
 #endif
 
+        internal static ConfigEntry<float> ConfigMainWindowSize { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
+        internal static ConfigEntry<bool> ConfigCrotchCorrectionByDefault { get; private set; }
+        internal static ConfigEntry<bool> ConfigAnklesCorrectionByDefault { get; private set; }
+
         protected override void Awake()
         {
             base.Awake();
+
+            ConfigMainWindowSize = Config.Bind("Config", "Main Window Size", 1f);
+            ConfigMainWindowShortcut = Config.Bind("Config", "Main Window Shortcut", new KeyboardShortcut(KeyCode.RightControl));
+            ConfigCrotchCorrectionByDefault = Config.Bind("Config", "Crotch Correction By Default", false);
+            ConfigAnklesCorrectionByDefault = Config.Bind("Config", "AnklesCorrection By Default", false);
+
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
-            //HarmonyExtensions.CreateInstance(_guid).PatchAllSafe();
         }
 
 #if AISHOUJO || HONEYSELECT2

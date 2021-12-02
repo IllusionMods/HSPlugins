@@ -1,8 +1,6 @@
 ﻿using System.Reflection;
-using System.Xml;
 using Studio;
 using ToolBox;
-using ToolBox.Extensions;
 #if IPA
 using Harmony;
 #elif BEPINEX
@@ -16,30 +14,8 @@ namespace HSUS.Features
 {
     public class AutoJointCorrection : IFeature
     {
-        private static bool _autoJointCorrection = true;
-
         public void Awake()
         {
-        }
-
-        public void LoadParams(XmlNode node)
-        {
-#if !PLAYHOME
-            node = node.FindChildNode("autoJointCorrection");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _autoJointCorrection = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-#endif
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if !PLAYHOME
-            writer.WriteStartElement("autoJointCorrection");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_autoJointCorrection));
-            writer.WriteEndElement();
-#endif
         }
 
         public void LevelLoaded()
@@ -61,7 +37,7 @@ namespace HSUS.Features
 
             public static bool Prepare()
             {
-                return _autoJointCorrection && HSUS._self.binary == Binary.Studio;
+                return HSUS.AutoJointCorrection.Value && HSUS._self.binary == Binary.Studio;
             }
 
             public static void Postfix(OICharInfo __instance)

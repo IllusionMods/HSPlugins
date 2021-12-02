@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Xml;
 using ToolBox.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
@@ -27,12 +26,6 @@ namespace HSUS.Features
 {
     public class DebugFeature : IFeature
     {
-#if HONEYSELECT || PLAYHOME
-        internal static bool _debugEnabled = true;
-#elif KOIKATSU || AISHOUJO || HONEYSELECT2
-        internal static bool _debugEnabled = false;
-#endif
-        internal static KeyCode _debugShortcut = KeyCode.RightControl;
 #if HONEYSELECT
         internal static bool _miniProfilerEnabled = true;
         internal static bool _miniProfilerStartCollapsed = true;
@@ -42,42 +35,42 @@ namespace HSUS.Features
         {
         }
 
-        public void LoadParams(XmlNode node)
-        {
-            node = node.FindChildNode("debug");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _debugEnabled = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-            if (node.Attributes["value"] != null)
-            {
-                string value = node.Attributes["value"].Value;
-                if (Enum.IsDefined(typeof(KeyCode), value))
-                    _debugShortcut = (KeyCode)Enum.Parse(typeof(KeyCode), value);
-            }
-#if HONEYSELECT
-            if (node.Attributes["miniProfilerEnabled"] != null)
-                _miniProfilerEnabled = XmlConvert.ToBoolean(node.Attributes["miniProfilerEnabled"].Value);
-            if (node.Attributes["miniProfilerStartCollapsed"] != null)
-                _miniProfilerStartCollapsed = XmlConvert.ToBoolean(node.Attributes["miniProfilerStartCollapsed"].Value);
-#endif
-        }
+        //        public void LoadParams(XmlNode node)
+        //        {
+        //            node = node.FindChildNode("debug");
+        //            if (node == null)
+        //                return;
+        //            if (node.Attributes["enabled"] != null)
+        //                _debugEnabled = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
+        //            if (node.Attributes["value"] != null)
+        //            {
+        //                string value = node.Attributes["value"].Value;
+        //                if (Enum.IsDefined(typeof(KeyCode), value))
+        //                    _debugShortcut = (KeyCode)Enum.Parse(typeof(KeyCode), value);
+        //            }
+        //#if HONEYSELECT
+        //            if (node.Attributes["miniProfilerEnabled"] != null)
+        //                _miniProfilerEnabled = XmlConvert.ToBoolean(node.Attributes["miniProfilerEnabled"].Value);
+        //            if (node.Attributes["miniProfilerStartCollapsed"] != null)
+        //                _miniProfilerStartCollapsed = XmlConvert.ToBoolean(node.Attributes["miniProfilerStartCollapsed"].Value);
+        //#endif
+        //        }
 
-        public void SaveParams(XmlTextWriter writer)
-        {
-            writer.WriteStartElement("debug");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_debugEnabled));
-            writer.WriteAttributeString("value", _debugShortcut.ToString());
-#if HONEYSELECT
-            writer.WriteAttributeString("miniProfilerEnabled", XmlConvert.ToString(_miniProfilerEnabled));
-            writer.WriteAttributeString("miniProfilerStartCollapsed", XmlConvert.ToString(_miniProfilerStartCollapsed));
-#endif
-            writer.WriteEndElement();
-        }
+        //        public void SaveParams(XmlTextWriter writer)
+        //        {
+        //            writer.WriteStartElement("debug");
+        //            writer.WriteAttributeString("enabled", XmlConvert.ToString(_debugEnabled));
+        //            writer.WriteAttributeString("value", _debugShortcut.ToString());
+        //#if HONEYSELECT
+        //            writer.WriteAttributeString("miniProfilerEnabled", XmlConvert.ToString(_miniProfilerEnabled));
+        //            writer.WriteAttributeString("miniProfilerStartCollapsed", XmlConvert.ToString(_miniProfilerStartCollapsed));
+        //#endif
+        //            writer.WriteEndElement();
+        //        }
 
         public void LevelLoaded()
         {
-            if (_debugEnabled && HSUS._self.gameObject.GetComponent<DebugConsole>() == null)
+            if (HSUS.Debug.Value && HSUS._self.gameObject.GetComponent<DebugConsole>() == null)
                 HSUS._self.gameObject.AddComponent<DebugConsole>();
         }
 
@@ -250,7 +243,7 @@ namespace HSUS.Features
 
         private void Update()
         {
-            if (Input.GetKeyDown(DebugFeature._debugShortcut))
+            if (HSUS.DebugHotkey.Value.IsDown())
                 _debug = !_debug;
 #if HONEYSELECT
             if (DebugFeature._miniProfilerEnabled)

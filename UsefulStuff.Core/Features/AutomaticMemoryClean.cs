@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Xml;
-using ToolBox.Extensions;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -8,8 +6,6 @@ namespace HSUS.Features
 {
     public class AutomaticMemoryClean : IFeature
     {
-        private bool _automaticMemoryClean = true;
-        private int _automaticMemoryCleanInterval = 300;
         private float _lastCleanup;
 
         public void Awake()
@@ -23,13 +19,13 @@ namespace HSUS.Features
 
         private void Update()
         {
-            if (_automaticMemoryClean
+            if (HSUS.AutomaticMemoryClean.Value
 #if HONEYSELECT
                 && OptimizeNEO._isCleaningResources == false
 #endif
             )
             {
-                if (Time.unscaledTime - _lastCleanup > _automaticMemoryCleanInterval)
+                if (Time.unscaledTime - _lastCleanup > HSUS.AutomaticMemoryCleanInterval.Value)
                 {
                     Resources.UnloadUnusedAssets();
                     GC.Collect();
@@ -38,26 +34,6 @@ namespace HSUS.Features
                         EventSystem.current.sendNavigationEvents = false;
                 }
             }
-        }
-
-
-        public void LoadParams(XmlNode node)
-        {
-            node = node.FindChildNode("automaticMemoryClean");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _automaticMemoryClean = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-            if (node.Attributes["interval"] != null)
-                _automaticMemoryCleanInterval = XmlConvert.ToInt32(node.Attributes["interval"].Value);
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-            writer.WriteStartElement("automaticMemoryClean");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_automaticMemoryClean));
-            writer.WriteAttributeString("interval", XmlConvert.ToString(_automaticMemoryCleanInterval));
-            writer.WriteEndElement();
         }
     }
 }

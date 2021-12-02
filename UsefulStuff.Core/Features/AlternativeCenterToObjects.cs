@@ -1,7 +1,5 @@
-﻿using System.Xml;
-using Studio;
+﻿using Studio;
 using ToolBox;
-using ToolBox.Extensions;
 using UnityEngine;
 #if IPA
 using System;
@@ -15,30 +13,8 @@ namespace HSUS.Features
 {
     public class AlternativeCenterToObjects : IFeature
     {
-        private static bool _alternativeCenterToObject = true;
-
         public void Awake()
         {
-        }
-
-        public void LoadParams(XmlNode node)
-        {
-#if !PLAYHOME
-            node = node.FindChildNode("alternativeCenterToObject");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _alternativeCenterToObject = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-#endif
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if !PLAYHOME
-            writer.WriteStartElement("alternativeCenterToObject");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_alternativeCenterToObject));
-            writer.WriteEndElement();
-#endif
         }
 
         public void LevelLoaded()
@@ -82,7 +58,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return HSUS._self.binary == Binary.Studio && _alternativeCenterToObject;
+                return HSUS._self.binary == Binary.Studio && HSUS.AlternativeCenterToObjects.Value;
             }
 
             private static void Postfix(Studio.CameraControl ___cameraControl)

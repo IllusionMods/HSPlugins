@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Xml;
 using ToolBox;
 using ToolBox.Extensions;
 using UnityEngine;
@@ -18,8 +17,6 @@ namespace HSUS.Features
 
         private Dictionary<Canvas, CanvasData> _scaledCanvases = new Dictionary<Canvas, CanvasData>();
         private HashSet<RectTransform> _alreadyProcessed;
-        internal float _gameUIScale = 1f;
-        private float _neoUIScale = 1f;
 
         #region Public Methods
         public void Awake()
@@ -113,7 +110,7 @@ namespace HSUS.Features
 
         public void Scale()
         {
-            float usedScale = HSUS._self.binary == Binary.Game ? _gameUIScale : _neoUIScale;
+            float usedScale = HSUS._self.binary == Binary.Game ? HSUS.UIScaleGame.Value : HSUS.UIScaleStudio.Value;
             foreach (KeyValuePair<Canvas, CanvasData> pair in _scaledCanvases)
             {
                 if (pair.Key != null && ShouldScaleUI(pair.Key))
@@ -144,42 +141,6 @@ namespace HSUS.Features
         {
             _alreadyProcessed = new HashSet<RectTransform>();
             Scale();
-        }
-
-        public void LoadParams(XmlNode node)
-        {
-            node = node.FindChildNode("uiScale");
-            if (node == null)
-                return;
-            foreach (XmlNode n in node.ChildNodes)
-            {
-                switch (n.Name)
-                {
-                    case "game":
-                        if (n.Attributes["scale"] != null)
-                            _gameUIScale = XmlConvert.ToSingle(n.Attributes["scale"].Value);
-                        break;
-                    case "neo":
-                        if (n.Attributes["scale"] != null)
-                            _neoUIScale = XmlConvert.ToSingle(n.Attributes["scale"].Value);
-                        break;
-                }
-            }
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-            writer.WriteStartElement("uiScale");
-
-            writer.WriteStartElement("game");
-            writer.WriteAttributeString("scale", XmlConvert.ToString(_gameUIScale));
-            writer.WriteEndElement();
-
-            writer.WriteStartElement("neo");
-            writer.WriteAttributeString("scale", XmlConvert.ToString(_neoUIScale));
-            writer.WriteEndElement();
-
-            writer.WriteEndElement();
         }
         #endregion
 

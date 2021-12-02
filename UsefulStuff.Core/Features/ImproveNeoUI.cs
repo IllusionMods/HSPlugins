@@ -1,6 +1,4 @@
-﻿using System.Xml;
-using ToolBox;
-using ToolBox.Extensions;
+﻿using ToolBox;
 using UnityEngine;
 using UnityEngine.UI;
 #if IPA
@@ -12,37 +10,15 @@ namespace HSUS.Features
 {
     public class ImproveNeoUI : IFeature
     {
-        internal static bool _improveNeoUI = true;
-
         public void Awake()
         {
 
         }
 
-        public void LoadParams(XmlNode node)
-        {
-#if HONEYSELECT || KOIKATSU
-            node = node.FindChildNode("improveNeoUI");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _improveNeoUI = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-#endif
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if HONEYSELECT || KOIKATSU
-            writer.WriteStartElement("improveNeoUI");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_improveNeoUI));
-            writer.WriteEndElement();
-#endif
-        }
-
         public void LevelLoaded()
         {
 #if HONEYSELECT || KOIKATSU
-            if (_improveNeoUI && HSUS._self.binary == Binary.Studio &&
+            if (HSUS.ImproveStudioUI.Value && HSUS._self.binary == Binary.Studio &&
 #if HONEYSELECT
                 HSUS._self.level == 3
 #elif SUNSHINE

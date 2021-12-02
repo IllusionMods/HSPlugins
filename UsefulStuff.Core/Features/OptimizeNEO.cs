@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Xml;
 #if IPA
 using Harmony;
 #elif BEPINEX
@@ -28,8 +27,6 @@ namespace HSUS.Features
 {
     public class OptimizeNEO : IFeature
     {
-        internal static bool _optimizeNeo = true;
-
 #if HONEYSELECT
         private readonly List<MethodInfo> _patchedMethods = new List<MethodInfo>()
         {
@@ -101,25 +98,6 @@ namespace HSUS.Features
 
         internal static bool _isCleaningResources { get { return _gcCollectCountdown >= 0 || _unloadUnusedAssetsCountdown >= 0; } }
 #endif
-        public void LoadParams(XmlNode node)
-        {
-#if !PLAYHOME
-            node = node.FindChildNode("optimizeNeo");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _optimizeNeo = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-#endif
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if !PLAYHOME
-            writer.WriteStartElement("optimizeNeo");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_optimizeNeo));
-            writer.WriteEndElement();
-#endif
-        }
 
         public void Awake()
         {
@@ -197,7 +175,7 @@ namespace HSUS.Features
         {
             public static bool Prepare()
             {
-                return _optimizeNeo;
+                return HSUS.OptimizeStudio.Value;
             }
 
             public static void Prefix(ItemList __instance)
@@ -294,7 +272,7 @@ namespace HSUS.Features
 
             public static bool Prepare()
             {
-                return _optimizeNeo;
+                return HSUS.OptimizeStudio.Value;
             }
 
 #if HONEYSELECT
@@ -436,7 +414,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo;
+                return HSUS.OptimizeStudio.Value;
             }
 
             private static void Postfix(CharaList __instance)
@@ -468,7 +446,7 @@ namespace HSUS.Features
         {
             internal static bool Prepare()
             {
-                return _optimizeNeo && HSUS._self.binary == Binary.Studio;
+                return HSUS.OptimizeStudio.Value && HSUS._self.binary == Binary.Studio;
             }
 
             internal static MethodInfo TargetMethod()
@@ -1442,7 +1420,7 @@ namespace HSUS.Features
 
             private static bool Prepare()
             {
-                return _optimizeNeo;
+                return HSUS.OptimizeStudio.Value;
             }
 
             private static void Postfix(WorkspaceCtrl __instance, TreeNodeCtrl ___treeNodeCtrl)
@@ -1517,7 +1495,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo && HSUS._self.binary == Binary.Studio;
+                return HSUS.OptimizeStudio.Value && HSUS._self.binary == Binary.Studio;
             }
 
             private static void Postfix()
@@ -1533,7 +1511,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo && HSUS._self.binary == Binary.Studio;
+                return HSUS.OptimizeStudio.Value && HSUS._self.binary == Binary.Studio;
             }
 
             private static void Postfix()
@@ -1549,7 +1527,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo && HSUS._self.binary == Binary.Studio;
+                return HSUS.OptimizeStudio.Value && HSUS._self.binary == Binary.Studio;
             }
 
             private static void Postfix()
@@ -1565,7 +1543,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo && HSUS._self.binary == Binary.Studio;
+                return HSUS.OptimizeStudio.Value && HSUS._self.binary == Binary.Studio;
             }
 
             private static void Postfix()
@@ -1581,7 +1559,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo && HSUS._self.binary == Binary.Studio;
+                return HSUS.OptimizeStudio.Value && HSUS._self.binary == Binary.Studio;
             }
 
             private static void Postfix()
@@ -1597,7 +1575,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo && HSUS._self.binary == Binary.Studio;
+                return HSUS.OptimizeStudio.Value && HSUS._self.binary == Binary.Studio;
             }
 
             private static void Postfix()
@@ -1613,7 +1591,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo && HSUS._self.binary == Binary.Studio;
+                return HSUS.OptimizeStudio.Value && HSUS._self.binary == Binary.Studio;
             }
 
             private static void Postfix()
@@ -1628,7 +1606,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo;
+                return HSUS.OptimizeStudio.Value;
             }
 
             private static void Postfix(TreeNodeObject __instance)
@@ -1644,7 +1622,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return _optimizeNeo;
+                return HSUS.OptimizeStudio.Value;
             }
 
             private static void Prefix()

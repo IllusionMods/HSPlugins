@@ -6,7 +6,5 @@ namespace HSUS.Features
     {
         void Awake();
         void LevelLoaded();
-        void LoadParams(XmlNode node);
-        void SaveParams(XmlTextWriter writer);
     }
 }

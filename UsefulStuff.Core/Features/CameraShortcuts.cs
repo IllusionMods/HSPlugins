@@ -2,8 +2,6 @@
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Xml;
-using ToolBox.Extensions;
 using UnityEngine;
 using Input = UnityEngine.Input;
 using MethodInfo = System.Reflection.MethodInfo;
@@ -17,33 +15,11 @@ namespace HSUS.Features
 {
     public class CameraShortcuts : IFeature
     {
-        private static bool _cameraSpeedShortcuts = true;
-
         public void Awake()
         {
 #if !PLAYHOME
             InputMouseProc_Patches.Patch();
             InputKeyProc_Patches.Patch();
-#endif
-        }
-
-        public void LoadParams(XmlNode node)
-        {
-#if !PLAYHOME
-            node = node.FindChildNode("cameraSpeedShortcuts");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _cameraSpeedShortcuts = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-#endif
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if !PLAYHOME
-            writer.WriteStartElement("cameraSpeedShortcuts");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_cameraSpeedShortcuts));
-            writer.WriteEndElement();
 #endif
         }
 
@@ -56,7 +32,7 @@ namespace HSUS.Features
         {
             public static void Patch()
             {
-                if (!_cameraSpeedShortcuts)
+                if (!HSUS.CameraShortcuts.Value)
                     return;
                 MethodInfo[] toPatch = new[]
                 {
@@ -95,7 +71,7 @@ namespace HSUS.Features
         {
             public static void Patch()
             {
-                if (!_cameraSpeedShortcuts)
+                if (!HSUS.CameraShortcuts.Value)
                     return;
                 MethodInfo[] toPatch = new[]
                 {

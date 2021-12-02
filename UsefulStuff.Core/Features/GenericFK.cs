@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Xml;
 using ToolBox;
 using ToolBox.Extensions;
 using UnityEngine;
@@ -19,26 +18,8 @@ namespace HSUS.Features
 {
     public class GenericFK : IFeature
     {
-        private static bool _enableGenericFK = true;
-
         public void Awake()
         {
-        }
-
-        public void LoadParams(XmlNode node)
-        {
-            node = node.FindChildNode("enableGenericFK");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _enableGenericFK = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-            writer.WriteStartElement("enableGenericFK");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_enableGenericFK));
-            writer.WriteEndElement();
         }
 
         public void LevelLoaded()
@@ -55,7 +36,7 @@ namespace HSUS.Features
                 _itemFKCtrl = Type.GetType("Studio.ItemFKCtrl,Assembly-CSharp");
                 if (_itemFKCtrl != null)
                     _initBone = _itemFKCtrl.GetMethod("InitBone", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                return _enableGenericFK && HSUS._self.binary == Binary.Studio && _itemFKCtrl != null;
+                return HSUS.GenericFK.Value && HSUS._self.binary == Binary.Studio && _itemFKCtrl != null;
             }
 
             private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -95,7 +76,7 @@ namespace HSUS.Features
 
             private static bool Prepare()
             {
-                if (HSUS._self.binary == Binary.Studio && _enableGenericFK && Type.GetType("Studio.ItemFKCtrl,Assembly-CSharp") != null)
+                if (HSUS._self.binary == Binary.Studio && HSUS.GenericFK.Value && Type.GetType("Studio.ItemFKCtrl,Assembly-CSharp") != null)
                 {
                     _targetInfoConstructor = Type.GetType("Studio.ItemFKCtrl+TargetInfo,Assembly-CSharp").GetConstructor(new[] { typeof(GameObject), typeof(ChangeAmount), typeof(bool) });
                     _countProperty = Type.GetType("Studio.ItemFKCtrl,Assembly-CSharp").GetProperty("count", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy);

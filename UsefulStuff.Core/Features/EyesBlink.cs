@@ -1,4 +1,7 @@
-﻿#if IPA
+﻿using System;
+using System.Reflection;
+using ToolBox;
+#if IPA
 using Harmony;
 #elif BEPINEX
 using HarmonyLib;
@@ -6,39 +9,13 @@ using HarmonyLib;
 #if AISHOUJO || HONEYSELECT2
 using AIChara;
 #endif
-using System;
-using System.Reflection;
-using System.Xml;
-using ToolBox;
-using ToolBox.Extensions;
 
 namespace HSUS.Features
 {
     public class EyesBlink : IFeature
     {
-        private static bool _eyesBlink = false;
         public void Awake()
         {
-        }
-
-        public void LoadParams(XmlNode node)
-        {
-#if !PLAYHOME
-            node = node.FindChildNode("eyesBlink");
-            if (node == null)
-                return;
-            if (node.Attributes["enabled"] != null)
-                _eyesBlink = XmlConvert.ToBoolean(node.Attributes["enabled"].Value);
-#endif
-        }
-
-        public void SaveParams(XmlTextWriter writer)
-        {
-#if !PLAYHOME
-            writer.WriteStartElement("eyesBlink");
-            writer.WriteAttributeString("enabled", XmlConvert.ToString(_eyesBlink));
-            writer.WriteEndElement();
-#endif
         }
 
         public void LevelLoaded()
@@ -69,7 +46,7 @@ namespace HSUS.Features
             private static void Postfix(ChaFileStatus __instance)
 #endif
             {
-                __instance.eyesBlink = _eyesBlink;
+                __instance.eyesBlink = HSUS.EyesBlink.Value;
             }
         }
 #endif
