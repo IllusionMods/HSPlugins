@@ -9,6 +9,7 @@
     <Import_RootNamespace>NodesConstraints.Core</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CameraEventsDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NodesConstraints.cs" />
   </ItemGroup>
