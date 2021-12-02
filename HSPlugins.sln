@@ -67,12 +67,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timeline.KKS", "Timeline.KK
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Timeline.Core", "Timeline.Core\Timeline.Core.shproj", "{E9A8DFAE-8470-4AB1-B5A6-6F9C9B42A3D7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UsefulStuff", "UsefulStuff", "{DADEF895-193D-4178-A67D-A54848914825}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KKSUS", "KKSUS\KKSUS.csproj", "{8D687395-37EC-4632-BFD3-BB9F56EC04B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KKUS", "KKUS\KKUS.csproj", "{2E566206-CB55-49B1-9D60-6182D596292F}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UsefulStuff.Core", "UsefulStuff.Core\UsefulStuff.Core.shproj", "{B4C7CDD3-B206-478D-B51F-FDC64C815F02}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		UIUtility\UIUtility.projitems*{074e95d7-3b9a-4cd9-b1b6-6f7273d400a4}*SharedItemsImports = 13
 		Core.PoseEditor\Core.PoseEditor.projitems*{22d768d0-1405-453d-80aa-e91d1b0eb956}*SharedItemsImports = 4
 		ToolBox\ToolBox.projitems*{22d768d0-1405-453d-80aa-e91d1b0eb956}*SharedItemsImports = 4
 		UIUtility\UIUtility.projitems*{22d768d0-1405-453d-80aa-e91d1b0eb956}*SharedItemsImports = 4
+		ToolBox\ToolBox.projitems*{2e566206-cb55-49b1-9d60-6182d596292f}*SharedItemsImports = 4
+		UIUtility\UIUtility.projitems*{2e566206-cb55-49b1-9d60-6182d596292f}*SharedItemsImports = 4
+		UsefulStuff.Core\UsefulStuff.Core.projitems*{2e566206-cb55-49b1-9d60-6182d596292f}*SharedItemsImports = 4
 		ToolBox\ToolBox.projitems*{34a5e7ce-5612-4fee-8290-2c4290363a40}*SharedItemsImports = 13
 		Timeline.Core\Timeline.Core.projitems*{34f37ca2-ada1-41d8-9aaa-cb9e67514373}*SharedItemsImports = 4
 		ToolBox\ToolBox.projitems*{34f37ca2-ada1-41d8-9aaa-cb9e67514373}*SharedItemsImports = 4
@@ -87,6 +98,10 @@ Global
 		Core.PoseEditor\Core.PoseEditor.projitems*{607fcc24-1e15-4ff8-a662-21d28fe01671}*SharedItemsImports = 13
 		NodesConstraints.Core\NodesConstraints.Core.projitems*{73fec2f5-225c-4363-984f-746dbab6f6f5}*SharedItemsImports = 4
 		ToolBox\ToolBox.projitems*{73fec2f5-225c-4363-984f-746dbab6f6f5}*SharedItemsImports = 4
+		ToolBox\ToolBox.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 4
+		UIUtility\UIUtility.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 4
+		UsefulStuff.Core\UsefulStuff.Core.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 4
+		UsefulStuff.Core\UsefulStuff.Core.projitems*{b4c7cdd3-b206-478d-b51f-fdc64c815f02}*SharedItemsImports = 13
 		NodesConstraints.Core\NodesConstraints.Core.projitems*{c55c162f-0f90-450b-96cc-6021168db63a}*SharedItemsImports = 4
 		ToolBox\ToolBox.projitems*{c55c162f-0f90-450b-96cc-6021168db63a}*SharedItemsImports = 4
 		Timeline.Core\Timeline.Core.projitems*{e9a8dfae-8470-4ab1-b5a6-6f9c9b42a3d7}*SharedItemsImports = 13
@@ -347,6 +362,30 @@ Global
 		{34F37CA2-ADA1-41D8-9AAA-CB9E67514373}.PH|Any CPU.Build.0 = Debug|Any CPU
 		{34F37CA2-ADA1-41D8-9AAA-CB9E67514373}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34F37CA2-ADA1-41D8-9AAA-CB9E67514373}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.AI|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.AI|Any CPU.Build.0 = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.HS|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.HS|Any CPU.Build.0 = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.KOI|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.KOI|Any CPU.Build.0 = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.PH|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.PH|Any CPU.Build.0 = Debug|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.AI|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.AI|Any CPU.Build.0 = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.HS|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.HS|Any CPU.Build.0 = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.KOI|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.KOI|Any CPU.Build.0 = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.PH|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.PH|Any CPU.Build.0 = Debug|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E566206-CB55-49B1-9D60-6182D596292F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -361,6 +400,9 @@ Global
 		{3978AEA2-BFCB-43C1-A909-921290587540} = {322BDAAE-E671-42A5-A6C0-0120C629957A}
 		{34F37CA2-ADA1-41D8-9AAA-CB9E67514373} = {322BDAAE-E671-42A5-A6C0-0120C629957A}
 		{E9A8DFAE-8470-4AB1-B5A6-6F9C9B42A3D7} = {322BDAAE-E671-42A5-A6C0-0120C629957A}
+		{8D687395-37EC-4632-BFD3-BB9F56EC04B4} = {DADEF895-193D-4178-A67D-A54848914825}
+		{2E566206-CB55-49B1-9D60-6182D596292F} = {DADEF895-193D-4178-A67D-A54848914825}
+		{B4C7CDD3-B206-478D-B51F-FDC64C815F02} = {DADEF895-193D-4178-A67D-A54848914825}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A138173C-ADED-4DEF-AE9B-B4B1F5CF0298}

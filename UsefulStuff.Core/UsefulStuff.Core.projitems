@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b4c7cdd3-b206-478d-b51f-fdc64c815f02</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>UsefulStuff.Core</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CharaMakerUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\AlternativeCenterToObjects.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\AnimationOptionDisplay.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\AutoJointCorrection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\AutomaticMemoryClean.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\CameraShortcuts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\DebugConsole.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\DefaultChars.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\DeleteConfirmation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\EyesBlink.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\FingersFKCopyButtons.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\FKColors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\Forced\HDRColorPicker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\Forced\ParentCharactersToObjects.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\Forced\Various.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\GenericFK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\IFeature.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\ImprovedTransformOperations.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\ImproveNeoUI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\OptimizeCharaMaker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\OptimizeNEO.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\PostProcessing.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmAccessoryCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmCharaLoadCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmClothesLoadCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmClothes_FCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmFaceSkinCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmHair_FCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmKindColorDCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmKindColorDSCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmSwimsuitCustom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\UIScale.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HSUS.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MiniProfiler\AbstractValueProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MiniProfiler\FramerateValueProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MiniProfiler\Graphic.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MiniProfiler\KeyboardShortcut.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MiniProfiler\MemoryValueProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MiniProfiler\MiniProfiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MiniProfiler\Texture2DUtil.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Resources\hsusresources.unity3d" />
+  </ItemGroup>
+</Project>
