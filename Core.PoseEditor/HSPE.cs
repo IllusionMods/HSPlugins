@@ -33,11 +33,7 @@ namespace HSPE
 #elif PLAYHOME
         internal const string _name = "PHPE";
         internal const string _guid = "com.joan6694.illusionplugins.poseeditor";
-#elif SUNSHINE
-        internal const string _name = "KKSPE";
-        internal const string _guid = "com.joan6694.kkplugins.kkspe";
-        internal const int saveVersion = 0;
-#elif KOIKATSU
+#elif KOIKATSU || SUNSHINE //This must be the same for KK/KKS cross compatibility
         internal const string _name = "KKPE";
         internal const string _guid = "com.joan6694.kkplugins.kkpe";
         internal const int saveVersion = 0;
