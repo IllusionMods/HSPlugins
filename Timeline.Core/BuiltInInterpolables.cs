@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using ToolBox.Extensions;
 using UnityEngine;
+#if AISHOUJO || HONEYSELECT2
+using AIChara;
+#endif
 
 namespace Timeline
 {
@@ -420,9 +423,10 @@ namespace Timeline
                 ));
             }
         }
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
         private static void CharacterClothingStates()
         {
+#if KOIKATSU
             Dictionary<ChaFileDefine.ClothesKind, string> clothes = new Dictionary<ChaFileDefine.ClothesKind, string>()
             {
                 {ChaFileDefine.ClothesKind.top, "Top"},
@@ -435,6 +439,19 @@ namespace Timeline
                 {ChaFileDefine.ClothesKind.shoes_inner, "Shoes Inside"},
                 {ChaFileDefine.ClothesKind.shoes_outer, "Shoes Outside"},
             };
+#else
+            Dictionary<ChaFileDefine.ClothesKind, string> clothes = new Dictionary<ChaFileDefine.ClothesKind, string>()
+            {
+                {ChaFileDefine.ClothesKind.top, "Top"},
+                {ChaFileDefine.ClothesKind.bot, "Bottom"},
+                {ChaFileDefine.ClothesKind.inner_t, "Bra"},
+                {ChaFileDefine.ClothesKind.inner_b, "Panties"},
+                {ChaFileDefine.ClothesKind.gloves, "Gloves"},
+                {ChaFileDefine.ClothesKind.panst, "Pantyhose"},
+                {ChaFileDefine.ClothesKind.socks, "Legwear"},
+                {ChaFileDefine.ClothesKind.shoes, "Shoes"},
+            };
+#endif
             foreach (KeyValuePair<ChaFileDefine.ClothesKind, string> pair in clothes)
             {
                 Timeline.AddInterpolableModel(new InterpolableModel(
@@ -456,7 +473,7 @@ namespace Timeline
         }
 #endif
 
-        private static void InterpolateClothes(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue, float factor)
+            private static void InterpolateClothes(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue, float factor)
         {
             int index = (int)parameter;
             byte value = (byte)leftValue;
@@ -468,7 +485,7 @@ namespace Timeline
         {
 #if HONEYSELECT
             return ((OCIChar)oci).charFileInfoStatus.clothesState[(int)parameter];
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
             return ((OCIChar)oci).charFileStatus.clothesState[(int)parameter];
 #endif
         }
@@ -503,9 +520,10 @@ namespace Timeline
                 ));
             }
         }
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
         private static void CharacterJuice()
         {
+#if KOIKATSU
             Dictionary<ChaFileDefine.SiruParts, string> juice = new Dictionary<ChaFileDefine.SiruParts, string>()
             {
                 {ChaFileDefine.SiruParts.SiruKao, "Face"},
@@ -514,6 +532,16 @@ namespace Timeline
                 {ChaFileDefine.SiruParts.SiruBackUp, "Back"},
                 {ChaFileDefine.SiruParts.SiruBackDown, "Butt"},
             };
+#else
+            Dictionary<ChaFileDefine.SiruParts, string> juice = new Dictionary<ChaFileDefine.SiruParts, string>()
+            {
+                {ChaFileDefine.SiruParts.SiruKao, "Face"},
+                {ChaFileDefine.SiruParts.SiruFrontTop, "Chest"},
+                {ChaFileDefine.SiruParts.SiruFrontBot, "Stomach"},
+                {ChaFileDefine.SiruParts.SiruBackTop, "Back"},
+                {ChaFileDefine.SiruParts.SiruBackBot, "Butt"},
+            };
+#endif
 
             foreach (KeyValuePair<ChaFileDefine.SiruParts, string> pair in juice)
             {
@@ -535,11 +563,11 @@ namespace Timeline
         }
 #endif
 
-        private static void InterpolateJuice(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue, float factor)
+            private static void InterpolateJuice(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue, float factor)
         {
 #if HONEYSELECT
             CharDefine.SiruParts index = (CharDefine.SiruParts)(int)parameter;
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
             ChaFileDefine.SiruParts index = (ChaFileDefine.SiruParts)(int)parameter;
 #endif
             byte value = (byte)leftValue;
@@ -551,7 +579,7 @@ namespace Timeline
         {
 #if HONEYSELECT
             return ((OCIChar)oci).GetSiruFlags((CharDefine.SiruParts)(int)parameter);
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
             return ((OCIChar)oci).GetSiruFlags((ChaFileDefine.SiruParts)(int)parameter);
 #endif
         }
@@ -613,9 +641,10 @@ namespace Timeline
                     writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o)));
 
         }
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
         private static void CharacterStateMisc()
         {
+#if KOIKATSU
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,
                     id: "tears",
@@ -632,6 +661,7 @@ namespace Timeline
                     getValue: (oci, parameter) => ((OCIChar)oci).GetTearsLv(),
                     readValueFromXml: (parameter, node) => node.ReadByte("value"),
                     writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (byte)o)));
+#endif
 
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,
@@ -659,7 +689,7 @@ namespace Timeline
         }
 #endif
 
-        private static void CharacterNeck()
+            private static void CharacterNeck()
         {
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,
@@ -671,7 +701,7 @@ namespace Timeline
                         int value = (int)leftValue;
 #if HONEYSELECT
                         if (((OCIChar)oci).charFileInfoStatus.neckLookPtn != value)
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
                         if (((OCIChar)oci).charFileStatus.neckLookPtn != value)
 #endif
                             ((OCIChar)oci).ChangeLookNeckPtn(value);
@@ -680,7 +710,7 @@ namespace Timeline
                     isCompatibleWithTarget: (oci) => oci is OCIChar,
 #if HONEYSELECT
                     getValue: (oci, parameter) => ((OCIChar)oci).charFileInfoStatus.neckLookPtn,
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
                     getValue: (oci, parameter) => ((OCIChar)oci).charFileStatus.neckLookPtn,
 #endif
                     readValueFromXml: (parameter, node) => node.ReadInt("value"),
@@ -893,7 +923,7 @@ namespace Timeline
                     readValueFromXml: (parameter, node) => node.ReadFloat("value"),
                     writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o)));
         }
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
         private static void Item()
         {
             //TODO PanelComponent fields
@@ -909,7 +939,11 @@ namespace Timeline
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((OCIItem)oci).SetColor(Color.LerpUnclamped((Color)leftValue, (Color)rightValue, factor), i),
                         interpolateAfter: null,
                         isCompatibleWithTarget: (oci) => oci is OCIItem it && it.useColor[i],
+#if KOIKATSU
                         getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.color[i],
+#else
+                        getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.colors[i].mainColor,
+#endif
                         readValueFromXml: (parameter, node) => node.ReadColor("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Color)o)));
 
@@ -921,7 +955,11 @@ namespace Timeline
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((OCIItem)oci).SetColor(Color.LerpUnclamped((Color)leftValue, (Color)rightValue, factor), i + 3),
                         interpolateAfter: null,
                         isCompatibleWithTarget: (oci) => oci is OCIItem it && it.useColor[i] && it.usePattern[i],
+#if KOIKATSU
                         getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.color[i + 3],
+#else
+                        getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.colors[i + 3].mainColor,
+#endif
                         readValueFromXml: (parameter, node) => node.ReadColor("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Color)o)));
                 Timeline.AddInterpolableModel(new InterpolableModel(
@@ -932,12 +970,20 @@ namespace Timeline
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
                         {
                             OCIItem item = (OCIItem)oci;
+#if KOIKATSU
                             item.itemInfo.pattern[i].uv = Vector4.LerpUnclamped((Vector4)leftValue, (Vector4)rightValue, factor);
+#else
+                            item.itemInfo.colors[i].pattern.uv = Vector4.LerpUnclamped((Vector4)leftValue, (Vector4)rightValue, factor);
+#endif
                             item.UpdateColor();
                         },
                         interpolateAfter: null,
                         isCompatibleWithTarget: (oci) => oci is OCIItem it && it.useColor[i] && it.usePattern[i],
-                        getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.pattern[i].uv,
+#if KOIKATSU
+                            getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.pattern[i].uv,
+#else
+                            getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.colors[i].pattern.uv,
+#endif
                         readValueFromXml: (parameter, node) => node.ReadVector4("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Vector4)o)));
                 Timeline.AddInterpolableModel(new InterpolableModel(
@@ -948,7 +994,11 @@ namespace Timeline
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((OCIItem)oci).SetPatternRot(i, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
                         interpolateAfter: null,
                         isCompatibleWithTarget: (oci) => oci is OCIItem it && it.useColor[i] && it.usePattern[i],
+#if KOIKATSU
                         getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.pattern[i].rot,
+#else
+                        getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.colors[i].pattern.rot,
+#endif
                         readValueFromXml: (parameter, node) => node.ReadFloat("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o)));
                 Timeline.AddInterpolableModel(new InterpolableModel(
@@ -959,16 +1009,26 @@ namespace Timeline
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
                         {
                             OCIItem item = (OCIItem)oci;
+#if KOIKATSU
                             if (item.itemInfo.pattern[i].clamp != (bool)leftValue)
+#else
+                        if (item.itemInfo.colors[i].pattern.clamp != (bool)leftValue)
+#endif
                                 item.SetPatternClamp(i, (bool)leftValue);
                         },
                         interpolateAfter: null,
                         isCompatibleWithTarget: (oci) => oci is OCIItem it && it.useColor[i] && it.usePattern[i],
+#if KOIKATSU
                         getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.pattern[i].rot,
+#else
+                        getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.colors[i].pattern.rot,
+#endif
                         readValueFromXml: (parameter, node) => node.ReadFloat("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o)));
             }
 
+            //TODO: Fix the rest
+#if KOIKATSU
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,
                     id: "itemColor4",
@@ -1122,11 +1182,11 @@ namespace Timeline
                     getValue: (oci, parameter) => ((OCIItem)oci).itemInfo.pattern[0].rot,
                     readValueFromXml: (parameter, node) => node.ReadFloat("value"),
                     writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o)));
-
+#endif
         }
 #endif
 
-        private static void Light()
+            private static void Light()
         {
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,

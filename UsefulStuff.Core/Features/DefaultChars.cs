@@ -28,9 +28,9 @@ namespace HSUS.Features
 #elif KOIKATSU
                 HSUS._self.level == 2
 #elif AISHOUJO
-                HSUS._self._level == 4
+                HSUS._self.level == 4
 #elif HONEYSELECT2
-                HSUS._self._level == 3
+                HSUS._self.level == 3
 #endif
             )
             {
@@ -56,12 +56,12 @@ namespace HSUS.Features
                     switch (CustomBase.Instance.modeSex)
                     {
                         case 0:
-                            if (string.IsNullOrEmpty(this._defaultMaleChar) == false)
-                                LoadCustomDefault(UserData.Path + "chara/male/" + this._defaultMaleChar);
+                            if (string.IsNullOrEmpty(HSUS.DefaultMaleChar.Value) == false)
+                                LoadCustomDefault(UserData.Path + "chara/male/" + HSUS.DefaultMaleChar.Value);
                             break;
                         case 1:
-                            if (string.IsNullOrEmpty(this._defaultFemaleChar) == false)
-                                LoadCustomDefault(UserData.Path + "chara/female/" + this._defaultFemaleChar);
+                            if (string.IsNullOrEmpty(HSUS.DefaultFemaleChar.Value) == false)
+                                LoadCustomDefault(UserData.Path + "chara/female/" + HSUS.DefaultFemaleChar.Value);
                             break;
                     }
 #endif

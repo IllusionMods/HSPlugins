@@ -215,13 +215,13 @@ namespace HSUS.Features
         private void SpecialOperations(float scale)
         {
 #if AISHOUJO || HONEYSELECT2
-            if (HSUS._self._binary == Binary.Game && HSUS._self._level == 4)
+            if (HSUS._self.binary == Binary.Game && HSUS._self.level == 4)
             {
                 RectTransform rt = GameObject.Find("CharaCustom/CustomControl/CanvasMain/SubMenu")?.transform as RectTransform;
-                if (rt != null && this._alreadyProcessed.Contains(rt) == false)
+                if (rt != null && _alreadyProcessed.Contains(rt) == false)
                 {
                     rt.offsetMin = new Vector2(rt.offsetMin.x, rt.offsetMax.y + (rt.offsetMin.y - rt.offsetMax.y) / scale);
-                    this._alreadyProcessed.Add(rt);
+                    _alreadyProcessed.Add(rt);
                 }
             }
 #endif

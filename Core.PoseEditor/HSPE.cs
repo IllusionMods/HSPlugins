@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using ToolBox;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 #if IPA
 using Harmony;
 using IllusionPlugin;

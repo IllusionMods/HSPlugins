@@ -31,4 +31,9 @@
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\KKPEResources.unity3d" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\AIPEResources.unity3d" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\HS2PEResources.unity3d" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\HSPEResources.unity3d" />
+  </ItemGroup>
 </Project>

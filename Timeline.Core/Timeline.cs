@@ -29,6 +29,9 @@ using BepInEx;
 #if KOIKATSU
 using Expression = ExpressionBone;
 using ExtensibleSaveFormat;
+#elif AISHOUJO || HONEYSELECT2
+using CharaUtils;
+using ExtensibleSaveFormat;
 #endif
 
 namespace Timeline
@@ -48,7 +51,7 @@ namespace Timeline
         internal const string _version = "1.1.0";
         private const string _guid = "com.joan6694.illusionplugins.timeline";
         internal const string _ownerId = "Timeline";
-#if KOIKATSU
+#if KOIKATSU || AISHOUJO || HONEYSELECT2
         private const int _saveVersion = 0;
         private const string _extSaveKey = "timeline";
 #endif
@@ -622,7 +625,7 @@ namespace Timeline
             _selectedGuideObjects = (HashSet<GuideObject>)GuideObjectManager.Instance.GetPrivate("hashSelectObject");
 #if HONEYSELECT
             AssetBundle bundle = AssetBundle.LoadFromMemory(Assembly.GetExecutingAssembly().GetResource("Timeline.Resources.TimelineResources.unity3d"));
-#elif KOIKATSU
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
             AssetBundle bundle = AssetBundle.LoadFromMemory(Assembly.GetExecutingAssembly().GetResource("Timeline.Resources.TimelineResourcesKoi.unity3d"));
 #endif
             GameObject uiPrefab = bundle.LoadAsset<GameObject>("Canvas");
@@ -3430,7 +3433,7 @@ namespace Timeline
 
         #region Saves
 
-#if KOIKATSU
+#if KOIKATSU || AISHOUJO || HONEYSELECT2
         private void OnSceneLoad(string path)
         {
             PluginData data = ExtendedSave.GetSceneExtendedDataById(_extSaveKey);
