@@ -160,7 +160,7 @@ namespace Timeline
         private const float _baseGridWidth = 300f;
         private const int _interpolableHeight = 32;
         private const float _curveGridCellSizePercent = 1f / 24f;
-        private Canvas _ui;
+        private static Canvas _ui;
         private Sprite _linkSprite;
         private Sprite _colorSprite;
         private Sprite _renameSprite;
@@ -3975,6 +3975,17 @@ namespace Timeline
                 ObjectCtrlInfo oci = __instance as ObjectCtrlInfo;
                 if (oci != null)
                     _self.RemoveInterpolables(_self._interpolables.Where(i => i.Value.oci == oci).Select(i => i.Value).ToList());
+            }
+        }
+
+        [HarmonyPatch(typeof(WorkspaceCtrl), nameof(WorkspaceCtrl.OnClickDelete))]
+        internal static class WorkspaceCtrl_OnClickDelete_Patches
+        {
+            private static bool Prefix()
+            {
+                if (Input.GetKey(KeyCode.Delete))
+                    return !_ui.gameObject.activeSelf;
+                return true;
             }
         }
 
