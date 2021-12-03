@@ -23,8 +23,9 @@ using Type = System.Type;
 using Harmony;
 using IllusionPlugin;
 #elif BEPINEX
-using HarmonyLib;
 using BepInEx;
+using BepInEx.Configuration;
+using HarmonyLib;
 #endif
 #if KOIKATSU
 using Expression = ExpressionBone;
@@ -270,10 +271,24 @@ namespace Timeline
         public static bool isPlaying { get { return _self._isPlaying; } }
         #endregion
 
+        internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> ConfigPlayPauseShortcut { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> ConfigKeyframeCopyShortcut { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> ConfigKeyframeCutShortcut { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> ConfigKeyframePasteShortcut { get; private set; }
+
+
         #region Unity Methods
         protected override void Awake()
         {
             base.Awake();
+
+            ConfigMainWindowShortcut = Config.Bind("Config", "Open Timeline UI", new KeyboardShortcut(KeyCode.T, KeyCode.LeftControl));
+            ConfigPlayPauseShortcut = Config.Bind("Config", "Play or Pause Timeline", new KeyboardShortcut(KeyCode.T, KeyCode.LeftShift));
+            ConfigKeyframeCopyShortcut = Config.Bind("Config", "Copy Keyframe", new KeyboardShortcut(KeyCode.C));
+            ConfigKeyframeCutShortcut = Config.Bind("Config", "Cut Keyframe", new KeyboardShortcut(KeyCode.X));
+            ConfigKeyframePasteShortcut = Config.Bind("Config", "PasteKeyframe", new KeyboardShortcut(KeyCode.V));
+
             _self = this;
 
             _assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -319,7 +334,7 @@ namespace Timeline
             if (_loaded == false)
                 return;
 
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.T))
+            if (ConfigMainWindowShortcut.Value.IsDown())
             {
                 _ui.gameObject.SetActive(!_ui.gameObject.activeSelf);
                 if (_ui.gameObject.activeSelf)
@@ -336,7 +351,7 @@ namespace Timeline
                 else
                     UIUtility.HideContextMenu();
             }
-            if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.T))
+            if (ConfigPlayPauseShortcut.Value.IsDown())
             {
                 if (_isPlaying)
                     Pause();
@@ -388,11 +403,11 @@ namespace Timeline
             {
                 if (Input.GetKey(KeyCode.LeftControl))
                 {
-                    if (Input.GetKeyDown(KeyCode.C))
+                    if (ConfigKeyframeCopyShortcut.Value.IsDown())
                         CopyKeyframes();
-                    else if (Input.GetKeyDown(KeyCode.X))
+                    else if (ConfigKeyframeCutShortcut.Value.IsDown())
                         CutKeyframes();
-                    else if (Input.GetKeyDown(KeyCode.V))
+                    else if (ConfigKeyframePasteShortcut.Value.IsDown())
                         PasteKeyframes();
                 }
 

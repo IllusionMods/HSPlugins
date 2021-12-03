@@ -68,7 +68,7 @@ namespace HSPE
             base.Awake();
 
             ConfigMainWindowSize = Config.Bind("Config", "Main Window Size", 1f);
-            ConfigMainWindowShortcut = Config.Bind("Config", "Main Window Shortcut", new KeyboardShortcut(KeyCode.RightControl));
+            ConfigMainWindowShortcut = Config.Bind("Config", "Main Window Shortcut", new KeyboardShortcut(KeyCode.H));
             ConfigCrotchCorrectionByDefault = Config.Bind("Config", "Crotch Correction By Default", false);
             ConfigAnklesCorrectionByDefault = Config.Bind("Config", "AnklesCorrection By Default", false);
 

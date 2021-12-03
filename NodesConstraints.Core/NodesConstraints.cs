@@ -16,6 +16,7 @@ using IllusionPlugin;
 using Harmony;
 #elif BEPINEX
 using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 #endif
 #if KOIKATSU
@@ -228,10 +229,15 @@ namespace NodesConstraints
         private bool _hasTimeline = false;
         #endregion
 
+        internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
+
         #region Unity Methods
         protected override void Awake()
         {
             base.Awake();
+
+            ConfigMainWindowShortcut = Config.Bind("Config", "Open NodeConstraints UI", new KeyboardShortcut(KeyCode.I, KeyCode.LeftControl));
+
             _self = this;
 #if HONEYSELECT
             HSExtSave.HSExtSave.RegisterHandler("nodesConstraints", null, null, this.OnSceneLoad, this.OnSceneImport, this.OnSceneSave, null, null);
@@ -317,11 +323,7 @@ namespace NodesConstraints
                 return;
             _totalActiveExpressions = _allExpressions.Count(e => e.enabled && e.gameObject.activeInHierarchy);
             _currentExpressionIndex = 0;
-#if HONEYSELECT || AISHOUJO || HONEYSELECT2
-            if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.N))
-#elif KOIKATSU
-            if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.I))
-#endif
+            if (ConfigMainWindowShortcut.Value.IsDown())
             {
                 _showUI = !_showUI;
                 if (_selectedConstraint != null)

@@ -18,6 +18,7 @@ using IllusionPlugin;
 using Harmony;
 #elif BEPINEX
 using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 #endif
 
@@ -226,10 +227,16 @@ namespace VideoExport
         public int recordingFrameLimit { get { return _recordingFrameLimit; } }
         #endregion
 
+        internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> ConfigStartStopShortcut { get; private set; }
+
         #region Unity Methods
         protected override void Awake()
         {
             base.Awake();
+
+            ConfigMainWindowShortcut = Config.Bind("Config", "Open VideoExport UI", new KeyboardShortcut(KeyCode.E, KeyCode.LeftControl));
+            ConfigStartStopShortcut = Config.Bind("Config", "Start or Stop Recording", new KeyboardShortcut(KeyCode.E, KeyCode.LeftControl, KeyCode.LeftShift));
 
             _pluginFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), _name);
             _outputFolder = Path.Combine(_pluginFolder, "Output");
@@ -277,8 +284,8 @@ namespace VideoExport
                 this.AddScreenshotPlugin(new HoneyShot(), harmony);
                 this.AddScreenshotPlugin(new PlayShot24ZHNeo(), harmony);
 #endif
-                this.AddScreenshotPlugin(new Screencap(), harmony);
-                this.AddScreenshotPlugin(new Bitmap(), harmony);
+                AddScreenshotPlugin(new Screencap(), harmony);
+                AddScreenshotPlugin(new Bitmap(), harmony);
                 if (_screenshotPlugins.Count == 0)
                     UnityEngine.Debug.LogError("VideoExport: No compatible screenshot plugin found, please install one.");
                 SetLanguage(_language);
@@ -287,14 +294,14 @@ namespace VideoExport
 
         protected override void Update()
         {
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.E))
+            if (ConfigStartStopShortcut.Value.IsDown())
             {
                 if (_isRecording == false)
                     RecordVideo();
                 else
                     StopRecording();
             }
-            else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.E))
+            else if (ConfigMainWindowShortcut.Value.IsDown())
             {
                 _showUi = !_showUi;
                 if (_imguiBackground == null)
@@ -348,7 +355,7 @@ namespace VideoExport
         {
             if (_showUi == false)
                 return;
-            _windowRect = GUILayout.Window(_uniqueId, _windowRect, this.Window, "Video Export " + _versionNum
+            _windowRect = GUILayout.Window(_uniqueId, _windowRect, Window, "Video Export " + _versionNum
 #if BETA
                                                                                                + "b"
 #endif
