@@ -1,4 +1,5 @@
-﻿using Studio;
+﻿#if !KOIKATSU
+using Studio;
 using ToolBox.Extensions;
 #if IPA
 using Harmony;
@@ -81,3 +82,4 @@ namespace HSUS.Features
 #endif
     }
 }
+#endif

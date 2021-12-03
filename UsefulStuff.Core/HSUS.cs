@@ -58,23 +58,32 @@ namespace HSUS
         private readonly OptimizeCharaMaker _optimizeCharaMaker = new OptimizeCharaMaker();
         private readonly UIScale _uiScale = new UIScale();
         private readonly DeleteConfirmation _deleteConfirmation = new DeleteConfirmation();
-        private readonly DefaultChars _defaultChars = new DefaultChars();
         private readonly ImproveNeoUI _improveNeoUi = new ImproveNeoUI();
         private readonly OptimizeNEO _optimizeNeo = new OptimizeNEO();
         private readonly GenericFK _genericFK = new GenericFK();
-        private readonly DebugFeature _debugFeature = new DebugFeature();
         private readonly ImprovedTransformOperations _improvedTransformOperations = new ImprovedTransformOperations();
-        private readonly AutoJointCorrection _autoJointCorrection = new AutoJointCorrection();
-        private readonly EyesBlink _eyesBlink = new EyesBlink();
         private readonly CameraShortcuts _cameraShortcuts = new CameraShortcuts();
         private readonly AlternativeCenterToObjects _alternativeCenterToObjects = new AlternativeCenterToObjects();
         private readonly FingersFKCopyButtons _fingersFKCopyButtons = new FingersFKCopyButtons();
         private readonly AnimationOptionDisplay _animationOptionDisplay = new AnimationOptionDisplay();
         private readonly FKColors _fkColors = new FKColors();
-        private readonly PostProcessing _postProcessing = new PostProcessing();
         private readonly AutomaticMemoryClean _automaticMemoryClean = new AutomaticMemoryClean();
         internal event Action _onUpdate;
-
+#if !KOIKATSU && !AISHOUJO && !HONEYSELECT2
+        //Handled by CharacterReplacer
+        private readonly DefaultChars _defaultChars = new DefaultChars();
+#endif
+#if !KOIKATSU
+        //Handled by DefaultParamEditor
+        private readonly AutoJointCorrection _autoJointCorrection = new AutoJointCorrection();
+        private readonly EyesBlink _eyesBlink = new EyesBlink();
+        //Vanilla features
+        private readonly PostProcessing _postProcessing = new PostProcessing();
+#endif
+#if !BEPINEX
+        //Handled by RuntimeUnityEditor
+        private readonly DebugFeature _debugFeature = new DebugFeature();
+#endif
         internal static HSUS _self;
         private int _lastScreenWidth;
         private int _lastScreenHeight;
@@ -89,9 +98,9 @@ namespace HSUS
 #elif BEPINEX
         internal Harmony _harmonyInstance;
 #endif
-        #endregion
+#endregion
 
-        #region Public Accessors
+#region Public Accessors
 #if IPA
         public override string Name { get { return _name; } }
         public override string Version
@@ -108,24 +117,35 @@ namespace HSUS
         public override string[] Filter { get { return new[] { "HoneySelect_64", "HoneySelect_32", "StudioNEO_32", "StudioNEO_64", "Honey Select Unlimited_64", "Honey Select Unlimited_32" }; } }
 #endif
         public static HSUS self { get { return _self; } }
+#endregion
 
+#region Config
         internal static ConfigEntry<float> UIScaleGame { get; private set; }
         internal static ConfigEntry<float> UIScaleStudio { get; private set; }
         internal static ConfigEntry<bool> OptimizeCharaMaker { get; private set; }
         internal static ConfigEntry<bool> DeleteConfirmationKey { get; private set; }
         internal static ConfigEntry<bool> DeleteConfirmationButton { get; private set; }
-        internal static ConfigEntry<string> DefaultFemaleChar { get; private set; }
-        internal static ConfigEntry<string> DefaultMaleChar { get; private set; }
         internal static ConfigEntry<bool> ImproveStudioUI { get; private set; }
         internal static ConfigEntry<bool> OptimizeStudio { get; private set; }
         internal static ConfigEntry<bool> GenericFK { get; private set; }
-        internal static ConfigEntry<bool> Debug { get; private set; }
-        internal static ConfigEntry<KeyboardShortcut> DebugHotkey { get; private set; }
         internal static ConfigEntry<bool> ImprovedTransformOperations { get; private set; }
-        internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
-        internal static ConfigEntry<bool> EyesBlink { get; private set; }
         internal static ConfigEntry<bool> CameraShortcuts { get; private set; }
         internal static ConfigEntry<bool> AlternativeCenterToObjects { get; private set; }
+        internal static ConfigEntry<bool> AutomaticMemoryClean { get; private set; }
+        internal static ConfigEntry<int> AutomaticMemoryCleanInterval { get; private set; }
+#if HONEYSELECT
+        internal static ConfigEntry<bool> FingersFKCopyButtons { get; private set; }
+#endif
+#if !KOIKATSU && !AISHOUJO && !HONEYSELECT2
+        //Handled by CharacterReplacer
+        internal static ConfigEntry<string> DefaultFemaleChar { get; private set; }
+        internal static ConfigEntry<string> DefaultMaleChar { get; private set; }
+#endif
+#if !KOIKATSU
+        //Handled by DefaultParamEditor
+        internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
+        internal static ConfigEntry<bool> EyesBlink { get; private set; }
+        //Vanilla features
         internal static ConfigEntry<bool> PostProcessingDepthOfField { get; private set; }
         internal static ConfigEntry<bool> PostProcessingSSAO { get; private set; }
         internal static ConfigEntry<bool> PostProcessingBloom { get; private set; }
@@ -133,14 +153,14 @@ namespace HSUS
         internal static ConfigEntry<bool> PostProcessingVignette { get; private set; }
         internal static ConfigEntry<bool> PostProcessingFog { get; private set; }
         internal static ConfigEntry<bool> PostProcessingSunShafts { get; private set; }
-        internal static ConfigEntry<bool> AutomaticMemoryClean { get; private set; }
-        internal static ConfigEntry<int> AutomaticMemoryCleanInterval { get; private set; }
-        internal static ConfigEntry<bool> VSync { get; private set; }
-
-#if HONEYSELECT
-        internal static ConfigEntry<bool> FingersFKCopyButtons { get; private set; }
 #endif
-
+#if !BEPINEX
+        //Handled by GraphicsSettings
+        internal static ConfigEntry<bool> VSync { get; private set; }
+        //Handled by RuntimeUnityEditor
+        internal static ConfigEntry<bool> Debug { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> DebugHotkey { get; private set; }
+#endif
         #endregion
 
         #region Unity Methods
@@ -153,18 +173,24 @@ namespace HSUS
             OptimizeCharaMaker = Config.Bind("Config", "OptimizeCharaMaker", true);
             DeleteConfirmationKey = Config.Bind("Config", "DeleteConfirmationKey", true);
             DeleteConfirmationButton = Config.Bind("Config", "DeleteConfirmationButton", true);
-            DefaultFemaleChar = Config.Bind("Config", "DefaultFemaleChar", "");
-            DefaultMaleChar = Config.Bind("Config", "DefaultMaleChar", "");
             ImproveStudioUI = Config.Bind("Config", "ImproveStudioUI", true);
             OptimizeStudio = Config.Bind("Config", "OptimizeStudio", true);
             GenericFK = Config.Bind("Config", "GenericFK", true);
-            Debug = Config.Bind("Config", "Debug", false);
-            DebugHotkey = Config.Bind("Config", "DebugHotkey", new KeyboardShortcut(KeyCode.RightControl));
             ImprovedTransformOperations = Config.Bind("Config", "ImprovedTransformOperations", true);
-            AutoJointCorrection = Config.Bind("Config", "AutoJointCorrection", true);
-            EyesBlink = Config.Bind("Config", "EyesBlink", true);
             CameraShortcuts = Config.Bind("Config", "CameraShortcuts", true);
             AlternativeCenterToObjects = Config.Bind("Config", "CameraShortcuts", true);
+            AutomaticMemoryClean = Config.Bind("Config", "AutomaticMemoryClean", true);
+            AutomaticMemoryCleanInterval = Config.Bind("Config", "AutomaticMemoryCleanInterval", 300);
+#if HONEYSELECT
+            FingersFKCopyButtons = Config.Bind("Config", "FingersFKCopyButtons", true);
+#endif
+#if !KOIKATSU && !AISHOUJO && !HONEYSELECT2
+            DefaultFemaleChar = Config.Bind("Config", "DefaultFemaleChar", "");
+            DefaultMaleChar = Config.Bind("Config", "DefaultMaleChar", "");
+#endif
+#if !KOIKATSU
+            AutoJointCorrection = Config.Bind("Config", "AutoJointCorrection", true);
+            EyesBlink = Config.Bind("Config", "EyesBlink", true);
             PostProcessingDepthOfField = Config.Bind("Config", "PostProcessingDepthOfField", false);
             PostProcessingSSAO = Config.Bind("Config", "PostProcessingSSAO", true);
             PostProcessingBloom = Config.Bind("Config", "PostProcessingBloom", true);
@@ -172,13 +198,12 @@ namespace HSUS
             PostProcessingVignette = Config.Bind("Config", "PostProcessingSelfShadow", true);
             PostProcessingFog = Config.Bind("Config", "PostProcessingFog", false);
             PostProcessingSunShafts = Config.Bind("Config", "PostProcessingSunShafts", false);
-            AutomaticMemoryClean = Config.Bind("Config", "AutomaticMemoryClean", true);
-            AutomaticMemoryCleanInterval = Config.Bind("Config", "AutomaticMemoryCleanInterval", 300);
-            VSync = Config.Bind("Config", "VSync", true);
-#if HONEYSELECT
-            FingersFKCopyButtons = Config.Bind("Config", "FingersFKCopyButtons", true);
 #endif
-
+#if !BEPINEX
+            VSync = Config.Bind("Config", "VSync", true);
+            Debug = Config.Bind("Config", "Debug", false);
+            DebugHotkey = Config.Bind("Config", "DebugHotkey", new KeyboardShortcut(KeyCode.RightControl));
+#endif
             _self = this;
 
 #if HONEYSELECT
@@ -193,22 +218,27 @@ namespace HSUS
             _features.Add(_optimizeCharaMaker);
             _features.Add(_uiScale);
             _features.Add(_deleteConfirmation);
-            _features.Add(_defaultChars);
             _features.Add(_improveNeoUi);
             _features.Add(_optimizeNeo);
             _features.Add(_genericFK);
-            _features.Add(_debugFeature);
             _features.Add(_improvedTransformOperations);
-            _features.Add(_autoJointCorrection);
-            _features.Add(_eyesBlink);
             _features.Add(_cameraShortcuts);
             _features.Add(_alternativeCenterToObjects);
             _features.Add(_fingersFKCopyButtons);
             _features.Add(_animationOptionDisplay);
             _features.Add(_fkColors);
-            _features.Add(_postProcessing);
             _features.Add(_automaticMemoryClean);
-
+#if !KOIKATSU && !AISHOUJO && !HONEYSELECT2
+            _features.Add(_defaultChars);
+#endif
+#if !KOIKATSU
+            _features.Add(_autoJointCorrection);
+            _features.Add(_eyesBlink);
+            _features.Add(_postProcessing);
+#endif
+#if !BEPINEX
+            _features.Add(_debugFeature);
+#endif
             UIUtility.Init();
 
             _harmonyInstance = HarmonyExtensions.CreateInstance(_guid);
@@ -256,9 +286,10 @@ namespace HSUS
 
         protected override void Update()
         {
+#if !BEPINEX
             if (VSync.Value == false)
                 QualitySettings.vSyncCount = 0;
-
+#endif
             if (_lastScreenWidth != Screen.width || _lastScreenHeight != Screen.height)
                 OnWindowResize();
             _lastScreenWidth = Screen.width;
@@ -283,13 +314,13 @@ namespace HSUS
             if (_onUpdate != null)
                 _onUpdate();
         }
-        #endregion
+#endregion
 
-        #region Private Methods
+#region Private Methods
         private void OnWindowResize()
         {
             this.ExecuteDelayed2(_uiScale.Scale, 2);
         }
-        #endregion
+#endregion
     }
 }

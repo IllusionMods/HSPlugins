@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !BEPINEX
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -114,7 +115,7 @@ namespace HSUS.Features
 
     public class DebugConsole : MonoBehaviour
     {
-        #region Types
+#region Types
         private struct ObjectPair
         {
             public readonly object parent;
@@ -164,9 +165,9 @@ namespace HSUS.Features
                 _old.Write(value);
             }
         }
-        #endregion
+#endregion
 
-        #region Private Variables
+#region Private Variables
         private Transform _target;
         private readonly HashSet<GameObject> _openedGameObjects = new HashSet<GameObject>();
         private Vector2 _scroll;
@@ -183,7 +184,7 @@ namespace HSUS.Features
         private static readonly GUIStyle _customBoxStyle = new GUIStyle { normal = new GUIStyleState { background = Texture2D.whiteTexture } };
         private bool _showHidden = false;
         private static string _logsFilter = "";
-        #endregion
+#endregion
 
 #if HONEYSELECT
         private static readonly string _has630Patch;
@@ -218,7 +219,7 @@ namespace HSUS.Features
 #endif
         }
 
-        #region Unity Methods
+#region Unity Methods
         private void Awake()
         {
         }
@@ -287,9 +288,9 @@ namespace HSUS.Features
 #endif
             );
         }
-        #endregion
+#endregion
 
-        #region Private Methods
+#region Private Methods
         private static void HandleLog(string condition, string stackTrace, LogType type)
         {
             string s = DateTime.Now.ToString("[HH:mm:ss] ") + condition + " " + stackTrace;
@@ -814,6 +815,7 @@ namespace HSUS.Features
             }
         }
     }
-    #endregion
+#endregion
 }
 
+#endif

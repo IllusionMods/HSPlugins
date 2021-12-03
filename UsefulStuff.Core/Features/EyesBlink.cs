@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !KOIKATSU
+using System;
 using System.Reflection;
 using ToolBox;
 #if IPA
@@ -53,3 +54,4 @@ namespace HSUS.Features
 
     }
 }
+#endif

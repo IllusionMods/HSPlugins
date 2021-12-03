@@ -1,4 +1,5 @@
-﻿using ToolBox;
+﻿#if !KOIKATSU && !AISHOUJO && !HONEYSELECT2
+using ToolBox;
 using ToolBox.Extensions;
 #if HONEYSELECT
 using System.IO;
@@ -154,3 +155,4 @@ namespace HSUS.Features
 
     }
 }
+#endif
