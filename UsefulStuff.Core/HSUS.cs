@@ -172,7 +172,7 @@ namespace HSUS
             UIScaleStudio = Config.Bind("Config", "UIScaleStudio", 1f);
             OptimizeCharaMaker = Config.Bind("Config", "OptimizeCharaMaker", true);
             DeleteConfirmationKey = Config.Bind("Config", "DeleteConfirmationKey", true);
-            DeleteConfirmationButton = Config.Bind("Config", "DeleteConfirmationButton", true);
+            DeleteConfirmationButton = Config.Bind("Config", "DeleteConfirmationButton", false);
             ImproveStudioUI = Config.Bind("Config", "ImproveStudioUI", true);
             OptimizeStudio = Config.Bind("Config", "OptimizeStudio", true);
             GenericFK = Config.Bind("Config", "GenericFK", true);
