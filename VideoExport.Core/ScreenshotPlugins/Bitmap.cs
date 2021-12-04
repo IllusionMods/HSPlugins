@@ -16,7 +16,6 @@ namespace VideoExport.ScreenshotPlugins
 {
     public class Bitmap : IScreenshotPlugin
     {
-#if !KOIKATSU
         [DllImport("user32.dll")]
         static extern IntPtr GetActiveWindow();
         [DllImport("user32.dll")]
@@ -32,15 +31,12 @@ namespace VideoExport.ScreenshotPlugins
             public int right;
             public int bottom;
         }
-#endif
 
         private enum CaptureMode
         {
             Normal,
             Immediate,
-#if !KOIKATSU
             Win32
-#endif
         }
 
         private enum ImgFormat
@@ -66,7 +62,6 @@ namespace VideoExport.ScreenshotPlugins
                         width = Mathf.RoundToInt(Screen.width * this._scaleFactor);
                         height = Mathf.RoundToInt(Screen.height * this._scaleFactor);
                         break;
-#if !KOIKATSU
                     case CaptureMode.Win32:
                         if (this._windowHandle == IntPtr.Zero)
                             this._windowHandle = GetActiveWindow();
@@ -75,7 +70,6 @@ namespace VideoExport.ScreenshotPlugins
                         width = rect.right - rect.left;
                         height = rect.bottom - rect.top;
                         break;
-#endif
                 }
                 if (width % 2 != 0)
                     width += 1;
@@ -194,7 +188,6 @@ namespace VideoExport.ScreenshotPlugins
                     this._cachedRenderTexture = Camera.main.targetTexture;
                     Camera.main.targetTexture = RenderTexture.GetTemporary((int)size.x, (int)size.y, renderTextureDepth, renderTextureFormat);
                     break;
-#if !KOIKATSU
                 case CaptureMode.Win32:
                     this._windowHandle = GetActiveWindow();
                     Rect rect = new Rect();
@@ -205,7 +198,6 @@ namespace VideoExport.ScreenshotPlugins
                     this._graphics = Graphics.FromImage(this._bitmap);
                     VideoExport._showUi = false;
                     break;
-#endif
             }
         }
 
@@ -217,10 +209,8 @@ namespace VideoExport.ScreenshotPlugins
                     return this.CaptureNormal();
                 case CaptureMode.Immediate:
                     return this.CaptureImmediate();
-#if !KOIKATSU
                 case CaptureMode.Win32:
                     return this.CaptureWin32(saveTo);
-#endif
             }
             return null;
         }
@@ -278,7 +268,7 @@ namespace VideoExport.ScreenshotPlugins
             }
             GUILayout.EndHorizontal();
 
-#if !HONEYSELECT && !KOIKATSU
+#if !HONEYSELECT
             if (this._captureMode == CaptureMode.Win32 && this._imageFormat == ImgFormat.EXR)
                 this._imageFormat = ImgFormat.BMP;
 #endif
@@ -358,7 +348,6 @@ namespace VideoExport.ScreenshotPlugins
             }
         }
 
-#if !KOIKATSU
         private byte[] CaptureWin32(string saveTo)
         {
             Rect rect = new Rect();
@@ -392,7 +381,6 @@ namespace VideoExport.ScreenshotPlugins
             }
             return null;
         }
-#endif
 
         private byte[] EncodeToBMP(Texture2D texture, int width, int height)
         {
