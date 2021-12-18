@@ -242,7 +242,7 @@ namespace Timeline
         private readonly AnimationCurve _hermitePreset = new AnimationCurve(new UnityEngine.Keyframe(0f, 0f, 0f, 0f), new UnityEngine.Keyframe(1f, 1f, 0f, 0f));
         private readonly AnimationCurve _stairsPreset = new AnimationCurve(new UnityEngine.Keyframe(0f, 0f, 0f, 0f), new UnityEngine.Keyframe(1f, 1f, float.PositiveInfinity, 0f));
 
-        private bool _isPlaying = false;
+        private bool _isPlaying;
         private float _startTime;
         private float _playbackTime;
         private float _duration = 10f;
@@ -268,7 +268,18 @@ namespace Timeline
         #region Accessors
         public static float playbackTime { get { return _self._playbackTime; } }
         public static float duration { get { return _self._duration; } }
-        public static bool isPlaying { get { return _self._isPlaying; } }
+        public static bool isPlaying
+        {
+            get { return _self._isPlaying; }
+            set
+            {
+                if (_self._isPlaying != value)
+                {
+                    _self._isPlaying = value;
+                    TimelineButton.UpdateButton();
+                }
+            }
+        }
         #endregion
 
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
@@ -336,20 +347,7 @@ namespace Timeline
 
             if (ConfigMainWindowShortcut.Value.IsDown())
             {
-                _ui.gameObject.SetActive(!_ui.gameObject.activeSelf);
-                if (_ui.gameObject.activeSelf)
-                    this.ExecuteDelayed2(() =>
-                    {
-                        UpdateInterpolablesView();
-                        this.ExecuteDelayed2(() => // I know that's weird but it prevents the grid sometimes disappearing, fuck unity 5.3 I guess
-                        {
-                            _grid.parent.gameObject.SetActive(false);
-                            _grid.parent.gameObject.SetActive(true);
-                            LayoutRebuilder.MarkLayoutForRebuild((RectTransform)_grid.parent);
-                        }, 4);
-                    }, 2);
-                else
-                    UIUtility.HideContextMenu();
+                ToggleUiVisible();
             }
             if (ConfigPlayPauseShortcut.Value.IsDown())
             {
@@ -416,12 +414,39 @@ namespace Timeline
             }
 
             InterpolateBefore();
+
+            TimelineButton.OnUpdate();
+        }
+
+        private void ToggleUiVisible()
+        {
+            _ui.gameObject.SetActive(!_ui.gameObject.activeSelf);
+            if (_ui.gameObject.activeSelf)
+                this.ExecuteDelayed2(() =>
+                {
+                    UpdateInterpolablesView();
+                    this.ExecuteDelayed2(
+                        () => // I know that's weird but it prevents the grid sometimes disappearing, fuck unity 5.3 I guess
+                        {
+                            _grid.parent.gameObject.SetActive(false);
+                            _grid.parent.gameObject.SetActive(true);
+                            LayoutRebuilder.MarkLayoutForRebuild((RectTransform)_grid.parent);
+                        }, 4);
+                }, 2);
+            else
+            {
+                UIUtility.HideContextMenu();
+                TimelineButton.UpdateButton();
+            }
         }
 
         private void PostLateUpdate()
         {
             if (_ui.gameObject.activeSelf && (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(2)) && UIUtility.IsContextMenuDisplayed() && UIUtility.WasClickInContextMenu() == false)
+            {
                 UIUtility.HideContextMenu();
+                TimelineButton.UpdateButton();
+            }
 
             InterpolateAfter();
         }
@@ -430,9 +455,9 @@ namespace Timeline
         #region Public Methods
         public static void Play()
         {
-            if (_self._isPlaying == false)
+            if (isPlaying == false)
             {
-                _self._isPlaying = true;
+                isPlaying = true;
                 _self._startTime = Time.time - _self._playbackTime;
             }
             else
@@ -441,7 +466,7 @@ namespace Timeline
 
         public static void Pause()
         {
-            _self._isPlaying = false;
+            isPlaying = false;
         }
 
         public static void Stop()
@@ -450,7 +475,7 @@ namespace Timeline
             _self.UpdateCursor();
             _self.Interpolate(true);
             _self.Interpolate(false);
-            _self._isPlaying = false;
+            isPlaying = false;
         }
 
         public static void PreviousFrame()
@@ -779,7 +804,7 @@ namespace Timeline
             //};
             handler.onDrag = (e) =>
             {
-                _isPlaying = false;
+                isPlaying = false;
                 _isDraggingCursor = true;
                 OnGridTopMouse(e);
                 e.Reset();
@@ -912,6 +937,10 @@ namespace Timeline
             UpdateInterpolablesView();
 
             _loaded = true;
+
+            // Wrap in a try since it can crash if KKAPI is not installed
+            try { StartCoroutine(TimelineButton.Init(() => _interpolables.Count > 0, () => _ui.gameObject.activeSelf, ToggleUiVisible, Logger)); }
+            catch (Exception ex) { Logger.LogError(ex); }
         }
 
         private void ScrollKeyframes(Vector2 arg0)
@@ -1169,6 +1198,8 @@ namespace Timeline
             this.ExecuteDelayed2(UpdateGrid);
 
             this.ExecuteDelayed2(UpdateSeparators, 2);
+
+            TimelineButton.UpdateButton();
         }
 
         private void UpdateInterpolablesViewTree(List<INode> nodes, bool showAll, ref int interpolableDisplayIndex, ref int headerDisplayIndex, ref float height, int indent = 0)
@@ -2249,7 +2280,7 @@ namespace Timeline
                                         }
                                     }
                                     if (_selectedKeyframesXOffset.Count != 0)
-                                        _isPlaying = false;
+                                        isPlaying = false;
                                     e.Reset();
                                 };
                                 dragHandler.onDrag = e =>

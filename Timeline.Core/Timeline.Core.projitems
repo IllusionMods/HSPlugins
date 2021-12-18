@@ -15,6 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)InterpolableModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Keyframe.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Timeline.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineButton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tree.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -23,5 +24,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\TimelineResourcesKoi.unity3d" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\timeline_button.png" />
   </ItemGroup>
 </Project>
