@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
+using BepInEx;
 #if IPA
 using Harmony;
 #elif BEPINEX
@@ -207,7 +208,9 @@ namespace HSPE.AMModules
             _femaleEyesComponentsCount = 16;
             _maleEyesComponentsCount = _femaleEyesComponentsCount;
 #endif
-            _presetsPath = Path.Combine(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), HSPE._name), "BlendShapesPresets");
+            // Todo turn this into a setting
+            var oldPresetsPath = Path.Combine(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), HSPE._name), "BlendShapesPresets");
+            _presetsPath = Directory.Exists(oldPresetsPath) ? oldPresetsPath : Path.Combine(Path.Combine(Path.Combine(Paths.GameRootPath, "UserData"), HSPE._name), "BlendShapesPresets");
         }
 
         public BlendShapesEditor(PoseController parent, GenericOCITarget target) : base(parent)
