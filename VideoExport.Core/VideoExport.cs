@@ -239,8 +239,10 @@ namespace VideoExport
             ConfigStartStopShortcut = Config.Bind("Config", "Start or Stop Recording", new KeyboardShortcut(KeyCode.E, KeyCode.LeftControl, KeyCode.LeftShift));
 
             _pluginFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), _name);
-            _outputFolder = Path.Combine(_pluginFolder, "Output");
-            _globalFramesFolder = Path.Combine(_pluginFolder, "Frames");
+            var oldOutputFolder = Path.Combine(_pluginFolder, "Output");
+            _outputFolder = Directory.Exists(oldOutputFolder) ? oldOutputFolder : Path.Combine(Path.Combine(Paths.GameRootPath, "UserData"), "Output");
+            var oldFramesFolder = Path.Combine(_pluginFolder, "Frames");
+            _globalFramesFolder = Directory.Exists(oldFramesFolder) ? oldFramesFolder : Path.Combine(Path.Combine(Paths.GameRootPath, "UserData"), "Frames");
 
             var harmony = HarmonyExtensions.CreateInstance(_guid);
 
