@@ -773,11 +773,10 @@ namespace HSPE
             _additionalRotationEqualsCommands = new List<GuideCommand.EqualsInfo>();
             foreach (OCIChar.BoneInfo bone in _target.ociChar.listBones)
             {
-                Transform twinBoneTransform = null;
                 Transform boneTransform = bone.guideObject.transformTarget;
                 if (fkTwinLimb.Contains(bone.boneGroup) == false)
                     continue;
-                twinBoneTransform = _bonesEditor.GetTwinBone(boneTransform);
+                Transform twinBoneTransform = _bonesEditor.GetTwinBone(boneTransform);
                 if (twinBoneTransform == null)
                     twinBoneTransform = boneTransform;
 
@@ -806,6 +805,29 @@ namespace HSPE
                         twinRot = new Quaternion(twinRot.x, -twinRot.y, -twinRot.z, twinRot.w);
                         Vector3 oldRotValue = bone.guideObject.changeAmount.rot;
                         bone.guideObject.changeAmount.rot = twinRot.eulerAngles;
+
+#if KOIKATSU
+                        //Could be simplified to a single if/else, but it's left verbose for clarity
+                        if (bone.boneID == 22 || bone.boneID == 25 || bone.boneID == 28 || bone.boneID == 31 || bone.boneID == 34) //Right hand first joint
+                            bone.guideObject.changeAmount.rot = new Vector3(-bone.guideObject.changeAmount.rot.x, 180 + bone.guideObject.changeAmount.rot.y, 180 - bone.guideObject.changeAmount.rot.z);
+
+                        else if (bone.boneID == 23 || bone.boneID == 26 || bone.boneID == 29 || bone.boneID == 32 || bone.boneID == 35) //Right hand second joint
+                            bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
+
+                        else if (bone.boneID == 24 || bone.boneID == 27 || bone.boneID == 30 || bone.boneID == 33 || bone.boneID == 36) //Right hand third joint
+                            bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
+
+
+                        else if (bone.boneID == 37 || bone.boneID == 40 || bone.boneID == 43 || bone.boneID == 46 || bone.boneID == 49) //Left hand first joint
+                            bone.guideObject.changeAmount.rot = new Vector3(-bone.guideObject.changeAmount.rot.x, 180 + bone.guideObject.changeAmount.rot.y, 180 - bone.guideObject.changeAmount.rot.z);
+
+                        else if (bone.boneID == 38 || bone.boneID == 41 || bone.boneID == 44 || bone.boneID == 47 || bone.boneID == 50) //Left hand second joint
+                            bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
+
+                        else if (bone.boneID == 39 || bone.boneID == 42 || bone.boneID == 45 || bone.boneID == 48 || bone.boneID == 51) //Left hand third joint
+                            bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
+#endif
+
                         _additionalRotationEqualsCommands.Add(new GuideCommand.EqualsInfo()
                         {
                             dicKey = bone.guideObject.dicKey,
