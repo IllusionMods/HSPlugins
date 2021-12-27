@@ -35,7 +35,7 @@ namespace Timeline
             var buttTex = ResourceUtils.GetEmbeddedResource("timeline_button.png").LoadTexture();
             _button = CustomToolbarButtons.AddLeftToolbarButton(buttTex, () =>
             {
-                if (_anyInterpolables())
+                if (!_anyInterpolables())
                 {
                     Logger.LogMessage("Nothing to play. Right click to open the Timeline window.");
                     _nagShown.Value = true;
