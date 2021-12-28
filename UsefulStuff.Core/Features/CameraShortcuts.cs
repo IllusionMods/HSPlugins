@@ -60,9 +60,9 @@ namespace HSUS.Features
             public static float GetCameraMultiplier(string axis)
             {
                 if (Input.GetKey(KeyCode.LeftControl))
-                    return Input.GetAxis(axis) / 6f;
+                    return Input.GetAxis(axis) / (6f * HSUS.CameraMultiplierFactor.Value);
                 if (Input.GetKey(KeyCode.LeftShift))
-                    return Input.GetAxis(axis) * 4f;
+                    return Input.GetAxis(axis) * (4f * HSUS.CameraMultiplierFactor.Value);
                 return Input.GetAxis(axis);
             }
         }
@@ -99,9 +99,9 @@ namespace HSUS.Features
             public static float GetCameraMultiplier()
             {
                 if (Input.GetKey(KeyCode.LeftControl))
-                    return Time.deltaTime / 6f;
+                    return Time.deltaTime / (6f * HSUS.CameraMultiplierFactor.Value);
                 if (Input.GetKey(KeyCode.LeftShift))
-                    return Time.deltaTime * 4f;
+                    return Time.deltaTime * (4f * HSUS.CameraMultiplierFactor.Value);
                 return Time.deltaTime;
             }
         }

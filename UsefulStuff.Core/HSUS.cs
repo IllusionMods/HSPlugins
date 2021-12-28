@@ -130,6 +130,7 @@ namespace HSUS
         internal static ConfigEntry<bool> GenericFK { get; private set; }
         internal static ConfigEntry<bool> ImprovedTransformOperations { get; private set; }
         internal static ConfigEntry<bool> CameraShortcuts { get; private set; }
+        internal static ConfigEntry<int> CameraMultiplierFactor { get; private set; }
         internal static ConfigEntry<bool> AlternativeCenterToObjects { get; private set; }
         internal static ConfigEntry<bool> AutomaticMemoryClean { get; private set; }
         internal static ConfigEntry<int> AutomaticMemoryCleanInterval { get; private set; }
@@ -178,6 +179,11 @@ namespace HSUS
             GenericFK = Config.Bind("Config", "GenericFK", true);
             ImprovedTransformOperations = Config.Bind("Config", "ImprovedTransformOperations", true);
             CameraShortcuts = Config.Bind("Config", "CameraShortcuts", true);
+#if AISHOUJO || HONEYSELECT2
+            CameraMultiplierFactor = Config.Bind("Config", "CameraMultiplierFactor", 10);
+#else
+            CameraMultiplierFactor = Config.Bind("Config", "CameraMultiplierFactor", 1);
+#endif
             AlternativeCenterToObjects = Config.Bind("Config", "CameraShortcuts", true);
             AutomaticMemoryClean = Config.Bind("Config", "AutomaticMemoryClean", true);
             AutomaticMemoryCleanInterval = Config.Bind("Config", "AutomaticMemoryCleanInterval", 300);
