@@ -24,13 +24,33 @@
     <Compile Include="$(MSBuildThisFileDirectory)VideoExport.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg-64.exe" />
-    <Content Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg.exe" />
-    <Content Include="$(MSBuildThisFileDirectory)ffmpeg\LICENSE.txt" />
-    <Content Include="$(MSBuildThisFileDirectory)gifski\gifski.exe" />
+    <ContentWithTargetPath  Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg-64.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>VideoExport\ffmpeg\ffmpeg-64.exe</TargetPath>
+    </ContentWithTargetPath >
+    <None Include="ffmpeg\ffmpeg-64.exe" />
+    <ContentWithTargetPath  Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>VideoExport\ffmpeg\ffmpeg.exe</TargetPath>
+    </ContentWithTargetPath >
+    <None Include="ffmpeg\ffmpeg.exe" />
+    <ContentWithTargetPath  Include="$(MSBuildThisFileDirectory)ffmpeg\LICENSE.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>VideoExport\ffmpeg\LICENSE.txt</TargetPath>
+    </ContentWithTargetPath >
+    <None Include="ffmpeg\LICENSE.txt" />
+    <ContentWithTargetPath  Include="$(MSBuildThisFileDirectory)gifski\gifski.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>VideoExport\gifski\gifski.exe</TargetPath>
+    </ContentWithTargetPath >
+    <None Include="gifski\gifski.exe" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)gifski\LICENSE" />
+    <ContentWithTargetPath  Include="$(MSBuildThisFileDirectory)gifski\LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>VideoExport\gifski\LICENSE</TargetPath>
+    </ContentWithTargetPath >
+    <None Include="gifski\LICENSE" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\English.xml" />
