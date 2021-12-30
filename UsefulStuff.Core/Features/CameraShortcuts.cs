@@ -32,8 +32,6 @@ namespace HSUS.Features
         {
             public static void Patch()
             {
-                if (!HSUS.CameraShortcuts.Value)
-                    return;
                 MethodInfo[] toPatch = new[]
                 {
                     typeof(Studio.CameraControl).GetMethod("InputMouseProc", BindingFlags.NonPublic | BindingFlags.Instance),
@@ -59,10 +57,10 @@ namespace HSUS.Features
 
             public static float GetCameraMultiplier(string axis)
             {
-                if (Input.GetKey(KeyCode.LeftControl))
-                    return Input.GetAxis(axis) / (6f * HSUS.CameraMultiplierFactor.Value);
-                if (Input.GetKey(KeyCode.LeftShift))
-                    return Input.GetAxis(axis) * (4f * HSUS.CameraMultiplierFactor.Value);
+                if (Input.GetKey(KeyCode.LeftControl) && HSUS.CameraShortcuts.Value)
+                    return Input.GetAxis(axis) * HSUS.CamSpeedSlow.Value;
+                if (Input.GetKey(KeyCode.LeftShift) && HSUS.CameraShortcuts.Value)
+                    return Input.GetAxis(axis) * HSUS.CamSpeedFast.Value;
                 return Input.GetAxis(axis);
             }
         }
@@ -71,8 +69,6 @@ namespace HSUS.Features
         {
             public static void Patch()
             {
-                if (!HSUS.CameraShortcuts.Value)
-                    return;
                 MethodInfo[] toPatch = new[]
                 {
                     typeof(Studio.CameraControl).GetMethod("InputKeyProc", AccessTools.all),
@@ -98,13 +94,18 @@ namespace HSUS.Features
 
             public static float GetCameraMultiplier()
             {
-                if (Input.GetKey(KeyCode.LeftControl))
-                    return Time.deltaTime / (6f * HSUS.CameraMultiplierFactor.Value);
-                if (Input.GetKey(KeyCode.LeftShift))
-                    return Time.deltaTime * (4f * HSUS.CameraMultiplierFactor.Value);
-                return Time.deltaTime;
+                float _adjDeltaTime = Time.deltaTime * HSUS.CamSpeedBaseFactor.Value
+#if AISHOUJO || HONEYSELECT2
+                    * 10f // to compensate for the 10x scale increse in AI and HS2
+#endif
+                    ;
+                if (Input.GetKey(KeyCode.LeftControl) && HSUS.CameraShortcuts.Value)
+                    return _adjDeltaTime * HSUS.CamSpeedSlow.Value;
+                if (Input.GetKey(KeyCode.LeftShift) && HSUS.CameraShortcuts.Value)
+                    return _adjDeltaTime * HSUS.CamSpeedFast.Value;
+                return _adjDeltaTime;
             }
         }
 #endif
-    }
+            }
 }
