@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using BepInEx.Logging;
 using ToolBox;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -57,6 +58,7 @@ namespace HSPE
         public override string[] Filter { get { return new[] { "PlayHomeStudio32bit", "PlayHomeStudio64bit" }; } }
 #endif
 #endif
+        internal static new ManualLogSource Logger;
 
         internal static ConfigEntry<float> ConfigMainWindowSize { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
@@ -66,6 +68,7 @@ namespace HSPE
         protected override void Awake()
         {
             base.Awake();
+            Logger = base.Logger;
 
             ConfigMainWindowSize = Config.Bind("Config", "Main Window Size", 1f);
             ConfigMainWindowShortcut = Config.Bind("Config", "Main Window Shortcut", new KeyboardShortcut(KeyCode.H));

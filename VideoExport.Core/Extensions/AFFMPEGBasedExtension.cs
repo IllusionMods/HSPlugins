@@ -90,7 +90,7 @@ namespace VideoExport.Extensions
             if (c == '\n')
             {
                 string line = this._errorBuilder.ToString();
-                UnityEngine.Debug.LogWarning(line);
+                VideoExport.Logger.LogWarning(line);
                 this._errorBuilder = new StringBuilder();
             }
             else

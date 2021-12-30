@@ -31,7 +31,7 @@ namespace VideoExport.ScreenshotPlugins
             MethodInfo captureOpaque = screencapType.GetMethod("CaptureOpaque", BindingFlags.NonPublic | BindingFlags.Instance);
             if (captureOpaque == null)
             {
-                UnityEngine.Debug.LogError("VideoExport: Screencap was found but seems out of date, please update it.");
+                VideoExport.Logger.LogError("VideoExport: Screencap was found but seems out of date, please update it.");
                 return false;
             }
             this._captureFunction = (CaptureFunctionDelegate)Delegate.CreateDelegate(typeof(CaptureFunctionDelegate), plugin, captureOpaque);
@@ -221,7 +221,7 @@ namespace VideoExport.ScreenshotPlugins
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError("VideoExport: Couldn't patch method.\n" + e);
+                VideoExport.Logger.LogError("VideoExport: Couldn't patch method.\n" + e);
                 return false;
             }
             return true;
@@ -387,7 +387,7 @@ namespace VideoExport.ScreenshotPlugins
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError("VideoExport: Couldn't patch method.\n" + e);
+                VideoExport.Logger.LogError("VideoExport: Couldn't patch method.\n" + e);
                 return false;
             }
             return true;

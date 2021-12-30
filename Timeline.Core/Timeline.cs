@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Xml;
+using BepInEx.Logging;
 using ToolBox;
 using ToolBox.Extensions;
 using UILib;
@@ -133,6 +134,8 @@ namespace Timeline
         #endregion
 
         #region Private Variables
+
+        internal static new ManualLogSource Logger;
         internal static Timeline _self;
         private static string _assemblyLocation;
         private static string _singleFilesFolder;
@@ -301,6 +304,7 @@ namespace Timeline
             ConfigKeyframePasteShortcut = Config.Bind("Config", "PasteKeyframe", new KeyboardShortcut(KeyCode.V));
 
             _self = this;
+            Logger = base.Logger;
 
             _assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _singleFilesFolder = Path.Combine(_assemblyLocation, Path.Combine(Name, "Single Files"));
@@ -611,7 +615,7 @@ namespace Timeline
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(Name + ": Couldn't add interpolable with model:\n" + model + "\n" + e);
+                Logger.LogError("Couldn't add interpolable with model:\n" + model + "\n" + e);
                 if (added)
                 {
                     _interpolables.Remove(actualInterpolable.GetHashCode());
@@ -2538,7 +2542,7 @@ namespace Timeline
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(Name + ": couldn't add keyframe to interpolable with value:" + interpolable + "\n" + e);
+                Logger.LogError("couldn't add keyframe to interpolable with value:" + interpolable + "\n" + e);
             }
         }
 
@@ -2597,7 +2601,7 @@ namespace Timeline
 
         private void MoveKeyframe(Keyframe keyframe, float destinationTime)
         {
-            UnityEngine.Debug.LogError(keyframe.parent.keyframes.IndexOfValue(keyframe));
+            Logger.LogError(keyframe.parent.keyframes.IndexOfValue(keyframe));
             keyframe.parent.keyframes.RemoveAt(keyframe.parent.keyframes.IndexOfValue(keyframe));
             keyframe.parent.keyframes.Add(destinationTime, keyframe);
             int i = _selectedKeyframes.FindIndex(k => k.Value == keyframe);
@@ -3172,7 +3176,7 @@ namespace Timeline
                 }
                 catch (Exception e)
                 {
-                    UnityEngine.Debug.LogError(Name + ": Couldn't delete keyframe with time \"" + pair.Key + "\" and value \"" + pair.Value + "\" from interpolable \"" + pair.Value.parent + "\"\n" + e);
+                    Logger.LogError("Couldn't delete keyframe with time \"" + pair.Key + "\" and value \"" + pair.Value + "\" from interpolable \"" + pair.Value.parent + "\"\n" + e);
                 }
             }
 
@@ -3611,7 +3615,7 @@ namespace Timeline
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(Name + ": Could not load data for OCI.\n" + document.FirstChild + "\n" + e);
+                Logger.LogError("Could not load data for OCI.\n" + document.FirstChild + "\n" + e);
             }
             UpdateInterpolablesView();
         }
@@ -3769,7 +3773,7 @@ namespace Timeline
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(Name + ": Couldn't load interpolable with the following XML:\n" + interpolableNode.OuterXml + "\n" + e);
+                Logger.LogError("Couldn't load interpolable with the following XML:\n" + interpolableNode.OuterXml + "\n" + e);
                 if (added)
                     RemoveInterpolable(interpolable);
             }
@@ -3831,7 +3835,7 @@ namespace Timeline
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError(Name + ": Couldn't save interpolable with the following value:\n" + interpolable + "\n" + e);
+                        Logger.LogError("Couldn't save interpolable with the following value:\n" + interpolable + "\n" + e);
                         return;
                     }
                 }
@@ -3866,7 +3870,7 @@ namespace Timeline
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError(Name + ": Could not duplicate data for OCI.\n" + stream + "\n" + e);
+                        Logger.LogError("Could not duplicate data for OCI.\n" + stream + "\n" + e);
                     }
 
                 }
@@ -3996,7 +4000,7 @@ namespace Timeline
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogWarning("Timeline: Could not patch OnDelete of type " + t.Name + "\n" + e);
+                        Logger.LogWarning("Could not patch OnDelete of type " + t.Name + "\n" + e);
                     }
                 }
             }

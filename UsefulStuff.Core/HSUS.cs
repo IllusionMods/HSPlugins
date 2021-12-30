@@ -259,7 +259,7 @@ namespace HSUS
                 }
                 catch (Exception e)
                 {
-                    UnityEngine.Debug.LogError(Name + ": Couldn't call Awake for feature " + feature + ":\n" + e);
+                    Logger.LogError("Couldn't call Awake for feature " + feature + ":\n" + e);
                 }
             }
         }
@@ -284,7 +284,7 @@ namespace HSUS
                 }
                 catch (Exception e)
                 {
-                    UnityEngine.Debug.LogError(Name + ": Couldn't call LevelLoaded for feature " + feature + ":\n" + e);
+                    Logger.LogError("Couldn't call LevelLoaded for feature " + feature + ":\n" + e);
                 }
             }
 

@@ -705,7 +705,7 @@ namespace HSPE.AMModules
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError("HSPE: Couldn't load blendshape for object " + _parent.name + " " + node.OuterXml + "\n" + e);
+                        HSPE.Logger.LogError("Couldn't load blendshape for object " + _parent.name + " " + node.OuterXml + "\n" + e);
                     }
                 }
             }
@@ -736,7 +736,7 @@ namespace HSPE.AMModules
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError("HSPE: Couldn't load blendshape for object " + _parent.name + " " + pair.Key.OuterXml + "\n" + e);
+                        HSPE.Logger.LogError("Couldn't load blendshape for object " + _parent.name + " " + pair.Key.OuterXml + "\n" + e);
                     }
                 }
                 _secondPassLoadingNodes.Clear();

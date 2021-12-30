@@ -1164,7 +1164,7 @@ namespace HSPE.AMModules
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError("HSPE: Couldn't load dynamic bone for object " + _parent.name + " " + node.OuterXml + "\n" + e);
+                        HSPE.Logger.LogError("Couldn't load dynamic bone for object " + _parent.name + " " + node.OuterXml + "\n" + e);
                     }
                 }
             }

@@ -1510,7 +1510,7 @@ namespace HSPE
         private void LoadDefaultVersion(XmlNode node, List<KeyValuePair<int, ObjectCtrlInfo>> dic)
         {
             //this.ExecuteDelayed(() => {
-            //    UnityEngine.Debug.LogError("objects in scene " + Studio.Studio.Instance.dicObjectCtrl.Count);
+            //    HSPE.Logger.LogError("objects in scene " + Studio.Studio.Instance.dicObjectCtrl.Count);
             //}, 6);
             if (node == null || node.Name != "root")
                 return;

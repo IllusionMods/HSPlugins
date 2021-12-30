@@ -135,7 +135,7 @@ namespace Timeline
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(Timeline.Name + ": Exception happened while checking if OCI was compatible with target:\n" + e);
+                Timeline.Logger.LogError("Exception happened while checking if OCI was compatible with target:\n" + e);
                 return false;
             }
         }

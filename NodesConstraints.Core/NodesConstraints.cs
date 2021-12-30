@@ -1573,7 +1573,7 @@ namespace NodesConstraints
                             if (!animInfo.Version.IsNullOrEmpty())
                                 AddLink(ociChar, animInfo.IKPart, linkedItem);
                         }
-                        UnityEngine.Debug.Log($"NodesConstraints: Loaded KK_AnimationController animations for character {ociChar.charInfo.chaFile.parameter.fullname.Trim()}");
+                        Logger.LogInfo($"Loaded KK_AnimationController animations for character {ociChar.charInfo.chaFile.parameter.fullname.Trim()}");
                     }
                     //Version 2 save data
                     else
@@ -1588,13 +1588,13 @@ namespace NodesConstraints
                             if (data.data.TryGetValue("Eyes", out var loadedEyeLink) && loadedEyeLink != null)
                                 AddEyeLink(ociChar, loadedObjects[(int)loadedEyeLink]);
 
-                            UnityEngine.Debug.Log($"NodesConstraints: Loaded KK_AnimationController animations for character {ociChar.charInfo.chaFile.parameter.fullname.Trim()}");
+                            Logger.LogInfo($"Loaded KK_AnimationController animations for character {ociChar.charInfo.chaFile.parameter.fullname.Trim()}");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    UnityEngine.Debug.LogError("NodesConstraints: Could not load KK_AnimationController animations.\n" + ex);
+                    Logger.LogError("Could not load KK_AnimationController animations.\n" + ex);
                 }
             }
         }

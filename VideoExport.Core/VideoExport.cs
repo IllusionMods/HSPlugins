@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using BepInEx.Logging;
 using ToolBox;
 using ToolBox.Extensions;
 using UnityEngine;
@@ -25,7 +26,7 @@ using HarmonyLib;
 namespace VideoExport
 {
 #if BEPINEX
-    [BepInPlugin(GUID: GUID, Name: _name, Version: Version)]
+    [BepInPlugin(GUID: GUID, Name: Name, Version: Version)]
 #if KOIKATSU
     [BepInProcess("CharaStudio")]
 #elif AISHOUJO || HONEYSELECT2
@@ -39,7 +40,7 @@ namespace VideoExport
     {
         public const string Version = "1.2.2";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
-        private const string _name = "VideoExport";
+        public const string Name = "VideoExport";
 
 #if IPA
         public override string Name { get { return _name; } }
@@ -166,6 +167,8 @@ namespace VideoExport
         #endregion
 
         #region Private Variables
+        internal static new ManualLogSource Logger;
+
         internal static string _pluginFolder;
         private static string _outputFolder;
         private static string _globalFramesFolder;
@@ -229,16 +232,17 @@ namespace VideoExport
 
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigStartStopShortcut { get; private set; }
-
         #region Unity Methods
         protected override void Awake()
         {
             base.Awake();
 
+            Logger = base.Logger;
+
             ConfigMainWindowShortcut = Config.Bind("Config", "Open VideoExport UI", new KeyboardShortcut(KeyCode.E, KeyCode.LeftControl));
             ConfigStartStopShortcut = Config.Bind("Config", "Start or Stop Recording", new KeyboardShortcut(KeyCode.E, KeyCode.LeftControl, KeyCode.LeftShift));
 
-            _pluginFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), _name);
+            _pluginFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Name);
             var oldOutputFolder = Path.Combine(_pluginFolder, "Output");
             _outputFolder = Directory.Exists(oldOutputFolder) ? oldOutputFolder : Path.Combine(Path.Combine(Paths.GameRootPath, "UserData"), "Output");
             var oldFramesFolder = Path.Combine(_pluginFolder, "Frames");
@@ -246,7 +250,7 @@ namespace VideoExport
 
             var harmony = HarmonyExtensions.CreateInstance(GUID);
 
-            _configFile = new GenericConfig(_name, this);
+            _configFile = new GenericConfig(Name, this);
             _selectedPlugin = _configFile.AddInt("selectedScreenshotPlugin", 0, true);
             _fps = _configFile.AddInt("framerate", 60, true);
             _autoGenerateVideo = _configFile.AddBool("autoGenerateVideo", true, true);
@@ -289,7 +293,7 @@ namespace VideoExport
                 AddScreenshotPlugin(new Screencap(), harmony);
                 AddScreenshotPlugin(new Bitmap(), harmony);
                 if (_screenshotPlugins.Count == 0)
-                    UnityEngine.Debug.LogError("VideoExport: No compatible screenshot plugin found, please install one.");
+                    Logger.LogError("No compatible screenshot plugin found, please install one.");
                 SetLanguage(_language);
             }, 5);
         }
@@ -422,7 +426,7 @@ namespace VideoExport
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(_name + ": Couldn't add screenshot plugin " + plugin + ".\n" + e);
+                Logger.LogError("Couldn't add screenshot plugin " + plugin + ".\n" + e);
             }
 
         }
@@ -937,7 +941,7 @@ namespace VideoExport
             screenshotPlugin.OnEndRecording();
             Time.captureFramerate = cachedCaptureFramerate;
 
-            UnityEngine.Debug.Log($"Time spent taking screenshots: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
+            Logger.LogInfo($"Time spent taking screenshots: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
 
             foreach (DynamicBone dynamicBone in Resources.FindObjectsOfTypeAll<DynamicBone>())
                 dynamicBone.m_UpdateRate = 60;
@@ -990,7 +994,7 @@ namespace VideoExport
                 }
 
                 proc.WaitForExit();
-                UnityEngine.Debug.LogError(proc.StandardError.ReadToEnd());
+                Logger.LogError(proc.StandardError.ReadToEnd());
 
                 yield return null;
                 if (proc.ExitCode == 0)
@@ -1006,7 +1010,7 @@ namespace VideoExport
                 }
                 proc.Close();
                 _generatingVideo = false;
-                UnityEngine.Debug.Log($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
+                Logger.LogInfo($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
             }
             else
             {
@@ -1031,7 +1035,7 @@ namespace VideoExport
 
         private Process StartExternalProcess(string exe, string arguments, bool redirectStandardOutput, bool redirectStandardError)
         {
-            UnityEngine.Debug.Log($"{exe} {arguments}");
+            Logger.LogInfo($"Starting process: {exe} {arguments}");
             Process proc = new Process
             {
                 StartInfo = new ProcessStartInfo
