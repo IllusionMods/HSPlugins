@@ -130,6 +130,9 @@ namespace HSUS
         internal static ConfigEntry<bool> GenericFK { get; private set; }
         internal static ConfigEntry<bool> ImprovedTransformOperations { get; private set; }
         internal static ConfigEntry<bool> CameraShortcuts { get; private set; }
+        internal static ConfigEntry<float> CamSpeedBaseFactor { get; private set; }
+        internal static ConfigEntry<float> CamSpeedFast { get; private set; }
+        internal static ConfigEntry<float> CamSpeedSlow { get; private set; }
         internal static ConfigEntry<bool> AlternativeCenterToObjects { get; private set; }
         internal static ConfigEntry<bool> AutomaticMemoryClean { get; private set; }
         internal static ConfigEntry<int> AutomaticMemoryCleanInterval { get; private set; }
@@ -178,7 +181,10 @@ namespace HSUS
             GenericFK = Config.Bind("Config", "GenericFK", true);
             ImprovedTransformOperations = Config.Bind("Config", "ImprovedTransformOperations", true);
             CameraShortcuts = Config.Bind("Config", "CameraShortcuts", true);
-            AlternativeCenterToObjects = Config.Bind("Config", "CameraShortcuts", true);
+            CamSpeedBaseFactor = Config.Bind("Config", "CamSpeedBaseFactor", 1f, new ConfigDescription("Set base speed for camera keyboard controls. A value less than 1 is slower than vanilla speed. A value greater than one is faster than vanilla speed.", new AcceptableValueRange<float>(0.1f, 10f)));
+            CamSpeedFast = Config.Bind("Config", "CamSpeedFast", 4f, new ConfigDescription("Speed multiplier for Fast Mode", new AcceptableValueRange<float>(1f, 100f)));
+            CamSpeedSlow = Config.Bind("Config", "CamSpeedSlow", 0.6f, new ConfigDescription("Speed multiplier for Slow Mode", new AcceptableValueRange<float>(0.01f, 1f)));
+            AlternativeCenterToObjects = Config.Bind("Config", "AlternativeCenterToObjects", true);
             AutomaticMemoryClean = Config.Bind("Config", "AutomaticMemoryClean", true);
             AutomaticMemoryCleanInterval = Config.Bind("Config", "AutomaticMemoryCleanInterval", 300);
 #if HONEYSELECT
@@ -194,8 +200,8 @@ namespace HSUS
             PostProcessingDepthOfField = Config.Bind("Config", "PostProcessingDepthOfField", false);
             PostProcessingSSAO = Config.Bind("Config", "PostProcessingSSAO", true);
             PostProcessingBloom = Config.Bind("Config", "PostProcessingBloom", true);
-            PostProcessingSelfShadow = Config.Bind("Config", "CameraShortcuts", true);
-            PostProcessingVignette = Config.Bind("Config", "PostProcessingSelfShadow", true);
+            PostProcessingSelfShadow = Config.Bind("Config", "PostProcessingSelfShadow", true);
+            PostProcessingVignette = Config.Bind("Config", "PostProcessingVignette", true);
             PostProcessingFog = Config.Bind("Config", "PostProcessingFog", false);
             PostProcessingSunShafts = Config.Bind("Config", "PostProcessingSunShafts", false);
 #endif
