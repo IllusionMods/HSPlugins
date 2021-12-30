@@ -1440,7 +1440,7 @@ namespace HSPE.AMModules
             public static void Populate()
             {
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "bonePos",
                         name: "Bone Position",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1460,7 +1460,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"B Position ({((HashedPair<BonesEditor, Transform>)parameter).value.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "boneRot",
                         name: "Bone Rotation",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1480,7 +1480,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"B Rotation ({((HashedPair<BonesEditor, Transform>)parameter).value.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "boneScale",
                         name: "Bone Scale",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>

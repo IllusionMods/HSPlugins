@@ -209,8 +209,8 @@ namespace HSPE.AMModules
             _maleEyesComponentsCount = _femaleEyesComponentsCount;
 #endif
             // Todo turn this into a setting
-            var oldPresetsPath = Path.Combine(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), HSPE._name), "BlendShapesPresets");
-            _presetsPath = Directory.Exists(oldPresetsPath) ? oldPresetsPath : Path.Combine(Path.Combine(Path.Combine(Paths.GameRootPath, "UserData"), HSPE._name), "BlendShapesPresets");
+            var oldPresetsPath = Path.Combine(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), HSPE.Name), "BlendShapesPresets");
+            _presetsPath = Directory.Exists(oldPresetsPath) ? oldPresetsPath : Path.Combine(Path.Combine(Path.Combine(Paths.GameRootPath, "UserData"), HSPE.Name), "BlendShapesPresets");
         }
 
         public BlendShapesEditor(PoseController parent, GenericOCITarget target) : base(parent)
@@ -1148,7 +1148,7 @@ namespace HSPE.AMModules
             public static void Populate()
             {
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "lastBlendShape",
                         name: "BlendShape (Last Modified)",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1201,7 +1201,7 @@ namespace HSPE.AMModules
                         });
 
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "groupBlendShape",
                         name: "BlendShape (Group)",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1235,7 +1235,7 @@ namespace HSPE.AMModules
                             return $"BS ({skinnedMeshName})";
                         });
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "groupBlendShapeLink",
                         name: "BlendShape (Group, Link)",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>

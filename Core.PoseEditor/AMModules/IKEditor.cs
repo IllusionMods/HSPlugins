@@ -2210,7 +2210,7 @@ namespace HSPE.AMModules
             public static void Populate()
             {
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "ikEnabled",
                         name: "IK Enabled",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -2231,7 +2231,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                         );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "ikFixTransforms",
                         name: "IK Fix Transforms",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -2252,7 +2252,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                         );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "ikPositionWeight",
                         name: "IK Pos Weight",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetIKPositionWeight(((Parameter)parameter).ik, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
@@ -2268,7 +2268,7 @@ namespace HSPE.AMModules
                 );
                 //FABRIK
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "fabrikTolerance",
                         name: "IK Tolerance",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetFABRIKTolerance(((Parameter)parameter).ik, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
@@ -2283,7 +2283,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "fabrikMaxIterations",
                         name: "IK Max Iterations",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetFABRIKMaxIterations(((Parameter)parameter).ik, Mathf.RoundToInt(Mathf.LerpUnclamped((int)leftValue, (int)rightValue, factor))),
@@ -2299,7 +2299,7 @@ namespace HSPE.AMModules
                 );
                 //FABRIKRoot
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "fabrikRootTolerance",
                         name: "IK Tolerance",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetFABRIKRootRootPin(((Parameter)parameter).ik, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
@@ -2314,7 +2314,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "fabrikRootMaxIterations",
                         name: "IK Max Iterations",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetFABRIKRootIterations(((Parameter)parameter).ik, Mathf.RoundToInt(Mathf.LerpUnclamped((int)leftValue, (int)rightValue, factor))),
@@ -2330,7 +2330,7 @@ namespace HSPE.AMModules
                 );
                 //CCDIK
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "ccdikTolerance",
                         name: "IK Tolerance",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetCCDIKTolerance(((Parameter)parameter).ik, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
@@ -2345,7 +2345,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "ccdikMaxIterations",
                         name: "IK Max Iterations",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetCCDIKMaxIterations(((Parameter)parameter).ik, Mathf.RoundToInt(Mathf.LerpUnclamped((int)leftValue, (int)rightValue, factor))),
@@ -2361,7 +2361,7 @@ namespace HSPE.AMModules
                 );
                 //AimIK
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "aimikTolerance",
                         name: "IK Tolerance",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetAimIKTolerance(((Parameter)parameter).ik, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
@@ -2376,7 +2376,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "aimikMaxIterations",
                         name: "IK Max Iterations",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetAimIKMaxIterations(((Parameter)parameter).ik, Mathf.RoundToInt(Mathf.LerpUnclamped((int)leftValue, (int)rightValue, factor))),
@@ -2391,7 +2391,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "aimikAxis",
                         name: "IK Axis",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetAimIKAxis(((Parameter)parameter).ik, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -2406,7 +2406,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "aimikClampWeight",
                         name: "IK Clamp Weight",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetAimIKClampWeight(((Parameter)parameter).ik, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
@@ -2421,7 +2421,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "aimikClampSmoothing",
                         name: "IK Clamp Smoothing",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetAimIKClampSmoothing(((Parameter)parameter).ik, Mathf.RoundToInt(Mathf.LerpUnclamped((int)leftValue, (int)rightValue, factor))),
@@ -2436,7 +2436,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "aimikPoleAxis",
                         name: "IK Pole Axis",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetAimIKPoleAxis(((Parameter)parameter).ik, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -2451,7 +2451,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "aimikPoleAxis",
                         name: "IK Pole Position",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetAimIKPolePosition(((Parameter)parameter).ik, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -2466,7 +2466,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "aimikPoleWeight",
                         name: "IK Pole Weight",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetAimIKPoleWeight(((Parameter)parameter).ik, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
@@ -2496,7 +2496,7 @@ namespace HSPE.AMModules
                 GenerateConstraintBendInterpolables("L. Knee", e => ((IKSolverFullBodyBiped)e.ik.solver).leftLegChain.bendConstraint, e => ((FullBodyBipedIKData)e.editor.SetIKDirty(e.ik)).leftLeg);
                 //LimbIK
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "limbikRotationWeight",
                         name: "IK Rot Weight",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetLimbIKRotationWeight(((Parameter)parameter).ik, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
@@ -2511,7 +2511,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "libmikBendModifierWeight",
                         name: "IK Bend Weight",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((Parameter)parameter).editor.SetLimbIKBendModifierWeight(((Parameter)parameter).ik, Mathf.RoundToInt(Mathf.LerpUnclamped((int)leftValue, (int)rightValue, factor))),
@@ -2530,7 +2530,7 @@ namespace HSPE.AMModules
             private static void GenerateEffectorInterpolables(string effectorName, Func<Parameter, IKEffector> getEffector, Func<Parameter, FullBodyBipedIKData.EffectorData> getEffectorData)
             {
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "fbbikEffectorPositionWeight" + effectorName,
                         name: "IK " + effectorName + " Pos Weight",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -2553,7 +2553,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "fbbikEffectorRotationWeight" + effectorName,
                         name: "IK " + effectorName + " Rot Weight",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -2580,7 +2580,7 @@ namespace HSPE.AMModules
             private static void GenerateConstraintBendInterpolables(string constraintName, Func<Parameter, IKConstraintBend> getConstraint, Func<Parameter, FullBodyBipedIKData.ConstraintBendData> getConstraintData)
             {
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "fbbikConstraintBendWeight" + constraintName,
                         name: "IK " + constraintName + " Weight",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>

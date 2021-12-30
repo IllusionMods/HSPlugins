@@ -34,7 +34,7 @@ using CharaUtils;
 namespace NodesConstraints
 {
 #if BEPINEX
-    [BepInPlugin(_guid, _name, _versionNum)]
+    [BepInPlugin(GUID, Name, Version)]
     [BepInDependency("com.bepis.bepinex.extendedsave")]
 #if KOIKATSU
     [BepInProcess("CharaStudio")]
@@ -47,9 +47,9 @@ namespace NodesConstraints
     , IEnhancedPlugin
 #endif
     {
-        public const string _name = "NodesConstraints";
-        public const string _guid = "com.joan6694.illusionplugins.nodesconstraints";
-        public const string _versionNum = "1.2.1";
+        public const string Name = "NodesConstraints";
+        public const string GUID = "com.joan6694.illusionplugins.nodesconstraints";
+        public const string Version = "1.2.1";
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
         private const string _extSaveKey = "nodesConstraints";
         private const int _saveVersion = 0;
@@ -250,7 +250,7 @@ namespace NodesConstraints
             ExtendedSave.SceneBeingImported += OnSceneImport;
             ExtendedSave.SceneBeingSaved += OnSceneSave;
 #endif
-            var harmonyInstance = HarmonyExtensions.CreateInstance(_guid);
+            var harmonyInstance = HarmonyExtensions.CreateInstance(GUID);
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
             _simpleListShowNodeTypeNames = Enum.GetNames(typeof(SimpleListShowNodeType));
@@ -392,7 +392,7 @@ namespace NodesConstraints
                 _wrapButton.alignment = TextAnchor.MiddleLeft;
                 _initUI = true;
             }
-            _windowRect = GUILayout.Window(_uniqueId, _windowRect, WindowFunction, "Nodes Constraints " + _versionNum
+            _windowRect = GUILayout.Window(_uniqueId, _windowRect, WindowFunction, "Nodes Constraints " + Version
 #if BETA
                                                                                                                        + "b"
 #endif
@@ -1675,7 +1675,7 @@ namespace NodesConstraints
 
             xmlWriter.WriteStartElement("constraints");
 
-            xmlWriter.WriteAttributeString("version", _versionNum);
+            xmlWriter.WriteAttributeString("version", Version);
 
             for (int i = 0; i < _constraints.Count; i++)
             {
@@ -1730,7 +1730,7 @@ namespace NodesConstraints
         private void PopulateTimeline()
         {
             TimelineCompatibility.AddInterpolableModelDynamic(
-                    owner: _name,
+                    owner: Name,
                     id: "constraintEnabled",
                     name: "Constraint Enabled",
                     interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>

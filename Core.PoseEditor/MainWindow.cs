@@ -151,7 +151,7 @@ namespace HSPE
             if (Resources.FindObjectsOfTypeAll<IKExecutionOrder>().Length == 0)
                 gameObject.AddComponent<IKExecutionOrder>().IKComponents = new IK[0];
 
-            string path = Path.Combine(Path.Combine(Paths.ConfigPath, HSPE._name), _config);
+            string path = Path.Combine(Path.Combine(Paths.ConfigPath, HSPE.Name), _config);
             if (File.Exists(path))
             {
                 XmlDocument doc = new XmlDocument();
@@ -297,7 +297,7 @@ namespace HSPE
 
         protected virtual void OnDestroy()
         {
-            string folder = Path.Combine(Paths.ConfigPath, HSPE._name);
+            string folder = Path.Combine(Paths.ConfigPath, HSPE.Name);
             if (Directory.Exists(folder) == false)
                 Directory.CreateDirectory(folder);
             string path = Path.Combine(folder, _config);
@@ -307,7 +307,7 @@ namespace HSPE
                 {
                     xmlWriter.Formatting = Formatting.Indented;
                     xmlWriter.WriteStartElement("root");
-                    xmlWriter.WriteAttributeString("version", HSPE._versionNum.ToString());
+                    xmlWriter.WriteAttributeString("version", HSPE.Version.ToString());
 
                     xmlWriter.WriteStartElement("advancedModeWindowSize");
                     xmlWriter.WriteAttributeString("x", XmlConvert.ToString((int)_advancedModeRect.width));
@@ -1576,7 +1576,7 @@ namespace HSPE
                     {
                         xmlWriter.WriteStartElement("characterInfo");
 
-                        xmlWriter.WriteAttributeString("version", HSPE._versionNum);
+                        xmlWriter.WriteAttributeString("version", HSPE.Version);
                         xmlWriter.WriteAttributeString("name", ociChar.charInfo.chaFile.parameter.fullname);
 
                         SaveElement(ociChar, xmlWriter);
@@ -1664,7 +1664,7 @@ namespace HSPE
             {
 
                 xmlWriter.WriteStartElement("root");
-                xmlWriter.WriteAttributeString("version", HSPE._versionNum);
+                xmlWriter.WriteAttributeString("version", HSPE.Version);
                 SortedDictionary<int, ObjectCtrlInfo> dic = new SortedDictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl);
                 foreach (KeyValuePair<int, ObjectCtrlInfo> kvp in dic)
                 {

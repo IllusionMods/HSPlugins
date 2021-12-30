@@ -1274,7 +1274,7 @@ namespace HSPE.AMModules
             public static void Populate()
             {
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "colliderBaseCenter",
                         name: "Collider Center",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1295,7 +1295,7 @@ namespace HSPE.AMModules
                 );
 
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "colliderBaseDirection",
                         name: "Collider Direction",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1316,7 +1316,7 @@ namespace HSPE.AMModules
                 );
 
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "colliderBaseBound",
                         name: "Collider Bound",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1337,7 +1337,7 @@ namespace HSPE.AMModules
                 );
 
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "colliderRadius",
                         name: "Collider Radius",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1358,7 +1358,7 @@ namespace HSPE.AMModules
                 );
 
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "colliderHeight",
                         name: "Collider Height",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>

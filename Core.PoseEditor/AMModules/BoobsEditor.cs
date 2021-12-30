@@ -979,7 +979,7 @@ namespace HSPE.AMModules
             public static void Populate()
             {
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "leftBoobEnabled",
                         name: "Left Boob Enabled",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -999,7 +999,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                         );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "leftBoobGravity",
                         name: "Left Boob Gravity",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((BoobsEditor)parameter).SetGravity(((BoobsEditor)parameter)._leftBoob, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -1014,7 +1014,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                         );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "leftBoobForce",
                         name: "Left Boob Force",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((BoobsEditor)parameter).SetForce(((BoobsEditor)parameter)._leftBoob, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -1029,7 +1029,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "rightBoobEnabled",
                         name: "Right Boob Enabled",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1049,7 +1049,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "rightBoobGravity",
                         name: "Right Boob Gravity",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((BoobsEditor)parameter).SetGravity(((BoobsEditor)parameter)._rightBoob, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -1064,7 +1064,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "rightBoobForce",
                         name: "Right Boob Force",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((BoobsEditor)parameter).SetForce(((BoobsEditor)parameter)._rightBoob, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -1080,7 +1080,7 @@ namespace HSPE.AMModules
                 );
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "leftButtEnabled",
                         name: "Left Butt Enabled",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1100,7 +1100,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                         );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "leftButtGravity",
                         name: "Left Butt Gravity",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((BoobsEditor)parameter).SetGravity(((BoobsEditor)parameter)._leftButtCheek, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -1115,7 +1115,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                         );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "leftButtForce",
                         name: "Left Butt Force",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((BoobsEditor)parameter).SetForce(((BoobsEditor)parameter)._leftButtCheek, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -1130,7 +1130,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "rightButtEnabled",
                         name: "Right Butt Enabled",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1150,7 +1150,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "rightButtGravity",
                         name: "Right Butt Gravity",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((BoobsEditor)parameter).SetGravity(((BoobsEditor)parameter)._rightButtCheek, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),
@@ -1165,7 +1165,7 @@ namespace HSPE.AMModules
                         checkIntegrity: CheckIntegrity
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "rightButtForce",
                         name: "Right Butt Force",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((BoobsEditor)parameter).SetForce(((BoobsEditor)parameter)._rightButtCheek, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor)),

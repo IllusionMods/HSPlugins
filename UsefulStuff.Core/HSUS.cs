@@ -21,32 +21,32 @@ using UnityEngine.SceneManagement;
 namespace HSUS
 {
 #if BEPINEX
-    [BepInPlugin(_guid, _name, _version)]
+    [BepInPlugin(GUID, Name, Version)]
 #endif
     internal class HSUS : GenericPlugin
 #if IPA
     , IEnhancedPlugin
 #endif
     {
-        internal const string _version = "1.11.0";
+        public const string Version = "1.11.0";
 #if HONEYSELECT
-        internal const string _name = "HSUS";
-        internal const string _guid = "com.joan6694.illusionplugins.hsus";
+        public const string Name = "HSUS";
+        public const string GUID = "com.joan6694.illusionplugins.hsus";
 #elif PLAYHOME
-        internal const string _name = "PHUS";
-        internal const string _guid = "com.joan6694.illusionplugins.phus";
+        public const string Name = "PHUS";
+        public const string GUID = "com.joan6694.illusionplugins.phus";
 #elif SUNSHINE
-        internal const string _name = "KKSUS";
-        internal const string _guid = "com.joan6694.illusionplugins.kksus";
+        public const string Name = "KKSUS";
+        public const string GUID = "com.joan6694.illusionplugins.kksus";
 #elif KOIKATSU
-        internal const string _name = "KKUS";
-        internal const string _guid = "com.joan6694.illusionplugins.kkus";
+        public const string Name = "KKUS";
+        public const string GUID = "com.joan6694.illusionplugins.kkus";
 #elif AISHOUJO
-        internal const string _name = "AIUS";
-        internal const string _guid = "com.joan6694.illusionplugins.aius";
+        public const string Name = "AIUS";
+        public const string GUID = "com.joan6694.illusionplugins.aius";
 #elif HONEYSELECT2
-        internal const string _name = "HS2US";
-        internal const string _guid = "com.joan6694.illusionplugins.hs2us";
+        public const string Name = "HS2US";
+        public const string GUID = "com.joan6694.illusionplugins.hs2us";
 #endif
 
         #region Private Types
@@ -248,7 +248,7 @@ namespace HSUS
 #endif
             UIUtility.Init();
 
-            _harmonyInstance = HarmonyExtensions.CreateInstance(_guid);
+            _harmonyInstance = HarmonyExtensions.CreateInstance(GUID);
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
             foreach (IFeature feature in _features)
@@ -259,7 +259,7 @@ namespace HSUS
                 }
                 catch (Exception e)
                 {
-                    UnityEngine.Debug.LogError(_name + ": Couldn't call Awake for feature " + feature + ":\n" + e);
+                    UnityEngine.Debug.LogError(Name + ": Couldn't call Awake for feature " + feature + ":\n" + e);
                 }
             }
         }
@@ -284,7 +284,7 @@ namespace HSUS
                 }
                 catch (Exception e)
                 {
-                    UnityEngine.Debug.LogError(_name + ": Couldn't call LevelLoaded for feature " + feature + ":\n" + e);
+                    UnityEngine.Debug.LogError(Name + ": Couldn't call LevelLoaded for feature " + feature + ":\n" + e);
                 }
             }
 

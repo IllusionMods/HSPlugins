@@ -38,7 +38,7 @@ using ExtensibleSaveFormat;
 namespace Timeline
 {
 #if BEPINEX
-    [BepInPlugin(_guid, _name, _version)]
+    [BepInPlugin(GUID, Name, Version)]
     [BepInProcess("CharaStudio")]
     [BepInDependency("com.bepis.bepinex.extendedsave")]
 #endif
@@ -48,9 +48,9 @@ namespace Timeline
 #endif
     {
         #region Constants
-        internal const string _name = "Timeline";
-        internal const string _version = "1.1.2";
-        private const string _guid = "com.joan6694.illusionplugins.timeline";
+        public const string Name = "Timeline";
+        public const string Version = "1.1.2";
+        public const string GUID = "com.joan6694.illusionplugins.timeline";
         internal const string _ownerId = "Timeline";
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
         private const int _saveVersion = 0;
@@ -303,7 +303,7 @@ namespace Timeline
             _self = this;
 
             _assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _singleFilesFolder = Path.Combine(_assemblyLocation, Path.Combine(_name, "Single Files"));
+            _singleFilesFolder = Path.Combine(_assemblyLocation, Path.Combine(Name, "Single Files"));
 
 #if HONEYSELECT
             HSExtSave.HSExtSave.RegisterHandler("timeline", null, null, this.SceneLoad, this.SceneImport, this.SceneWrite, null, null);
@@ -312,7 +312,7 @@ namespace Timeline
             ExtensibleSaveFormat.ExtendedSave.SceneBeingImported += OnSceneImport;
             ExtensibleSaveFormat.ExtendedSave.SceneBeingSaved += OnSceneSave;
 #endif
-            var harmonyInstance = HarmonyExtensions.CreateInstance(_guid);
+            var harmonyInstance = HarmonyExtensions.CreateInstance(GUID);
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
             OCI_OnDelete_Patches.ManualPatch(harmonyInstance);
         }
@@ -611,7 +611,7 @@ namespace Timeline
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(_name + ": Couldn't add interpolable with model:\n" + model + "\n" + e);
+                UnityEngine.Debug.LogError(Name + ": Couldn't add interpolable with model:\n" + model + "\n" + e);
                 if (added)
                 {
                     _interpolables.Remove(actualInterpolable.GetHashCode());
@@ -2538,7 +2538,7 @@ namespace Timeline
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(_name + ": couldn't add keyframe to interpolable with value:" + interpolable + "\n" + e);
+                UnityEngine.Debug.LogError(Name + ": couldn't add keyframe to interpolable with value:" + interpolable + "\n" + e);
             }
         }
 
@@ -3172,7 +3172,7 @@ namespace Timeline
                 }
                 catch (Exception e)
                 {
-                    UnityEngine.Debug.LogError(_name + ": Couldn't delete keyframe with time \"" + pair.Key + "\" and value \"" + pair.Value + "\" from interpolable \"" + pair.Value.parent + "\"\n" + e);
+                    UnityEngine.Debug.LogError(Name + ": Couldn't delete keyframe with time \"" + pair.Key + "\" and value \"" + pair.Value + "\" from interpolable \"" + pair.Value.parent + "\"\n" + e);
                 }
             }
 
@@ -3611,7 +3611,7 @@ namespace Timeline
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(_name + ": Could not load data for OCI.\n" + document.FirstChild + "\n" + e);
+                UnityEngine.Debug.LogError(Name + ": Could not load data for OCI.\n" + document.FirstChild + "\n" + e);
             }
             UpdateInterpolablesView();
         }
@@ -3769,7 +3769,7 @@ namespace Timeline
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(_name + ": Couldn't load interpolable with the following XML:\n" + interpolableNode.OuterXml + "\n" + e);
+                UnityEngine.Debug.LogError(Name + ": Couldn't load interpolable with the following XML:\n" + interpolableNode.OuterXml + "\n" + e);
                 if (added)
                     RemoveInterpolable(interpolable);
             }
@@ -3831,7 +3831,7 @@ namespace Timeline
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError(_name + ": Couldn't save interpolable with the following value:\n" + interpolable + "\n" + e);
+                        UnityEngine.Debug.LogError(Name + ": Couldn't save interpolable with the following value:\n" + interpolable + "\n" + e);
                         return;
                     }
                 }
@@ -3866,7 +3866,7 @@ namespace Timeline
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError(_name + ": Could not duplicate data for OCI.\n" + stream + "\n" + e);
+                        UnityEngine.Debug.LogError(Name + ": Could not duplicate data for OCI.\n" + stream + "\n" + e);
                     }
 
                 }

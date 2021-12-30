@@ -1651,7 +1651,7 @@ namespace HSPE.AMModules
             public static void Populate()
             {
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneEnabled",
                         name: "DB Enabled",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1676,7 +1676,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"DB Enabled ({((Parameter)parameter).dynamicBone.m_Root.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneGravity",
                         name: "DB Gravity",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1701,7 +1701,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"DB Gravity ({((Parameter)parameter).dynamicBone.m_Root.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneForce",
                         name: "DB Force",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1726,7 +1726,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"DB Force ({((Parameter)parameter).dynamicBone.m_Root.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneFreezeAxis",
                         name: "DB FreezeAxis",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1751,7 +1751,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"DB FreezeAxis ({((Parameter)parameter).dynamicBone.m_Root.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneWeight",
                         name: "DB Weight",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1776,7 +1776,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"DB Weight ({((Parameter)parameter).dynamicBone.m_Root.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneDamping",
                         name: "DB Damping",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1801,7 +1801,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"DB Damping ({((Parameter)parameter).dynamicBone.m_Root.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneElasticity",
                         name: "DB Elasticity",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1826,7 +1826,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"DB Elasticity ({((Parameter)parameter).dynamicBone.m_Root.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneStiffness",
                         name: "DB Stiffness",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1851,7 +1851,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"DB Stiffness ({((Parameter)parameter).dynamicBone.m_Root.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneInertia",
                         name: "DB Inertia",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
@@ -1876,7 +1876,7 @@ namespace HSPE.AMModules
                         getFinalName: (name, oci, parameter) => $"DB Inertia ({((Parameter)parameter).dynamicBone.m_Root.name})"
                 );
                 ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
-                        owner: HSPE._name,
+                        owner: HSPE.Name,
                         id: "dynamicBoneRadius",
                         name: "DB Radius",
                         interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>

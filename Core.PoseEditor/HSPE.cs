@@ -14,7 +14,7 @@ using BepInEx.Configuration;
 namespace HSPE
 {
 #if BEPINEX
-    [BepInPlugin(_guid, _name, _versionNum)]
+    [BepInPlugin(GUID, Name, Version)]
     [BepInDependency("com.bepis.bepinex.extendedsave")]
 #if KOIKATSU
     [BepInProcess("CharaStudio")]
@@ -28,25 +28,25 @@ namespace HSPE
 #endif
     {
 #if HONEYSELECT
-        internal const string _name = "HSPE";
-        internal const string _guid = "com.joan6694.illusionplugins.poseeditor";
+        public const string Name = "HSPE";
+        public const string GUID = "com.joan6694.illusionplugins.poseeditor";
 #elif PLAYHOME
-        internal const string _name = "PHPE";
-        internal const string _guid = "com.joan6694.illusionplugins.poseeditor";
+        public const string Name = "PHPE";
+        public const string GUID = "com.joan6694.illusionplugins.poseeditor";
 #elif KOIKATSU || SUNSHINE //This must be the same for KK/KKS cross compatibility
-        internal const string _name = "KKPE";
-        internal const string _guid = "com.joan6694.kkplugins.kkpe";
+        public const string Name = "KKPE";
+        public const string GUID = "com.joan6694.kkplugins.kkpe";
         internal const int saveVersion = 0;
 #elif AISHOUJO
-        internal const string _name = "AIPE";
-        internal const string _guid = "com.joan6694.illusionplugins.poseeditor";
+        public const string Name = "AIPE";
+        public const string GUID = "com.joan6694.illusionplugins.poseeditor";
         internal const int saveVersion = 0;
 #elif HONEYSELECT2
-        internal const string _name = "HS2PE";
-        internal const string _guid = "com.joan6694.illusionplugins.poseeditor";
+        public const string Name = "HS2PE";
+        public const string GUID = "com.joan6694.illusionplugins.poseeditor";
         internal const int saveVersion = 0;
 #endif
-        internal const string _versionNum = "2.13.2";
+        public const string Version = "2.13.2";
 
 #if IPA
         public override string Name { get { return _name; } }

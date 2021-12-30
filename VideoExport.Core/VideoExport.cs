@@ -25,7 +25,7 @@ using HarmonyLib;
 namespace VideoExport
 {
 #if BEPINEX
-    [BepInPlugin(GUID: _guid, Name: _name, Version: _versionNum)]
+    [BepInPlugin(GUID: GUID, Name: _name, Version: Version)]
 #if KOIKATSU
     [BepInProcess("CharaStudio")]
 #elif AISHOUJO || HONEYSELECT2
@@ -37,8 +37,8 @@ namespace VideoExport
                                , IEnhancedPlugin
 #endif
     {
-        private const string _versionNum = "1.2.2";
-        private const string _guid = "com.joan6694.illusionplugins.videoexport";
+        public const string Version = "1.2.2";
+        public const string GUID = "com.joan6694.illusionplugins.videoexport";
         private const string _name = "VideoExport";
 
 #if IPA
@@ -244,7 +244,7 @@ namespace VideoExport
             var oldFramesFolder = Path.Combine(_pluginFolder, "Frames");
             _globalFramesFolder = Directory.Exists(oldFramesFolder) ? oldFramesFolder : Path.Combine(Path.Combine(Paths.GameRootPath, "UserData"), "Frames");
 
-            var harmony = HarmonyExtensions.CreateInstance(_guid);
+            var harmony = HarmonyExtensions.CreateInstance(GUID);
 
             _configFile = new GenericConfig(_name, this);
             _selectedPlugin = _configFile.AddInt("selectedScreenshotPlugin", 0, true);
@@ -357,7 +357,7 @@ namespace VideoExport
         {
             if (_showUi == false)
                 return;
-            _windowRect = GUILayout.Window(_uniqueId, _windowRect, Window, "Video Export " + _versionNum
+            _windowRect = GUILayout.Window(_uniqueId, _windowRect, Window, "Video Export " + Version
 #if BETA
                                                                                                + "b"
 #endif
