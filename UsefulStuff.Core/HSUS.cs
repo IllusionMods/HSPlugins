@@ -122,7 +122,7 @@ namespace HSUS
 #region Config
         internal static ConfigEntry<float> UIScaleGame { get; private set; }
         internal static ConfigEntry<float> UIScaleStudio { get; private set; }
-        internal static ConfigEntry<bool> OptimizeCharaMaker { get; private set; }
+        internal static ConfigEntry<bool> CharaMakerSearchboxes { get; private set; }
         internal static ConfigEntry<bool> DeleteConfirmationKey { get; private set; }
         internal static ConfigEntry<bool> DeleteConfirmationButton { get; private set; }
         internal static ConfigEntry<bool> ImproveStudioUI { get; private set; }
@@ -149,13 +149,13 @@ namespace HSUS
         internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
         internal static ConfigEntry<bool> EyesBlink { get; private set; }
         //Vanilla features
-        internal static ConfigEntry<bool> PostProcessingDepthOfField { get; private set; }
-        internal static ConfigEntry<bool> PostProcessingSSAO { get; private set; }
-        internal static ConfigEntry<bool> PostProcessingBloom { get; private set; }
-        internal static ConfigEntry<bool> PostProcessingSelfShadow { get; private set; }
-        internal static ConfigEntry<bool> PostProcessingVignette { get; private set; }
-        internal static ConfigEntry<bool> PostProcessingFog { get; private set; }
-        internal static ConfigEntry<bool> PostProcessingSunShafts { get; private set; }
+        //internal static ConfigEntry<bool> PostProcessingDepthOfField { get; private set; }
+        //internal static ConfigEntry<bool> PostProcessingSSAO { get; private set; }
+        //internal static ConfigEntry<bool> PostProcessingBloom { get; private set; }
+        //internal static ConfigEntry<bool> PostProcessingSelfShadow { get; private set; }
+        //internal static ConfigEntry<bool> PostProcessingVignette { get; private set; }
+        //internal static ConfigEntry<bool> PostProcessingFog { get; private set; }
+        //internal static ConfigEntry<bool> PostProcessingSunShafts { get; private set; }
 #endif
 #if !BEPINEX
         //Handled by GraphicsSettings
@@ -171,44 +171,45 @@ namespace HSUS
         {
             base.Awake();
 
-            UIScaleGame = Config.Bind("Config", "UIScaleGame", 1f);
-            UIScaleStudio = Config.Bind("Config", "UIScaleStudio", 1f);
-            OptimizeCharaMaker = Config.Bind("Config", "OptimizeCharaMaker", true);
-            DeleteConfirmationKey = Config.Bind("Config", "DeleteConfirmationKey", true);
-            DeleteConfirmationButton = Config.Bind("Config", "DeleteConfirmationButton", false);
-            ImproveStudioUI = Config.Bind("Config", "ImproveStudioUI", true);
-            OptimizeStudio = Config.Bind("Config", "OptimizeStudio", true);
-            GenericFK = Config.Bind("Config", "GenericFK", true);
-            ImprovedTransformOperations = Config.Bind("Config", "ImprovedTransformOperations", true);
-            CameraShortcuts = Config.Bind("Config", "CameraShortcuts", true);
-            CamSpeedBaseFactor = Config.Bind("Config", "CamSpeedBaseFactor", 1f, new ConfigDescription("Set base speed for camera keyboard controls. A value less than 1 is slower than vanilla speed. A value greater than one is faster than vanilla speed.", new AcceptableValueRange<float>(0.1f, 10f)));
-            CamSpeedFast = Config.Bind("Config", "CamSpeedFast", 4f, new ConfigDescription("Speed multiplier for Fast Mode", new AcceptableValueRange<float>(1f, 100f)));
-            CamSpeedSlow = Config.Bind("Config", "CamSpeedSlow", 0.6f, new ConfigDescription("Speed multiplier for Slow Mode", new AcceptableValueRange<float>(0.01f, 1f)));
-            AlternativeCenterToObjects = Config.Bind("Config", "AlternativeCenterToObjects", true);
-            AutomaticMemoryClean = Config.Bind("Config", "AutomaticMemoryClean", true);
-            AutomaticMemoryCleanInterval = Config.Bind("Config", "AutomaticMemoryCleanInterval", 300);
+            UIScaleGame = Config.Bind("Interface", "UI Scale in Game", 1f, "Scale all of the Canvas interfaces in game by this factor.");
+            UIScaleStudio = Config.Bind("Interface", "UI Scale in Studio", 1f, "Scale all of the Canvas interfaces in studio by this factor.");
+            CharaMakerSearchboxes = Config.Bind("Interface", "Add search boxes to Character Maker", true, "Add search boxes to some of the lists in character maker (searching characters).");
+            DeleteConfirmationKey = Config.Bind("Studio controls", "Show confirmation when pressing Delete key", false, "Helps avoid deleting studio objects by accident.");
+            DeleteConfirmationButton = Config.Bind("Studio controls", "Show confirmation when clicking Delete interface button", false, "Helps avoid deleting studio objects by accident.");
+            ImproveStudioUI = Config.Bind("Interface", "Improve Studio UI", true, "Adjust sizes and positions of some UI elements");
+            OptimizeStudio = Config.Bind("Interface", "Add search boxes to Studio", true, "Add search boxes to some of the lists in character maker (searching characters). Changes how some studio lists work.");
+            GenericFK = Config.Bind("Studio controls", "GenericFK", true);
+            ImprovedTransformOperations = Config.Bind("Studio controls", "Improved Transform Operations", true, "Adds additional buttons to bottom left transform controls for copying and resetting. Allows dragging on the X/Y/Z labels to change values in the text boxes. Increases precision of values in the text boxes.");
+            CamSpeedBaseFactor = Config.Bind("Studio camera", "Camera Speed Base Factor", 1f, new ConfigDescription("Set base speed for camera keyboard controls. A value less than 1 is slower than vanilla speed. A value greater than one is faster than vanilla speed.", new AcceptableValueRange<float>(0.1f, 10f)));
+            CameraShortcuts = Config.Bind("Studio camera", "Camera Speed Modifier Keys", true, "While moving the camera hold LeftControl to slow camera down and LeftShift to speed it up.");
+            CamSpeedFast = Config.Bind("Studio camera", "Speed Modifier Fast", 4f, new ConfigDescription("Speed multiplier when holding LeftShift", new AcceptableValueRange<float>(1f, 100f)));
+            CamSpeedSlow = Config.Bind("Studio camera", "Speed Modifier Slow", 0.6f, new ConfigDescription("Speed multiplier when holding LeftControl", new AcceptableValueRange<float>(0.01f, 1f)));
+            AlternativeCenterToObjects = Config.Bind("Studio controls", "Alternative Center To Objects", true, "Change how pressing F centers the camera.");
+            AutomaticMemoryClean = Config.Bind("Performance", "Automatic Memory Cleaning", false, "Periodically clean memory from unused objects in case the game doesn't do it for whatever reason. When cleanup is performed the game/studio may stutter/lag for a moment.");
+            AutomaticMemoryCleanInterval = Config.Bind("Performance", "Automatic Memory Cleaning Interval", 300, "How often to clean memory.");
 #if HONEYSELECT
-            FingersFKCopyButtons = Config.Bind("Config", "FingersFKCopyButtons", true);
+            FingersFKCopyButtons = Config.Bind("Studio controls", "FingersFKCopyButtons", true);
 #endif
 #if !KOIKATSU && !AISHOUJO && !HONEYSELECT2
-            DefaultFemaleChar = Config.Bind("Config", "DefaultFemaleChar", "");
-            DefaultMaleChar = Config.Bind("Config", "DefaultMaleChar", "");
+            DefaultFemaleChar = Config.Bind("Defaults", "DefaultFemaleChar", "");
+            DefaultMaleChar = Config.Bind("Defaults", "DefaultMaleChar", "");
 #endif
 #if !KOIKATSU
-            AutoJointCorrection = Config.Bind("Config", "AutoJointCorrection", true);
-            EyesBlink = Config.Bind("Config", "EyesBlink", true);
-            PostProcessingDepthOfField = Config.Bind("Config", "PostProcessingDepthOfField", false);
-            PostProcessingSSAO = Config.Bind("Config", "PostProcessingSSAO", true);
-            PostProcessingBloom = Config.Bind("Config", "PostProcessingBloom", true);
-            PostProcessingSelfShadow = Config.Bind("Config", "PostProcessingSelfShadow", true);
-            PostProcessingVignette = Config.Bind("Config", "PostProcessingVignette", true);
-            PostProcessingFog = Config.Bind("Config", "PostProcessingFog", false);
-            PostProcessingSunShafts = Config.Bind("Config", "PostProcessingSunShafts", false);
+            AutoJointCorrection = Config.Bind("Defaults", "AutoJointCorrection", true);
+            EyesBlink = Config.Bind("Defaults", "EyesBlink", true);
+            //PostProcessingDepthOfField = Config.Bind("Graphics", "PostProcessingDepthOfField", false);
+            //PostProcessingSSAO = Config.Bind("Graphics", "PostProcessingSSAO", true);
+            //PostProcessingBloom = Config.Bind("Graphics", "PostProcessingBloom", true);
+            //PostProcessingSelfShadow = Config.Bind("Graphics", "PostProcessingSelfShadow", true);
+            //PostProcessingVignette = Config.Bind("Graphics", "PostProcessingVignette", true);
+            //PostProcessingFog = Config.Bind("Graphics", "PostProcessingFog", false);
+            //PostProcessingSunShafts = Config.Bind("Graphics", "PostProcessingSunShafts", false);
 #endif
 #if !BEPINEX
-            VSync = Config.Bind("Config", "VSync", true);
-            Debug = Config.Bind("Config", "Debug", false);
-            DebugHotkey = Config.Bind("Config", "DebugHotkey", new KeyboardShortcut(KeyCode.RightControl));
+            // Wait, what? Using bepin config for non-bepin
+            VSync = Config.Bind("Graphics", "VSync", true);
+            Debug = Config.Bind("Other", "Debug", false);
+            DebugHotkey = Config.Bind("Other", "DebugHotkey", new KeyboardShortcut(KeyCode.RightControl));
 #endif
             _self = this;
 

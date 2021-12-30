@@ -174,7 +174,7 @@ namespace HSUS.Features
         {
             private static bool Prepare()
             {
-                return HSUS.OptimizeCharaMaker.Value;
+                return HSUS.CharaMakerSearchboxes.Value;
             }
 
             private static void Prefix(CustomFileWindow __instance)
