@@ -291,7 +291,8 @@ namespace VideoExport
                 this.AddScreenshotPlugin(new PlayShot24ZHNeo(), harmony);
 #endif
                 AddScreenshotPlugin(new Screencap(), harmony);
-                AddScreenshotPlugin(new Bitmap(), harmony);
+                if (Type.GetType("System.Drawing.Graphics, System.Drawing", false) != null)
+                    AddScreenshotPlugin(new Bitmap(), harmony);
                 if (_screenshotPlugins.Count == 0)
                     Logger.LogError("No compatible screenshot plugin found, please install one.");
                 SetLanguage(_language);
