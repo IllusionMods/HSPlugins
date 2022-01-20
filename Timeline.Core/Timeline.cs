@@ -299,9 +299,9 @@ namespace Timeline
 
             ConfigMainWindowShortcut = Config.Bind("Config", "Open Timeline UI", new KeyboardShortcut(KeyCode.T, KeyCode.LeftControl));
             ConfigPlayPauseShortcut = Config.Bind("Config", "Play or Pause Timeline", new KeyboardShortcut(KeyCode.T, KeyCode.LeftShift));
-            ConfigKeyframeCopyShortcut = Config.Bind("Config", "Copy Keyframe", new KeyboardShortcut(KeyCode.C));
-            ConfigKeyframeCutShortcut = Config.Bind("Config", "Cut Keyframe", new KeyboardShortcut(KeyCode.X));
-            ConfigKeyframePasteShortcut = Config.Bind("Config", "PasteKeyframe", new KeyboardShortcut(KeyCode.V));
+            ConfigKeyframeCopyShortcut = Config.Bind("Config", "Copy Keyframes", new KeyboardShortcut(KeyCode.C, KeyCode.LeftControl));
+            ConfigKeyframeCutShortcut = Config.Bind("Config", "Cut Keyframes", new KeyboardShortcut(KeyCode.X, KeyCode.LeftControl));
+            ConfigKeyframePasteShortcut = Config.Bind("Config", "PasteKeyframes", new KeyboardShortcut(KeyCode.V, KeyCode.LeftControl));
 
             _self = this;
             Logger = base.Logger;
@@ -403,15 +403,12 @@ namespace Timeline
 
             if (_ui.gameObject.activeSelf)
             {
-                if (Input.GetKey(KeyCode.LeftControl))
-                {
-                    if (ConfigKeyframeCopyShortcut.Value.IsDown())
-                        CopyKeyframes();
-                    else if (ConfigKeyframeCutShortcut.Value.IsDown())
-                        CutKeyframes();
-                    else if (ConfigKeyframePasteShortcut.Value.IsDown())
-                        PasteKeyframes();
-                }
+                if (ConfigKeyframeCopyShortcut.Value.IsDown())
+                    CopyKeyframes();
+                else if (ConfigKeyframeCutShortcut.Value.IsDown())
+                    CutKeyframes();
+                else if (ConfigKeyframePasteShortcut.Value.IsDown())
+                    PasteKeyframes();
 
                 if (_speedInputField.isFocused == false)
                     _speedInputField.text = Time.timeScale.ToString("0.#####");
@@ -4018,6 +4015,7 @@ namespace Timeline
         {
             private static bool Prefix()
             {
+                // Prevent people from deleting objects in studio workspace by accident while timeline window is in focus
                 if (Input.GetKey(KeyCode.Delete))
                     return !_self._ui.gameObject.activeSelf;
                 return true;
