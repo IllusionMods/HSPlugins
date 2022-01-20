@@ -146,9 +146,9 @@ namespace VideoExport.ScreenshotPlugins
         public bool Init(Harmony harmony)
 #endif
         {
-            this._scaleFactor = VideoExport._configFile.AddFloat("builtInSizeMultiplier", 1f, true);
-            this._captureMode = (CaptureMode)VideoExport._configFile.AddInt("builtInCaptureMode", (int)CaptureMode.Normal, true);
-            this._imageFormat = (ImgFormat)VideoExport._configFile.AddInt("builtInImageFormat", (int)ImgFormat.BMP, true);
+            this._scaleFactor = VideoExport._configFile.AddFloat("bmpSizeMultiplier", 1f, true);
+            this._captureMode = (CaptureMode)VideoExport._configFile.AddInt("bmpCaptureMode", (int)CaptureMode.Normal, true);
+            this._imageFormat = (ImgFormat)VideoExport._configFile.AddInt("bmpImageFormat", (int)ImgFormat.BMP, true);
             this._imageFormatNames = Enum.GetNames(typeof(ImgFormat));
 
             return true;
@@ -277,8 +277,8 @@ namespace VideoExport.ScreenshotPlugins
         public void SaveParams()
         {
             VideoExport._configFile.SetFloat("bmpSizeMultiplier", this._scaleFactor);
-            VideoExport._configFile.SetInt("builtInCaptureMode", (int)this._captureMode);
-            VideoExport._configFile.SetInt("builtInImageFormat", (int)this._imageFormat);
+            VideoExport._configFile.SetInt("bmpCaptureMode", (int)this._captureMode);
+            VideoExport._configFile.SetInt("bmpImageFormat", (int)this._imageFormat);
         }
 
         private byte[] CaptureNormal()
