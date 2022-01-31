@@ -7,6 +7,7 @@ else {
 }
 
 $copy = $dir + "\copy\BepInEx\plugins" 
+Remove-Item -Force -Path ($dir + "\copy") -Recurse -ErrorAction SilentlyContinue
 Remove-Item -Force -Path ($dir + "\out\") -Recurse -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path ($dir + "\out\")
 
@@ -19,7 +20,7 @@ foreach ($subdir in Get-ChildItem -Path $dir -Directory -Exclude "Out")
     }
     else
     {
-        $pluginDir = $subdir + "\BepInEx\plugins" 
+        $pluginDir = Get-Item ($subdir.FullName + "\BepInEx\plugins") 
     }
     Write-Information -MessageData ("Using " + $pluginDir + " as plugin directory")
     
@@ -38,10 +39,16 @@ foreach ($subdir in Get-ChildItem -Path $dir -Directory -Exclude "Out")
         Copy-Item -Path ($pluginFile.DirectoryName + "\" + $pluginFile.BaseName + ".xml") -Destination $copy -Recurse -Force -ErrorAction Ignore
         Copy-Item -Path ($pluginFile.DirectoryName + "\" + $pluginFile.BaseName) -Destination $copy -Recurse -Force -ErrorAction Ignore
 
+        if($pluginFile.Name -clike "*PE.dll")
+        {
+            New-Item -ItemType Directory -Force -Path ($dir + "\copy\mods")
+            Copy-Item -Path ($pluginDir.FullName + "\Joan6694DynamicBoneColliders.zipmod") -Destination ($dir + "\copy\mods") -Force 
+        }
+
         # the replace removes .0 from the end of version up until it hits a non-0 or there are only 2 version parts remaining (e.g. v1.0 v1.0.1)
         $ver = (Get-ChildItem -Path ($copy) -Filter "*.dll" -Recurse -Force)[0].VersionInfo.FileVersion.ToString() -replace "^([\d+\.]+?\d+)[\.0]*$", '${1}'
 
-        Compress-Archive -Path ($copy + "\..\") -Force -CompressionLevel "Optimal" -DestinationPath ($outdir + "\" + $pluginFile.BaseName + "_" + "v" + $ver + ".zip")
+        Compress-Archive -Path ($dir + "\copy\*") -Force -CompressionLevel "Optimal" -DestinationPath ($outdir + "\" + $pluginFile.BaseName + "_" + "v" + $ver + ".zip")
     }
 
     foreach ($pluginFile in Get-ChildItem -Path $pluginDir -Filter *.dll) 
