@@ -292,9 +292,14 @@ namespace VideoExport
 #endif
                 AddScreenshotPlugin(new Screencap(), harmony);
                 if (Type.GetType("System.Drawing.Graphics, System.Drawing", false) != null)
-                    AddScreenshotPlugin(new Bitmap(), harmony);
+                {
+                    // Need to do it this way because KK blows up with a type load exception if it sees the Bitmap type anywhere in the method body
+                    new Action(() => AddScreenshotPlugin(new Bitmap(), harmony))();
+                }
+
                 if (_screenshotPlugins.Count == 0)
                     Logger.LogError("No compatible screenshot plugin found, please install one.");
+
                 SetLanguage(_language);
             }, 5);
         }
