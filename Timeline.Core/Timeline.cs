@@ -331,7 +331,7 @@ namespace Timeline
             if (level == 3)
                 this.Init();
         }
-#elif SUNSHINE
+#elif SUNSHINE || HONEYSELECT2 || AISHOUJO
         protected override void LevelLoaded(Scene scene, LoadSceneMode mode)
         {
             base.LevelLoaded(scene, mode);
