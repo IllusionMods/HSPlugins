@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System;
 using UnityEngine;
 using Input = UnityEngine.Input;
 using MethodInfo = System.Reflection.MethodInfo;
@@ -15,6 +16,7 @@ namespace HSUS.Features
 {
     public class CameraShortcuts : IFeature
     {
+        private static bool _isStudioCam;
         public void Awake()
         {
 #if !PLAYHOME
@@ -69,14 +71,18 @@ namespace HSUS.Features
         {
             public static void Patch()
             {
-                MethodInfo[] toPatch = new[]
+                Type[] typesToPatch = new[]
                 {
-                    typeof(Studio.CameraControl).GetMethod("InputKeyProc", AccessTools.all),
-                    typeof(BaseCameraControl_Ver2).GetMethod("InputKeyProc", AccessTools.all),
-                    typeof(BaseCameraControl).GetMethod("InputKeyProc", AccessTools.all),
+                    typeof(Studio.CameraControl),
+                    typeof(BaseCameraControl_Ver2),
+                    typeof(BaseCameraControl),
                 };
-                foreach (MethodInfo mi in toPatch)
+                foreach (Type t in typesToPatch)
+                {
+                    _isStudioCam = (t == typeof(Studio.CameraControl)) ? true : false;
+                    MethodInfo mi = t.GetMethod("InputKeyProc", AccessTools.all);
                     HSUS._self._harmonyInstance.Patch(mi, transpiler: new HarmonyMethod(typeof(InputKeyProc_Patches).GetMethod(nameof(Transpiler), BindingFlags.NonPublic | BindingFlags.Static)));
+                }
             }
 
             private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -86,7 +92,10 @@ namespace HSUS.Features
                 foreach (CodeInstruction inst in instructionsList)
                 {
                     if (inst.opcode == OpCodes.Call && inst.operand == timeDeltaTime)
-                        yield return new CodeInstruction(OpCodes.Call, typeof(InputKeyProc_Patches).GetMethod(nameof(GetCameraMultiplier))) { labels = new List<Label>(inst.labels) };
+                    {
+                        string _getCameraMultiplierMethod = (_isStudioCam) ? nameof(GetCameraMultiplierStudio) : nameof(GetCameraMultiplier);
+                        yield return new CodeInstruction(OpCodes.Call, typeof(InputKeyProc_Patches).GetMethod(_getCameraMultiplierMethod)) { labels = new List<Label>(inst.labels) };
+                    }
                     else
                         yield return inst;
                 }
@@ -94,18 +103,29 @@ namespace HSUS.Features
 
             public static float GetCameraMultiplier()
             {
+                float _adjDeltaTime = Time.deltaTime * HSUS.CamSpeedBaseFactor.Value;
+                return CameraMultiplier(_adjDeltaTime);
+            }
+
+            public static float GetCameraMultiplierStudio()
+            {
                 float _adjDeltaTime = Time.deltaTime * HSUS.CamSpeedBaseFactor.Value
 #if AISHOUJO || HONEYSELECT2
                     * 10f // to compensate for the 10x scale increse in AI and HS2
 #endif
                     ;
+                return CameraMultiplier(_adjDeltaTime);
+            }
+
+            private static float CameraMultiplier(float delta)
+            {
                 if (Input.GetKey(KeyCode.LeftControl) && HSUS.CameraShortcuts.Value)
-                    return _adjDeltaTime * HSUS.CamSpeedSlow.Value;
+                    return delta * HSUS.CamSpeedSlow.Value;
                 if (Input.GetKey(KeyCode.LeftShift) && HSUS.CameraShortcuts.Value)
-                    return _adjDeltaTime * HSUS.CamSpeedFast.Value;
-                return _adjDeltaTime;
+                    return delta * HSUS.CamSpeedFast.Value;
+                return delta;
             }
         }
 #endif
-            }
+    }
 }
