@@ -221,7 +221,7 @@ namespace VideoExport
         private string _imagesPostfix = "";
         private bool _clearSceneBeforeEncoding;
         private bool _closeWhenDone;
-        private Language _language;
+        private ConfigEntry<Language> _language;
         #endregion
 
         #region Public Accessors (for other plugins probably)
@@ -267,8 +267,9 @@ namespace VideoExport
             _prewarmLoopCount = _configFile.AddInt("prewarmLoopCount", 3, true);
             _imagesPrefix = _configFile.AddString("imagesPrefix", "", true);
             _imagesPostfix = _configFile.AddString("imagesPostfix", "", true);
-            _language = (Language)_configFile.AddInt("language", (int)Language.English, true);
-            SetLanguage(_language);
+            _language = Config.Bind(Name, "Language", Language.English, "Interface language");
+            _language.SettingChanged += (sender, args) => SetLanguage(_language.Value);
+            SetLanguage(_language.Value);
             string newOutputFolder = _configFile.AddString("outputFolder", _outputFolder, true, _currentDictionary.GetString(TranslationKey.VideosFolderDesc));
             if (Directory.Exists(newOutputFolder))
                 _outputFolder = newOutputFolder;
@@ -301,7 +302,7 @@ namespace VideoExport
                 if (_screenshotPlugins.Count == 0)
                     Logger.LogError("No compatible screenshot plugin found, please install one.");
 
-                SetLanguage(_language);
+                SetLanguage(_language.Value);
             }, 5);
         }
 
@@ -379,7 +380,6 @@ namespace VideoExport
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            _configFile.SetInt("language", (int)_language);
             _configFile.SetInt("selectedScreenshotPlugin", _selectedPlugin);
             _configFile.SetInt("framerate", _fps);
             _configFile.SetBool("autoGenerateVideo", _autoGenerateVideo);
@@ -395,7 +395,6 @@ namespace VideoExport
             _configFile.SetInt("prewarmLoopCount", _prewarmLoopCount);
             _configFile.SetString("imagesPrefix", _imagesPrefix);
             _configFile.SetString("imagesPostfix", _imagesPostfix);
-            _configFile.SetInt("language", (int)_language);
             _configFile.SetString("outputFolder", _outputFolder);
             _configFile.SetString("framesFolder", _globalFramesFolder);
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
@@ -442,13 +441,6 @@ namespace VideoExport
         {
             GUILayout.BeginVertical();
             {
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button(Language.English.ToString()))
-                    SetLanguage(Language.English);
-                if (GUILayout.Button(Language.中文.ToString()))
-                    SetLanguage(Language.中文);
-                GUILayout.EndHorizontal();
-
                 GUI.enabled = _isRecording == false;
 
                 if (_screenshotPlugins.Count > 1)
@@ -765,8 +757,8 @@ namespace VideoExport
 
         private void SetLanguage(Language language)
         {
-            _language = language;
-            switch (_language)
+            _language.Value = language;
+            switch (language)
             {
                 case Language.English:
                     _currentDictionary = _englishDictionary;
