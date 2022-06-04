@@ -245,9 +245,9 @@ namespace VideoExport
 
             _pluginFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Name);
             var oldOutputFolder = Path.Combine(_pluginFolder, "Output");
-            _outputFolder = Directory.Exists(oldOutputFolder) ? oldOutputFolder : Path.Combine(Path.Combine(Paths.GameRootPath, "UserData"), "Output");
+            _outputFolder = Directory.Exists(oldOutputFolder) ? oldOutputFolder : Path.Combine(Paths.GameRootPath, "UserData/VideoExport/Output");
             var oldFramesFolder = Path.Combine(_pluginFolder, "Frames");
-            _globalFramesFolder = Directory.Exists(oldFramesFolder) ? oldFramesFolder : Path.Combine(Path.Combine(Paths.GameRootPath, "UserData"), "Frames");
+            _globalFramesFolder = Directory.Exists(oldFramesFolder) ? oldFramesFolder : Path.Combine(Paths.GameRootPath, "UserData/VideoExport/Frames");
 
             var harmony = HarmonyExtensions.CreateInstance(GUID);
 
