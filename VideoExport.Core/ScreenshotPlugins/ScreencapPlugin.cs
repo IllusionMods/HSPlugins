@@ -1,74 +1,4 @@
-﻿#if HONEYSELECT
-using System;
-using System.Reflection;
-using Harmony;
-using IllusionPlugin;
-using UnityEngine;
-
-namespace VideoExport.ScreenshotPlugins
-{
-    public class Screencap : IScreenshotPlugin
-    {
-        private delegate byte[] CaptureFunctionDelegate();
-
-        private CaptureFunctionDelegate _captureFunction;
-        private Vector2 _currentSize;
-
-        public string name { get { return "Screencap"; } }
-        public Vector2 currentSize { get { return this._currentSize; } }
-        public bool transparency { get { return false; } }
-        public string extension { get { return "png"; } }
-        public byte bitDepth { get { return 8; } }
-
-        public bool Init(HarmonyInstance harmony)
-        {
-            Type screencapType = Type.GetType("ScreencapMB,Screencap");
-            if (screencapType == null)
-                return false;
-            object plugin = GameObject.FindObjectOfType(screencapType);
-            if (plugin == null)
-                return false;
-            MethodInfo captureOpaque = screencapType.GetMethod("CaptureOpaque", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (captureOpaque == null)
-            {
-                VideoExport.Logger.LogError("VideoExport: Screencap was found but seems out of date, please update it.");
-                return false;
-            }
-            this._captureFunction = (CaptureFunctionDelegate)Delegate.CreateDelegate(typeof(CaptureFunctionDelegate), plugin, captureOpaque);
-
-            int downscalingRate = ModPrefs.GetInt("Screencap", "DownscalingRate", 1, true);
-            this._currentSize = new Vector2(ModPrefs.GetInt("Screencap", "Width", 1280, true) * downscalingRate, ModPrefs.GetInt("Screencap", "Height", 720, true) * downscalingRate);
-            return true;
-        }
-
-        public void UpdateLanguage()
-        {
-        }
-
-        public void OnStartRecording()
-        {
-        }
-
-        public byte[] Capture(string saveTo)
-        {
-            return this._captureFunction();
-        }
-
-        public void OnEndRecording()
-        {
-        }
-
-        public void DisplayParams()
-        {
-        }
-
-        public void SaveParams()
-        {
-        }
-    }
-}
-
-#elif KOIKATSU
+﻿#if KOIKATSU
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -84,7 +14,7 @@ using UnityEngine;
 
 namespace VideoExport.ScreenshotPlugins
 {
-    public class Screencap : IScreenshotPlugin
+    public class ScreencapPlugin : IScreenshotPlugin
     {
         #region Private Types
         private enum CaptureType
@@ -122,50 +52,50 @@ namespace VideoExport.ScreenshotPlugins
         #endregion
 
         #region Private Variables
-        private static readonly HarmonyExtensions.Replacement[] _replacements = 
+        private static readonly HarmonyExtensions.Replacement[] _replacements =
         {
-            new HarmonyExtensions.Replacement() 
+            new HarmonyExtensions.Replacement()
             {
-                pattern = new[] 
+                pattern = new[]
                 {
-                    new CodeInstruction(OpCodes.Call, typeof(File).GetMethod("WriteAllBytes", BindingFlags.Public | BindingFlags.Static)),
+                    new CodeInstruction(OpCodes.Call, typeof(File).GetMethod(nameof(File.WriteAllBytes), BindingFlags.Public | BindingFlags.Static)),
                 },
-                replacer = new[] 
+                replacer = new[]
                 {
-                    new CodeInstruction(OpCodes.Call, typeof(Screencap).GetMethod(nameof(WriteAllBytesReplacement), BindingFlags.NonPublic | BindingFlags.Static)),
+                    new CodeInstruction(OpCodes.Call, typeof(ScreencapPlugin).GetMethod(nameof(WriteAllBytesReplacement), BindingFlags.NonPublic | BindingFlags.Static)),
                 }
             },
-            new HarmonyExtensions.Replacement() 
+            new HarmonyExtensions.Replacement()
             {
-                pattern = new[] 
+                pattern = new[]
                 {
-                    new CodeInstruction(OpCodes.Callvirt, typeof(ManualLogSource).GetMethod("Log", BindingFlags.Instance | BindingFlags.Public)),
+                    new CodeInstruction(OpCodes.Callvirt, typeof(ManualLogSource).GetMethod(nameof(ManualLogSource.Log), BindingFlags.Instance | BindingFlags.Public)),
                 },
-                replacer = new[] 
+                replacer = new[]
                 {
-                    new CodeInstruction(OpCodes.Call, typeof(Screencap).GetMethod(nameof(LogReplacement), BindingFlags.NonPublic | BindingFlags.Static)),
+                    new CodeInstruction(OpCodes.Call, typeof(ScreencapPlugin).GetMethod(nameof(LogReplacement), BindingFlags.NonPublic | BindingFlags.Static)),
                 }
             },
-            new HarmonyExtensions.Replacement() 
+            new HarmonyExtensions.Replacement()
             {
-                pattern = new[] 
+                pattern = new[]
                 {
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Utils.Sound), "Play", new[]{typeof(SystemSE)})),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Utils.Sound), nameof(Utils.Sound.Play), new[]{typeof(SystemSE)})),
                 },
-                replacer = new[] 
+                replacer = new[]
                 {
-                    new CodeInstruction(OpCodes.Call, typeof(Screencap).GetMethod(nameof(PlayReplacement), BindingFlags.NonPublic | BindingFlags.Static)),
+                    new CodeInstruction(OpCodes.Call, typeof(ScreencapPlugin).GetMethod(nameof(PlayReplacement), BindingFlags.NonPublic | BindingFlags.Static)),
                 }
             },
-            new HarmonyExtensions.Replacement() 
+            new HarmonyExtensions.Replacement()
             {
-                pattern = new[] 
+                pattern = new[]
                 {
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GL), "Clear", new[]{typeof(bool), typeof(bool), typeof(Color)})),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(GL), nameof(GL.Clear), new[]{typeof(bool), typeof(bool), typeof(Color)})),
                 },
-                replacer = new[] 
+                replacer = new[]
                 {
-                    new CodeInstruction(OpCodes.Call, typeof(Screencap).GetMethod(nameof(ClearReplacement), BindingFlags.NonPublic | BindingFlags.Static)),
+                    new CodeInstruction(OpCodes.Call, typeof(ScreencapPlugin).GetMethod(nameof(ClearReplacement), BindingFlags.NonPublic | BindingFlags.Static)),
                 }
             }
         };
@@ -190,34 +120,31 @@ namespace VideoExport.ScreenshotPlugins
         #region Public Methods
         public bool Init(Harmony harmony)
         {
-            Type screencapType = Type.GetType("Screencap.ScreenshotManager,Screencap");
-            if (screencapType == null)
-                return false;
-            object screenshotManager = GameObject.FindObjectOfType(screencapType);
+            var screenshotManager = Screencap.ScreenshotManager.Instance;
             if (screenshotManager == null)
                 return false;
             this._captureType = (CaptureType)VideoExport._configFile.AddInt("Screencap_captureType", 0, true);
             this._in3d = VideoExport._configFile.AddBool("Screencap_in3d", false, true);
-            this._resolutionX = (ConfigEntry<int>)screencapType.GetPrivateProperty("ResolutionX");
-            this._resolutionY = (ConfigEntry<int>)screencapType.GetPrivateProperty("ResolutionY");
-            this._resolution360 = (ConfigEntry<int>)screencapType.GetPrivateProperty("Resolution360");
-            this._imageSeparationOffset = (ConfigEntry<float>)screencapType.GetPrivateProperty("ImageSeparationOffset");
-            this._downscalingRate = (ConfigEntry<int>)screencapType.GetPrivateProperty("DownscalingRate");
-            this._captureAlpha = (ConfigEntry<bool>)screencapType.GetPrivateProperty("CaptureAlpha");
-            this._useJpg = (ConfigEntry<bool>)screencapType.GetPrivateProperty("UseJpg");
-            MethodInfo takeCharScreenshot = screencapType.GetMethod("TakeCharScreenshot", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo take360Screenshot = screencapType.GetMethod("Take360Screenshot", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (takeCharScreenshot == null || take360Screenshot == null)
+            this._resolutionX = Screencap.ScreenshotManager.ResolutionX;
+            this._resolutionY = Screencap.ScreenshotManager.ResolutionY;
+            this._resolution360 = Screencap.ScreenshotManager.Resolution360;
+            this._imageSeparationOffset = Screencap.ScreenshotManager.ImageSeparationOffset;
+            this._downscalingRate = Screencap.ScreenshotManager.DownscalingRate;
+            this._captureAlpha = Screencap.ScreenshotManager.CaptureAlpha;
+            this._useJpg = Screencap.ScreenshotManager.UseJpg;
+
+            var tv = Traverse.Create(screenshotManager);
+            var takeCharScreenshot = tv.Method("TakeCharScreenshot", new[] { typeof(bool) });
+            var take360Screenshot = tv.Method("Take360Screenshot", new[] { typeof(bool) });
+            if (!takeCharScreenshot.MethodExists() || !take360Screenshot.MethodExists())
                 return false;
-            this._takeCharScreenshot = (Func<bool, IEnumerator>)Delegate.CreateDelegate(typeof(Func<bool, IEnumerator>), screenshotManager, takeCharScreenshot);
-            this._take360Screenshot = (Func<bool, IEnumerator>)Delegate.CreateDelegate(typeof(Func<bool, IEnumerator>), screenshotManager, take360Screenshot);
-            if (this._take360Screenshot == null || this._takeCharScreenshot == null)
-                return false;
+            this._takeCharScreenshot = in3D => takeCharScreenshot.GetValue<IEnumerator>(in3D);
+            this._take360Screenshot = in3D => take360Screenshot.GetValue<IEnumerator>(in3D);
             try
             {
-                harmony.Patch(screencapType.GetCoroutineMethod("TakeCharScreenshot"), transpiler: new HarmonyMethod(typeof(Screencap).GetMethod(nameof(GeneralTranspiler), BindingFlags.Static | BindingFlags.NonPublic)));
-                harmony.Patch(screencapType.GetCoroutineMethod("Take360Screenshot"), transpiler: new HarmonyMethod(typeof(Screencap).GetMethod(nameof(GeneralTranspiler), BindingFlags.Static | BindingFlags.NonPublic)));
-                harmony.Patch(Type.GetType("alphaShot.AlphaShot2,Screencap").GetMethod("PerformCapture"), transpiler: new HarmonyMethod(typeof(Screencap).GetMethod(nameof(GeneralTranspiler), BindingFlags.Static | BindingFlags.NonPublic)));
+                harmony.Patch(typeof(Screencap.ScreenshotManager).GetCoroutineMethod("TakeCharScreenshot"), transpiler: new HarmonyMethod(typeof(ScreencapPlugin).GetMethod(nameof(GeneralTranspiler), BindingFlags.Static | BindingFlags.NonPublic)));
+                harmony.Patch(typeof(Screencap.ScreenshotManager).GetCoroutineMethod("Take360Screenshot"), transpiler: new HarmonyMethod(typeof(ScreencapPlugin).GetMethod(nameof(GeneralTranspiler), BindingFlags.Static | BindingFlags.NonPublic)));
+                harmony.Patch(typeof(alphaShot.AlphaShot2).GetMethod("PerformCapture"), transpiler: new HarmonyMethod(typeof(ScreencapPlugin).GetMethod(nameof(GeneralTranspiler), BindingFlags.Static | BindingFlags.NonPublic)));
             }
             catch (Exception e)
             {
@@ -299,11 +226,20 @@ namespace VideoExport.ScreenshotPlugins
                 self.Log(level, obj);
         }
 
+#if KK
         private static void PlayReplacement(SystemSE se)
         {
             if (!_videoExportCapture)
                 Utils.Sound.Play(se);
         }
+#else
+        private static AudioSource PlayReplacement(SystemSE se)
+        {
+            if (!_videoExportCapture)
+                return Utils.Sound.Play(se);
+            return null;
+        }
+#endif
 
         private static void ClearReplacement(bool clearDepth, bool clearColor, Color backgroundColor)
         {
@@ -313,6 +249,7 @@ namespace VideoExport.ScreenshotPlugins
 
         private static IEnumerable<CodeInstruction> GeneralTranspiler(IEnumerable<CodeInstruction> instructions)
         {
+            //return instructions;
             return HarmonyExtensions.ReplaceCodePattern(instructions, _replacements);
         }
         #endregion
@@ -336,17 +273,17 @@ using UnityEngine;
 
 namespace VideoExport.ScreenshotPlugins
 {
-    public class Screencap : IScreenshotPlugin
+    public class ScreencapPlugin : IScreenshotPlugin
     {
-        #region Accessors
+#region Accessors
         public string name { get { return "Screenshot Manager"; } }
         public Vector2 currentSize { get { return new Vector2(this._captureWidth.Value, this._captureHeight.Value); } }
         public bool transparency { get { return this._alpha.Value; } }
         public string extension { get { return "png"; } }
         public byte bitDepth { get { return 8; } }
-        #endregion
+#endregion
 
-        #region Private Variables
+#region Private Variables
         private static bool _videoExportCapture = false;
         private static byte[] _imageBytes;
         private static Texture2D _texture = new Texture2D(Screen.width, Screen.height, TextureFormat.ARGB32, false, true);
@@ -356,19 +293,13 @@ namespace VideoExport.ScreenshotPlugins
         private ConfigEntry<int> _captureWidth;
         private ConfigEntry<int> _captureHeight;
         private ConfigEntry<bool> _alpha;
-        #endregion
+#endregion
 
-        #region Public Methods
+#region Public Methods
         public bool Init(Harmony harmony)
         {
-#if AISHOUJO
-            Type screencapType = Type.GetType("Screencap.ScreenshotManager,AI_Screencap");
-#elif HONEYSELECT2
-            Type screencapType = Type.GetType("Screencap.ScreenshotManager,HS2_Screencap");
-#endif
-            if (screencapType == null)
-                return false;
-            object screenshotManager = GameObject.FindObjectOfType(screencapType);
+            var screencapType = typeof(Screencap.ScreenshotManager);
+            var screenshotManager = GameObject.FindObjectOfType(screencapType);
             if (screenshotManager == null)
                 return false;
             this._captureWidth = (ConfigEntry<int>)screenshotManager.GetPrivateProperty("CaptureWidth");
@@ -383,7 +314,7 @@ namespace VideoExport.ScreenshotPlugins
                 return false;
             try
             {
-                harmony.Patch(screencapType.GetMethod("WriteTex", BindingFlags.NonPublic | BindingFlags.Instance), new HarmonyMethod(typeof(Screencap).GetMethod(nameof(WriteTex_Prefix), BindingFlags.Static | BindingFlags.NonPublic)));
+                harmony.Patch(screencapType.GetMethod("WriteTex", BindingFlags.NonPublic | BindingFlags.Instance), new HarmonyMethod(typeof(ScreencapPlugin).GetMethod(nameof(WriteTex_Prefix), BindingFlags.Static | BindingFlags.NonPublic)));
             }
             catch (Exception e)
             {
@@ -416,9 +347,9 @@ namespace VideoExport.ScreenshotPlugins
         public void SaveParams()
         {
         }
-        #endregion
+#endregion
 
-        #region Private Methods
+#region Private Methods
         private static bool WriteTex_Prefix(RenderTexture rt, bool alpha, ref IEnumerator __result)
         {
             if (_videoExportCapture)
@@ -443,7 +374,7 @@ namespace VideoExport.ScreenshotPlugins
         {
             yield break;
         }
-        #endregion
+#endregion
     }
 }
 #endif
