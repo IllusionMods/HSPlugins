@@ -32,6 +32,7 @@ namespace VideoExport
 #elif AISHOUJO || HONEYSELECT2
     [BepInProcess("StudioNEOV2")]
 #endif
+    [BepInDependency(Screencap.ScreenshotManager.GUID, BepInDependency.DependencyFlags.SoftDependency)]
 #endif
     public class VideoExport : GenericPlugin
 #if IPA
@@ -290,7 +291,7 @@ namespace VideoExport
                 this.AddScreenshotPlugin(new HoneyShot(), harmony);
                 this.AddScreenshotPlugin(new PlayShot24ZHNeo(), harmony);
 #endif
-                AddScreenshotPlugin(new Screencap(), harmony);
+                AddScreenshotPlugin(new ScreencapPlugin(), harmony);
                 if (Type.GetType("System.Drawing.Graphics, System.Drawing", false) != null)
                 {
                     // Need to do it this way because KK blows up with a type load exception if it sees the Bitmap type anywhere in the method body

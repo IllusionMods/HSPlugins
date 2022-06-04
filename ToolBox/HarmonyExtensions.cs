@@ -74,7 +74,9 @@ namespace ToolBox.Extensions {
                         for (int k = 0; k < replacement.replacer.Length; k++)
                         {
                             int finalIndex = i + k;
-                            codeInstructions[finalIndex] = new CodeInstruction(replacement.replacer[k]) { labels = new List<Label>(codeInstructions[finalIndex].labels) };
+                            //codeInstructions[finalIndex] = new CodeInstruction(replacement.replacer[k]) { labels = new List<Label>(codeInstructions[finalIndex].labels) };
+                            codeInstructions[finalIndex].opcode = replacement.replacer[k].opcode; 
+                            codeInstructions[finalIndex].operand= replacement.replacer[k].operand; 
                         }
                         i += replacement.replacer.Length;
                     }
