@@ -226,7 +226,7 @@ namespace VideoExport.ScreenshotPlugins
                 self.Log(level, obj);
         }
 
-#if KK
+#if !SUNSHINE
         private static void PlayReplacement(SystemSE se)
         {
             if (!_videoExportCapture)
