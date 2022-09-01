@@ -292,10 +292,14 @@ namespace Timeline
 #if KOIKATSU || SUNSHINE
                     readValueFromXml: (parameter, node) =>
                     {
-                        StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == node.ReadInt("valueNo") && x.GUID == node.Attributes?["GUID"]?.InnerText && x.Group == node.ReadInt("valueGroup") && x.Category == node.ReadInt("valueCategory"));
+                        string nodeGUID = node.Attributes?["GUID"]?.InnerText;
+                        int nodeGr = node.ReadInt("valueGroup");
+                        int nodeCa = node.ReadInt("valueCategory");
+                        int nodeNo = node.ReadInt("valueNo");                        
+                        StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == nodeNo && x.GUID == nodeGUID && x.Group == nodeGr && x.Category == nodeCa);
                         return node.ReadInt("valueNo") >= UniversalAutoResolver.BaseSlotID && resolveInfo == null
                             ? new OICharInfo.AnimeInfo() { group = 0, category = 0, no = 0 } // This prevents some of the potential LoadAnime spam
-                            : new OICharInfo.AnimeInfo() { group = node.ReadInt("valueGroup"), category = node.ReadInt("valueCategory"), no = resolveInfo != null ? resolveInfo.LocalSlot : node.ReadInt("valueNo") };
+                            : new OICharInfo.AnimeInfo() { group = nodeGr, category = nodeCa, no = resolveInfo != null ? resolveInfo.LocalSlot : nodeNo };
                     },
                     writeValueToXml: (parameter, writer, o) =>
                     {

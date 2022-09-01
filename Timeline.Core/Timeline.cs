@@ -3607,13 +3607,15 @@ namespace Timeline
                 document.Load(path);
                 ReadInterpolableTree(document.FirstChild, dic, _selectedOCI);
 #if KOIKATSU || SUNSHINE
+                string docGUID = document.FirstChild.Attributes?["GUID"]?.InnerText;
+                int docCa = document.FirstChild.ReadInt("animationCategory");
+                int docGr = document.FirstChild.ReadInt("animationGroup");
+                int docNo = document.FirstChild.ReadInt("animationNo");
                 OCIChar character = _selectedOCI as OCIChar;
-                StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == document.FirstChild.ReadInt("animationNo") && x.GUID == document.FirstChild.Attributes?["GUID"]?.InnerText && x.Group == document.FirstChild.ReadInt("animationGroup") && x.Category == document.FirstChild.ReadInt("animationCategory"));
+                StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == docNo && x.GUID == docGUID && x.Group == docGr && x.Category == docCa);
                 if (character != null)
                 {
-                    character.LoadAnime(document.FirstChild.ReadInt("animationGroup"),
-                            document.FirstChild.ReadInt("animationCategory"),
-                            resolveInfo != null ? resolveInfo.LocalSlot : document.FirstChild.ReadInt("animationNo"));
+                    character.LoadAnime(docGr, docCa, resolveInfo != null ? resolveInfo.LocalSlot : docNo);
                 }
 #else           //AI&HS2 Studio use original ID(management number) for animation zipmods by default
                 OCIChar character = _selectedOCI as OCIChar;
