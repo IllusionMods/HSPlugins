@@ -297,7 +297,7 @@ namespace Timeline
                         int nodeCa = node.ReadInt("valueCategory");
                         int nodeNo = node.ReadInt("valueNo");                        
                         StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == nodeNo && x.GUID == nodeGUID && x.Group == nodeGr && x.Category == nodeCa);
-                        return node.ReadInt("valueNo") >= UniversalAutoResolver.BaseSlotID && resolveInfo == null
+                        return nodeNo >= UniversalAutoResolver.BaseSlotID && resolveInfo == null
                             ? new OICharInfo.AnimeInfo() { group = 0, category = 0, no = 0 } // This prevents some of the potential LoadAnime spam
                             : new OICharInfo.AnimeInfo() { group = nodeGr, category = nodeCa, no = resolveInfo != null ? resolveInfo.LocalSlot : nodeNo };
                     },
