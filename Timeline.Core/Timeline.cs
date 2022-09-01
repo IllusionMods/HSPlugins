@@ -3608,8 +3608,8 @@ namespace Timeline
                 ReadInterpolableTree(document.FirstChild, dic, _selectedOCI);
 #if KOIKATSU || SUNSHINE
                 string docGUID = document.FirstChild.Attributes?["GUID"]?.InnerText;
-                int docCa = document.FirstChild.ReadInt("animationCategory");
                 int docGr = document.FirstChild.ReadInt("animationGroup");
+                int docCa = document.FirstChild.ReadInt("animationCategory");
                 int docNo = document.FirstChild.ReadInt("animationNo");
                 OCIChar character = _selectedOCI as OCIChar;
                 StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == docNo && x.GUID == docGUID && x.Group == docGr && x.Category == docCa);
