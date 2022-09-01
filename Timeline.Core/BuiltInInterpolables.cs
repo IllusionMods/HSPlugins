@@ -4,6 +4,9 @@ using ToolBox.Extensions;
 using UnityEngine;
 #if AISHOUJO || HONEYSELECT2
 using AIChara;
+#elif KOIKATSU || SUNSHINE
+using Sideloader.AutoResolver;
+using System.Linq;
 #endif
 
 namespace Timeline
@@ -276,7 +279,7 @@ namespace Timeline
                     {
                         OCIChar chara = (OCIChar)oci;
                         OICharInfo.AnimeInfo info = (OICharInfo.AnimeInfo)leftValue;
-                        if (chara.oiCharInfo.animeInfo.category != info.category || chara.oiCharInfo.animeInfo.group != info.group || chara.oiCharInfo.animeInfo.no != info.no)
+                        if (chara.oiCharInfo.animeInfo.group != info.group || chara.oiCharInfo.animeInfo.category != info.category || chara.oiCharInfo.animeInfo.no != info.no)
                             chara.LoadAnime(info.group, info.category, info.no);
                     },
                     interpolateAfter: null,
@@ -284,8 +287,30 @@ namespace Timeline
                     getValue: (oci, parameter) =>
                     {
                         OICharInfo.AnimeInfo info = ((OCIChar)oci).oiCharInfo.animeInfo;
-                        return new OICharInfo.AnimeInfo() { category = info.category, group = info.group, no = info.no };
+                        return new OICharInfo.AnimeInfo() { group = info.group, category = info.category, no = info.no };
                     },
+#if KOIKATSU || SUNSHINE
+                    readValueFromXml: (parameter, node) =>
+                    {
+                        string nodeGUID = node.Attributes?["GUID"]?.InnerText;
+                        int nodeGr = node.ReadInt("valueGroup");
+                        int nodeCa = node.ReadInt("valueCategory");
+                        int nodeNo = node.ReadInt("valueNo");                        
+                        StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == nodeNo && x.GUID == nodeGUID && x.Group == nodeGr && x.Category == nodeCa);
+                        return nodeNo >= UniversalAutoResolver.BaseSlotID && resolveInfo == null
+                            ? new OICharInfo.AnimeInfo() { group = 0, category = 0, no = 0 } // This prevents some of the potential LoadAnime spam
+                            : new OICharInfo.AnimeInfo() { group = nodeGr, category = nodeCa, no = resolveInfo != null ? resolveInfo.LocalSlot : nodeNo };
+                    },
+                    writeValueToXml: (parameter, writer, o) =>
+                    {
+                        OICharInfo.AnimeInfo info = (OICharInfo.AnimeInfo)o;
+                        StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.LocalSlot == info.no && x.Group == info.group && x.Category == info.category);
+                        writer.WriteAttributeString("GUID", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.GUID : "");
+                        writer.WriteValue("valueGroup", info.group);
+                        writer.WriteValue("valueCategory", info.category);
+                        writer.WriteValue("valueNo", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.Slot : info.no);
+                    }
+#else               // AI&HS2 Studio use original ID(management number) for animation zipmods by default
                     readValueFromXml: (parameter, node) => new OICharInfo.AnimeInfo() { category = node.ReadInt("valueCategory"), group = node.ReadInt("valueGroup"), no = node.ReadInt("valueNo") },
                     writeValueToXml: (parameter, writer, o) =>
                     {
@@ -294,6 +319,7 @@ namespace Timeline
                         writer.WriteValue("valueGroup", info.group);
                         writer.WriteValue("valueNo", info.no);
                     }
+#endif
             ));
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,
@@ -473,7 +499,7 @@ namespace Timeline
         }
 #endif
 
-            private static void InterpolateClothes(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue, float factor)
+        private static void InterpolateClothes(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue, float factor)
         {
             int index = (int)parameter;
             byte value = (byte)leftValue;
@@ -563,7 +589,7 @@ namespace Timeline
         }
 #endif
 
-            private static void InterpolateJuice(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue, float factor)
+        private static void InterpolateJuice(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue, float factor)
         {
 #if HONEYSELECT
             CharDefine.SiruParts index = (CharDefine.SiruParts)(int)parameter;
@@ -689,7 +715,7 @@ namespace Timeline
         }
 #endif
 
-            private static void CharacterNeck()
+        private static void CharacterNeck()
         {
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,
@@ -1186,7 +1212,7 @@ namespace Timeline
         }
 #endif
 
-            private static void Light()
+        private static void Light()
         {
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,

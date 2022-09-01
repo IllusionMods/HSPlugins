@@ -28,9 +28,10 @@ using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 #endif
-#if KOIKATSU
+#if KOIKATSU || SUNSHINE
 using Expression = ExpressionBone;
 using ExtensibleSaveFormat;
+using Sideloader.AutoResolver;
 #elif AISHOUJO || HONEYSELECT2
 using CharaUtils;
 using ExtensibleSaveFormat;
@@ -3605,7 +3606,18 @@ namespace Timeline
             {
                 document.Load(path);
                 ReadInterpolableTree(document.FirstChild, dic, _selectedOCI);
-
+#if KOIKATSU || SUNSHINE
+                string docGUID = document.FirstChild.Attributes?["GUID"]?.InnerText;
+                int docGr = document.FirstChild.ReadInt("animationGroup");
+                int docCa = document.FirstChild.ReadInt("animationCategory");
+                int docNo = document.FirstChild.ReadInt("animationNo");
+                OCIChar character = _selectedOCI as OCIChar;
+                StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == docNo && x.GUID == docGUID && x.Group == docGr && x.Category == docCa);
+                if (character != null)
+                {
+                    character.LoadAnime(docGr, docCa, resolveInfo != null ? resolveInfo.LocalSlot : docNo);
+                }
+#else           //AI&HS2 Studio use original ID(management number) for animation zipmods by default
                 OCIChar character = _selectedOCI as OCIChar;
                 if (character != null)
                 {
@@ -3613,6 +3625,7 @@ namespace Timeline
                             document.FirstChild.ReadInt("animationCategory"),
                             document.FirstChild.ReadInt("animationNo"));
                 }
+#endif
             }
             catch (Exception e)
             {
@@ -3629,13 +3642,22 @@ namespace Timeline
                 writer.WriteStartElement("root");
 
                 OCIChar character = _selectedOCI as OCIChar;
-                ;
+
                 if (character != null)
                 {
+#if KOIKATSU || SUNSHINE
+                    OICharInfo.AnimeInfo info = character.oiCharInfo.animeInfo;
+                    StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.LocalSlot == info.no && x.Group == info.group && x.Category == info.category);
+                    writer.WriteAttributeString("GUID", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.GUID : "");
+                    writer.WriteValue("animationGroup", info.group);
+                    writer.WriteValue("animationCategory", info.category);
+                    writer.WriteValue("animationNo", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.Slot : info.no);
+#else           //AI&HS2 Studio use original ID(management number) for animation zipmods by default
                     OICharInfo.AnimeInfo info = character.oiCharInfo.animeInfo;
                     writer.WriteValue("animationCategory", info.category);
                     writer.WriteValue("animationGroup", info.group);
                     writer.WriteValue("animationNo", info.no);
+#endif
                 }
 
                 foreach (INode node in _interpolablesTree.tree)
@@ -3877,9 +3899,9 @@ namespace Timeline
                 }
             }, 20);
         }
-        #endregion
+#endregion
 
-        #region Patches
+#region Patches
 #if HONEYSELECT
         [HarmonyPatch(typeof(Expression), "Start")]
 #elif KOIKATSU
@@ -4049,6 +4071,6 @@ namespace Timeline
             }
         }
 #endif
-        #endregion
+#endregion
     }
 }
