@@ -396,7 +396,14 @@ namespace Timeline
 
             if (_toDelete.Count != 0)
             {
-                RemoveInterpolables(_toDelete);
+                try
+                {
+                    RemoveInterpolables(_toDelete);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError("Failed to Remove Interpolables from toDelete list: " + ex);
+                }
                 _toDelete.Clear();
             }
             if (_tooltip.transform.parent.gameObject.activeSelf)
@@ -3899,9 +3906,9 @@ namespace Timeline
                 }
             }, 20);
         }
-#endregion
+        #endregion
 
-#region Patches
+        #region Patches
 #if HONEYSELECT
         [HarmonyPatch(typeof(Expression), "Start")]
 #elif KOIKATSU
@@ -4071,6 +4078,6 @@ namespace Timeline
             }
         }
 #endif
-#endregion
+        #endregion
     }
 }

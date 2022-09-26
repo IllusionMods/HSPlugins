@@ -176,7 +176,7 @@ namespace Timeline
         public void RemoveLeaf(TLeaf obj)
         {
             int hashCode = LeafNode<TLeaf>.ComputeHashCode(obj);
-            if (_nodes.TryGetValue(hashCode, out INode node))
+            if (_nodes.TryGetValue(hashCode, out INode node)) 
                 Remove(node);
         }
 
@@ -286,10 +286,42 @@ namespace Timeline
             if (_nodes.ContainsKey(node.GetHashCode()))
             {
                 _nodes.Remove(node.GetHashCode());
-                if (node.parent != null)
-                    node.parent.children.Remove(node);
-                else
-                    _rootGroup.children.Remove(node);
+
+                //if (node.parent != null)
+                //    node.parent.children.Remove(node);
+                //else
+                //    _rootGroup.children.Remove(node);
+
+                // This brute force approach is required because in some cases the above is not enough (dunno why, I didn't write this class I just fix things)
+                RemoveRecursive(_rootGroup, node);
+            }
+        }
+
+        private static void RemoveRecursive(GroupNode<TGroup> group, INode node)
+        {
+            for (var index = 0; index < group.children.Count; index++)
+            {
+                var nodea = group.children[index];
+                switch (nodea.type)
+                {
+                    case INodeType.Leaf:
+                        if (nodea.GetHashCode() == node.GetHashCode())
+                        {
+                            group.children.RemoveAt(index);
+                            index--;
+                        }
+                        break;
+                    case INodeType.Group:
+                        var groupNode = (GroupNode<TGroup>)nodea;
+                        RemoveRecursive(groupNode, node);
+                        if (groupNode.children.Count == 0)
+                        {
+                            group.children.Remove(groupNode);
+                            index--;
+                        }
+
+                        break;
+                }
             }
         }
 
