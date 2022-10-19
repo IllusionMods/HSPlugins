@@ -11,7 +11,7 @@ namespace CollidersDebug
 {
     [BepInPlugin(_guid, _name, _versionNum)]
     [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
-    [BepInProcess("KoikatsuSunshine")]
+
     public class CollidersDebug : GenericPlugin
     {
         private const string _name = "ColllidersDebug";
