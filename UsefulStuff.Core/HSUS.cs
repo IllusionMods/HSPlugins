@@ -73,9 +73,9 @@ namespace HSUS
         //Handled by CharacterReplacer
         private readonly DefaultChars _defaultChars = new DefaultChars();
 #endif
+        private readonly AutoJointCorrection _autoJointCorrection = new AutoJointCorrection();
 #if !KOIKATSU
         //Handled by DefaultParamEditor
-        private readonly AutoJointCorrection _autoJointCorrection = new AutoJointCorrection();
         private readonly EyesBlink _eyesBlink = new EyesBlink();
         //Vanilla features
         private readonly PostProcessing _postProcessing = new PostProcessing();
@@ -144,9 +144,9 @@ namespace HSUS
         internal static ConfigEntry<string> DefaultFemaleChar { get; private set; }
         internal static ConfigEntry<string> DefaultMaleChar { get; private set; }
 #endif
+        internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
 #if !KOIKATSU
         //Handled by DefaultParamEditor
-        internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
         internal static ConfigEntry<bool> EyesBlink { get; private set; }
         //Vanilla features
         //internal static ConfigEntry<bool> PostProcessingDepthOfField { get; private set; }
@@ -194,8 +194,8 @@ namespace HSUS
             DefaultFemaleChar = Config.Bind("Defaults", "DefaultFemaleChar", "");
             DefaultMaleChar = Config.Bind("Defaults", "DefaultMaleChar", "");
 #endif
-#if !KOIKATSU
             AutoJointCorrection = Config.Bind("Defaults", "AutoJointCorrection", true);
+#if !KOIKATSU
             EyesBlink = Config.Bind("Defaults", "EyesBlink", true);
             //PostProcessingDepthOfField = Config.Bind("Graphics", "PostProcessingDepthOfField", false);
             //PostProcessingSSAO = Config.Bind("Graphics", "PostProcessingSSAO", true);
@@ -229,6 +229,7 @@ namespace HSUS
             _features.Add(_optimizeNeo);
             _features.Add(_genericFK);
             _features.Add(_improvedTransformOperations);
+            _features.Add(_autoJointCorrection);
             _features.Add(_cameraShortcuts);
             _features.Add(_alternativeCenterToObjects);
             _features.Add(_fingersFKCopyButtons);
@@ -239,7 +240,6 @@ namespace HSUS
             _features.Add(_defaultChars);
 #endif
 #if !KOIKATSU
-            _features.Add(_autoJointCorrection);
             _features.Add(_eyesBlink);
             _features.Add(_postProcessing);
 #endif
