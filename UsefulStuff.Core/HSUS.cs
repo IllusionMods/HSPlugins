@@ -145,6 +145,14 @@ namespace HSUS
         internal static ConfigEntry<string> DefaultMaleChar { get; private set; }
 #endif
         internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
+        internal static ConfigEntry<bool> LeftArmAJC { get; private set; }
+        internal static ConfigEntry<bool> LeftLegAJC { get; private set; }
+        internal static ConfigEntry<bool> LeftForearmAJC { get; private set; }
+        internal static ConfigEntry<bool> LeftThighAJC { get; private set; }
+        internal static ConfigEntry<bool> RightArmAJC { get; private set; }
+        internal static ConfigEntry<bool> RightLegAJC { get; private set; }
+        internal static ConfigEntry<bool> RightForearmAJC { get; private set; }
+        internal static ConfigEntry<bool> RightThighAJC { get; private set; }
 #if !KOIKATSU
         //Handled by DefaultParamEditor
         internal static ConfigEntry<bool> EyesBlink { get; private set; }
@@ -194,7 +202,15 @@ namespace HSUS
             DefaultFemaleChar = Config.Bind("Defaults", "DefaultFemaleChar", "");
             DefaultMaleChar = Config.Bind("Defaults", "DefaultMaleChar", "");
 #endif
-            AutoJointCorrection = Config.Bind("Defaults", "AutoJointCorrection", true);
+            AutoJointCorrection = Config.Bind("Auto Joint Correction", "Auto Joint Correction", true, "If this is enabled, joint correction is automatically set as set here when adding a new character");
+            LeftArmAJC = Config.Bind("Auto Joint Correction", "Left Arm", true, "Fixes Left Shoulder, Upperarm, Elbo, Hand");
+            LeftLegAJC = Config.Bind("Auto Joint Correction", "Left Leg", true, "Fixes Left Leg, Knee, Calf");
+            LeftForearmAJC = Config.Bind("Auto Joint Correction", "Left Forearm", true, "Fixes Left Forearm (mainly the wrist area). It can cause the wrist to deform abnormally.");
+            LeftThighAJC = Config.Bind("Auto Joint Correction", "Left Thigh", true, "Fixes Left Thigh");
+            RightArmAJC = Config.Bind("Auto Joint Correction", "Right Arm", true, "Fixes Right Shoulder, Upperarm, Elbo, Hand");
+            RightLegAJC = Config.Bind("Auto Joint Correction", "Right Leg", true, "Fixes Right Leg, Knee, Calf");
+            RightForearmAJC = Config.Bind("Auto Joint Correction", "Right Forearm", true, "Fixes Right Forearm (mainly the wrist area). It can cause the wrist to deform abnormally.");
+            RightThighAJC = Config.Bind("Auto Joint Correction", "Right Thigh", true, "Fixes Right Thigh");
 #if !KOIKATSU
             EyesBlink = Config.Bind("Defaults", "EyesBlink", true);
             //PostProcessingDepthOfField = Config.Bind("Graphics", "PostProcessingDepthOfField", false);

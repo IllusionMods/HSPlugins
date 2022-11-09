@@ -42,8 +42,14 @@ namespace HSUS.Features
 
             public static void Postfix(OICharInfo __instance)
             {
-                for (int i = 0; i < __instance.expression.Length; i++)
-                    __instance.expression[i] = true;
+                __instance.expression[0] = HSUS.LeftArmAJC.Value;
+                __instance.expression[1] = HSUS.RightArmAJC.Value;
+                __instance.expression[2] = HSUS.LeftLegAJC.Value;
+                __instance.expression[3] = HSUS.RightLegAJC.Value;
+                __instance.expression[4] = HSUS.LeftForearmAJC.Value;
+                __instance.expression[5] = HSUS.RightForearmAJC.Value;
+                __instance.expression[6] = HSUS.LeftThighAJC.Value;
+                __instance.expression[7] = HSUS.RightThighAJC.Value;
             }
         }
 #endif
