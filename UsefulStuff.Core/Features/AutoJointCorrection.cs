@@ -50,6 +50,7 @@ namespace HSUS.Features
                 __instance.expression[5] = HSUS.RightForearmAJC.Value;
                 __instance.expression[6] = HSUS.LeftThighAJC.Value;
                 __instance.expression[7] = HSUS.RightThighAJC.Value;
+                //Ankle and crotch correction are features of PE(Pose Editor). Setting defaults is also handled by the PE.
             }
         }
 #endif
