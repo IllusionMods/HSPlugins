@@ -1018,7 +1018,30 @@ namespace VideoExport
             _progressBarPercentage = 1;
 
             if (_autoDeleteImages && error == false)
+            {
+                var retry = false;
+                try
+                {
+                    Directory.Delete(framesFolder, true);
+                }
+                catch
+                {
+                    retry = true;
+                }
+                if (retry)
+                {
+                    // Try waiting for any remaining file locks to release
+                    yield return new WaitForSecondsRealtime(1);
+                    try
+                    {
                 Directory.Delete(framesFolder, true);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogWarning("Failed to auto delete images: " + e);
+                    }
+                }
+            }
             _isRecording = false;
             Resources.UnloadUnusedAssets();
             GC.Collect();
