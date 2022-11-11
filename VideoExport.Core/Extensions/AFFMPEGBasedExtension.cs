@@ -43,7 +43,11 @@ namespace VideoExport.Extensions
             if (IntPtr.Size == 8)
                 this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg-64.exe"));
             else
-                this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg.exe"));
+            {
+                // Since KK is the oldest supported game now, all games are 64bit
+                //this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg.exe"));
+                throw new InvalidOperationException("We're somehow running in a 32bit environment?");
+            }
             _rotation = (Rotation)VideoExport._configFile.AddInt("ffmpegRotation", (int)Rotation.None, true);
         }
 
