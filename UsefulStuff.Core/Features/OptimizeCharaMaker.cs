@@ -189,7 +189,7 @@ namespace HSUS.Features
                 ((Image)searchBar.targetGraphic).sprite = __instance.transform.Find("WinRect/imgBack/imgName").GetComponent<Image>().sprite;
                 foreach (Text text in searchBar.GetComponentsInChildren<Text>())
                     text.color = Color.white;
-
+                
                 Button clearButton = UIUtility.CreateButton("Clear", searchGroup, "X");
                 clearButton.transform.SetRect(new Vector2(1f, 0f), Vector2.one, new Vector2(-28f, 0f), Vector2.zero);
                 clearButton.GetComponentInChildren<Text>().color = Color.black;
@@ -220,12 +220,13 @@ namespace HSUS.Features
 
             private static void UpdateSearch(string text, List<CustomFileInfo> items)
             {
-                bool party = Application.productName == "Koikatsu Party";
+                // Only true in KK, in KKP and KKS it is false
+                bool isField = typeof(CustomFileInfo).GetField("fic", AccessTools.all) != null;
                 foreach (CustomFileInfo info in items)
                 {
                     //This is obligatory because Koikatsu Party is garbage
                     CustomFileInfoComponent cfic;
-                    if (party == false)
+                    if (isField)
                     {
                         cfic = (CustomFileInfoComponent)info.GetPrivate("fic");
                         cfic.Disvisible(((string)info.GetPrivate("name")).IndexOf(text, StringComparison.OrdinalIgnoreCase) == -1);
