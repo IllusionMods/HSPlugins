@@ -172,6 +172,8 @@ namespace UILib
             InputField f = go.GetComponent<InputField>();
             f.placeholder.GetComponent<Text>().text = placeholder;
 
+            f.textComponent.gameObject.name += "(XUAIGNORE)";
+
             return f;
         }
 
