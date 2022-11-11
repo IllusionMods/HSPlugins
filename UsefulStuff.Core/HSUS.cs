@@ -98,9 +98,9 @@ namespace HSUS
 #elif BEPINEX
         internal Harmony _harmonyInstance;
 #endif
-#endregion
+        #endregion
 
-#region Public Accessors
+        #region Public Accessors
 #if IPA
         public override string Name { get { return _name; } }
         public override string Version
@@ -117,9 +117,9 @@ namespace HSUS
         public override string[] Filter { get { return new[] { "HoneySelect_64", "HoneySelect_32", "StudioNEO_32", "StudioNEO_64", "Honey Select Unlimited_64", "Honey Select Unlimited_32" }; } }
 #endif
         public static HSUS self { get { return _self; } }
-#endregion
+        #endregion
 
-#region Config
+        #region Config
         internal static ConfigEntry<float> UIScaleGame { get; private set; }
         internal static ConfigEntry<float> UIScaleStudio { get; private set; }
         internal static ConfigEntry<bool> CharaMakerSearchboxes { get; private set; }
@@ -145,6 +145,7 @@ namespace HSUS
         internal static ConfigEntry<string> DefaultMaleChar { get; private set; }
 #endif
         internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
+        internal static ConfigEntry<AutoJointCorrection.JointCorrectionArea> AutoJointCorrectionValues { get; private set; }
 #if !KOIKATSU
         //Handled by DefaultParamEditor
         internal static ConfigEntry<bool> EyesBlink { get; private set; }
@@ -194,7 +195,14 @@ namespace HSUS
             DefaultFemaleChar = Config.Bind("Defaults", "DefaultFemaleChar", "");
             DefaultMaleChar = Config.Bind("Defaults", "DefaultMaleChar", "");
 #endif
-            AutoJointCorrection = Config.Bind("Defaults", "AutoJointCorrection", true);
+            AutoJointCorrection = Config.Bind("Auto Joint Correction", "Auto Joint Correction", true, "If this is enabled, joint correction is automatically set as set here when adding a new character. Changes to this setting require a studio restart to take effect.");
+            AutoJointCorrectionValues = Config.Bind("Auto Joint Correction", "Default values", Features.AutoJointCorrection.JointCorrectionArea.All,
+                "Desired initial state of the joint correction toggles. This is applied if the Auto Joint Correction setting is enabled.\n" +
+                "- Arm correction affects shoulder, upperarm, elbow and upper hand\n" +
+                "- Forearm correction affects mainly the wrist area. It can cause the wrist to deform abnormally.\n" +
+                "- Leg correction affects the leg, knee and calf.\n" +
+                "- Thigh correction affects mainly the thigh area.\n" +
+                "- Crotch and Ankle correction is handled by PE, check its settings if you want to change those.");
 #if !KOIKATSU
             EyesBlink = Config.Bind("Defaults", "EyesBlink", true);
             //PostProcessingDepthOfField = Config.Bind("Graphics", "PostProcessingDepthOfField", false);
@@ -321,13 +329,13 @@ namespace HSUS
             if (_onUpdate != null)
                 _onUpdate();
         }
-#endregion
+        #endregion
 
-#region Private Methods
+        #region Private Methods
         private void OnWindowResize()
         {
             this.ExecuteDelayed2(_uiScale.Scale, 2);
         }
-#endregion
+        #endregion
     }
 }
