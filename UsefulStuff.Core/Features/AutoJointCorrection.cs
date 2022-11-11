@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Studio;
 using ToolBox;
 #if IPA
@@ -42,16 +43,28 @@ namespace HSUS.Features
 
             public static void Postfix(OICharInfo __instance)
             {
-                __instance.expression[0] = HSUS.LeftArmAJC.Value;
-                __instance.expression[1] = HSUS.RightArmAJC.Value;
-                __instance.expression[2] = HSUS.LeftLegAJC.Value;
-                __instance.expression[3] = HSUS.RightLegAJC.Value;
-                __instance.expression[4] = HSUS.LeftForearmAJC.Value;
-                __instance.expression[5] = HSUS.RightForearmAJC.Value;
-                __instance.expression[6] = HSUS.LeftThighAJC.Value;
-                __instance.expression[7] = HSUS.RightThighAJC.Value;
-                //Ankle and crotch correction are features of PE(Pose Editor). Setting defaults is also handled by the PE.
+                var enabledCorrections = HSUS.AutoJointCorrectionValues.Value;
+                for (int i = 0; i < __instance.expression.Length; i++)
+                    __instance.expression[i] = ((int)enabledCorrections >> i & 1) == 1;
             }
+        }
+
+        [Flags]
+        public enum JointCorrectionArea
+        {
+            LeftArm = 1 << 0,
+            RightArm = 1 << 1,
+            LeftLeg = 1 << 2,
+            RightLeg = 1 << 3,
+            LeftForearm = 1 << 4,
+            RightForearm = 1 << 5,
+            LeftThigh = 1 << 6,
+            RightThigh = 1 << 7,
+            All = 0b11111111
+            //Ankle and crotch correction are features of PE(Pose Editor). Setting defaults is also handled by the PE.
+            //Crotch = 1 << 8,
+            //LeftAnkle = 1 << 9,
+            //RightAnkle = 1 << 10,
         }
 #endif
     }
