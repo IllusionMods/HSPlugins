@@ -408,7 +408,7 @@ namespace VideoExport
         public void RecordVideo()
         {
             if (_isRecording == false)
-                StartCoroutine(RecordVideo_Routine());
+                StartCoroutine(RecordVideo_Routine_Safe());
         }
 
         public void StopRecording()
@@ -787,6 +787,26 @@ namespace VideoExport
                 extension.UpdateLanguage();
         }
 
+        private IEnumerator RecordVideo_Routine_Safe()
+        {
+            var coroutine = RecordVideo_Routine();
+            while (true)
+            {
+                try
+                {
+                    if (!coroutine.MoveNext())
+                        break;
+                }
+                catch
+                {
+                    // Make sure the UI gets unlocked if there's an unexpected crash
+                    _isRecording = false;
+                    throw;
+                }
+
+                yield return coroutine.Current;
+            }
+        }
         private IEnumerator RecordVideo_Routine()
         {
             _isRecording = true;
@@ -992,7 +1012,10 @@ namespace VideoExport
                 }
 
                 proc.WaitForExit();
-                Logger.LogError(proc.StandardError.ReadToEnd());
+
+                var errorOut = proc.StandardError.ReadToEnd()?.Trim();
+                if (!string.IsNullOrEmpty(errorOut))
+                    Logger.LogError(errorOut);
 
                 yield return null;
                 if (proc.ExitCode == 0)
@@ -1034,7 +1057,7 @@ namespace VideoExport
                     yield return new WaitForSecondsRealtime(1);
                     try
                     {
-                Directory.Delete(framesFolder, true);
+                        Directory.Delete(framesFolder, true);
                     }
                     catch (Exception e)
                     {
