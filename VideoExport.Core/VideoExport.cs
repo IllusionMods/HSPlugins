@@ -244,10 +244,6 @@ namespace VideoExport
             ConfigStartStopShortcut = Config.Bind("Config", "Start or Stop Recording", new KeyboardShortcut(KeyCode.E, KeyCode.LeftControl, KeyCode.LeftShift));
 
             _pluginFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Name);
-            var oldOutputFolder = Path.Combine(_pluginFolder, "Output");
-            _outputFolder = Directory.Exists(oldOutputFolder) ? oldOutputFolder : Path.Combine(Paths.GameRootPath, "UserData/VideoExport/Output");
-            var oldFramesFolder = Path.Combine(_pluginFolder, "Frames");
-            _globalFramesFolder = Directory.Exists(oldFramesFolder) ? oldFramesFolder : Path.Combine(Paths.GameRootPath, "UserData/VideoExport/Frames");
 
             var harmony = HarmonyExtensions.CreateInstance(GUID);
 
@@ -270,12 +266,15 @@ namespace VideoExport
             _language = Config.Bind(Name, "Language", Language.English, "Interface language");
             _language.SettingChanged += (sender, args) => SetLanguage(_language.Value);
             SetLanguage(_language.Value);
-            string newOutputFolder = _configFile.AddString("outputFolder", _outputFolder, true, _currentDictionary.GetString(TranslationKey.VideosFolderDesc));
-            if (Directory.Exists(newOutputFolder))
-                _outputFolder = newOutputFolder;
-            string newGlobalFramesFolder = _configFile.AddString("framesFolder", _globalFramesFolder, true, _currentDictionary.GetString(TranslationKey.FramesFolderDesc));
-            if (Directory.Exists(newGlobalFramesFolder))
-                _globalFramesFolder = newGlobalFramesFolder;
+
+            // If old directories exist, keep using them by default, otherwise use the new defaults
+            var outputFolderDefault = Path.Combine(_pluginFolder, "Output");
+            if (!Directory.Exists(outputFolderDefault)) outputFolderDefault = Path.Combine(Paths.GameRootPath, "UserData\\VideoExport\\Output");
+            _outputFolder = _configFile.AddString("outputFolder", outputFolderDefault, true, _currentDictionary.GetString(TranslationKey.VideosFolderDesc));
+
+            var framesFolderDefault = Path.Combine(_pluginFolder, "Frames");
+            if (!Directory.Exists(framesFolderDefault)) framesFolderDefault = Path.Combine(Paths.GameRootPath, "UserData\\VideoExport\\Frames");
+            _globalFramesFolder = _configFile.AddString("framesFolder", framesFolderDefault, true, _currentDictionary.GetString(TranslationKey.FramesFolderDesc));
 
             _extensions.Add(new MP4Extension());
             _extensions.Add(new WEBMExtension());
