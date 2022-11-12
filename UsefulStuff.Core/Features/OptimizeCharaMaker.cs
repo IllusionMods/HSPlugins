@@ -12,6 +12,7 @@ using CustomMenu;
 using System;
 using System.Collections.Generic;
 using ChaCustom;
+using KKAPI.Utilities;
 using UILib;
 #endif
 
@@ -189,7 +190,7 @@ namespace HSUS.Features
                 ((Image)searchBar.targetGraphic).sprite = __instance.transform.Find("WinRect/imgBack/imgName").GetComponent<Image>().sprite;
                 foreach (Text text in searchBar.GetComponentsInChildren<Text>())
                     text.color = Color.white;
-                
+
                 Button clearButton = UIUtility.CreateButton("Clear", searchGroup, "X");
                 clearButton.transform.SetRect(new Vector2(1f, 0f), Vector2.one, new Vector2(-28f, 0f), Vector2.zero);
                 clearButton.GetComponentInChildren<Text>().color = Color.black;
@@ -224,19 +225,30 @@ namespace HSUS.Features
                 bool isField = typeof(CustomFileInfo).GetField("fic", AccessTools.all) != null;
                 foreach (CustomFileInfo info in items)
                 {
-                    //This is obligatory because Koikatsu Party is garbage
                     CustomFileInfoComponent cfic;
+                    string charaName;
                     if (isField)
                     {
                         cfic = (CustomFileInfoComponent)info.GetPrivate("fic");
-                        cfic.Disvisible(((string)info.GetPrivate("name")).IndexOf(text, StringComparison.OrdinalIgnoreCase) == -1);
+                        charaName = (string)info.GetPrivate("name");
                     }
                     else
                     {
                         cfic = (CustomFileInfoComponent)info.GetPrivateProperty("fic");
-                        cfic.Disvisible(((string)info.GetPrivateProperty("name")).IndexOf(text, StringComparison.OrdinalIgnoreCase) == -1);
+                        charaName = (string)info.GetPrivateProperty("name");
                     }
+
+                    cfic.Disvisible(!ContainsStringAlsoIfTranslated(charaName, text));
                 }
+            }
+
+            private static bool ContainsStringAlsoIfTranslated(string input, string searchText)
+            {
+                if (string.IsNullOrEmpty(searchText)) return true;
+                if (string.IsNullOrEmpty(input)) return false;
+
+                return input.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                       (TranslationHelper.TryTranslate(input, out var tl) && tl.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0);
             }
         }
 #endif
