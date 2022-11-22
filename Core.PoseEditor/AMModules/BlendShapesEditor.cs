@@ -220,6 +220,8 @@ namespace HSPE.AMModules
             _target = target;
             MainWindow._self.ExecuteDelayed(() =>
             {
+                if (_parent == null) return;
+
                 RefreshSkinnedMeshRendererList();
                 if (_target.type == GenericOCITarget.Type.Character)
                     Init();
