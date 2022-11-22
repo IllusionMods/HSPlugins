@@ -1240,6 +1240,7 @@ namespace HSPE
             {
                 if (kvp.Key >= _lastIndex)
                 {
+                    // Note: Objects copied by the "obj copy" studio button will have their PoseControllers copied as well, so the AddComponent calls below won't run in those cases
                     switch (kvp.Value.objectInfo.kind)
                     {
                         case 0:
@@ -1248,11 +1249,7 @@ namespace HSPE
                             break;
                         case 1:
                             if (kvp.Value.guideObject.transformTarget.GetComponent<PoseController>() == null)
-                            {
-                                PoseController controller = kvp.Value.guideObject.transformTarget.gameObject.AddComponent<PoseController>();
-                                if (controller._collidersEditor._isLoneCollider == false)
-                                    this.ExecuteDelayed2(() => { controller.enabled = false; }, 2);
-                            }
+                                kvp.Value.guideObject.transformTarget.gameObject.AddComponent<PoseController>();
                             break;
                     }
                 }

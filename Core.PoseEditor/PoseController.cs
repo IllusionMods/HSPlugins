@@ -98,9 +98,15 @@ namespace HSPE
             _modules.Add(_ikEditor);
 
             if (_collidersEditor._isLoneCollider)
+            {
                 _currentModule = _collidersEditor;
+            }
             else
+            {
                 _currentModule = _bonesEditor;
+                this.ExecuteDelayed2(() => { enabled = false; }, 2);
+            }
+
             _currentModule.isEnabled = true;
 
             onParentage += OnParentage;
