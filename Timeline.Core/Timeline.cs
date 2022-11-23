@@ -1872,9 +1872,8 @@ namespace Timeline
                                                         interpolables.Add(((LeafNode<Interpolable>)n).obj);
                                                 });
 
-                                                RemoveInterpolables(interpolables);
                                                 _interpolablesTree.Remove(display.group);
-                                                UpdateInterpolablesView();
+                                                RemoveInterpolables(interpolables);
                                             }
                                         }, "Are you sure you want to delete this group?");
                                     }
