@@ -104,7 +104,9 @@ namespace HSPE
             else
             {
                 _currentModule = _bonesEditor;
-                this.ExecuteDelayed2(() => { enabled = false; }, 2);
+                // Disable by default on static studio items. Has to be done in here to handle studio "obj copy" button making a copy of this component
+                if (!(this is CharaPoseController))
+                    this.ExecuteDelayed2(() => { enabled = false; }, 2);
             }
 
             _currentModule.isEnabled = true;
