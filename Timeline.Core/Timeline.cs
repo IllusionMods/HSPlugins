@@ -1547,7 +1547,7 @@ namespace Timeline
                                     }
                                 });
                                 List<AContextMenuElement> treeGroups = GetInterpolablesTreeGroups(currentlySelectedInterpolables.Select(elem => (INode)_interpolablesTree.GetLeafNode(elem)));
-                                if (treeGroups.Count != 1)
+                                if (treeGroups.Count != 1 || currentlySelectedInterpolables.Select(elem => (INode)_interpolablesTree.GetLeafNode(elem)).Any(x => x.parent != null))
                                 {
                                     elements.Add(new GroupElement()
                                     {
@@ -1798,7 +1798,7 @@ namespace Timeline
                                     }
                                 });
                                 List<AContextMenuElement> treeGroups = GetInterpolablesTreeGroups(new List<INode> { display.group });
-                                if (treeGroups.Count != 1)
+                                if (treeGroups.Count != 1 || display.group.parent != null)
                                 {
                                     elements.Add(new GroupElement()
                                     {

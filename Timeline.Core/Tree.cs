@@ -176,7 +176,7 @@ namespace Timeline
         public void RemoveLeaf(TLeaf obj)
         {
             int hashCode = LeafNode<TLeaf>.ComputeHashCode(obj);
-            if (_nodes.TryGetValue(hashCode, out INode node)) 
+            if (_nodes.TryGetValue(hashCode, out INode node))
                 Remove(node);
         }
 
@@ -212,15 +212,28 @@ namespace Timeline
         {
             if (node == group)
                 return;
-            if (node.parent != null)
-                node.parent.children.Remove(node);
+
+            var parent = node.parent;
+            if (parent != null)
+            {
+                if (group == node.parent)
+                    return;
+
+                parent.children.Remove(node);
+                node.parent = null;
+                if (parent.type == INodeType.Group && parent.children.Count == 0)
+                    Remove(parent);
+            }
             else
+            {
                 _rootGroup.children.Remove(node);
-            node.parent = null;
+            }
+
             if (group != null)
                 group.children.Add(node);
             else
                 _rootGroup.children.Add(node);
+
             node.parent = group;
         }
 
