@@ -2720,45 +2720,97 @@ namespace Timeline
 
         private void LoadSingleFile()
         {
-            if (_selectedOCI == null)
-                return;
-            string path = Path.Combine(_singleFilesFolder, _singleFileNameField.text + ".xml");
-            if (File.Exists(path))
-                LoadSingle(path);
+            try
+            {
+                if (_selectedOCI == null)
+                {
+                    Logger.LogMessage("Can't load: No studio object is selected. This function loads timeline data for a single studio object.");
+                    return;
+                }
+
+                string path = Path.Combine(_singleFilesFolder, _singleFileNameField.text + ".xml");
+                if (File.Exists(path))
+                {
+                    LoadSingle(path);
+                    Logger.LogMessage("File was loaded successfully.");
+                }
+                else
+                {
+                    Logger.LogMessage("Can't load: No file selected or the file no longer exists.");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogMessage("Can't load: " + e.Message);
+                Logger.LogError(e);
+            }
         }
 
         private void SaveSingleFile()
         {
-            if (_selectedOCI == null)
-                return;
-            string selected = _singleFileNameField.text;
-            foreach (char c in Path.GetInvalidPathChars())
-                selected = selected.Replace(c.ToString(), "");
-            if (string.IsNullOrEmpty(selected))
-                return;
-            if (Directory.Exists(_singleFilesFolder) == false)
-                Directory.CreateDirectory(_singleFilesFolder);
-            string path = Path.Combine(_singleFilesFolder, selected + ".xml");
-            SaveSingle(path);
-            _singleFileNameField.text = selected;
-            UpdateSingleFilesPanel();
+            try
+            {
+                if (_selectedOCI == null)
+                {
+                    Logger.LogMessage("Can't save: No studio object is selected. This function saves timeline data for a single studio object.");
+                    return;
+                }
+
+                string selected = _singleFileNameField.text?.Trim();
+                _singleFileNameField.text = selected;
+
+                if (string.IsNullOrEmpty(selected) || selected.Intersect(Path.GetInvalidPathChars()).Any())
+                {
+                    Logger.LogMessage("Can't save: Provided name is empty or contains invalid characters.");
+                    return;
+                }
+
+                if (Directory.Exists(_singleFilesFolder) == false)
+                    Directory.CreateDirectory(_singleFilesFolder);
+
+                string path = Path.Combine(_singleFilesFolder, selected + ".xml");
+
+                SaveSingle(path);
+
+                UpdateSingleFilesPanel();
+
+                Logger.LogMessage("File was saved successfully.");
+            }
+            catch (Exception e)
+            {
+                Logger.LogMessage("Can't save: " + e.Message);
+                Logger.LogError(e);
+            }
         }
 
         private void DeleteSingleFile()
         {
-            UIUtility.DisplayConfirmationDialog(result =>
+            try
             {
-                if (result)
+                string path = Path.Combine(_singleFilesFolder, _singleFileNameField.text + ".xml");
+                if (File.Exists(path))
                 {
-                    string path = Path.Combine(_singleFilesFolder, _singleFileNameField.text + ".xml");
-                    if (File.Exists(path))
+                    UIUtility.DisplayConfirmationDialog(result =>
                     {
-                        File.Delete(path);
-                        _singleFileNameField.text = "";
-                        UpdateSingleFilesPanel();
-                    }
+                        if (result)
+                        {
+                            File.Delete(path);
+                            _singleFileNameField.text = "";
+                            UpdateSingleFilesPanel();
+                            Logger.LogMessage("File was deleted successfully.");
+                        }
+                    }, "Are you sure you want to delete this file?");
                 }
-            }, "Are you sure you want to delete this file?");
+                else
+                {
+                    Logger.LogMessage("Can't delete: No file selected or the file no longer exists.");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogMessage("Can't delete: " + e.Message);
+                Logger.LogError(e);
+            }
         }
         #endregion
 
