@@ -1546,8 +1546,8 @@ namespace Timeline
                                         UpdateGrid();
                                     }
                                 });
-                                List<AContextMenuElement> treeGroups = GetInterpolablesTreeGroups(currentlySelectedInterpolables.Select(elem => (INode)_interpolablesTree.GetLeafNode(elem)));
-                                if (treeGroups.Count != 1 || currentlySelectedInterpolables.Select(elem => (INode)_interpolablesTree.GetLeafNode(elem)).Any(x => x.parent != null))
+                                var treeGroups = GetInterpolablesTreeGroups(currentlySelectedInterpolables.Select(elem => (INode)_interpolablesTree.GetLeafNode(elem)).ToList());
+                                if (treeGroups.Count > 0)
                                 {
                                     elements.Add(new GroupElement()
                                     {
@@ -1797,8 +1797,8 @@ namespace Timeline
                                         UpdateGrid();
                                     }
                                 });
-                                List<AContextMenuElement> treeGroups = GetInterpolablesTreeGroups(new List<INode> { display.group });
-                                if (treeGroups.Count != 1 || display.group.parent != null)
+                                var treeGroups = GetInterpolablesTreeGroups(new List<INode> { display.group });
+                                if (treeGroups.Count > 0)
                                 {
                                     elements.Add(new GroupElement()
                                     {
@@ -1891,36 +1891,49 @@ namespace Timeline
             return display;
         }
 
-        private List<AContextMenuElement> GetInterpolablesTreeGroups(IEnumerable<INode> toParent)
+        private List<AContextMenuElement> GetInterpolablesTreeGroups(ICollection<INode> toParent)
         {
-            IEnumerable<IGroupNode> parents = toParent.Where(n => n.parent != null).Select(n => n.parent).Distinct();
-            IGroupNode toIgnore = null;
-            if (parents.Count() == 1)
-                toIgnore = parents.FirstOrDefault();
-            List<AContextMenuElement> elements = RecurseInterpolablesTreeGroups(_interpolablesTree.tree, toParent, toIgnore);
-            elements.Insert(0, new LeafElement()
-            {
-                text = "Nothing",
-                onClick = p =>
-                {
-                    _interpolablesTree.ParentTo(toParent, null);
-                    UpdateInterpolablesView();
-                }
-            });
+            var groupsToIgnore = new List<IGroupNode>();
 
-            return elements;
+            // Ensure that groups can't be parented to a group that they are a parent of
+            var groupNodes = toParent.OfType<IGroupNode>().ToList();
+            var hasGroups = groupNodes.Count > 0;
+            if (hasGroups)
+                groupsToIgnore.AddRange(groupNodes.Map(node => node.children.OfType<IGroupNode>()));
+
+            // If all items have the same parent, remove it from the options
+            var parents = toParent.Select(n => n.parent).Distinct().ToList();
+            if (parents.Count == 1 && parents[0] != null)
+            {
+                groupsToIgnore.Add(parents[0]);
+            }
+
+            var possibleParents = RecurseInterpolablesTreeGroups(_interpolablesTree.tree, toParent, groupsToIgnore, hasGroups);
+
+            if (parents.Count != 1 || parents[0] != null)
+            {
+                possibleParents.Insert(0, new LeafElement()
+                {
+                    text = "Nothing",
+                    onClick = p =>
+                    {
+                        _interpolablesTree.ParentTo(toParent, null);
+                        UpdateInterpolablesView();
+                    }
+                });
+            }
+
+            return possibleParents;
         }
 
-        private List<AContextMenuElement> RecurseInterpolablesTreeGroups(List<INode> nodes, IEnumerable<INode> toParent, IGroupNode toIgnore)
+        private List<AContextMenuElement> RecurseInterpolablesTreeGroups(List<INode> nodes, ICollection<INode> toParent, ICollection<IGroupNode> toIgnore, bool ignoreChildren)
         {
-            List<AContextMenuElement> elements = new List<AContextMenuElement>();
+            var elements = new List<AContextMenuElement>();
 
-            foreach (INode node in nodes)
+            foreach (var group in nodes.OfType<GroupNode<InterpolableGroup>>())
             {
-                if (node.type != INodeType.Group)
-                    continue;
-                GroupNode<InterpolableGroup> group = (GroupNode<InterpolableGroup>)node;
-                if (node != toIgnore)
+                var ignored = toIgnore.Contains(group);
+                if (!ignored)
                 {
                     elements.Add(new LeafElement()
                     {
@@ -1933,13 +1946,17 @@ namespace Timeline
                         }
                     });
                 }
-                if (group.children.Count(n => n.type == INodeType.Group) != 0)
+                if (!ignored || !ignoreChildren)
                 {
-                    elements.Add(new GroupElement()
+                    var subElements = RecurseInterpolablesTreeGroups(group.children, toParent, toIgnore, ignoreChildren);
+                    if (subElements.Count > 0)
                     {
-                        text = group.obj.name,
-                        elements = RecurseInterpolablesTreeGroups(group.children, toParent, toIgnore)
-                    });
+                        elements.Add(new GroupElement()
+                        {
+                            text = group.obj.name,
+                            elements = subElements
+                        });
+                    }
                 }
             }
             return elements;
@@ -3792,7 +3809,7 @@ namespace Timeline
 
                     string id = interpolableNode.Attributes["id"].Value;
                     InterpolableModel model = _interpolableModelsList.Find(i => i.owner == ownerId && i.id == id);
-                    if (model == null /*|| model.isCompatibleWithTarget(oci) == false*/) //Might need to get this back on in the future, depending on how things end up going
+                    if (model == null /*|| model.isCompatibleWithTarget(oci) == false*/) //todo Might need to get this back on in the future, depending on how things end up going; add logging for discarded entries?
                         return;
                     if (model.readParameterFromXml != null)
                         interpolable = new Interpolable(oci, model.readParameterFromXml(oci, interpolableNode), model);

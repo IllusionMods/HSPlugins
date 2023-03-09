@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 #if !EMOTIONCREATORS
@@ -192,6 +193,19 @@ namespace ToolBox.Extensions {
             return true;
         }
 
+        /// <summary>
+        /// Traverses an object hierarchy and return a flattened list of elements.
+        /// </summary>
+        public static IEnumerable<TSource> Map<TSource>(this IEnumerable<TSource> source, Func<TSource, IEnumerable<TSource>> getChildrenFunction)
+        {
+            var sourceList = source.ToList();
+            var results = sourceList.AsEnumerable();
+
+            foreach (var element in sourceList) 
+                results = results.Concat(getChildrenFunction(element).Map(getChildrenFunction));
+
+            return results;
+        }
     }
 
     public delegate void Action<T1, T2, T3, T4, T5>(T1 arg, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
