@@ -102,9 +102,15 @@ namespace Timeline
             {
                 _nodes.Add(node.GetHashCode(), node);
                 if (parent != null)
+                {
                     parent.children.Add(node);
+                    node.parent = parent;
+                }
                 else
+                {
                     _rootGroup.children.Add(node);
+                    node.parent = null;
+                }
             }
             return node;
         }
