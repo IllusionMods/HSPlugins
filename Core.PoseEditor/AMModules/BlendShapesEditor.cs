@@ -852,11 +852,171 @@ namespace HSPE.AMModules
         private void LoadPreset(string name)
         {
             string path = Path.Combine(_presetsPath, name);
-            if (File.Exists(path) == false)
+            if (!File.Exists(path)) 
                 return;
             XmlDocument doc = new XmlDocument();
             doc.Load(path);
+
+#if AISHOUJO || HONEYSELECT2 //todo Does this also work in KK?
+            try
+            {
+                HandleChangedFaceType(doc.FirstChild);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex);
+            }
+#endif
+
             LoadXml(doc.FirstChild);
+        }
+
+        // Fixes different head/face kind between saved and current character causing modifications to face to be lost
+        // Fix by wenlee666 in https://github.com/IllusionMods/HSPlugins/issues/37
+        private void HandleChangedFaceType(XmlNode xmlRoot)
+        {
+            string[] facetypes =
+            {
+                "n_head_cf1",
+                "n_head_cf2",
+                "n_head_cf2_c1",
+                "n head cf3_hs2"
+            };
+            var faceBoneNow = "";
+            foreach (var meshRenderer in _skinnedMeshRenderers)
+            {
+                if (meshRenderer.name == "o_eyelashes")
+                    faceBoneNow = meshRenderer.transform.parent.name;
+            }
+
+            foreach (var obj in xmlRoot.FirstChild.ChildNodes)
+            {
+                var xml = (XmlNode)obj;
+                var xmlElement = (XmlElement)xml;
+                var u = xmlElement.GetAttribute("name");
+                var a = u.LastIndexOf("/");
+                var s = u.Substring(a);
+                var facerenderer = 0;
+                if (!(s == "/o_eyelashes"))
+                {
+                    if (!(s == "/o_tang"))
+                    {
+                        if (s == "/o_tooth") facerenderer = 3;
+                    }
+                    else
+                        facerenderer = 2;
+                }
+                else
+                    facerenderer = 1;
+
+                var u2 = u.Substring(0, u.Length - s.Length);
+                var a2 = u2.LastIndexOf("/");
+                var faceBone = u2.Substring(a2);
+                var value = u2.Substring(0, u2.Length - faceBone.Length) + "/" + faceBoneNow + s;
+                var facebone = faceBone.Substring(1, faceBone.Length - 1);
+                if (facebone != faceBoneNow)
+                {
+                    var x = 0;
+                    var x2 = 0;
+                    var x3 = 0;
+                    foreach (var a3 in facetypes)
+                    {
+                        x++;
+                        if (a3 == facebone) x2 = x;
+                        if (a3 == faceBoneNow) x3 = x;
+                    }
+
+                    xmlElement.SetAttribute("name", value);
+                    foreach (var obj2 in xml.ChildNodes)
+                    {
+                        var element2 = (XmlElement)(XmlNode)obj2;
+                        var index = XmlConvert.ToInt32(element2.GetAttribute("index"));
+                        switch (facerenderer)
+                        {
+                            case 1:
+                                switch (x2)
+                                {
+                                    case 1:
+                                        if (x3 == 2)
+                                        {
+                                            if (index == 0) index = 16;
+                                            index--;
+                                        }
+
+                                        break;
+                                    case 2:
+                                        if (index == 15) index = -1;
+                                        index++;
+                                        break;
+                                    case 3:
+                                        if (x3 == 2)
+                                        {
+                                            if (index == 0) index = 16;
+                                            index--;
+                                        }
+
+                                        break;
+                                }
+
+                                break;
+                            case 2:
+                                switch (x2)
+                                {
+                                    case 1:
+                                        if (index == 0) index = 7;
+                                        index--;
+                                        break;
+                                    case 2:
+                                        if (x3 == 1)
+                                        {
+                                            if (index == 6) index = -1;
+                                            index++;
+                                        }
+
+                                        break;
+                                    case 3:
+                                        if (x3 == 1)
+                                        {
+                                            if (index == 6) index = -1;
+                                            index++;
+                                        }
+
+                                        break;
+                                }
+
+                                break;
+                            case 3:
+                                switch (x2)
+                                {
+                                    case 1:
+                                        if (index == 0) index = 7;
+                                        index--;
+                                        break;
+                                    case 2:
+                                        if (x3 == 1)
+                                        {
+                                            if (index == 6) index = -1;
+                                            index++;
+                                        }
+
+                                        break;
+                                    case 3:
+                                        if (x3 == 1)
+                                        {
+                                            if (index == 6) index = -1;
+                                            index++;
+                                        }
+
+                                        break;
+                                }
+
+                                break;
+                        }
+
+                        element2.SetAttribute("index", index.ToString());
+                    }
+                }
+            }
         }
 
         private void DeletePreset(string name)
