@@ -857,6 +857,7 @@ namespace HSPE.AMModules
             XmlDocument doc = new XmlDocument();
             doc.Load(path);
 
+#if AISHOUJO || HONEYSELECT2 //todo Does this also work in KK?
             try
             {
                 HandleChangedFaceType(doc.FirstChild);
@@ -865,10 +866,12 @@ namespace HSPE.AMModules
             {
                 Debug.LogError(ex);
             }
+#endif
 
             LoadXml(doc.FirstChild);
         }
 
+        // Fixes different head/face kind between saved and current character causing modifications to face to be lost
         // Fix by wenlee666 in https://github.com/IllusionMods/HSPlugins/issues/37
         private void HandleChangedFaceType(XmlNode xmlRoot)
         {
