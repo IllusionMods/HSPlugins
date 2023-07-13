@@ -28,7 +28,7 @@ namespace HSUS
     , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.12.0";
+        public const string Version = "1.13.0";
 #if HONEYSELECT
         public const string Name = "HSUS";
         public const string GUID = "com.joan6694.illusionplugins.hsus";
@@ -63,6 +63,7 @@ namespace HSUS
         private readonly GenericFK _genericFK = new GenericFK();
         private readonly ImprovedTransformOperations _improvedTransformOperations = new ImprovedTransformOperations();
         private readonly CameraShortcuts _cameraShortcuts = new CameraShortcuts();
+        private readonly SetVisibleToAllSelectedWorkspaceObjects _setVisibleToAllSelectedWorkspaceObjects = new SetVisibleToAllSelectedWorkspaceObjects();
         private readonly AlternativeCenterToObjects _alternativeCenterToObjects = new AlternativeCenterToObjects();
         private readonly FingersFKCopyButtons _fingersFKCopyButtons = new FingersFKCopyButtons();
         private readonly AnimationOptionDisplay _animationOptionDisplay = new AnimationOptionDisplay();
@@ -239,6 +240,7 @@ namespace HSUS
             _features.Add(_improvedTransformOperations);
             _features.Add(_autoJointCorrection);
             _features.Add(_cameraShortcuts);
+            _features.Add(_setVisibleToAllSelectedWorkspaceObjects);
             _features.Add(_alternativeCenterToObjects);
             _features.Add(_fingersFKCopyButtons);
             _features.Add(_animationOptionDisplay);

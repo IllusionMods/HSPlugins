@@ -32,6 +32,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Features\OptimizeCharaMaker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\OptimizeNEO.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\PostProcessing.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\SetVisibleToAllSelectedWorkspaceObjects.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmAccessoryCustom.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmCharaLoadCustom.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\SubMenus\SmClothesLoadCustom.cs" />
