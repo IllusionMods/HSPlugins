@@ -852,7 +852,7 @@ namespace HSPE.AMModules
         private void LoadPreset(string name)
         {
             string path = Path.Combine(_presetsPath, name);
-            if (!File.Exists(path)) 
+            if (!File.Exists(path))
                 return;
             XmlDocument doc = new XmlDocument();
             doc.Load(path);
@@ -1111,14 +1111,20 @@ namespace HSPE.AMModules
             if (_dirtySkinnedMeshRenderers.Count != 0)
                 foreach (KeyValuePair<SkinnedMeshRenderer, SkinnedMeshRendererData> kvp in _dirtySkinnedMeshRenderers)
                     foreach (KeyValuePair<int, BlendShapeData> weight in kvp.Value.dirtyBlendShapes)
-                        kvp.Key.SetBlendShapeWeight(weight.Key, weight.Value.weight);
+                        //todo: needs a proper fix for destroyed renderers in _dirtySkinnedMeshRenderers after item parenting
+                        if (kvp.Key != null)
+                            kvp.Key.SetBlendShapeWeight(weight.Key, weight.Value.weight);
         }
 
 
 
         private void SetMeshRendererNotDirty(SkinnedMeshRenderer renderer)
         {
-            if (_dirtySkinnedMeshRenderers.ContainsKey(renderer))
+            //todo: needs a proper fix for destroyed renderers in _dirtySkinnedMeshRenderers after item parenting
+            foreach (var destroyed in _dirtySkinnedMeshRenderers.Keys.Where(x => !x))
+                _dirtySkinnedMeshRenderers.Remove(destroyed);
+
+            if (renderer != null && _dirtySkinnedMeshRenderers.ContainsKey(renderer))
             {
                 SkinnedMeshRendererData data = _dirtySkinnedMeshRenderers[renderer];
                 foreach (KeyValuePair<int, BlendShapeData> kvp in data.dirtyBlendShapes)
@@ -1190,7 +1196,8 @@ namespace HSPE.AMModules
             }
             List<SkinnedMeshRenderer> toAdd = null;
             foreach (SkinnedMeshRenderer r in skinnedMeshRenderers)
-                if (_skinnedMeshRenderers.Contains(r) == false && _parent._childObjects.All(child => r.transform.IsChildOf(child.transform) == false))
+                //todo: needs a proper fix for destroyed renderers in _childObjects after item parenting
+                if (_skinnedMeshRenderers.Contains(r) == false && _parent._childObjects.All(child => child != null && r.transform.IsChildOf(child.transform) == false))
                 {
                     if (toAdd == null)
                         toAdd = new List<SkinnedMeshRenderer>();
