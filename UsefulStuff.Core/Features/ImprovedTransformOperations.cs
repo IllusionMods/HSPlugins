@@ -540,6 +540,12 @@ namespace HSUS.Features
                         }
                     }
                 }
+
+                if (HSUS._self.binary == Binary.Studio)
+                    if (HSUS.CopyTransformHotkey.Value.IsDown())
+                        CopyTransform();
+                    else if (HSUS.PasteTransformHotkey.Value.IsDown())
+                        PasteTransform();
             }
 
             private void UpdateButtonsVisibility()

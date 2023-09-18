@@ -137,6 +137,8 @@ namespace HSUS
         internal static ConfigEntry<bool> AlternativeCenterToObjects { get; private set; }
         internal static ConfigEntry<bool> AutomaticMemoryClean { get; private set; }
         internal static ConfigEntry<int> AutomaticMemoryCleanInterval { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> CopyTransformHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> PasteTransformHotkey { get; private set; }
 #if HONEYSELECT
         internal static ConfigEntry<bool> FingersFKCopyButtons { get; private set; }
 #endif
@@ -189,6 +191,9 @@ namespace HSUS
             AlternativeCenterToObjects = Config.Bind("Studio controls", "Alternative Center To Objects", true, "Change how pressing F centers the camera.");
             AutomaticMemoryClean = Config.Bind("Performance", "Automatic Memory Cleaning", false, "Periodically clean memory from unused objects in case the game doesn't do it for whatever reason. When cleanup is performed the game/studio may stutter/lag for a moment.");
             AutomaticMemoryCleanInterval = Config.Bind("Performance", "Automatic Memory Cleaning Interval", 300, "How often to clean memory.");
+
+            CopyTransformHotkey = Config.Bind("Improved Transform Operations", "Copy Transform", new KeyboardShortcut(KeyCode.C, KeyCode.LeftControl));
+            PasteTransformHotkey = Config.Bind("Improved Transform Operations", "Paste Transform", new KeyboardShortcut(KeyCode.V, KeyCode.LeftControl));
 #if HONEYSELECT
             FingersFKCopyButtons = Config.Bind("Studio controls", "FingersFKCopyButtons", true);
 #endif
