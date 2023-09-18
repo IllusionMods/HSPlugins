@@ -546,6 +546,12 @@ namespace HSUS.Features
                         CopyTransform();
                     else if (HSUS.PasteTransformHotkey.Value.IsDown())
                         PasteTransform();
+                    else if (HSUS.PasteTransformPositionOnlyHotkey.Value.IsDown())
+                        PasteTransform(pastePos: true);
+                    else if (HSUS.PasteTransformRotationOnlyHotkey.Value.IsDown())
+                        PasteTransform(pasteRot: true);
+                    else if (HSUS.PasteTransformScaleOnlyHotkey.Value.IsDown())
+                        PasteTransform(pasteScale: true);
             }
 
             private void UpdateButtonsVisibility()
@@ -565,11 +571,23 @@ namespace HSUS.Features
                 UpdateButtonsVisibility();
             }
 
+            // Without this the compiler will complain
+            // `cannot convert from 'method group' to 'UnityAction'`
+            // when adding this function to a listener
             private void PasteTransform()
+            {
+                PasteTransform(true, true, true);
+            }
+
+            private void PasteTransform(bool pastePos = false, bool pasteRot = false, bool pasteScale = false)
             {
                 if (_clipboardEmpty)
                     return;
-                SetValues(_savedPosition, _savedRotation, _savedScale);
+                SetValues(
+                    pastePos ? _savedPosition : (Vector3?)null,
+                    pasteRot ? _savedRotation : (Vector3?)null,
+                    pasteScale ? _savedScale: (Vector3?)null
+                );
             }
 
             private void ResetTransform()
@@ -577,7 +595,7 @@ namespace HSUS.Features
                 SetValues(Vector3.zero, Vector3.zero, Vector3.one);
             }
 
-            private void SetValues(Vector3 pos, Vector3 rot, Vector3 scale)
+            private void SetValues(Vector3? pos, Vector3? rot, Vector3? scale)
             {
                 List<GuideCommand.EqualsInfo> moveChangeAmountInfo = new List<GuideCommand.EqualsInfo>();
                 List<GuideCommand.EqualsInfo> rotateChangeAmountInfo = new List<GuideCommand.EqualsInfo>();
@@ -585,10 +603,10 @@ namespace HSUS.Features
 
                 foreach (GuideObject guideObject in _hashSelectObject)
                 {
-                    if (guideObject.enablePos)
+                    if (guideObject.enablePos && pos != null)
                     {
                         Vector3 oldPosValue = guideObject.changeAmount.pos;
-                        guideObject.changeAmount.pos = pos;
+                        guideObject.changeAmount.pos = (Vector3)pos;
                         moveChangeAmountInfo.Add(new GuideCommand.EqualsInfo()
                         {
                             dicKey = guideObject.dicKey,
@@ -596,10 +614,10 @@ namespace HSUS.Features
                             newValue = guideObject.changeAmount.pos
                         });
                     }
-                    if (guideObject.enableRot)
+                    if (guideObject.enableRot && rot != null)
                     {
                         Vector3 oldRotValue = guideObject.changeAmount.rot;
-                        guideObject.changeAmount.rot = rot;
+                        guideObject.changeAmount.rot = (Vector3)rot;
                         rotateChangeAmountInfo.Add(new GuideCommand.EqualsInfo()
                         {
                             dicKey = guideObject.dicKey,
@@ -607,10 +625,10 @@ namespace HSUS.Features
                             newValue = guideObject.changeAmount.rot
                         });
                     }
-                    if (guideObject.enableScale)
+                    if (guideObject.enableScale && scale != null)
                     {
                         Vector3 oldScaleValue = guideObject.changeAmount.scale;
-                        guideObject.changeAmount.scale = scale;
+                        guideObject.changeAmount.scale = (Vector3)scale;
                         scaleChangeAmountInfo.Add(new GuideCommand.EqualsInfo()
                         {
                             dicKey = guideObject.dicKey,

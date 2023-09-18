@@ -139,6 +139,9 @@ namespace HSUS
         internal static ConfigEntry<int> AutomaticMemoryCleanInterval { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> CopyTransformHotkey { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> PasteTransformHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> PasteTransformPositionOnlyHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> PasteTransformRotationOnlyHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> PasteTransformScaleOnlyHotkey { get; private set; }
 #if HONEYSELECT
         internal static ConfigEntry<bool> FingersFKCopyButtons { get; private set; }
 #endif
@@ -194,6 +197,9 @@ namespace HSUS
 
             CopyTransformHotkey = Config.Bind("Improved Transform Operations", "Copy Transform", new KeyboardShortcut(KeyCode.C, KeyCode.LeftControl));
             PasteTransformHotkey = Config.Bind("Improved Transform Operations", "Paste Transform", new KeyboardShortcut(KeyCode.V, KeyCode.LeftControl));
+            PasteTransformPositionOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Postition Only)", new KeyboardShortcut());
+            PasteTransformRotationOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Rotation Only)", new KeyboardShortcut());
+            PasteTransformScaleOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Scale Only)", new KeyboardShortcut());
 #if HONEYSELECT
             FingersFKCopyButtons = Config.Bind("Studio controls", "FingersFKCopyButtons", true);
 #endif
