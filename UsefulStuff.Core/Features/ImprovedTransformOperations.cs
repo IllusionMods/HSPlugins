@@ -563,12 +563,15 @@ namespace HSUS.Features
 
             private void CopyTransform()
             {
-                GuideObject source = _hashSelectObject.First();
-                _savedPosition = source.changeAmount.pos;
-                _savedRotation = source.changeAmount.rot;
-                _savedScale = source.changeAmount.scale;
-                _clipboardEmpty = false;
-                UpdateButtonsVisibility();
+                if (_hashSelectObject.Count == 1)
+                {
+                    GuideObject source = _hashSelectObject.First();
+                    _savedPosition = source.changeAmount.pos;
+                    _savedRotation = source.changeAmount.rot;
+                    _savedScale = source.changeAmount.scale;
+                    _clipboardEmpty = false;
+                    UpdateButtonsVisibility();
+                }
             }
 
             // Without this the compiler will complain
