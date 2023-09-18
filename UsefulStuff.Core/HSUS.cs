@@ -142,6 +142,7 @@ namespace HSUS
         internal static ConfigEntry<KeyboardShortcut> PasteTransformPositionOnlyHotkey { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> PasteTransformRotationOnlyHotkey { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> PasteTransformScaleOnlyHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> ResetTransformHotkey { get; private set; }
 #if HONEYSELECT
         internal static ConfigEntry<bool> FingersFKCopyButtons { get; private set; }
 #endif
@@ -200,6 +201,7 @@ namespace HSUS
             PasteTransformPositionOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Postition Only)", new KeyboardShortcut());
             PasteTransformRotationOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Rotation Only)", new KeyboardShortcut());
             PasteTransformScaleOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Scale Only)", new KeyboardShortcut());
+            ResetTransformHotkey = Config.Bind("Improved Transform Operations", "Reset Transform", new KeyboardShortcut());
 #if HONEYSELECT
             FingersFKCopyButtons = Config.Bind("Studio controls", "FingersFKCopyButtons", true);
 #endif

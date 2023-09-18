@@ -552,6 +552,8 @@ namespace HSUS.Features
                         PasteTransform(pasteRot: true);
                     else if (HSUS.PasteTransformScaleOnlyHotkey.Value.IsDown())
                         PasteTransform(pasteScale: true);
+                    else if (HSUS.ResetTransformHotkey.Value.IsDown())
+                        ResetTransform();
             }
 
             private void UpdateButtonsVisibility()
