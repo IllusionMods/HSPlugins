@@ -198,10 +198,10 @@ namespace HSUS
 
             CopyTransformHotkey = Config.Bind("Improved Transform Operations", "Copy Transform", new KeyboardShortcut(KeyCode.C, KeyCode.LeftControl));
             PasteTransformHotkey = Config.Bind("Improved Transform Operations", "Paste Transform", new KeyboardShortcut(KeyCode.V, KeyCode.LeftControl));
-            PasteTransformPositionOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Postition Only)", new KeyboardShortcut());
-            PasteTransformRotationOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Rotation Only)", new KeyboardShortcut());
-            PasteTransformScaleOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Scale Only)", new KeyboardShortcut());
-            ResetTransformHotkey = Config.Bind("Improved Transform Operations", "Reset Transform", new KeyboardShortcut());
+            PasteTransformPositionOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Postition Only)", KeyboardShortcut.Empty);
+            PasteTransformRotationOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Rotation Only)", KeyboardShortcut.Empty);
+            PasteTransformScaleOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Scale Only)", KeyboardShortcut.Empty);
+            ResetTransformHotkey = Config.Bind("Improved Transform Operations", "Reset Transform", KeyboardShortcut.Empty);
 #if HONEYSELECT
             FingersFKCopyButtons = Config.Bind("Studio controls", "FingersFKCopyButtons", true);
 #endif
