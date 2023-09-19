@@ -13,6 +13,7 @@ using Harmony;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using BepInEx.Logging;
 #endif
 #if PLAYHOME || KOIKATSU || AISHOUJO || HONEYSELECT2
 using UnityEngine.SceneManagement;
@@ -151,6 +152,8 @@ namespace HSUS
         internal static ConfigEntry<string> DefaultFemaleChar { get; private set; }
         internal static ConfigEntry<string> DefaultMaleChar { get; private set; }
 #endif
+        internal static new ManualLogSource Logger;
+
         internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
         internal static ConfigEntry<AutoJointCorrection.JointCorrectionArea> AutoJointCorrectionValues { get; private set; }
 #if !KOIKATSU
@@ -178,6 +181,7 @@ namespace HSUS
         protected override void Awake()
         {
             base.Awake();
+            Logger = base.Logger;
 
             UIScaleGame = Config.Bind("Interface", "UI Scale in Game", 1f, "Scale all of the Canvas interfaces in game by this factor.");
             UIScaleStudio = Config.Bind("Interface", "UI Scale in Studio", 1f, "Scale all of the Canvas interfaces in studio by this factor.");

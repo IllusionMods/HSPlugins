@@ -574,6 +574,8 @@ namespace HSUS.Features
                     _clipboardEmpty = false;
                     UpdateButtonsVisibility();
                 }
+                else if (_hashSelectObject.Count > 1)
+                    HSUS.Logger.LogMessage("Please select only 1 object when copying to prevent ambiguity");
             }
 
             // Without this the compiler will complain
