@@ -547,11 +547,11 @@ namespace HSUS.Features
                     else if (HSUS.PasteTransformHotkey.Value.IsDown())
                         PasteTransform();
                     else if (HSUS.PasteTransformPositionOnlyHotkey.Value.IsDown())
-                        PasteTransform(pastePos: true);
+                        PasteTransform(true, false, false);
                     else if (HSUS.PasteTransformRotationOnlyHotkey.Value.IsDown())
-                        PasteTransform(pasteRot: true);
+                        PasteTransform(false, true, false);
                     else if (HSUS.PasteTransformScaleOnlyHotkey.Value.IsDown())
-                        PasteTransform(pasteScale: true);
+                        PasteTransform(false, false, true);
                     else if (HSUS.ResetTransformHotkey.Value.IsDown())
                         ResetTransform();
             }
@@ -584,7 +584,7 @@ namespace HSUS.Features
                 PasteTransform(true, true, true);
             }
 
-            private void PasteTransform(bool pastePos = false, bool pasteRot = false, bool pasteScale = false)
+            private void PasteTransform(bool pastePos, bool pasteRot, bool pasteScale)
             {
                 if (_clipboardEmpty)
                     return;
