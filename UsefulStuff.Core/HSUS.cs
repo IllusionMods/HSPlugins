@@ -13,6 +13,7 @@ using Harmony;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using BepInEx.Logging;
 #endif
 #if PLAYHOME || KOIKATSU || AISHOUJO || HONEYSELECT2
 using UnityEngine.SceneManagement;
@@ -137,6 +138,12 @@ namespace HSUS
         internal static ConfigEntry<bool> AlternativeCenterToObjects { get; private set; }
         internal static ConfigEntry<bool> AutomaticMemoryClean { get; private set; }
         internal static ConfigEntry<int> AutomaticMemoryCleanInterval { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> CopyTransformHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> PasteTransformHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> PasteTransformPositionOnlyHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> PasteTransformRotationOnlyHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> PasteTransformScaleOnlyHotkey { get; private set; }
+        internal static ConfigEntry<KeyboardShortcut> ResetTransformHotkey { get; private set; }
 #if HONEYSELECT
         internal static ConfigEntry<bool> FingersFKCopyButtons { get; private set; }
 #endif
@@ -145,6 +152,8 @@ namespace HSUS
         internal static ConfigEntry<string> DefaultFemaleChar { get; private set; }
         internal static ConfigEntry<string> DefaultMaleChar { get; private set; }
 #endif
+        internal static new ManualLogSource Logger;
+
         internal static ConfigEntry<bool> AutoJointCorrection { get; private set; }
         internal static ConfigEntry<AutoJointCorrection.JointCorrectionArea> AutoJointCorrectionValues { get; private set; }
 #if !KOIKATSU
@@ -172,6 +181,7 @@ namespace HSUS
         protected override void Awake()
         {
             base.Awake();
+            Logger = base.Logger;
 
             UIScaleGame = Config.Bind("Interface", "UI Scale in Game", 1f, "Scale all of the Canvas interfaces in game by this factor.");
             UIScaleStudio = Config.Bind("Interface", "UI Scale in Studio", 1f, "Scale all of the Canvas interfaces in studio by this factor.");
@@ -189,6 +199,13 @@ namespace HSUS
             AlternativeCenterToObjects = Config.Bind("Studio controls", "Alternative Center To Objects", true, "Change how pressing F centers the camera.");
             AutomaticMemoryClean = Config.Bind("Performance", "Automatic Memory Cleaning", false, "Periodically clean memory from unused objects in case the game doesn't do it for whatever reason. When cleanup is performed the game/studio may stutter/lag for a moment.");
             AutomaticMemoryCleanInterval = Config.Bind("Performance", "Automatic Memory Cleaning Interval", 300, "How often to clean memory.");
+
+            CopyTransformHotkey = Config.Bind("Improved Transform Operations", "Copy Transform", new KeyboardShortcut(KeyCode.C, KeyCode.LeftControl));
+            PasteTransformHotkey = Config.Bind("Improved Transform Operations", "Paste Transform", new KeyboardShortcut(KeyCode.V, KeyCode.LeftControl));
+            PasteTransformPositionOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Postition Only)", KeyboardShortcut.Empty);
+            PasteTransformRotationOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Rotation Only)", KeyboardShortcut.Empty);
+            PasteTransformScaleOnlyHotkey = Config.Bind("Improved Transform Operations", "Paste Transform (Scale Only)", KeyboardShortcut.Empty);
+            ResetTransformHotkey = Config.Bind("Improved Transform Operations", "Reset Transform", KeyboardShortcut.Empty);
 #if HONEYSELECT
             FingersFKCopyButtons = Config.Bind("Studio controls", "FingersFKCopyButtons", true);
 #endif
