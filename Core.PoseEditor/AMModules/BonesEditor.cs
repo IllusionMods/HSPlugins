@@ -1240,10 +1240,10 @@ namespace HSPE.AMModules
                 }
             }
         }
-        private static bool WildCardSearch(string text, string search)
+        private bool WildCardSearch(string text, string search)
         {
             string regex = "^.*" + Regex.Escape(search).Replace("\\?", ".").Replace("\\*", ".*") + ".*$";
-            return Regex.IsMatch(text, regex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            return Regex.IsMatch(text, regex, RegexOptions.IgnoreCase);
         }
 
         private void UpdateSearch()
