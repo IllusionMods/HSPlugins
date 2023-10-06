@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using ToolBox.Extensions;
 using UnityEngine;
@@ -1234,6 +1235,11 @@ namespace HSPE.AMModules
                 }
             }
         }
+        private static bool WildCardSearch(string text, string search)
+        {
+            string regex = "^.*" + Regex.Escape(search).Replace("\\?", ".").Replace("\\*", ".*") + ".*$";
+            return Regex.IsMatch(text, regex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        }
 
         private void DisplayObjectTree(GameObject go, int indent)
         {
@@ -1247,7 +1253,7 @@ namespace HSPE.AMModules
                 aliased = false;
             }
 
-            if (_search.Length == 0 || go.name.IndexOf(_search, StringComparison.OrdinalIgnoreCase) != -1 || (aliased && displayedName.IndexOf(_search, StringComparison.OrdinalIgnoreCase) != -1))
+            if (_search.Length == 0 || WildCardSearch(go.name, _search) || (aliased && WildCardSearch(displayedName, _search)))
             {
                 Color c = GUI.color;
                 if (_dirtyBones.ContainsKey(go))
