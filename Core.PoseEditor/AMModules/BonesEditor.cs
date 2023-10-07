@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using ToolBox.Extensions;
 using UnityEngine;
@@ -84,6 +85,7 @@ namespace HSPE.AMModules
         private bool _removeShortcutMode;
         private readonly HashSet<GameObject> _openedBones = new HashSet<GameObject>();
         private bool _drawGizmos = true;
+        private List<GameObject> searchResults;
 
         private static readonly List<VectorLine> _cubeDebugLines = new List<VectorLine>();
         #endregion
@@ -180,7 +182,7 @@ namespace HSPE.AMModules
                 this._boneEditionShortcuts.Add(this._parent.transform.FindDescendant("cf_J_FaceRoot"), "Face");
 #endif
             }
-
+            UpdateSearch();
             //this._parent.StartCoroutine(this.EndOfFrame());
         }
         #endregion
@@ -287,10 +289,13 @@ namespace HSPE.AMModules
             }
             GUILayout.EndHorizontal();
             _boneEditionScroll = GUILayout.BeginScrollView(_boneEditionScroll, GUI.skin.box, GUILayout.ExpandHeight(true));
+
+            if (_search != oldSearch && _search.Length > 0)
+                UpdateSearch();
+
             foreach (Transform child in _parent.transform)
-            {
                 DisplayObjectTree(child.gameObject, 0);
-            }
+
             GUILayout.EndScrollView();
             GUILayout.BeginHorizontal();
             GUILayout.Label("Alias", GUILayout.ExpandWidth(false));
@@ -1234,20 +1239,47 @@ namespace HSPE.AMModules
                 }
             }
         }
+        private bool WildCardSearch(string text, string search)
+        {
+            string regex = "^.*" + Regex.Escape(search).Replace("\\?", ".").Replace("\\*", ".*") + ".*$";
+            return Regex.IsMatch(text, regex, RegexOptions.IgnoreCase);
+        }
+
+        private void UpdateSearch()
+        {
+            searchResults = new List<GameObject>();
+            void FilterBones(GameObject go)
+            {
+                if (_parent._childObjects.Contains(go))
+                    return;
+                string displayedName;
+                bool aliased = true;
+                if (_boneAliases.TryGetValue(go.name, out displayedName) == false)
+                {
+                    displayedName = go.name;
+                    aliased = false;
+                }
+
+                if (_search.Length == 0 || WildCardSearch(go.name, _search) || (aliased && WildCardSearch(displayedName, _search)))
+                    searchResults.Add(go);
+
+                for (int i = 0; i < go.transform.childCount; ++i)
+                    FilterBones(go.transform.GetChild(i).gameObject);
+            }
+
+            foreach (Transform child in _parent.transform)
+            {
+                FilterBones(child.gameObject);
+            }
+        }
 
         private void DisplayObjectTree(GameObject go, int indent)
         {
-            if (_parent._childObjects.Contains(go))
-                return;
-            string displayedName;
-            bool aliased = true;
-            if (_boneAliases.TryGetValue(go.name, out displayedName) == false)
-            {
+        if (_boneAliases.TryGetValue(go.name, out string displayedName) == false)
                 displayedName = go.name;
-                aliased = false;
-            }
 
-            if (_search.Length == 0 || go.name.IndexOf(_search, StringComparison.OrdinalIgnoreCase) != -1 || (aliased && displayedName.IndexOf(_search, StringComparison.OrdinalIgnoreCase) != -1))
+
+            if (_search.Length == 0 || searchResults.Contains(go))
             {
                 Color c = GUI.color;
                 if (_dirtyBones.ContainsKey(go))
