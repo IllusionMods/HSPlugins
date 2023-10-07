@@ -290,7 +290,7 @@ namespace HSPE.AMModules
             GUILayout.EndHorizontal();
             _boneEditionScroll = GUILayout.BeginScrollView(_boneEditionScroll, GUI.skin.box, GUILayout.ExpandHeight(true));
 
-            if (_search != oldSearch || _search == null)
+            if (_search != oldSearch)
                 UpdateSearch();
 
             foreach (Transform child in _parent.transform)
