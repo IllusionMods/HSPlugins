@@ -290,13 +290,12 @@ namespace HSPE.AMModules
             GUILayout.EndHorizontal();
             _boneEditionScroll = GUILayout.BeginScrollView(_boneEditionScroll, GUI.skin.box, GUILayout.ExpandHeight(true));
 
-            if (_search != oldSearch)
+            if (_search != oldSearch && _search.Length > 0)
                 UpdateSearch();
 
             foreach (Transform child in _parent.transform)
-            {
                 DisplayObjectTree(child.gameObject, 0);
-            }
+
             GUILayout.EndScrollView();
             GUILayout.BeginHorizontal();
             GUILayout.Label("Alias", GUILayout.ExpandWidth(false));
@@ -1276,10 +1275,11 @@ namespace HSPE.AMModules
 
         private void DisplayObjectTree(GameObject go, int indent)
         {
-            if (_boneAliases.TryGetValue(go.name, out string displayedName) == false)
+        if (_boneAliases.TryGetValue(go.name, out string displayedName) == false)
                 displayedName = go.name;
 
-            if (searchResults.Contains(go))
+
+            if (_search.Length == 0 || searchResults.Contains(go))
             {
                 Color c = GUI.color;
                 if (_dirtyBones.ContainsKey(go))
