@@ -98,6 +98,14 @@ namespace HSPE.AMModules
             public string blendName;
         }
 
+#if KOIKATSU
+        private class SkinnedMeshRendererWrapper
+        {
+            public SkinnedMeshRenderer renderer;
+            public List<SkinnedMeshRendererWrapper> links;
+        }
+#endif
+
 #if HONEYSELECT || KOIKATSU
         [HarmonyPatch(typeof(FaceBlendShape), "LateUpdate")]
         private class FaceBlendShape_Patches
@@ -150,7 +158,11 @@ namespace HSPE.AMModules
         private SkinnedMeshRenderer _skinnedMeshTarget;
         private bool _linkEyesComponents = true;
         private readonly Dictionary<string, Dictionary<int, string>> _oriHeadBlendIndex = new Dictionary<string, Dictionary<int, string>>();
+#if KOIKATSU
+        private readonly Dictionary<SkinnedMeshRenderer, SkinnedMeshRendererWrapper> _links = new Dictionary<SkinnedMeshRenderer, SkinnedMeshRendererWrapper>();
+#elif HONEYSELECT2 || AISHOUJO
         private readonly Dictionary<string, Dictionary<string, List<BlendLinkData>>> _links = new Dictionary<string, Dictionary<string, List<BlendLinkData>>>();
+#endif
         private string _search = "";
         private readonly GenericOCITarget _target;
         private readonly Dictionary<XmlNode, SkinnedMeshRenderer> _secondPassLoadingNodes = new Dictionary<XmlNode, SkinnedMeshRenderer>();
@@ -162,7 +174,7 @@ namespace HSPE.AMModules
         private string _renameString = "";
         private int _lastEditedBlendShape = -1;
         private bool _isBusy = false;
-        #endregion
+#endregion
 
         #region Public Fields
         public override AdvancedModeModuleType type { get { return AdvancedModeModuleType.BlendShapes; } }
@@ -406,7 +418,6 @@ namespace HSPE.AMModules
             if (GUILayout.Button("Reset all"))
                 ResetAll();
             GUI.color = c;
-
             if (GUILayout.Button("NonOriChar"))
                 _oriHeadBlendIndex.Clear();
             if (_oriHeadBlendIndex.Count > 0)
@@ -529,19 +540,50 @@ namespace HSPE.AMModules
                             {
                                 _lastEditedBlendShape = blendShapeIndex;
                                 SetBlendShapeWeight(_skinnedMeshTarget, blendShapeIndex, weight);
+
+#if KOIKATSU
+                                if (_linkEyesComponents && blendShapeIndex < (_target.isFemale ? _femaleEyesComponentsCount : _maleEyesComponentsCount))
+                                {
+                                    SkinnedMeshRendererWrapper wrapper;
+                                    if (_links.TryGetValue(_skinnedMeshTarget, out wrapper))
+                                    {
+                                        foreach (SkinnedMeshRendererWrapper link in wrapper.links)
+                                        {
+                                            if (blendShapeIndex < link.renderer.sharedMesh.blendShapeCount)
+                                                SetBlendShapeWeight(link.renderer, blendShapeIndex, weight);
+                                        }
+                                    }
+                                }
+#endif
                             }
                             GUILayout.EndVertical();
                             GUI.color = Color.red;
-                            if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false), GUILayout.Height(50f))
-                                && data != null
-                                && data.TryGetValue(blendShapeName, out blendShapeData1))
+                            if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false), GUILayout.Height(50f)) && data != null && data.TryGetValue(blendShapeName, out blendShapeData1))
                             {
                                 _skinnedMeshTarget.SetBlendShapeWeight(blendShapeIndex, blendShapeData1.originalWeight);
                                 data.Remove(blendShapeName);
+#if KOIKATSU
+                                if (_linkEyesComponents && blendShapeIndex < (_target.isFemale ? _femaleEyesComponentsCount : _maleEyesComponentsCount))
+                                {
+                                    SkinnedMeshRendererWrapper wrapper;
+                                    if (_links.TryGetValue(_skinnedMeshTarget, out wrapper))
+                                    {
+                                        foreach (SkinnedMeshRendererWrapper link in wrapper.links)
+                                        {
+                                            string linkBSName = GetBlendShapeName(link.renderer, blendShapeIndex);
+                                            if (_dirtySkinnedMeshRenderers.TryGetValue(GetRendererName(link.renderer), out var data2) && data2.TryGetValue(linkBSName, out var bsData))
+                                            {
+                                                link.renderer.SetBlendShapeWeight(blendShapeIndex, bsData.originalWeight);
+                                                data2.Remove(linkBSName);
+                                            }
+                                        }
+                                    }
+                                }
+#elif AISHOUJO || HONEYSELECT2
                                 if (_linkEyesComponents
-                                    && index < (_target.isFemale ? _femaleEyesComponentsCount : _maleEyesComponentsCount)
-                                    && _links.TryGetValue(rendererName1, out var dictionary2)
-                                    && dictionary2.TryGetValue(blendShapeName, out var blendLinkDataList))
+                                        && index < (_target.isFemale ? _femaleEyesComponentsCount : _maleEyesComponentsCount)
+                                        && _links.TryGetValue(rendererName1, out var dictionary2)
+                                        && dictionary2.TryGetValue(blendShapeName, out var blendLinkDataList))
                                 {
                                     foreach (BlendLinkData blendLinkData in blendLinkDataList)
                                     {
@@ -554,6 +596,8 @@ namespace HSPE.AMModules
                                         }
                                     }
                                 }
+#endif
+
                             }
                             GUILayout.EndHorizontal();
                             GUI.color = c;
@@ -575,9 +619,18 @@ namespace HSPE.AMModules
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
                 {
-                    if (_linkEyesComponents 
-                        && _dirtySkinnedMeshRenderers.TryGetValue(rendererName1, out var dictionary3) 
-                        && _links.TryGetValue(rendererName1, out var dictionary4))
+#if KOIKATSU
+                    if (_linkEyesComponents)
+                    {
+                        SkinnedMeshRendererWrapper wrapper;
+                        if (_links.TryGetValue(_skinnedMeshTarget, out wrapper))
+                            foreach (SkinnedMeshRendererWrapper link in wrapper.links)
+                                SetMeshRendererNotDirty(link.renderer);
+                    }
+#elif AISHOUJO || HONEYSELECT2
+                    if (_linkEyesComponents
+                       && _dirtySkinnedMeshRenderers.TryGetValue(rendererName1, out var dictionary3)
+                       && _links.TryGetValue(rendererName1, out var dictionary4))
                     {
                         foreach (var keyValuePair in dictionary3)
                         {
@@ -596,10 +649,9 @@ namespace HSPE.AMModules
                             }
                         }
                     }
-
+#endif
                     SetMeshRendererNotDirty(_skinnedMeshTarget);
                 }
-
                 GUI.color = c;
                 GUILayout.EndHorizontal();
                 GUILayout.EndVertical();
@@ -624,6 +676,7 @@ namespace HSPE.AMModules
             {
                 blendShapeData = SetBlendShapeDirty(renderer, blendShapeName);
                 blendShapeData.weight = weight;
+#if AISHOUJO || HONEYSELECT2
                 if (_linkEyesComponents && index < (_target.isFemale ? _femaleEyesComponentsCount : _maleEyesComponentsCount) && _links.TryGetValue(GetRendererName(renderer), out var dictionary) && dictionary.TryGetValue(blendShapeName, out var blendLinkDataList))
                 {
                     foreach (BlendLinkData blendLinkData in blendLinkDataList)
@@ -631,6 +684,7 @@ namespace HSPE.AMModules
                         SetBlendShapeDirty(blendLinkData.renderer, blendLinkData.blendName).weight = weight;
                     }
                 }
+#endif
             }
 
             return blendShapeData;
@@ -798,7 +852,7 @@ namespace HSPE.AMModules
             }, 2);
             return changed || _secondPassLoadingNodes.Count > 0;
         }
-        #endregion
+#endregion
 
         #region Private Methods
         private bool LoadSingleSkinnedMeshRenderer(XmlNode node, SkinnedMeshRenderer renderer)
@@ -931,17 +985,75 @@ namespace HSPE.AMModules
             _instanceByFaceBlendShape.Add(_target.ociChar.charInfo.fbsCtrl, this);
 #endif
 
-            //Only for HS2 code
             List<SkinnedMeshRenderer> skinnedMeshRendererList = new List<SkinnedMeshRenderer>();
             foreach (var skinnedMeshRenderer in _skinnedMeshRenderers)
             {
-                if (skinnedMeshRenderer.Key == "o_head")
-                    _headRenderer = skinnedMeshRenderer.Value;
                 string key = skinnedMeshRenderer.Key;
-                if (key == "o_eyelashes" || key == "o_namida" || key == "o_head")
-                    skinnedMeshRendererList.Add(skinnedMeshRenderer.Value);
+
+                switch (key)
+                {
+#if HONEYSELECT || KOIKATSU || PLAYHOME
+                    case "cf_O_head":
+                    case "cf_O_face":
+#elif AISHOUJO || HONEYSELECT2
+                    case "o_head":
+#endif
+                        _headRenderer = skinnedMeshRenderer.Value;
+                        break;
+                }
+
+                switch (key)
+                {
+#if HONEYSELECT || PLAYHOME
+                    case "cf_O_head":
+                    case "cf_O_matuge":
+                    case "cf_O_namida01":
+                    case "cf_O_namida02":
+#elif KOIKATSU
+                    case "cf_O_face":
+                    case "cf_O_eyeline":
+                    case "cf_O_eyeline_low":
+                    case "cf_Ohitomi_L":
+                    case "cf_Ohitomi_R":
+                    case "cf_O_namida_L":
+                    case "cf_O_namida_M":
+                    case "cf_O_namida_S":
+#elif AISHOUJO || HONEYSELECT2
+                    case "o_eyelashes":
+                    case "o_namida":
+                    case "o_head":
+#endif
+
+#if KOIKATSU
+                        SkinnedMeshRendererWrapper wrapper = new SkinnedMeshRendererWrapper
+                        {
+                            renderer = skinnedMeshRenderer.Value,
+                            links = new List<SkinnedMeshRendererWrapper>()
+                        };
+
+                        if (!_links.ContainsKey(skinnedMeshRenderer.Value))
+                            _links.Add(skinnedMeshRenderer.Value, wrapper);
+
+#elif AISHOUJO || HONEYSELECT2
+                        skinnedMeshRendererList.Add(skinnedMeshRenderer.Value);
+#endif
+
+                        break;
+                }
+
+
             }
 
+#if KOIKATSU
+            foreach (KeyValuePair<SkinnedMeshRenderer, SkinnedMeshRendererWrapper> pair in _links)
+            {
+                foreach (KeyValuePair<SkinnedMeshRenderer, SkinnedMeshRendererWrapper> pair2 in _links)
+                {
+                    if (pair.Key != pair2.Key)
+                        pair.Value.links.Add(pair2.Value);
+                }
+            }
+#elif AISHOUJO || HONEYSELECT2
             List<Dictionary<string, string>> dictionaryList = new List<Dictionary<string, string>>();
             foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRendererList)
             {
@@ -981,6 +1093,7 @@ namespace HSPE.AMModules
                     }
                 }
             }
+#endif
         }
 
         private void ResetAll()
@@ -1124,7 +1237,7 @@ namespace HSPE.AMModules
                 }
             }
         }
-        #endregion
+#endregion
 
         #region Timeline Compatibility
         internal static class TimelineCompatibility
@@ -1324,12 +1437,32 @@ namespace HSPE.AMModules
                                 SkinnedMeshRenderer renderer = p.renderer;
                                 float[] left = (float[])leftValue;
                                 float[] right = (float[])rightValue;
-                                //int targetLinkMaxCount = p.editor._target.isFemale ? _femaleEyesComponentsCount : _maleEyesComponentsCount;
+#if KOIKATSU
+                                int targetLinkMaxCount = p.editor._target.isFemale ? _femaleEyesComponentsCount : _maleEyesComponentsCount;
+                                for (int i = 0; i < left.Length; i++)
+                                {
+                                    float newBlendShapeWeight = Mathf.LerpUnclamped(left[i], right[i], factor);
+                                    p.editor.SetBlendShapeWeight(renderer, i, newBlendShapeWeight);
+                                    if (i < targetLinkMaxCount)
+                                    {
+                                        SkinnedMeshRendererWrapper wrapper;
+                                        if (p.editor._links.TryGetValue(renderer, out wrapper))
+                                        {
+                                            foreach (SkinnedMeshRendererWrapper link in wrapper.links)
+                                            {
+                                                if (i < link.renderer.sharedMesh.blendShapeCount)
+                                                    p.editor.SetBlendShapeWeight(link.renderer, i, newBlendShapeWeight);
+                                            }
+                                        }
+                                    }
+                                }
+#elif AISHOUJO || HONEYSELECT2
                                 for (int index = 0; index < left.Length; ++index)
                                 {
                                     float weight = Mathf.LerpUnclamped(left[index], right[index], factor);
                                     p.editor.SetBlendShapeWeight(renderer, index, weight);
                                 }
+#endif
                             }
                         },
                         interpolateAfter: null,
@@ -1481,6 +1614,6 @@ namespace HSPE.AMModules
                 return groupParameter.editor != null && (groupParameter.editor._isBusy || groupParameter.renderer != null);
             }
         }
-        #endregion
+#endregion
     }
 }
