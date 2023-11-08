@@ -1179,10 +1179,9 @@ namespace HSPE.AMModules
             _skinnedMeshRenderers.Clear();
             _dirtySkinnedMeshRenderers.Clear();
 
-            foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
+            foreach (SkinnedMeshRenderer skin in skinnedMeshRenderers)
             {
-                SkinnedMeshRenderer skin = skinnedMeshRenderer;
-                if (skin.sharedMesh.blendShapeCount > 0 && _parent._childObjects.All((child => !(skin).transform.IsChildOf(child.transform))))
+                if (skin != null && skin.sharedMesh != null && skin.sharedMesh.blendShapeCount > 0 && _parent._childObjects.All((child => !(skin).transform.IsChildOf(child.transform))))
                 {
                     string name = skin.name;
                     if (overlapNames.ContainsKey(name))
