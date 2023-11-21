@@ -1186,8 +1186,9 @@ namespace HSPE.AMModules
                     string name = skin.name;
                     if (overlapNames.ContainsKey(name))
                     {
-                        name += overlapNames[name].ToString();
-                        ++overlapNames[name];
+                        var overlapCount = overlapNames[name];
+                        overlapNames[name] = overlapCount + 1;
+                        name += overlapCount.ToString();
                     }
                     else
                     {
