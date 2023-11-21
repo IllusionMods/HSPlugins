@@ -237,7 +237,7 @@ namespace HSUS.Features
 #if HONEYSELECT
                 int currentGroup = (int)instance.GetPrivate("group");
 #elif KOIKATSU || AISHOUJO
-                int currentGroup = (int)instance.GetPrivate("category");
+                var currentGroup = ItemList_InitList_Patches.ItemListData.MakeGroupId(instance.group, instance.category);
 #endif
                 List<StudioNode> list;
                 if (data.objects.TryGetValue(currentGroup, out list) == false)
@@ -260,14 +260,18 @@ namespace HSUS.Features
         {
             public class ItemListData
             {
-                public readonly Dictionary<int, List<StudioNode>> objects = new Dictionary<int, List<StudioNode>>();
+                public static ulong MakeGroupId(int group, int category)
+                {
+                    return ((ulong)group << 32) | (uint)category;
+                }
+                public readonly Dictionary<ulong, List<StudioNode>> objects = new Dictionary<ulong, List<StudioNode>>();
                 public InputField searchBar;
             }
 
             public static readonly Dictionary<ItemList, ItemListData> _dataByInstance = new Dictionary<ItemList, ItemListData>();
 
 #if KOIKATSU
-            private static int _lastCategory = -1;
+            private static ulong _lastGroupId =  ulong.MaxValue;
 #endif
 
             public static bool Prepare()
@@ -349,16 +353,17 @@ namespace HSUS.Features
                 ___scrollRect.verticalNormalizedPosition = 1f;
 
                 List<StudioNode> list;
-                if (data.objects.TryGetValue(_lastCategory, out list))
+                if (data.objects.TryGetValue(_lastGroupId, out list))
                     foreach (StudioNode studioNode in list)
                         studioNode.active = false;
-                if (data.objects.TryGetValue(_category, out list))
+                var groupId = ItemListData.MakeGroupId(_group, _category);
+                if (data.objects.TryGetValue(groupId, out list))
                     foreach (StudioNode studioNode in list)
                         studioNode.active = true;
                 else
                 {
                     list = new List<StudioNode>();
-                    data.objects.Add(_category, list);
+                    data.objects.Add(groupId, list);
 
                     foreach (KeyValuePair<int, Info.ItemLoadInfo> keyValuePair in Singleton<Info>.Instance.dicItemLoadInfo[_group][_category])
                     {
@@ -400,7 +405,7 @@ namespace HSUS.Features
                     __instance.gameObject.SetActive(true);
                 ___group = _group;
                 ___category = _category;
-                _lastCategory = _category;
+                _lastGroupId = groupId;
                 ItemList_Awake_Patches.ResetSearch(__instance);
                 return false;
             }
