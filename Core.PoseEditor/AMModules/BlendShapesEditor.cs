@@ -974,15 +974,17 @@ namespace HSPE.AMModules
 
         private void Init()
         {
+            _instanceByFaceBlendShape.RemoveIfNullKey();
+
             _headRenderer = null;
 #if HONEYSELECT
-            _instanceByFaceBlendShape.Add(this._target.ociChar.charBody.fbsCtrl, this);
+            _instanceByFaceBlendShape[this._target.ociChar.charBody.fbsCtrl] = this;
 #elif PLAYHOME
-            _instanceByFaceBlendShape.Add(this._target.ociChar.charInfo.human, this);
+            _instanceByFaceBlendShape[this._target.ociChar.charInfo.human] = this;
 #elif KOIKATSU
-            _instanceByFaceBlendShape.Add(_target.ociChar.charInfo.fbsCtrl, this);
+            _instanceByFaceBlendShape[_target.ociChar.charInfo.fbsCtrl] = this;
 #elif AISHOUJO || HONEYSELECT2
-            _instanceByFaceBlendShape.Add(_target.ociChar.charInfo.fbsCtrl, this);
+            _instanceByFaceBlendShape[_target.ociChar.charInfo.fbsCtrl] = this;
 #endif
 
             List<SkinnedMeshRenderer> skinnedMeshRendererList = new List<SkinnedMeshRenderer>();
