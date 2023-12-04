@@ -807,25 +807,7 @@ namespace HSPE
                         bone.guideObject.changeAmount.rot = twinRot.eulerAngles;
 
 #if KOIKATSU
-                        //Could be simplified to a single if/else, but it's left verbose for clarity
-                        if (bone.boneID == 22 || bone.boneID == 25 || bone.boneID == 28 || bone.boneID == 31 || bone.boneID == 34) //Right hand first joint
-                            bone.guideObject.changeAmount.rot = new Vector3(-bone.guideObject.changeAmount.rot.x, 180 + bone.guideObject.changeAmount.rot.y, 180 - bone.guideObject.changeAmount.rot.z);
-
-                        else if (bone.boneID == 23 || bone.boneID == 26 || bone.boneID == 29 || bone.boneID == 32 || bone.boneID == 35) //Right hand second joint
-                            bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
-
-                        else if (bone.boneID == 24 || bone.boneID == 27 || bone.boneID == 30 || bone.boneID == 33 || bone.boneID == 36) //Right hand third joint
-                            bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
-
-
-                        else if (bone.boneID == 37 || bone.boneID == 40 || bone.boneID == 43 || bone.boneID == 46 || bone.boneID == 49) //Left hand first joint
-                            bone.guideObject.changeAmount.rot = new Vector3(-bone.guideObject.changeAmount.rot.x, 180 + bone.guideObject.changeAmount.rot.y, 180 - bone.guideObject.changeAmount.rot.z);
-
-                        else if (bone.boneID == 38 || bone.boneID == 41 || bone.boneID == 44 || bone.boneID == 47 || bone.boneID == 50) //Left hand second joint
-                            bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
-
-                        else if (bone.boneID == 39 || bone.boneID == 42 || bone.boneID == 45 || bone.boneID == 48 || bone.boneID == 51) //Left hand third joint
-                            bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
+                        FixTwinFingerBone(bone);
 #endif
 
                         _additionalRotationEqualsCommands.Add(new GuideCommand.EqualsInfo()
@@ -841,6 +823,31 @@ namespace HSPE
             _lockDrag = false;
             StopDrag();
         }
+
+#if KOIKATSU
+        private void FixTwinFingerBone( OCIChar.BoneInfo bone )
+        {
+            //Could be simplified to a single if/else, but it's left verbose for clarity
+            if (bone.boneID == 22 || bone.boneID == 25 || bone.boneID == 28 || bone.boneID == 31 || bone.boneID == 34) //Right hand first joint
+                bone.guideObject.changeAmount.rot = new Vector3(-bone.guideObject.changeAmount.rot.x, 180 + bone.guideObject.changeAmount.rot.y, 180 - bone.guideObject.changeAmount.rot.z);
+
+            else if (bone.boneID == 23 || bone.boneID == 26 || bone.boneID == 29 || bone.boneID == 32 || bone.boneID == 35) //Right hand second joint
+                bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
+
+            else if (bone.boneID == 24 || bone.boneID == 27 || bone.boneID == 30 || bone.boneID == 33 || bone.boneID == 36) //Right hand third joint
+                bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
+
+
+            else if (bone.boneID == 37 || bone.boneID == 40 || bone.boneID == 43 || bone.boneID == 46 || bone.boneID == 49) //Left hand first joint
+                bone.guideObject.changeAmount.rot = new Vector3(-bone.guideObject.changeAmount.rot.x, 180 + bone.guideObject.changeAmount.rot.y, 180 - bone.guideObject.changeAmount.rot.z);
+
+            else if (bone.boneID == 38 || bone.boneID == 41 || bone.boneID == 44 || bone.boneID == 47 || bone.boneID == 50) //Left hand second joint
+                bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
+
+            else if (bone.boneID == 39 || bone.boneID == 42 || bone.boneID == 45 || bone.boneID == 48 || bone.boneID == 51) //Left hand third joint
+                bone.guideObject.changeAmount.rot = new Vector3(bone.guideObject.changeAmount.rot.x, -bone.guideObject.changeAmount.rot.y, -bone.guideObject.changeAmount.rot.z);
+        }
+#endif
 
         private void SwapPoseInternal()
         {
@@ -915,6 +922,11 @@ namespace HSPE
                         bone.guideObject.changeAmount.rot = twinRot.eulerAngles;
                         twinBone.guideObject.changeAmount.rot = rot.eulerAngles;
 
+#if KOIKATSU
+                        FixTwinFingerBone(bone);
+                        FixTwinFingerBone(twinBone);
+#endif
+
                         _additionalRotationEqualsCommands.Add(new GuideCommand.EqualsInfo()
                         {
                             dicKey = bone.guideObject.dicKey,
@@ -966,6 +978,52 @@ namespace HSPE
                         SetBendGoalPosition(pair.Key, twinPosition, false);
                         SetBendGoalPosition(twin, position, false);
                         break;
+                }
+            }
+
+#if (KOIKATSU && SUNSHINE) || HONEYSELECT2
+            var cha = _target.ociChar.charInfo;
+            bool handShapeEnable0 = cha.GetEnableShapeHand(0);
+            bool handShapeEnable1 = cha.GetEnableShapeHand(1);
+            int hand00 = cha.GetShapeHandIndex(0, 0);
+            int hand01 = cha.GetShapeHandIndex(0, 1);
+            int hand10 = cha.GetShapeHandIndex(1, 0);
+            int hand11 = cha.GetShapeHandIndex(1, 1);
+            float blend0 = cha.GetShapeHandBlendValue(0);
+            float blend1 = cha.GetShapeHandBlendValue(1);
+            
+            _target.ociChar.ChangeHandAnime(0, hand10);
+            _target.ociChar.ChangeHandAnime(1, hand00);
+            cha.SetEnableShapeHand(0, handShapeEnable1);
+            cha.SetEnableShapeHand(1, handShapeEnable0);
+            cha.SetShapeHandIndex(0, hand10, hand11);
+            cha.SetShapeHandBlend(0, blend1);
+            cha.SetShapeHandIndex(1, hand00, hand01);
+            cha.SetShapeHandBlend(1, blend0);
+#endif
+
+            var fkCtrl = _target.ociChar.fkCtrl;
+            if (fkCtrl.isActiveAndEnabled)
+            {
+                bool leftHandFK = false;
+                bool rightHandFK = false;
+
+                foreach (var bone in fkCtrl.listBones)
+                {
+                    if (bone.gameObject.name.Contains("Toes"))
+                        continue;
+
+                    if (bone.group == OIBoneInfo.BoneGroup.LeftHand && bone.enable)
+                        leftHandFK = true;
+
+                    if (bone.group == OIBoneInfo.BoneGroup.RightHand && bone.enable)
+                        rightHandFK = true;
+                }
+
+                if (leftHandFK ^ rightHandFK)
+                {
+                    _target.ociChar.ActiveFK(OIBoneInfo.BoneGroup.LeftHand, rightHandFK);
+                    _target.ociChar.ActiveFK(OIBoneInfo.BoneGroup.RightHand, leftHandFK);
                 }
             }
 
