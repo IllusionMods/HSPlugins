@@ -1010,6 +1010,9 @@ namespace HSPE
 
                 foreach (var bone in fkCtrl.listBones)
                 {
+                    if (bone.gameObject.name.Contains("Toes"))
+                        continue;
+
                     if (bone.group == OIBoneInfo.BoneGroup.LeftHand && bone.enable)
                         leftHandFK = true;
 
