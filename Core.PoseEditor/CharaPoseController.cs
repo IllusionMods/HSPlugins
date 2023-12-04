@@ -981,6 +981,49 @@ namespace HSPE
                 }
             }
 
+#if (KOIKATSU && SUNSHINE) || HONEYSELECT2
+            var cha = _target.ociChar.charInfo;
+            bool handShapeEnable0 = cha.GetEnableShapeHand(0);
+            bool handShapeEnable1 = cha.GetEnableShapeHand(1);
+            int hand00 = cha.GetShapeHandIndex(0, 0);
+            int hand01 = cha.GetShapeHandIndex(0, 1);
+            int hand10 = cha.GetShapeHandIndex(1, 0);
+            int hand11 = cha.GetShapeHandIndex(1, 1);
+            float blend0 = cha.GetShapeHandBlendValue(0);
+            float blend1 = cha.GetShapeHandBlendValue(1);
+            
+            _target.ociChar.ChangeHandAnime(0, hand10);
+            _target.ociChar.ChangeHandAnime(1, hand00);
+            cha.SetEnableShapeHand(0, handShapeEnable1);
+            cha.SetEnableShapeHand(1, handShapeEnable0);
+            cha.SetShapeHandIndex(0, hand10, hand11);
+            cha.SetShapeHandBlend(0, blend1);
+            cha.SetShapeHandIndex(1, hand00, hand01);
+            cha.SetShapeHandBlend(1, blend0);
+#endif
+
+            var fkCtrl = _target.ociChar.fkCtrl;
+            if (fkCtrl.isActiveAndEnabled)
+            {
+                bool leftHandFK = false;
+                bool rightHandFK = false;
+
+                foreach (var bone in fkCtrl.listBones)
+                {
+                    if (bone.group == OIBoneInfo.BoneGroup.LeftHand && bone.enable)
+                        leftHandFK = true;
+
+                    if (bone.group == OIBoneInfo.BoneGroup.RightHand && bone.enable)
+                        rightHandFK = true;
+                }
+
+                if (leftHandFK ^ rightHandFK)
+                {
+                    _target.ociChar.ActiveFK(OIBoneInfo.BoneGroup.LeftHand, rightHandFK);
+                    _target.ociChar.ActiveFK(OIBoneInfo.BoneGroup.RightHand, leftHandFK);
+                }
+            }
+
             _scheduleNextIKPostUpdate = () =>
             {
                 foreach (KeyValuePair<FullBodyBipedEffector, int> pair in _effectorToIndex)
