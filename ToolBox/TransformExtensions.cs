@@ -12,7 +12,7 @@ namespace ToolBox.Extensions {
             Transform self2 = self;
             StringBuilder path = new StringBuilder(self2.name);
             self2 = self2.parent;
-            while (self2 != root)
+            while (self2 != null && self2 != root)
             {
                 path.Insert(0, "/");
                 path.Insert(0, self2.name);
