@@ -84,6 +84,7 @@ namespace HSPE
 
             _bonesEditor = new BonesEditor(this, _target);
             _modules.Add(_bonesEditor);
+            _bonesEditor._gom = MainWindow._self._gom;
 
             _collidersEditor = new CollidersEditor(this, _target);
             _modules.Add(_collidersEditor);

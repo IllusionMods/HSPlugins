@@ -1,4 +1,5 @@
-﻿using Studio;
+﻿using ADV.Commands.Object;
+using Studio;
 using System;
 using System.Xml;
 using UnityEngine;
@@ -129,6 +130,347 @@ namespace HSPE.AMModules
             }
             inc = Mathf.Pow(10, incIndex);
             GUILayout.EndVertical();
+        }
+
+        protected Vector3 Vector3Editor(Transform transform, float customInc, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null, bool scaleEditor = false)
+        {
+            return Vector3Editor(transform, _redColor, _greenColor, _blueColor, customInc, xLabel, yLabel, zLabel, onValueChanged, scaleEditor);
+        }
+        protected Vector3 Vector3Editor(Transform transform, Color xColor, Color yColor, Color zColor, float customInc, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null, bool scaleEditor = false)
+        {
+            Vector3 result = ((transform == null) ? Vector3.zero : transform.localPosition);
+            string text = customInc.ToString("+0.#####;-0.#####");
+            string text2 = (0f - customInc).ToString("+0.#####;-0.#####");
+            GUILayout.BeginVertical();
+            Color color = GUI.color;
+            GUI.color = xColor;
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(xLabel, GUILayout.ExpandWidth(false));
+            string text3 = result.x.ToString("0.00000");
+            string text4 = GUILayout.TextField(text3, GUILayout.MaxWidth(60f));
+            if (transform != null && text3 != text4)
+            {
+                if (float.TryParse(text4, out var result2))
+                {
+                    result.x = result2;
+                    onValueChanged?.Invoke();
+                }
+                PoseController._curTriggered = (scaleEditor ? "scl_x_t" : "pos_x_t");
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+            if (GUILayout.Button("0", GUILayout.Width(20f)) && transform != null)
+            {
+                result.x = (scaleEditor ? 1 : 0);
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = (scaleEditor ? "scl_x_0" : "pos_x_0");
+            }
+            if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Vector3.zero;
+                }
+                transform.position -= customInc * Vector3.right;
+                result = transform.localPosition;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = (scaleEditor ? "scl_x_-" : "pos_x_-");
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            if (GUILayout.RepeatButton(text) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Vector3.zero;
+                }
+                transform.position += customInc * Vector3.right;
+                result = transform.localPosition;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = (scaleEditor ? "scl_x_+" : "pos_x_+");
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
+            GUI.color = yColor;
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(yLabel, GUILayout.ExpandWidth(false));
+            text3 = result.y.ToString("0.00000");
+            text4 = GUILayout.TextField(text3, GUILayout.MaxWidth(60f));
+            if (transform != null && text3 != text4)
+            {
+                if (float.TryParse(text4, out var result3))
+                {
+                    result.y = result3;
+                    onValueChanged?.Invoke();
+                }
+                PoseController._curTriggered = (scaleEditor ? "scl_y_t" : "pos_y_t");
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+            if (GUILayout.Button("0", GUILayout.Width(20f)) && transform != null)
+            {
+                result.y = (scaleEditor ? 1 : 0);
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = (scaleEditor ? "scl_y_0" : "pos_y_0");
+            }
+            if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Vector3.zero;
+                }
+                transform.position -= customInc * Vector3.up;
+                result = transform.localPosition;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = (scaleEditor ? "scl_y_-" : "pos_y_-");
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            if (GUILayout.RepeatButton(text) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Vector3.zero;
+                }
+                transform.position += customInc * Vector3.up;
+                result = transform.localPosition;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = (scaleEditor ? "scl_y_+" : "pos_y_+");
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
+            GUI.color = zColor;
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(zLabel, GUILayout.ExpandWidth(false));
+            text3 = result.z.ToString("0.00000");
+            text4 = GUILayout.TextField(text3, GUILayout.MaxWidth(60f));
+            if (transform != null && text3 != text4)
+            {
+                if (float.TryParse(text4, out var result4))
+                {
+                    result.z = result4;
+                    onValueChanged?.Invoke();
+                }
+                PoseController._curTriggered = (scaleEditor ? "scl_z_t" : "pos_z_t");
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+            if (GUILayout.Button("0", GUILayout.Width(20f)) && transform != null)
+            {
+                result.z = (scaleEditor ? 1 : 0);
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = (scaleEditor ? "scl_z_0" : "pos_z_0");
+            }
+            if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Vector3.zero;
+                }
+                transform.position -= customInc * Vector3.forward;
+                result = transform.localPosition;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = (scaleEditor ? "scl_z_-" : "pos_z_-");
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            if (GUILayout.RepeatButton(text) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Vector3.zero;
+                }
+                transform.position += customInc * Vector3.forward;
+                result = transform.localPosition;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = (scaleEditor ? "scl_z_+" : "pos_z_+");
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
+            GUI.color = color;
+            GUILayout.EndHorizontal();
+            return result;
+        }
+
+        protected Quaternion QuaternionEditor(Transform transform, float customInc, string xLabel = "X (Pitch):\t", string yLabel = "Y (Yaw):\t", string zLabel = "Z (Roll):\t", Action onValueChanged = null)
+        {
+            return QuaternionEditor(transform, AdvancedModeModule._redColor, AdvancedModeModule._greenColor, AdvancedModeModule._blueColor, customInc, xLabel, yLabel, zLabel, onValueChanged);
+        }
+
+        protected Quaternion QuaternionEditor(Transform transform, Color xColor, Color yColor, Color zColor, float customInc, string xLabel = "X (Pitch):\t", string yLabel = "Y (Yaw):\t", string zLabel = "Z (Roll):\t", Action onValueChanged = null)
+        {
+            Quaternion quaternion = ((transform == null) ? Quaternion.identity : transform.localRotation);
+            string text = customInc.ToString("+0.#####;-0.#####");
+            string text2 = (0f - customInc).ToString("+0.#####;-0.#####");
+            GUILayout.BeginVertical();
+            Color color = GUI.color;
+            GUI.color = xColor;
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(xLabel, GUILayout.ExpandWidth(false));
+            string text3 = quaternion.eulerAngles.x.ToString("0.00000");
+            string text4 = GUILayout.TextField(text3, GUILayout.MaxWidth(60f));
+            if (transform != null && text3 != text4)
+            {
+                if (float.TryParse(text4, out var result))
+                {
+                    quaternion = Quaternion.Euler(result, quaternion.eulerAngles.y, quaternion.eulerAngles.z);
+                    SetBoneTargetRotation(quaternion);
+                    SetBoneTargetRotationFKNode(quaternion, true);
+                }
+                PoseController._curTriggered = "rot_x_t";
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+            if (GUILayout.Button("0", GUILayout.Width(20f)) && transform != null)
+            {
+                quaternion = Quaternion.Euler(0f, quaternion.eulerAngles.y, quaternion.eulerAngles.z);
+                SetBoneTargetRotation(quaternion);
+                SetBoneTargetRotationFKNode(quaternion, true);
+                PoseController._curTriggered = "rot_x_0";
+            }
+            if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Quaternion.identity;
+                }
+                transform.rotation *= Quaternion.AngleAxis(0f - customInc, Vector3.right);
+                quaternion = transform.localRotation;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = "rot_x_-";
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            if (GUILayout.RepeatButton(text) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Quaternion.identity;
+                }
+                transform.rotation *= Quaternion.AngleAxis(customInc, Vector3.right);
+                quaternion = transform.localRotation;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = "rot_x_+";
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
+            GUI.color = yColor;
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(yLabel, GUILayout.ExpandWidth(false));
+            text3 = quaternion.eulerAngles.y.ToString("0.00000");
+            text4 = GUILayout.TextField(text3, GUILayout.MaxWidth(60f));
+            if (transform != null && text3 != text4)
+            {
+                if (float.TryParse(text4, out var result2))
+                {
+                    quaternion = Quaternion.Euler(quaternion.eulerAngles.x, result2, quaternion.eulerAngles.z);
+                    SetBoneTargetRotation(quaternion);
+                    SetBoneTargetRotationFKNode(quaternion, true);
+                }
+                PoseController._curTriggered = "rot_y_t";
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+            if (GUILayout.Button("0", GUILayout.Width(20f)) && transform != null)
+            {
+                quaternion = Quaternion.Euler(quaternion.eulerAngles.x, 0f, quaternion.eulerAngles.z);
+                SetBoneTargetRotation(quaternion);
+                SetBoneTargetRotationFKNode(quaternion, true);
+                PoseController._curTriggered = "rot_y_0";
+            }
+            if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Quaternion.identity;
+                }
+                transform.rotation *= Quaternion.AngleAxis(0f - customInc, Vector3.up);
+                quaternion = transform.localRotation;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = "rot_y_-";
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            if (GUILayout.RepeatButton(text) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Quaternion.identity;
+                }
+                transform.rotation *= Quaternion.AngleAxis(customInc, Vector3.up);
+                quaternion = transform.localRotation;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = "rot_y_+";
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
+            GUI.color = zColor;
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(zLabel, GUILayout.ExpandWidth(false));
+            text3 = quaternion.eulerAngles.z.ToString("0.00000");
+            text4 = GUILayout.TextField(text3, GUILayout.MaxWidth(60f));
+            if (transform != null && text3 != text4)
+            {
+                if (float.TryParse(text4, out var result3))
+                {
+                    quaternion.z = result3;
+                    quaternion = Quaternion.Euler(quaternion.eulerAngles.x, quaternion.eulerAngles.y, result3);
+                    SetBoneTargetRotation(quaternion);
+                    SetBoneTargetRotationFKNode(quaternion, true);
+                }
+                PoseController._curTriggered = "rot_z_t";
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+            if (GUILayout.Button("0", GUILayout.Width(20f)) && transform != null)
+            {
+                quaternion.z = 0f;
+                quaternion = Quaternion.Euler(quaternion.eulerAngles.x, quaternion.eulerAngles.y, 0f);
+                SetBoneTargetRotation(quaternion);
+                SetBoneTargetRotationFKNode(quaternion, true);
+                PoseController._curTriggered = "rot_z_0";
+            }
+            if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Quaternion.identity;
+                }
+                transform.rotation *= Quaternion.AngleAxis(0f - customInc, Vector3.forward);
+                quaternion = transform.localRotation;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = "rot_z_-";
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            if (GUILayout.RepeatButton(text) && transform != null && !_parent._waitCorBool)
+            {
+                if (transform == null)
+                {
+                    return Quaternion.identity;
+                }
+                transform.rotation *= Quaternion.AngleAxis(customInc, Vector3.forward);
+                quaternion = transform.localRotation;
+                onValueChanged?.Invoke();
+                PoseController._curTriggered = "rot_z_+";
+                _parent._waitCorBool = true;
+                _parent.StartCoroutine(_parent.WaitCor());
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
+            GUI.color = color;
+            GUILayout.EndHorizontal();
+            return quaternion;
         }
 
         protected Vector3 Vector3Editor(Vector3 value, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null)
