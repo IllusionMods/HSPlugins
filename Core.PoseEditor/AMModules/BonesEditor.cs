@@ -218,7 +218,7 @@ namespace HSPE.AMModules
             {
                 ApplyBoneManualCorrection();
             }
-            if (!PoseController._drawAdvancedMode  || (object)_gomTarget == _gom?.selectObject?.transformTarget)
+            if (!PoseController._drawAdvancedMode || (object)_gomTarget == _gom?.selectObject?.transformTarget)
             {
                 return;
             }
@@ -569,11 +569,16 @@ namespace HSPE.AMModules
                     case CoordType.Position:
                         {
                             Vector3 boneTargetPosition2 = GetBoneTargetPosition();
+                            if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
+                                boneTargetPosition2 = _boneTarget.parent.TransformPoint(boneTargetPosition2);
+
                             shouldSaveValue = false;
-                            boneTargetPosition2 = _isWorld ? Vector3Editor(_boneTarget, _positionInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true)
-                                                           : Vector3Editor(boneTargetPosition2, _positionInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true);
+                            boneTargetPosition2 = Vector3Editor(boneTargetPosition2, _positionInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true);
                             if (shouldSaveValue)
                             {
+                                if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
+                                    boneTargetPosition2 = _boneTarget.parent.InverseTransformPoint(boneTargetPosition2);
+
                                 SetBoneTargetPosition(boneTargetPosition2);
                             }
                             _lastShouldSaveValue = shouldSaveValue;
@@ -582,19 +587,27 @@ namespace HSPE.AMModules
                     case CoordType.Rotation:
                         {
                             Quaternion boneTargetRotation2 = GetBoneTargetRotation(fkBoneInfo);
+
+                            // BUG: this seems to work and display correct rotation, but after editor and converting back to local rotation, it has identical result on rotation as if _isWorld was false
+                            if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
+                                boneTargetRotation2 = _boneTarget.parent.rotation * boneTargetRotation2;
+
                             shouldSaveValue = false;
-                            boneTargetRotation2 = _isWorld ? QuaternionEditor(_boneTarget, _rotationInc, "X (Pitch):\t", "Y (Yaw):\t", "Z (Roll):\t", () => shouldSaveValue = true)
-                                                           : QuaternionEditor(boneTargetRotation2, _rotationInc, "X (Pitch):\t", "Y (Yaw):\t", "Z (Roll):\t", () => shouldSaveValue = true);
-                            if (Event.current.rawType == EventType.Repaint)
+                            boneTargetRotation2 = QuaternionEditor(boneTargetRotation2, _rotationInc, "X (Pitch):\t", "Y (Yaw):\t", "Z (Roll):\t", () => shouldSaveValue = true);
+                            if (shouldSaveValue)
                             {
-                                if (shouldSaveValue)
+                                if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
+                                    boneTargetRotation2 = Quaternion.Inverse(_boneTarget.parent.transform.rotation) * boneTargetRotation2;
+                                
+                                SetBoneTargetRotation(boneTargetRotation2);
+                                SetBoneTargetRotationFKNode(boneTargetRotation2, false, fkBoneInfo, fkTwinBoneInfo);
+
+                                if (fkBoneInfo != null)
                                 {
-                                    SetBoneTargetRotation(boneTargetRotation2);
-                                    SetBoneTargetRotationFKNode(boneTargetRotation2, false, fkBoneInfo, fkTwinBoneInfo);
-                                }
-                                else if (fkBoneInfo != null && _lastShouldSaveValue)
-                                {
-                                    SetBoneTargetRotationFKNode(boneTargetRotation2, true, fkBoneInfo, fkTwinBoneInfo);
+                                    _parent.ExecuteDelayed(() =>
+                                    {
+                                        SetBoneTargetRotationFKNode(boneTargetRotation2, true, fkBoneInfo, fkTwinBoneInfo);
+                                    });
                                 }
                                 _lastShouldSaveValue = shouldSaveValue;
                             }
