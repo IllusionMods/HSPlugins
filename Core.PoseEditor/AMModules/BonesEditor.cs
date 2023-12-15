@@ -128,6 +128,8 @@ namespace HSPE.AMModules
         #region Constructor
         public BonesEditor(PoseController parent, GenericOCITarget target) : base(parent)
         {
+            _gom = GuideObjectManager.Instance ?? throw new Exception("Too early for GuideObjectManager");
+
             _target = target;
             _parent.onLateUpdate += LateUpdate;
             _parent.onDisable += OnDisable;
@@ -216,7 +218,7 @@ namespace HSPE.AMModules
             {
                 ApplyBoneManualCorrection();
             }
-            if (!PoseController._drawAdvancedMode || !PoseController._advLinkedGom || (object)_gomTarget == _gom?.selectObject?.transformTarget)
+            if (!PoseController._drawAdvancedMode  || (object)_gomTarget == _gom?.selectObject?.transformTarget)
             {
                 return;
             }
@@ -602,10 +604,7 @@ namespace HSPE.AMModules
                         {
                             Vector3 boneTargetScale = GetBoneTargetScale();
                             shouldSaveValue = false;
-                            boneTargetScale = Vector3Editor(boneTargetScale, _scaleInc, "X:\t", "Y:\t", "Z:\t", delegate
-                            {
-                                shouldSaveValue = true;
-                            }, true);
+                            boneTargetScale = Vector3Editor(boneTargetScale, _scaleInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true);
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("X/Y/Z");
                             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
@@ -613,13 +612,11 @@ namespace HSPE.AMModules
                             {
                                 shouldSaveValue = true;
                                 boneTargetScale = Vector3.one;
-                                PoseController._curTriggered = "scl_xyz_0";
                             }
                             if (GUILayout.RepeatButton((0f - _scaleInc).ToString("+0.#####;-0.#####")) && !_parent._waitCorBool && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 boneTargetScale -= _scaleInc * Vector3.one;
-                                PoseController._curTriggered = "scl_xyz_-";
                                 _parent._waitCorBool = true;
                                 _parent.StartCoroutine(_parent.WaitCor());
                             }
@@ -627,7 +624,6 @@ namespace HSPE.AMModules
                             {
                                 shouldSaveValue = true;
                                 boneTargetScale += _scaleInc * Vector3.one;
-                                PoseController._curTriggered = "scl_xyz_+";
                                 _parent._waitCorBool = true;
                                 _parent.StartCoroutine(_parent.WaitCor());
                             }
@@ -658,7 +654,6 @@ namespace HSPE.AMModules
                                 {
                                     angle = 0f - _rotateAroundInc;
                                 }
-                                PoseController._curTriggered = "ard_x_-";
                                 _parent._waitCorBool = true;
                                 _parent.StartCoroutine(_parent.WaitCor());
                             }
@@ -670,7 +665,6 @@ namespace HSPE.AMModules
                                 {
                                     angle = _rotateAroundInc;
                                 }
-                                PoseController._curTriggered = "ard_x_+";
                                 _parent._waitCorBool = true;
                                 _parent.StartCoroutine(_parent.WaitCor());
                             }
@@ -689,7 +683,6 @@ namespace HSPE.AMModules
                                 {
                                     angle = 0f - _rotateAroundInc;
                                 }
-                                PoseController._curTriggered = "ard_y_-";
                                 _parent._waitCorBool = true;
                                 _parent.StartCoroutine(_parent.WaitCor());
                             }
@@ -701,7 +694,6 @@ namespace HSPE.AMModules
                                 {
                                     angle = _rotateAroundInc;
                                 }
-                                PoseController._curTriggered = "ard_y_+";
                                 _parent._waitCorBool = true;
                                 _parent.StartCoroutine(_parent.WaitCor());
                             }
@@ -720,7 +712,6 @@ namespace HSPE.AMModules
                                 {
                                     angle = 0f - _rotateAroundInc;
                                 }
-                                PoseController._curTriggered = "ard_z_-";
                                 _parent._waitCorBool = true;
                                 _parent.StartCoroutine(_parent.WaitCor());
                             }
@@ -732,7 +723,6 @@ namespace HSPE.AMModules
                                 {
                                     angle = _rotateAroundInc;
                                 }
-                                PoseController._curTriggered = "ard_z_+";
                                 _parent._waitCorBool = true;
                                 _parent.StartCoroutine(_parent.WaitCor());
                             }
@@ -853,17 +843,14 @@ namespace HSPE.AMModules
                 if (GUILayout.Button("Reset Pos.") && _boneTarget != null)
                 {
                     ResetBonePos(_boneTarget, _twinBoneTarget, Event.current.control);
-                    PoseController._curTriggered = "pos_reset";
                 }
                 if (GUILayout.Button("Reset Rot.") && _boneTarget != null)
                 {
                     ResetBoneRot(_boneTarget, _twinBoneTarget, Event.current.control);
-                    PoseController._curTriggered = "rot_reset";
                 }
                 if (GUILayout.Button("Reset Scale") && _boneTarget != null)
                 {
                     ResetBoneScale(_boneTarget, _twinBoneTarget, Event.current.control);
-                    PoseController._curTriggered = "scl_reset";
                 }
 
                 if (GUILayout.Button("Default") && _boneTarget != null)
@@ -918,7 +905,6 @@ namespace HSPE.AMModules
                 if (GUILayout.Button("Dirty Pos.") && _boneTarget != null)
                 {
                     MakeDirtyBonePos(_boneTarget, _twinBoneTarget, Event.current.control);
-                    PoseController._curTriggered = "pos_dirty";
                 }
                 if (GUILayout.Button("Dirty Rot.") && _boneTarget != null)
                 {
@@ -926,12 +912,10 @@ namespace HSPE.AMModules
                     {
                         MakeDirtyBoneRot(_boneTarget, _twinBoneTarget, Event.current.control);
                     }
-                    PoseController._curTriggered = "rot_dirty";
                 }
                 if (GUILayout.Button("Dirty Scale") && _boneTarget != null)
                 {
                     MakeDirtyBoneScale(_boneTarget, _twinBoneTarget, Event.current.control);
-                    PoseController._curTriggered = "scl_dirty";
                 }
                 GUILayout.EndHorizontal();
                 GUI.enabled = true;
@@ -956,7 +940,6 @@ namespace HSPE.AMModules
                             customShortcuts.Add(path, _boneTarget.name);
                     }
                     _removeShortcutMode = false;
-                    PoseController._curTriggered = "";
                 }
 
                 color = GUI.color;
@@ -965,7 +948,6 @@ namespace HSPE.AMModules
                 if (GUILayout.Button(_removeShortcutMode ? "Click on a shortcut" : "- Remove Shortcut"))
                 {
                     _removeShortcutMode = !_removeShortcutMode;
-                    PoseController._curTriggered = "";
                 }
                 GUI.color = color;
 
@@ -1018,7 +1000,6 @@ namespace HSPE.AMModules
                         {
                             GoToObject(shortcut.gameObject);
                         }
-                        PoseController._curTriggered = "";
                     }
                     ++i;
 
@@ -1035,10 +1016,6 @@ namespace HSPE.AMModules
             }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
-            if (PoseController._curTriggered != "" && !PoseController._curTriggered.EndsWith("_0") && (DateTime.Now - PoseController._lastTriggeredDT).TotalSeconds > 1.0)
-            {
-                PoseController._curTriggered = "";
-            }
         }
 
         private void ChangeBoneTarget(Transform newTarget)

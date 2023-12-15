@@ -155,7 +155,6 @@ namespace HSPE.AMModules
                     result.x = result2;
                     onValueChanged?.Invoke();
                 }
-                PoseController._curTriggered = (scaleEditor ? "scl_x_t" : "pos_x_t");
             }
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
@@ -163,7 +162,6 @@ namespace HSPE.AMModules
             {
                 result.x = (scaleEditor ? 1 : 0);
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = (scaleEditor ? "scl_x_0" : "pos_x_0");
             }
             if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
             {
@@ -174,7 +172,6 @@ namespace HSPE.AMModules
                 transform.position -= customInc * Vector3.right;
                 result = transform.localPosition;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = (scaleEditor ? "scl_x_-" : "pos_x_-");
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -187,7 +184,6 @@ namespace HSPE.AMModules
                 transform.position += customInc * Vector3.right;
                 result = transform.localPosition;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = (scaleEditor ? "scl_x_+" : "pos_x_+");
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -205,7 +201,6 @@ namespace HSPE.AMModules
                     result.y = result3;
                     onValueChanged?.Invoke();
                 }
-                PoseController._curTriggered = (scaleEditor ? "scl_y_t" : "pos_y_t");
             }
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
@@ -213,7 +208,6 @@ namespace HSPE.AMModules
             {
                 result.y = (scaleEditor ? 1 : 0);
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = (scaleEditor ? "scl_y_0" : "pos_y_0");
             }
             if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
             {
@@ -224,7 +218,6 @@ namespace HSPE.AMModules
                 transform.position -= customInc * Vector3.up;
                 result = transform.localPosition;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = (scaleEditor ? "scl_y_-" : "pos_y_-");
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -237,7 +230,6 @@ namespace HSPE.AMModules
                 transform.position += customInc * Vector3.up;
                 result = transform.localPosition;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = (scaleEditor ? "scl_y_+" : "pos_y_+");
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -255,7 +247,6 @@ namespace HSPE.AMModules
                     result.z = result4;
                     onValueChanged?.Invoke();
                 }
-                PoseController._curTriggered = (scaleEditor ? "scl_z_t" : "pos_z_t");
             }
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
@@ -263,7 +254,6 @@ namespace HSPE.AMModules
             {
                 result.z = (scaleEditor ? 1 : 0);
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = (scaleEditor ? "scl_z_0" : "pos_z_0");
             }
             if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
             {
@@ -274,7 +264,6 @@ namespace HSPE.AMModules
                 transform.position -= customInc * Vector3.forward;
                 result = transform.localPosition;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = (scaleEditor ? "scl_z_-" : "pos_z_-");
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -287,7 +276,6 @@ namespace HSPE.AMModules
                 transform.position += customInc * Vector3.forward;
                 result = transform.localPosition;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = (scaleEditor ? "scl_z_+" : "pos_z_+");
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -320,19 +308,19 @@ namespace HSPE.AMModules
                 if (float.TryParse(text4, out var result))
                 {
                     quaternion = Quaternion.Euler(result, quaternion.eulerAngles.y, quaternion.eulerAngles.z);
-                    SetBoneTargetRotation(quaternion);
-                    SetBoneTargetRotationFKNode(quaternion, true);
+                    //SetBoneTargetRotation(quaternion);
+                    //SetBoneTargetRotationFKNode(quaternion, true);
+                onValueChanged?.Invoke();
                 }
-                PoseController._curTriggered = "rot_x_t";
             }
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
             if (GUILayout.Button("0", GUILayout.Width(20f)) && transform != null)
             {
                 quaternion = Quaternion.Euler(0f, quaternion.eulerAngles.y, quaternion.eulerAngles.z);
-                SetBoneTargetRotation(quaternion);
-                SetBoneTargetRotationFKNode(quaternion, true);
-                PoseController._curTriggered = "rot_x_0";
+                //SetBoneTargetRotation(quaternion);
+                //SetBoneTargetRotationFKNode(quaternion, true);
+                onValueChanged?.Invoke();
             }
             if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
             {
@@ -343,7 +331,6 @@ namespace HSPE.AMModules
                 transform.rotation *= Quaternion.AngleAxis(0f - customInc, Vector3.right);
                 quaternion = transform.localRotation;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = "rot_x_-";
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -356,7 +343,6 @@ namespace HSPE.AMModules
                 transform.rotation *= Quaternion.AngleAxis(customInc, Vector3.right);
                 quaternion = transform.localRotation;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = "rot_x_+";
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -372,19 +358,19 @@ namespace HSPE.AMModules
                 if (float.TryParse(text4, out var result2))
                 {
                     quaternion = Quaternion.Euler(quaternion.eulerAngles.x, result2, quaternion.eulerAngles.z);
-                    SetBoneTargetRotation(quaternion);
-                    SetBoneTargetRotationFKNode(quaternion, true);
+                    //SetBoneTargetRotation(quaternion);
+                    //SetBoneTargetRotationFKNode(quaternion, true);
+                onValueChanged?.Invoke();
                 }
-                PoseController._curTriggered = "rot_y_t";
             }
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
             if (GUILayout.Button("0", GUILayout.Width(20f)) && transform != null)
             {
                 quaternion = Quaternion.Euler(quaternion.eulerAngles.x, 0f, quaternion.eulerAngles.z);
-                SetBoneTargetRotation(quaternion);
-                SetBoneTargetRotationFKNode(quaternion, true);
-                PoseController._curTriggered = "rot_y_0";
+                //SetBoneTargetRotation(quaternion);
+                //SetBoneTargetRotationFKNode(quaternion, true);
+                onValueChanged?.Invoke();
             }
             if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
             {
@@ -395,7 +381,6 @@ namespace HSPE.AMModules
                 transform.rotation *= Quaternion.AngleAxis(0f - customInc, Vector3.up);
                 quaternion = transform.localRotation;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = "rot_y_-";
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -408,7 +393,6 @@ namespace HSPE.AMModules
                 transform.rotation *= Quaternion.AngleAxis(customInc, Vector3.up);
                 quaternion = transform.localRotation;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = "rot_y_+";
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -425,10 +409,10 @@ namespace HSPE.AMModules
                 {
                     quaternion.z = result3;
                     quaternion = Quaternion.Euler(quaternion.eulerAngles.x, quaternion.eulerAngles.y, result3);
-                    SetBoneTargetRotation(quaternion);
-                    SetBoneTargetRotationFKNode(quaternion, true);
+                    //SetBoneTargetRotation(quaternion);
+                    //SetBoneTargetRotationFKNode(quaternion, true);
+                onValueChanged?.Invoke();
                 }
-                PoseController._curTriggered = "rot_z_t";
             }
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
@@ -436,9 +420,9 @@ namespace HSPE.AMModules
             {
                 quaternion.z = 0f;
                 quaternion = Quaternion.Euler(quaternion.eulerAngles.x, quaternion.eulerAngles.y, 0f);
-                SetBoneTargetRotation(quaternion);
-                SetBoneTargetRotationFKNode(quaternion, true);
-                PoseController._curTriggered = "rot_z_0";
+                //SetBoneTargetRotation(quaternion);
+                //SetBoneTargetRotationFKNode(quaternion, true);
+                onValueChanged?.Invoke();
             }
             if (GUILayout.RepeatButton(text2) && transform != null && !_parent._waitCorBool)
             {
@@ -449,7 +433,6 @@ namespace HSPE.AMModules
                 transform.rotation *= Quaternion.AngleAxis(0f - customInc, Vector3.forward);
                 quaternion = transform.localRotation;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = "rot_z_-";
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }
@@ -462,7 +445,6 @@ namespace HSPE.AMModules
                 transform.rotation *= Quaternion.AngleAxis(customInc, Vector3.forward);
                 quaternion = transform.localRotation;
                 onValueChanged?.Invoke();
-                PoseController._curTriggered = "rot_z_+";
                 _parent._waitCorBool = true;
                 _parent.StartCoroutine(_parent.WaitCor());
             }

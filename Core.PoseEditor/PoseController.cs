@@ -84,7 +84,6 @@ namespace HSPE
 
             _bonesEditor = new BonesEditor(this, _target);
             _modules.Add(_bonesEditor);
-            _bonesEditor._gom = MainWindow._self._gom;
 
             _collidersEditor = new CollidersEditor(this, _target);
             _modules.Add(_collidersEditor);
@@ -440,5 +439,13 @@ namespace HSPE
         }
         #endregion
 
+        internal bool _waitCorBool;
+        internal float _waitCorSliderValue = 1f;
+
+        internal IEnumerator WaitCor()
+        {
+            yield return new WaitForSeconds(_waitCorSliderValue / 10f);
+            _waitCorBool = false;
+        }
     }
 }
