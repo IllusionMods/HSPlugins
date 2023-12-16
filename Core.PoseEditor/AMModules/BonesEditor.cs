@@ -496,14 +496,14 @@ namespace HSPE.AMModules
 
             GUILayout.BeginHorizontal();
             GUILayout.Label("Legend:");
-            Color color = GUI.color;
+            Color co = GUI.color;
             GUI.color = Color.cyan;
             GUILayout.Button("Selected");
             GUI.color = Color.magenta;
             GUILayout.Button("Changed*");
             GUI.color = CollidersEditor._colliderColor;
             GUILayout.Button("Collider");
-            GUI.color = color;
+            GUI.color = co;
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
             GUILayout.BeginVertical(GUI.skin.box, GUILayout.MinWidth(350f * ((MainWindow._self._advancedModeRect.width / 650f - 1f) / 2.7f + 1f)));
@@ -524,36 +524,30 @@ namespace HSPE.AMModules
                 if (_boneEditionCoordType == CoordType.Position)
                     GUI.color = Color.cyan;
                 if (GUILayout.Button("Position" + (transformData != null && transformData.position.hasValue ? "*" : "")))
-                {
                     _boneEditionCoordType = CoordType.Position;
-                }
-                GUI.color = color;
+                GUI.color = co;
 
                 if (transformData != null && transformData.rotation.hasValue)
                     GUI.color = Color.magenta;
                 if (_boneEditionCoordType == CoordType.Rotation)
                     GUI.color = Color.cyan;
                 if (GUILayout.Button("Rotation" + (transformData != null && transformData.rotation.hasValue ? "*" : "")))
-                {
                     _boneEditionCoordType = CoordType.Rotation;
-                }
-                GUI.color = color;
+                GUI.color = co;
 
                 if (transformData != null && transformData.scale.hasValue)
                     GUI.color = Color.magenta;
                 if (_boneEditionCoordType == CoordType.Scale)
                     GUI.color = Color.cyan;
                 if (GUILayout.Button("Scale" + (transformData != null && transformData.scale.hasValue ? "*" : "")))
-                {
                     _boneEditionCoordType = CoordType.Scale;
-                }
-                GUI.color = color;
+                GUI.color = co;
 
                 if (_boneEditionCoordType == CoordType.RotateAround)
                     GUI.color = Color.cyan;
                 if (GUILayout.Button("Rotate Around"))
                     _boneEditionCoordType = CoordType.RotateAround;
-                GUI.color = color;
+                GUI.color = co;
 
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
@@ -599,12 +593,8 @@ namespace HSPE.AMModules
                                 SetBoneTargetRotationFKNode(boneTargetRotation2, false, fkBoneInfo, fkTwinBoneInfo);
 
                                 if (fkBoneInfo != null)
-                                {
-                                    _parent.ExecuteDelayed(() =>
-                                    {
-                                        SetBoneTargetRotationFKNode(boneTargetRotation2, true, fkBoneInfo, fkTwinBoneInfo);
-                                    });
-                                }
+                                    _parent.ExecuteDelayed(() => SetBoneTargetRotationFKNode(boneTargetRotation2, true, fkBoneInfo, fkTwinBoneInfo));
+
                                 _lastShouldSaveValue = shouldSaveValue;
                             }
                             break;
@@ -622,7 +612,7 @@ namespace HSPE.AMModules
                                 shouldSaveValue = true;
                                 boneTargetScale = Vector3.one;
                             }
-                            if (GUILayout.RepeatButton((0f - _scaleInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                            if (GUILayout.RepeatButton((-_scaleInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 boneTargetScale -= _scaleInc * Vector3.one;
@@ -635,9 +625,8 @@ namespace HSPE.AMModules
                             GUILayout.EndHorizontal();
                             GUILayout.EndHorizontal();
                             if (shouldSaveValue && CanClickSpeedLimited())
-                            {
                                 SetBoneTargetScale(boneTargetScale);
-                            }
+
                             _lastShouldSaveValue = shouldSaveValue;
                             break;
                         }
@@ -646,82 +635,70 @@ namespace HSPE.AMModules
                             shouldSaveValue = false;
                             Vector3 axis = Vector3.zero;
                             float angle = 0f;
-                            Color color2 = GUI.color;
+                            Color c = GUI.color;
                             GUI.color = AdvancedModeModule._redColor;
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("X (Pitch)");
                             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.RepeatButton((0f - _rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                            if (GUILayout.RepeatButton((-_rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.right;
                                 if (RepeatControl())
-                                {
-                                    angle = 0f - _rotateAroundInc;
-                                }
+                                    angle = -_rotateAroundInc;
                             }
                             if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.right;
                                 if (RepeatControl())
-                                {
                                     angle = _rotateAroundInc;
-                                }
                             }
                             GUILayout.EndHorizontal();
                             GUILayout.EndHorizontal();
-                            GUI.color = color2;
+                            GUI.color = c;
                             GUI.color = AdvancedModeModule._greenColor;
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Y (Yaw)");
                             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.RepeatButton((0f - _rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                            if (GUILayout.RepeatButton((-_rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.up;
                                 if (RepeatControl())
-                                {
-                                    angle = 0f - _rotateAroundInc;
-                                }
+                                    angle = -_rotateAroundInc;
                             }
                             if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.up;
                                 if (RepeatControl())
-                                {
                                     angle = _rotateAroundInc;
-                                }
                             }
                             GUILayout.EndHorizontal();
                             GUILayout.EndHorizontal();
-                            GUI.color = color2;
+                            GUI.color = c;
                             GUI.color = AdvancedModeModule._blueColor;
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Z (Roll)");
                             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.RepeatButton((0f - _rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                            if (GUILayout.RepeatButton((-_rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.forward;
                                 if (RepeatControl())
-                                {
-                                    angle = 0f - _rotateAroundInc;
-                                }
+                                    angle = -_rotateAroundInc;
                             }
                             if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.forward;
                                 if (RepeatControl())
-                                {
                                     angle = _rotateAroundInc;
-                                }
                             }
                             GUILayout.EndHorizontal();
                             GUILayout.EndHorizontal();
-                            GUI.color = color2;
+                            GUI.color = c;
 
                             if (Event.current.rawType == EventType.Repaint && CanClickSpeedLimited())
                             {
@@ -834,17 +811,11 @@ namespace HSPE.AMModules
 
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Reset Pos.") && _boneTarget != null)
-                {
                     ResetBonePos(_boneTarget, _twinBoneTarget, Event.current.control);
-                }
                 if (GUILayout.Button("Reset Rot.") && _boneTarget != null)
-                {
                     ResetBoneRot(_boneTarget, _twinBoneTarget, Event.current.control);
-                }
                 if (GUILayout.Button("Reset Scale") && _boneTarget != null)
-                {
                     ResetBoneScale(_boneTarget, _twinBoneTarget, Event.current.control);
-                }
 
                 if (GUILayout.Button("Default") && _boneTarget != null)
                 {
@@ -896,27 +867,21 @@ namespace HSPE.AMModules
 
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Dirty Pos.") && _boneTarget != null)
-                {
                     MakeDirtyBonePos(_boneTarget, _twinBoneTarget, Event.current.control);
-                }
                 if (GUILayout.Button("Dirty Rot.") && _boneTarget != null)
                 {
                     if (fkBoneInfo == null || !fkBoneInfo.active)
-                    {
                         MakeDirtyBoneRot(_boneTarget, _twinBoneTarget, Event.current.control);
-                    }
                 }
                 if (GUILayout.Button("Dirty Scale") && _boneTarget != null)
-                {
                     MakeDirtyBoneScale(_boneTarget, _twinBoneTarget, Event.current.control);
-                }
                 GUILayout.EndHorizontal();
                 GUI.enabled = true;
                 GUILayout.BeginVertical(GUI.skin.box);
 
                 GUILayout.BeginHorizontal();
 
-                Dictionary<string, string> customShortcuts = _target.type == GenericOCITarget.Type.Character ? _target.isFemale ? _femaleShortcuts : _maleShortcuts : _itemShortcuts;
+                Dictionary<string, string> customShortcuts = _target.type == GenericOCITarget.Type.Character ? (_target.isFemale ? _femaleShortcuts : _maleShortcuts) : _itemShortcuts;
 
                 GUIStyle style = GUI.skin.GetStyle("Label");
                 TextAnchor bak = style.alignment;
@@ -935,13 +900,11 @@ namespace HSPE.AMModules
                     _removeShortcutMode = false;
                 }
 
-                color = GUI.color;
+                Color color = GUI.color;
                 if (_removeShortcutMode)
                     GUI.color = AdvancedModeModule._redColor;
                 if (GUILayout.Button(_removeShortcutMode ? "Click on a shortcut" : "- Remove Shortcut"))
-                {
                     _removeShortcutMode = !_removeShortcutMode;
-                }
                 GUI.color = color;
 
                 GUILayout.EndHorizontal();
@@ -1536,12 +1499,10 @@ namespace HSPE.AMModules
         private void DisplayObjectTree(GameObject go, int indent)
         {
             if (_parent._childObjects.Contains(go))
-            {
                 return;
-            }
+
             if (_boneAliases.TryGetValue(go.name, out string displayedName) == false)
                 displayedName = go.name;
-
 
             if (_search.Length == 0 || searchResults.Contains(go))
             {
@@ -1586,9 +1547,7 @@ namespace HSPE.AMModules
                             else
                             {
                                 if (_openedBones.Contains(go))
-                                {
                                     _openedBones.Remove(go);
-                                }
                             }
                         }
                         else
