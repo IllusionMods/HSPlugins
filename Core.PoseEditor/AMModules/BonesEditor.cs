@@ -557,196 +557,200 @@ namespace HSPE.AMModules
                 switch (_boneEditionCoordType)
                 {
                     case CoordType.Position:
+                        Vector3 boneTargetPosition2 = GetBoneTargetPosition();
+                        if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
+                            boneTargetPosition2 = _boneTarget.parent.TransformPoint(boneTargetPosition2);
+
+                        shouldSaveValue = false;
+                        boneTargetPosition2 = Vector3Editor(boneTargetPosition2, _positionInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true);
+                        if (shouldSaveValue && CanClickSpeedLimited())
                         {
-                            Vector3 boneTargetPosition2 = GetBoneTargetPosition();
                             if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
-                                boneTargetPosition2 = _boneTarget.parent.TransformPoint(boneTargetPosition2);
+                                boneTargetPosition2 = _boneTarget.parent.InverseTransformPoint(boneTargetPosition2);
 
-                            shouldSaveValue = false;
-                            boneTargetPosition2 = Vector3Editor(boneTargetPosition2, _positionInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true);
-                            if (shouldSaveValue && CanClickSpeedLimited())
-                            {
-                                if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
-                                    boneTargetPosition2 = _boneTarget.parent.InverseTransformPoint(boneTargetPosition2);
-
-                                SetBoneTargetPosition(boneTargetPosition2);
-                            }
-                            _lastShouldSaveValue = shouldSaveValue;
-                            break;
+                            SetBoneTargetPosition(boneTargetPosition2);
                         }
+
+                        _lastShouldSaveValue = shouldSaveValue;
+                        break;
                     case CoordType.Rotation:
-                        {
-                            Quaternion boneTargetRotation2 = GetBoneTargetRotation(fkBoneInfo);
+                        Quaternion boneTargetRotation2 = GetBoneTargetRotation(fkBoneInfo);
 
-                            // BUG: this seems to work and display correct rotation, but after clicking buttons in editor and converting back to local rotation, it has identical result on rotation as if _isWorld was false
+                        // BUG: this seems to work and display correct rotation, but after clicking buttons in editor and converting back to local rotation, it has identical result on rotation as if _isWorld was false
+                        if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
+                            boneTargetRotation2 = _boneTarget.parent.rotation * boneTargetRotation2;
+
+                        shouldSaveValue = false;
+                        boneTargetRotation2 = QuaternionEditor(boneTargetRotation2, _rotationInc, "X (Pitch):\t", "Y (Yaw):\t", "Z (Roll):\t", () => shouldSaveValue = true);
+                        if (shouldSaveValue && CanClickSpeedLimited())
+                        {
                             if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
-                                boneTargetRotation2 = _boneTarget.parent.rotation * boneTargetRotation2;
+                                boneTargetRotation2 = Quaternion.Inverse(_boneTarget.parent.transform.rotation) * boneTargetRotation2;
 
-                            shouldSaveValue = false;
-                            boneTargetRotation2 = QuaternionEditor(boneTargetRotation2, _rotationInc, "X (Pitch):\t", "Y (Yaw):\t", "Z (Roll):\t", () => shouldSaveValue = true);
-                            if (shouldSaveValue && CanClickSpeedLimited())
-                            {
-                                if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
-                                    boneTargetRotation2 = Quaternion.Inverse(_boneTarget.parent.transform.rotation) * boneTargetRotation2;
+                            SetBoneTargetRotation(boneTargetRotation2);
+                            SetBoneTargetRotationFKNode(boneTargetRotation2, false, fkBoneInfo, fkTwinBoneInfo);
 
-                                SetBoneTargetRotation(boneTargetRotation2);
-                                SetBoneTargetRotationFKNode(boneTargetRotation2, false, fkBoneInfo, fkTwinBoneInfo);
-
-                                if (fkBoneInfo != null)
-                                    _parent.ExecuteDelayed(() => SetBoneTargetRotationFKNode(boneTargetRotation2, true, fkBoneInfo, fkTwinBoneInfo));
-
-                                _lastShouldSaveValue = shouldSaveValue;
-                            }
-                            break;
-                        }
-                    case CoordType.Scale:
-                        {
-                            Vector3 boneTargetScale = GetBoneTargetScale();
-                            shouldSaveValue = false;
-                            boneTargetScale = Vector3Editor(boneTargetScale, _scaleInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true, true);
-                            GUILayout.BeginHorizontal();
-                            GUILayout.Label("X/Y/Z");
-                            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.Button("0", GUILayout.Width(20f)))
-                            {
-                                shouldSaveValue = true;
-                                boneTargetScale = Vector3.one;
-                            }
-                            if (GUILayout.RepeatButton((-_scaleInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
-                            {
-                                shouldSaveValue = true;
-                                boneTargetScale -= _scaleInc * Vector3.one;
-                            }
-                            if (GUILayout.RepeatButton(_scaleInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
-                            {
-                                shouldSaveValue = true;
-                                boneTargetScale += _scaleInc * Vector3.one;
-                            }
-                            GUILayout.EndHorizontal();
-                            GUILayout.EndHorizontal();
-                            if (shouldSaveValue && CanClickSpeedLimited())
-                                SetBoneTargetScale(boneTargetScale);
+                            if (fkBoneInfo != null)
+                                _parent.ExecuteDelayed(() => SetBoneTargetRotationFKNode(boneTargetRotation2, true, fkBoneInfo, fkTwinBoneInfo));
 
                             _lastShouldSaveValue = shouldSaveValue;
-                            break;
                         }
-                    case CoordType.RotateAround:
+
+                        break;
+                    case CoordType.Scale:
+                        Vector3 boneTargetScale = GetBoneTargetScale();
+                        shouldSaveValue = false;
+                        boneTargetScale = Vector3Editor(boneTargetScale, _scaleInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true, true);
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label("X/Y/Z");
+                        GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+                        if (GUILayout.Button("0", GUILayout.Width(20f)))
                         {
-                            shouldSaveValue = false;
-                            Vector3 axis = Vector3.zero;
-                            float angle = 0f;
-                            Color c = GUI.color;
-                            GUI.color = AdvancedModeModule._redColor;
-                            GUILayout.BeginHorizontal();
-                            GUILayout.Label("X (Pitch)");
-                            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.RepeatButton((-_rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
-                            {
-                                shouldSaveValue = true;
-                                axis = _boneTarget.right;
-                                if (RepeatControl())
-                                    angle = -_rotateAroundInc;
-                            }
-                            if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
-                            {
-                                shouldSaveValue = true;
-                                axis = _boneTarget.right;
-                                if (RepeatControl())
-                                    angle = _rotateAroundInc;
-                            }
-                            GUILayout.EndHorizontal();
-                            GUILayout.EndHorizontal();
-                            GUI.color = c;
-                            GUI.color = AdvancedModeModule._greenColor;
-                            GUILayout.BeginHorizontal();
-                            GUILayout.Label("Y (Yaw)");
-                            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.RepeatButton((-_rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
-                            {
-                                shouldSaveValue = true;
-                                axis = _boneTarget.up;
-                                if (RepeatControl())
-                                    angle = -_rotateAroundInc;
-                            }
-                            if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
-                            {
-                                shouldSaveValue = true;
-                                axis = _boneTarget.up;
-                                if (RepeatControl())
-                                    angle = _rotateAroundInc;
-                            }
-                            GUILayout.EndHorizontal();
-                            GUILayout.EndHorizontal();
-                            GUI.color = c;
-                            GUI.color = AdvancedModeModule._blueColor;
-                            GUILayout.BeginHorizontal();
-                            GUILayout.Label("Z (Roll)");
-                            GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.RepeatButton((-_rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
-                            {
-                                shouldSaveValue = true;
-                                axis = _boneTarget.forward;
-                                if (RepeatControl())
-                                    angle = -_rotateAroundInc;
-                            }
-                            if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
-                            {
-                                shouldSaveValue = true;
-                                axis = _boneTarget.forward;
-                                if (RepeatControl())
-                                    angle = _rotateAroundInc;
-                            }
-                            GUILayout.EndHorizontal();
-                            GUILayout.EndHorizontal();
-                            GUI.color = c;
-
-                            if (Event.current.rawType == EventType.Repaint && CanClickSpeedLimited())
-                            {
-                                if (_boneTarget != null)
-                                {
-                                    if (shouldSaveValue)
-                                    {
-                                        Quaternion currentRotation = GetBoneTargetRotation(fkBoneInfo);
-
-                                        Vector3 currentPosition = GetBoneTargetPosition();
-
-                                        _boneTarget.RotateAround(Studio.Studio.Instance.cameraCtrl.targetPos, axis, angle);
-
-                                        if (fkBoneInfo != null)
-                                        {
-                                            if (_oldFKRotationValue == null)
-                                                _oldFKRotationValue = fkBoneInfo.guideObject.changeAmount.rot;
-                                            fkBoneInfo.guideObject.changeAmount.rot = _boneTarget.localEulerAngles;
-                                        }
-
-                                        TransformData td = SetBoneDirty(_boneTarget.gameObject);
-
-                                        td.rotation = _boneTarget.localRotation;
-                                        if (!td.originalRotation.hasValue)
-                                            td.originalRotation = currentRotation;
-
-                                        td.position = _boneTarget.localPosition;
-                                        if (!td.originalPosition.hasValue)
-                                            td.originalPosition = currentPosition;
-                                    }
-                                    else if (fkBoneInfo != null && _lastShouldSaveValue)
-                                    {
-                                        GuideCommand.EqualsInfo[] infos = new GuideCommand.EqualsInfo[1];
-                                        infos[0] = new GuideCommand.EqualsInfo()
-                                        {
-                                            dicKey = fkBoneInfo.guideObject.dicKey,
-                                            oldValue = _oldFKRotationValue.Value,
-                                            newValue = fkBoneInfo.guideObject.changeAmount.rot
-                                        };
-                                        UndoRedoManager.Instance.Push(new GuideCommand.RotationEqualsCommand(infos));
-                                        _oldFKRotationValue = null;
-                                    }
-                                }
-                                _lastShouldSaveValue = shouldSaveValue;
-                            }
-
-                            break;
+                            shouldSaveValue = true;
+                            boneTargetScale = Vector3.one;
                         }
+
+                        if (GUILayout.RepeatButton((-_scaleInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        {
+                            shouldSaveValue = true;
+                            boneTargetScale -= _scaleInc * Vector3.one;
+                        }
+
+                        if (GUILayout.RepeatButton(_scaleInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        {
+                            shouldSaveValue = true;
+                            boneTargetScale += _scaleInc * Vector3.one;
+                        }
+
+                        GUILayout.EndHorizontal();
+                        GUILayout.EndHorizontal();
+                        if (shouldSaveValue && CanClickSpeedLimited())
+                            SetBoneTargetScale(boneTargetScale);
+
+                        _lastShouldSaveValue = shouldSaveValue;
+                        break;
+                    case CoordType.RotateAround:
+                        shouldSaveValue = false;
+                        Vector3 axis = Vector3.zero;
+                        float angle = 0f;
+                        Color c = GUI.color;
+                        GUI.color = AdvancedModeModule._redColor;
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label("X (Pitch)");
+                        GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+                        if (GUILayout.RepeatButton((-_rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        {
+                            shouldSaveValue = true;
+                            axis = _boneTarget.right;
+                            if (RepeatControl())
+                                angle = -_rotateAroundInc;
+                        }
+
+                        if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        {
+                            shouldSaveValue = true;
+                            axis = _boneTarget.right;
+                            if (RepeatControl())
+                                angle = _rotateAroundInc;
+                        }
+
+                        GUILayout.EndHorizontal();
+                        GUILayout.EndHorizontal();
+                        GUI.color = c;
+                        GUI.color = AdvancedModeModule._greenColor;
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label("Y (Yaw)");
+                        GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+                        if (GUILayout.RepeatButton((-_rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        {
+                            shouldSaveValue = true;
+                            axis = _boneTarget.up;
+                            if (RepeatControl())
+                                angle = -_rotateAroundInc;
+                        }
+
+                        if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        {
+                            shouldSaveValue = true;
+                            axis = _boneTarget.up;
+                            if (RepeatControl())
+                                angle = _rotateAroundInc;
+                        }
+
+                        GUILayout.EndHorizontal();
+                        GUILayout.EndHorizontal();
+                        GUI.color = c;
+                        GUI.color = AdvancedModeModule._blueColor;
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label("Z (Roll)");
+                        GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+                        if (GUILayout.RepeatButton((-_rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        {
+                            shouldSaveValue = true;
+                            axis = _boneTarget.forward;
+                            if (RepeatControl())
+                                angle = -_rotateAroundInc;
+                        }
+
+                        if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        {
+                            shouldSaveValue = true;
+                            axis = _boneTarget.forward;
+                            if (RepeatControl())
+                                angle = _rotateAroundInc;
+                        }
+
+                        GUILayout.EndHorizontal();
+                        GUILayout.EndHorizontal();
+                        GUI.color = c;
+
+                        if (Event.current.rawType == EventType.Repaint && CanClickSpeedLimited())
+                        {
+                            if (_boneTarget != null)
+                            {
+                                if (shouldSaveValue)
+                                {
+                                    Quaternion currentRotation = GetBoneTargetRotation(fkBoneInfo);
+
+                                    Vector3 currentPosition = GetBoneTargetPosition();
+
+                                    _boneTarget.RotateAround(Studio.Studio.Instance.cameraCtrl.targetPos, axis, angle);
+
+                                    if (fkBoneInfo != null)
+                                    {
+                                        if (_oldFKRotationValue == null)
+                                            _oldFKRotationValue = fkBoneInfo.guideObject.changeAmount.rot;
+                                        fkBoneInfo.guideObject.changeAmount.rot = _boneTarget.localEulerAngles;
+                                    }
+
+                                    TransformData td = SetBoneDirty(_boneTarget.gameObject);
+
+                                    td.rotation = _boneTarget.localRotation;
+                                    if (!td.originalRotation.hasValue)
+                                        td.originalRotation = currentRotation;
+
+                                    td.position = _boneTarget.localPosition;
+                                    if (!td.originalPosition.hasValue)
+                                        td.originalPosition = currentPosition;
+                                }
+                                else if (fkBoneInfo != null && _lastShouldSaveValue)
+                                {
+                                    GuideCommand.EqualsInfo[] infos = new GuideCommand.EqualsInfo[1];
+                                    infos[0] = new GuideCommand.EqualsInfo()
+                                    {
+                                        dicKey = fkBoneInfo.guideObject.dicKey,
+                                        oldValue = _oldFKRotationValue.Value,
+                                        newValue = fkBoneInfo.guideObject.changeAmount.rot
+                                    };
+                                    UndoRedoManager.Instance.Push(new GuideCommand.RotationEqualsCommand(infos));
+                                    _oldFKRotationValue = null;
+                                }
+                            }
+
+                            _lastShouldSaveValue = shouldSaveValue;
+                        }
+
+                        break;
                 }
                 GUILayout.EndVertical();
                 GUI.enabled = true;
