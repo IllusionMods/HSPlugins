@@ -89,8 +89,8 @@ namespace HSPE.AMModules
         private bool _sortByName = false;
         private bool _isWorld = false;
         private bool _goToObject;
-        internal GuideObjectManager _gom;
-        internal static Transform _gomTarget = null;
+        private GuideObjectManager _gom;
+        private static Transform _gomTarget = null;
         private List<GameObject> searchResults;
 
         private static readonly List<VectorLine> _cubeDebugLines = new List<VectorLine>();
@@ -128,8 +128,6 @@ namespace HSPE.AMModules
         #region Constructor
         public BonesEditor(PoseController parent, GenericOCITarget target) : base(parent)
         {
-            _gom = GuideObjectManager.Instance ?? throw new Exception("Too early for GuideObjectManager");
-
             _target = target;
             _parent.onLateUpdate += LateUpdate;
             _parent.onDisable += OnDisable;
@@ -137,8 +135,8 @@ namespace HSPE.AMModules
             {
                 Vector3 topLeftForward = (Vector3.up + Vector3.left + Vector3.forward) * _cubeSize,
                     topRightForward = (Vector3.up + Vector3.right + Vector3.forward) * _cubeSize,
-                    bottomLeftForward = ((Vector3.down + Vector3.left + Vector3.forward) * _cubeSize),
-                    bottomRightForward = ((Vector3.down + Vector3.right + Vector3.forward) * _cubeSize),
+                    bottomLeftForward = (Vector3.down + Vector3.left + Vector3.forward) * _cubeSize,
+                    bottomRightForward = (Vector3.down + Vector3.right + Vector3.forward) * _cubeSize,
                     topLeftBack = (Vector3.up + Vector3.left + Vector3.back) * _cubeSize,
                     topRightBack = (Vector3.up + Vector3.right + Vector3.back) * _cubeSize,
                     bottomLeftBack = (Vector3.down + Vector3.left + Vector3.back) * _cubeSize,
@@ -215,34 +213,36 @@ namespace HSPE.AMModules
         private void LateUpdate()
         {
             if (_target.type == GenericOCITarget.Type.Item)
-            {
                 ApplyBoneManualCorrection();
-            }
-            if (!PoseController._drawAdvancedMode || (object)_gomTarget == _gom?.selectObject?.transformTarget)
-            {
+
+            if (!PoseController._drawAdvancedMode || _parent == null)
                 return;
-            }
-            if ((object)_gom?.selectObject?.transformTarget == _parent?.transform)
+
+            if (_gom == null)
+                _gom = GuideObjectManager.Instance ?? throw new Exception("Too early for GuideObjectManager");
+
+            var selectObject = _gom.selectObject;
+            var transformTarget = selectObject?.transformTarget;
+            if (_gomTarget == transformTarget)
+                return;
+
+            if (transformTarget == _parent.transform)
             {
                 if (ValidBoneTarget(_boneTarget))
-                {
                     _gomTarget = _boneTarget;
-                }
             }
-            else if (_gom?.selectObject?.transformTarget != null && _gom.selectObject.transformTarget.GetComponentInParent<PoseController>() == _parent)
+            else if (transformTarget != null && transformTarget.GetComponentInParent<PoseController>() == _parent)
             {
-                if (_gomTarget != _gom.selectObject.transformTarget)
-                {
-                    _gomTarget = _gom.selectObject.transformTarget;
-                }
+                _gomTarget = transformTarget;
             }
             else
             {
                 _gomTarget = null;
             }
+
             if (_gomTarget != null)
             {
-                ChangeBoneTarget(_gom.selectObject.transformTarget);
+                ChangeBoneTarget(transformTarget);
                 _goToObject = true;
             }
         }
@@ -341,49 +341,45 @@ namespace HSPE.AMModules
                     OpenParents(_boneTarget.gameObject);
             }
             GUILayout.EndHorizontal();
-            _boneEditionScroll = GUILayout.BeginScrollView(_boneEditionScroll, GUI.skin.box, GUILayout.ExpandHeight(true));
 
             if (_search != oldSearch && _search.Length > 0)
                 UpdateSearch();
 
-            if (_onlyModified && _sortByName)
+            // Draw bone list scrollview
+            _boneEditionScroll = GUILayout.BeginScrollView(_boneEditionScroll, GUI.skin.box, GUILayout.ExpandHeight(true));
+            if (_onlyModified && _sortByName && _dirtyBones != null && _dirtyBones.Count > 0)
             {
-                Dictionary<GameObject, TransformData> dirtyBones = _dirtyBones;
-                if (dirtyBones != null && dirtyBones.Count > 0)
+                foreach (GameObject goKey in _dirtyBones.Keys)
                 {
-                    foreach (GameObject key in _dirtyBones.Keys)
-                    {
-                        if (!_boneAliases.TryGetValue(key.name, out var value2))
-                        {
-                            value2 = key.name;
-                        }
-                        GUI.color = ((key.transform == _boneTarget) ? Color.cyan : Color.magenta);
-                        if (GUILayout.Button(value2 + "*", GUILayout.ExpandWidth(false)))
-                        {
-                            if (ValidBoneTarget(key))
-                            {
-                                _gomTarget = key.transform;
-                            }
-                            ChangeBoneTarget(key.transform);
-                        }
-                    }
-                    GUI.color = Color.white;
-                    goto IL_032b;
-                }
-            }
-            foreach (Transform child in _parent.transform)
-                DisplayObjectTree(child.gameObject, 0);
+                    if (!_boneAliases.TryGetValue(goKey.name, out var value2))
+                        value2 = goKey.name;
 
-            if (_goToObject && Event.current.rawType == EventType.Repaint)
-            {
-                if (_boneTarget != null)
-                {
-                    GoToObject(_boneTarget.gameObject);
+                    GUI.color = goKey.transform == _boneTarget ? Color.cyan : Color.magenta;
+                    if (GUILayout.Button(value2 + "*", GUILayout.ExpandWidth(false)))
+                    {
+                        if (ValidBoneTarget(goKey))
+                            _gomTarget = goKey.transform;
+
+                        ChangeBoneTarget(goKey.transform);
+                    }
                 }
-                _goToObject = false;
+                GUI.color = Color.white;
             }
-        IL_032b: //todo clean up
+            else
+            {
+                foreach (Transform child in _parent.transform)
+                    DisplayObjectTree(child.gameObject, 0);
+
+                if (_goToObject && Event.current.rawType == EventType.Repaint)
+                {
+                    if (_boneTarget != null)
+                        GoToObject(_boneTarget.gameObject);
+
+                    _goToObject = false;
+                }
+            }
             GUILayout.EndScrollView();
+
             GUILayout.BeginHorizontal();
             GUILayout.Label("Alias", GUILayout.ExpandWidth(false));
             _currentAlias = GUILayout.TextField(_currentAlias, GUILayout.ExpandWidth(true));
@@ -411,7 +407,7 @@ namespace HSPE.AMModules
             GUILayout.EndHorizontal();
 
 
-            string text = ((_boneTarget == null) ? "(no target)" : _boneTarget.name);
+            string text = _boneTarget == null ? "(no target)" : _boneTarget.name;
             GUILayout.BeginHorizontal();
             GUI.enabled = _boneTarget != null;
             if (GUILayout.Button(text))
@@ -920,7 +916,7 @@ namespace HSPE.AMModules
 
                 GUILayout.BeginHorizontal();
 
-                Dictionary<string, string> customShortcuts = _target.type == GenericOCITarget.Type.Character ? (_target.isFemale ? _femaleShortcuts : _maleShortcuts) : _itemShortcuts;
+                Dictionary<string, string> customShortcuts = _target.type == GenericOCITarget.Type.Character ? _target.isFemale ? _femaleShortcuts : _maleShortcuts : _itemShortcuts;
 
                 GUIStyle style = GUI.skin.GetStyle("Label");
                 TextAnchor bak = style.alignment;
@@ -1556,60 +1552,65 @@ namespace HSPE.AMModules
                     GUI.color = CollidersEditor._colliderColor;
                 if (_boneTarget == go.transform)
                     GUI.color = Color.cyan;
-                GUILayout.BeginHorizontal();
-                if (_search.Length == 0 && !_onlyModified)
+
+                if (_onlyModified)
                 {
-                    GUILayout.Space(indent * 20f);
-                    int childCount = 0;
-                    for (int i = 0; i < go.transform.childCount; i++)
-                        if (_parent._childObjects.Contains(go.transform.GetChild(i).gameObject) == false)
-                            childCount++;
-                    if (childCount != 0)
+                    if (_dirtyBones.ContainsKey(go))
                     {
-                        if (GUILayout.Toggle(_openedBones.Contains(go), "", GUILayout.ExpandWidth(false)))
+                        if (GUILayout.Button(displayedName + "*", GUILayout.ExpandWidth(false)))
                         {
-                            if (_openedBones.Contains(go) == false)
-                                _openedBones.Add(go);
-                        }
-                        else
-                        {
-                            if (_openedBones.Contains(go))
-                            {
-                                _openedBones.Remove(go);
-                            }
+                            if (ValidBoneTarget(go))
+                                _gomTarget = go.transform;
+
+                            ChangeBoneTarget(go.transform);
                         }
                     }
-                    else
-                        GUILayout.Space(20f);
                 }
-                if (!_onlyModified)
+                else
                 {
+                    GUILayout.BeginHorizontal();
+                    if (_search.Length == 0)
+                    {
+                        GUILayout.Space(indent * 20f);
+                        int childCount = 0;
+                        for (int i = 0; i < go.transform.childCount; i++)
+                            if (_parent._childObjects.Contains(go.transform.GetChild(i).gameObject) == false)
+                                childCount++;
+                        if (childCount != 0)
+                        {
+                            if (GUILayout.Toggle(_openedBones.Contains(go), "", GUILayout.ExpandWidth(false)))
+                            {
+                                if (_openedBones.Contains(go) == false)
+                                    _openedBones.Add(go);
+                            }
+                            else
+                            {
+                                if (_openedBones.Contains(go))
+                                {
+                                    _openedBones.Remove(go);
+                                }
+                            }
+                        }
+                        else
+                            GUILayout.Space(20f);
+                    }
+
                     if (GUILayout.Button(displayedName + (_dirtyBones.ContainsKey(go) ? "*" : ""), GUILayout.ExpandWidth(false)))
                     {
                         if (ValidBoneTarget(go))
-                        {
                             _gomTarget = go.transform;
-                        }
+
                         ChangeBoneTarget(go.transform);
                     }
+                    GUILayout.EndHorizontal();
                 }
-                else if (_dirtyBones.ContainsKey(go) && GUILayout.Button(displayedName + "*", GUILayout.ExpandWidth(false)))
-                {
-                    if (ValidBoneTarget(go))
-                    {
-                        _gomTarget = go.transform;
-                    }
-                    ChangeBoneTarget(go.transform);
-                }
+
                 GUI.color = c;
-                GUILayout.EndHorizontal();
             }
             if (_search.Length != 0 || _openedBones.Contains(go))
             {
                 for (int i = 0; i < go.transform.childCount; ++i)
-                {
                     DisplayObjectTree(go.transform.GetChild(i).gameObject, indent + 1);
-                }
             }
         }
 
@@ -1714,8 +1715,8 @@ namespace HSPE.AMModules
 
             Vector3 topLeftForward = _boneTarget.transform.position + (_boneTarget.up + -_boneTarget.right + _boneTarget.forward) * _cubeSize,
                 topRightForward = _boneTarget.transform.position + (_boneTarget.up + _boneTarget.right + _boneTarget.forward) * _cubeSize,
-                bottomLeftForward = _boneTarget.transform.position + ((-_boneTarget.up + -_boneTarget.right + _boneTarget.forward) * _cubeSize),
-                bottomRightForward = _boneTarget.transform.position + ((-_boneTarget.up + _boneTarget.right + _boneTarget.forward) * _cubeSize),
+                bottomLeftForward = _boneTarget.transform.position + (-_boneTarget.up + -_boneTarget.right + _boneTarget.forward) * _cubeSize,
+                bottomRightForward = _boneTarget.transform.position + (-_boneTarget.up + _boneTarget.right + _boneTarget.forward) * _cubeSize,
                 topLeftBack = _boneTarget.transform.position + (_boneTarget.up + -_boneTarget.right + -_boneTarget.forward) * _cubeSize,
                 topRightBack = _boneTarget.transform.position + (_boneTarget.up + _boneTarget.right + -_boneTarget.forward) * _cubeSize,
                 bottomLeftBack = _boneTarget.transform.position + (-_boneTarget.up + -_boneTarget.right + -_boneTarget.forward) * _cubeSize,

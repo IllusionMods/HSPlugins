@@ -1,5 +1,4 @@
-﻿using ADV.Commands.Object;
-using Studio;
+﻿using Studio;
 using System;
 using System.Xml;
 using UnityEngine;
@@ -307,12 +306,10 @@ namespace HSPE.AMModules
             string newValue = GUILayout.TextField(oldValue, GUILayout.MaxWidth(60));
             if (oldValue != newValue)
             {
-                Console.WriteLine(newValue);
                 float res;
                 if (float.TryParse(newValue, out res))
                 {
                     value = Quaternion.Euler(res, value.eulerAngles.y, value.eulerAngles.z);
-                    Console.WriteLine(value.eulerAngles);
                     if (onValueChanged != null)
                         onValueChanged();
                 }
@@ -323,7 +320,6 @@ namespace HSPE.AMModules
             if (GUILayout.Button("0", GUILayout.Width(20f)))
             {
                 value = Quaternion.Euler(0f, value.eulerAngles.y, value.eulerAngles.z);
-                    Console.WriteLine(value.eulerAngles);
                 onValueChanged?.Invoke();
             }
             if (GUILayout.RepeatButton(minusCustomIncString) && RepeatControl())
