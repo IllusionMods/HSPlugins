@@ -438,14 +438,5 @@ namespace HSPE
                 onLoadEnd(changed);
         }
         #endregion
-
-        internal bool _waitCorBool;
-        internal float _waitCorSliderValue = 1f;
-
-        internal IEnumerator WaitCor()
-        {
-            yield return new WaitForSeconds(_waitCorSliderValue / 10f);
-            _waitCorBool = false;
-        }
     }
 }

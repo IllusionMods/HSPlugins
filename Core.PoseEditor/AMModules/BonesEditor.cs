@@ -574,7 +574,7 @@ namespace HSPE.AMModules
 
                             shouldSaveValue = false;
                             boneTargetPosition2 = Vector3Editor(boneTargetPosition2, _positionInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true);
-                            if (shouldSaveValue)
+                            if (shouldSaveValue && CanClickSpeedLimited())
                             {
                                 if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
                                     boneTargetPosition2 = _boneTarget.parent.InverseTransformPoint(boneTargetPosition2);
@@ -588,17 +588,17 @@ namespace HSPE.AMModules
                         {
                             Quaternion boneTargetRotation2 = GetBoneTargetRotation(fkBoneInfo);
 
-                            // BUG: this seems to work and display correct rotation, but after editor and converting back to local rotation, it has identical result on rotation as if _isWorld was false
+                            // BUG: this seems to work and display correct rotation, but after clicking buttons in editor and converting back to local rotation, it has identical result on rotation as if _isWorld was false
                             if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
                                 boneTargetRotation2 = _boneTarget.parent.rotation * boneTargetRotation2;
 
                             shouldSaveValue = false;
                             boneTargetRotation2 = QuaternionEditor(boneTargetRotation2, _rotationInc, "X (Pitch):\t", "Y (Yaw):\t", "Z (Roll):\t", () => shouldSaveValue = true);
-                            if (shouldSaveValue)
+                            if (shouldSaveValue && CanClickSpeedLimited())
                             {
                                 if (_isWorld && _boneTarget != null && _boneTarget.parent != null)
                                     boneTargetRotation2 = Quaternion.Inverse(_boneTarget.parent.transform.rotation) * boneTargetRotation2;
-                                
+
                                 SetBoneTargetRotation(boneTargetRotation2);
                                 SetBoneTargetRotationFKNode(boneTargetRotation2, false, fkBoneInfo, fkTwinBoneInfo);
 
@@ -617,7 +617,7 @@ namespace HSPE.AMModules
                         {
                             Vector3 boneTargetScale = GetBoneTargetScale();
                             shouldSaveValue = false;
-                            boneTargetScale = Vector3Editor(boneTargetScale, _scaleInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true);
+                            boneTargetScale = Vector3Editor(boneTargetScale, _scaleInc, "X:\t", "Y:\t", "Z:\t", () => shouldSaveValue = true, true);
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("X/Y/Z");
                             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
@@ -626,23 +626,19 @@ namespace HSPE.AMModules
                                 shouldSaveValue = true;
                                 boneTargetScale = Vector3.one;
                             }
-                            if (GUILayout.RepeatButton((0f - _scaleInc).ToString("+0.#####;-0.#####")) && !_parent._waitCorBool && _boneTarget != null)
+                            if (GUILayout.RepeatButton((0f - _scaleInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 boneTargetScale -= _scaleInc * Vector3.one;
-                                _parent._waitCorBool = true;
-                                _parent.StartCoroutine(_parent.WaitCor());
                             }
-                            if (GUILayout.RepeatButton(_scaleInc.ToString("+0.#####;-0.#####")) && !_parent._waitCorBool && _boneTarget != null)
+                            if (GUILayout.RepeatButton(_scaleInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 boneTargetScale += _scaleInc * Vector3.one;
-                                _parent._waitCorBool = true;
-                                _parent.StartCoroutine(_parent.WaitCor());
                             }
                             GUILayout.EndHorizontal();
                             GUILayout.EndHorizontal();
-                            if (shouldSaveValue)
+                            if (shouldSaveValue && CanClickSpeedLimited())
                             {
                                 SetBoneTargetScale(boneTargetScale);
                             }
@@ -659,7 +655,7 @@ namespace HSPE.AMModules
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("X (Pitch)");
                             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.RepeatButton((0f - _rotateAroundInc).ToString("+0.#####;-0.#####")) && !_parent._waitCorBool && _boneTarget != null)
+                            if (GUILayout.RepeatButton((0f - _rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.right;
@@ -667,10 +663,8 @@ namespace HSPE.AMModules
                                 {
                                     angle = 0f - _rotateAroundInc;
                                 }
-                                _parent._waitCorBool = true;
-                                _parent.StartCoroutine(_parent.WaitCor());
                             }
-                            if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && !_parent._waitCorBool && _boneTarget != null)
+                            if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.right;
@@ -678,8 +672,6 @@ namespace HSPE.AMModules
                                 {
                                     angle = _rotateAroundInc;
                                 }
-                                _parent._waitCorBool = true;
-                                _parent.StartCoroutine(_parent.WaitCor());
                             }
                             GUILayout.EndHorizontal();
                             GUILayout.EndHorizontal();
@@ -688,7 +680,7 @@ namespace HSPE.AMModules
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Y (Yaw)");
                             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.RepeatButton((0f - _rotateAroundInc).ToString("+0.#####;-0.#####")) && !_parent._waitCorBool && _boneTarget != null)
+                            if (GUILayout.RepeatButton((0f - _rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.up;
@@ -696,10 +688,8 @@ namespace HSPE.AMModules
                                 {
                                     angle = 0f - _rotateAroundInc;
                                 }
-                                _parent._waitCorBool = true;
-                                _parent.StartCoroutine(_parent.WaitCor());
                             }
-                            if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && !_parent._waitCorBool && _boneTarget != null)
+                            if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.up;
@@ -707,8 +697,6 @@ namespace HSPE.AMModules
                                 {
                                     angle = _rotateAroundInc;
                                 }
-                                _parent._waitCorBool = true;
-                                _parent.StartCoroutine(_parent.WaitCor());
                             }
                             GUILayout.EndHorizontal();
                             GUILayout.EndHorizontal();
@@ -717,7 +705,7 @@ namespace HSPE.AMModules
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("Z (Roll)");
                             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
-                            if (GUILayout.RepeatButton((0f - _rotateAroundInc).ToString("+0.#####;-0.#####")) && !_parent._waitCorBool && _boneTarget != null)
+                            if (GUILayout.RepeatButton((0f - _rotateAroundInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.forward;
@@ -725,10 +713,8 @@ namespace HSPE.AMModules
                                 {
                                     angle = 0f - _rotateAroundInc;
                                 }
-                                _parent._waitCorBool = true;
-                                _parent.StartCoroutine(_parent.WaitCor());
                             }
-                            if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && !_parent._waitCorBool && _boneTarget != null)
+                            if (GUILayout.RepeatButton(_rotateAroundInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
                             {
                                 shouldSaveValue = true;
                                 axis = _boneTarget.forward;
@@ -736,14 +722,12 @@ namespace HSPE.AMModules
                                 {
                                     angle = _rotateAroundInc;
                                 }
-                                _parent._waitCorBool = true;
-                                _parent.StartCoroutine(_parent.WaitCor());
                             }
                             GUILayout.EndHorizontal();
                             GUILayout.EndHorizontal();
                             GUI.color = color2;
 
-                            if (Event.current.rawType == EventType.Repaint)
+                            if (Event.current.rawType == EventType.Repaint && CanClickSpeedLimited())
                             {
                                 if (_boneTarget != null)
                                 {
@@ -1879,5 +1863,17 @@ namespace HSPE.AMModules
             }
         }
         #endregion
+
+        private bool CanClickSpeedLimited()
+        {
+            if (_lastClickTime + _clickRepeatSeconds < Time.realtimeSinceStartup || _lastClickTime > Time.realtimeSinceStartup)
+            {
+                _lastClickTime = Time.realtimeSinceStartup;
+                return true;
+            }
+            return false;
+        }
+        private float _lastClickTime;
+        private float _clickRepeatSeconds = 0.03f;
     }
 }
