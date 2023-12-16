@@ -131,27 +131,27 @@ namespace HSPE.AMModules
             GUILayout.EndVertical();
         }
 
-        protected Vector3 Vector3Editor(Vector3 value, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null)
+        protected Vector3 Vector3Editor(Vector3 value, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null, bool scaleEditor = false)
         {
-            return Vector3Editor(value, _redColor, _greenColor, _blueColor, _inc, xLabel, yLabel, zLabel, onValueChanged);
+            return Vector3Editor(value, _redColor, _greenColor, _blueColor, _inc, xLabel, yLabel, zLabel, onValueChanged, scaleEditor);
         }
 
-        protected Vector3 Vector3Editor(Vector3 value, float customInc, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null)
+        protected Vector3 Vector3Editor(Vector3 value, float customInc, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null, bool scaleEditor = false)
         {
-            return Vector3Editor(value, _redColor, _greenColor, _blueColor, customInc, xLabel, yLabel, zLabel, onValueChanged);
+            return Vector3Editor(value, _redColor, _greenColor, _blueColor, customInc, xLabel, yLabel, zLabel, onValueChanged, scaleEditor);
         }
 
-        protected Vector3 Vector3Editor(Vector3 value, Color color, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null)
+        protected Vector3 Vector3Editor(Vector3 value, Color color, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null, bool scaleEditor = false)
         {
-            return Vector3Editor(value, color, color, color, _inc, xLabel, yLabel, zLabel, onValueChanged);
+            return Vector3Editor(value, color, color, color, _inc, xLabel, yLabel, zLabel, onValueChanged, scaleEditor);
         }
 
-        protected Vector3 Vector3Editor(Vector3 value, Color color, float customInc, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null)
+        protected Vector3 Vector3Editor(Vector3 value, Color color, float customInc, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null, bool scaleEditor = false)
         {
-            return Vector3Editor(value, color, color, color, customInc, xLabel, yLabel, zLabel, onValueChanged);
+            return Vector3Editor(value, color, color, color, customInc, xLabel, yLabel, zLabel, onValueChanged, scaleEditor);
         }
 
-        protected Vector3 Vector3Editor(Vector3 value, Color xColor, Color yColor, Color zColor, float customInc, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null)
+        protected Vector3 Vector3Editor(Vector3 value, Color xColor, Color yColor, Color zColor, float customInc, string xLabel = "X:\t", string yLabel = "Y:\t", string zLabel = "Z:\t", Action onValueChanged = null, bool scaleEditor = false)
         {
             string customIncString = customInc.ToString("+0.#####;-0.#####");
             string minusCustomIncString = (-customInc).ToString("+0.#####;-0.#####");
@@ -177,6 +177,13 @@ namespace HSPE.AMModules
             GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+
+            if (GUILayout.Button("0", GUILayout.Width(20f)))
+            {
+                value.x = (scaleEditor ? 1 : 0);
+                onValueChanged?.Invoke();
+            }
+
             if (GUILayout.RepeatButton(minusCustomIncString) && RepeatControl())
             {
                 value -= customInc * Vector3.right;
@@ -211,6 +218,13 @@ namespace HSPE.AMModules
             GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+
+            if (GUILayout.Button("0", GUILayout.Width(20f)))
+            {
+                value.y = (scaleEditor ? 1 : 0);
+                onValueChanged?.Invoke();
+            }
+
             if (GUILayout.RepeatButton(minusCustomIncString) && RepeatControl())
             {
                 value -= customInc * Vector3.up;
@@ -245,6 +259,13 @@ namespace HSPE.AMModules
             GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+
+            if (GUILayout.Button("0", GUILayout.Width(20f)))
+            {
+                value.z = (scaleEditor ? 1 : 0);
+                onValueChanged?.Invoke();
+            }
+
             if (GUILayout.RepeatButton(minusCustomIncString) && RepeatControl())
             {
                 value -= customInc * Vector3.forward;
@@ -296,6 +317,11 @@ namespace HSPE.AMModules
             GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+            if (GUILayout.Button("0", GUILayout.Width(20f)))
+            {
+                value = Quaternion.Euler(0f, value.eulerAngles.y, value.eulerAngles.z);
+                onValueChanged?.Invoke();
+            }
             if (GUILayout.RepeatButton(minusCustomIncString) && RepeatControl())
             {
                 value *= Quaternion.AngleAxis(-customInc, Vector3.right);
@@ -330,6 +356,11 @@ namespace HSPE.AMModules
             GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+            if (GUILayout.Button("0", GUILayout.Width(20f)))
+            {
+                value = Quaternion.Euler(value.eulerAngles.x, 0f, value.eulerAngles.z);
+                onValueChanged?.Invoke();
+            }
             if (GUILayout.RepeatButton(minusCustomIncString) && RepeatControl())
             {
                 value *= Quaternion.AngleAxis(-customInc, Vector3.up);
@@ -365,6 +396,12 @@ namespace HSPE.AMModules
             GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(160f));
+            if (GUILayout.Button("0", GUILayout.Width(20f)))
+            {
+                value.z = 0f;
+                value = Quaternion.Euler(value.eulerAngles.x, value.eulerAngles.y, 0f);
+                onValueChanged?.Invoke();
+            }
             if (GUILayout.RepeatButton(minusCustomIncString) && RepeatControl())
             {
                 value *= Quaternion.AngleAxis(-customInc, Vector3.forward);
