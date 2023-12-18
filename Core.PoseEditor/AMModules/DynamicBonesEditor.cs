@@ -17,9 +17,9 @@ namespace HSPE.AMModules
     {
         #region Constants
 #if HONEYSELECT || KOIKATSU || PLAYHOME
-        private const float _dynamicBonesDragRadius = 0.025f;
+        private const float _dynamicBonesDragRadiusBase = 0.025f;
 #elif AISHOUJO || HONEYSELECT2
-        private const float _dynamicBonesDragRadius = 0.25f;
+        private const float _dynamicBonesDragRadiusBase = 0.25f;
 #endif
         #endregion
 
@@ -277,6 +277,7 @@ namespace HSPE.AMModules
         private Action _preDragAction = null;
         private static DynamicBoneData _copiedDynamicBoneData = null;
         private bool _isBusy = false;
+        private static float _dynamicBonesDragRadius = _dynamicBonesDragRadiusBase;
         #endregion
 
         #region Public Fields
@@ -1216,6 +1217,7 @@ namespace HSPE.AMModules
         {
             if (GizmosEnabled() == false)
                 return;
+            _dynamicBonesDragRadius = _dynamicBonesDragRadiusBase * Studio.Studio.optionSystem.manipulateSize;
             DynamicBoneDraggingLogic();
             _debugLines.Draw(_dynamicBones, _dynamicBoneTarget, _dirtyDynamicBones);
         }
