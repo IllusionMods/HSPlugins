@@ -90,6 +90,8 @@ namespace HSPE.AMModules
         {
             public float weight;
             public float originalWeight;
+
+            public BlendShapeData Clone() { return (BlendShapeData)MemberwiseClone(); }
         }
 
         private class BlendLinkData
@@ -696,14 +698,18 @@ namespace HSPE.AMModules
             {
                 foreach (var skinnedMeshRenderer in other._dirtySkinnedMeshRenderers)
                 {
-                    if (other._dirtySkinnedMeshRenderers.TryGetValue(skinnedMeshRenderer.Key, out var dictionary))
-                    {
-                        skinnedMeshRenderer.Value.Clear();
-                        foreach (var keyValuePair in dictionary)
-                        {
-                            skinnedMeshRenderer.Value.Add(keyValuePair.Key, keyValuePair.Value);
-                        }
-                    }
+                    string rendererName = skinnedMeshRenderer.Key;
+                    if (!_skinnedMeshRenderers.ContainsKey(rendererName))
+                        continue;
+
+                    Dictionary<string, BlendShapeData> selfBsd;
+                    if( !_dirtySkinnedMeshRenderers.TryGetValue(rendererName, out selfBsd) )
+                         selfBsd = _dirtySkinnedMeshRenderers[rendererName] = new Dictionary<string, BlendShapeData>();
+
+                    var otherBsd = skinnedMeshRenderer.Value;
+
+                    foreach (var kvp in otherBsd)
+                        selfBsd[kvp.Key] = kvp.Value.Clone();
                 }
 
                 _blendShapesScroll = other._blendShapesScroll;
