@@ -89,8 +89,6 @@ namespace HSPE.AMModules
         private bool _sortByName = false;
         private bool _isWorld = false;
         private bool _goToObject;
-        private GuideObjectManager _gom;
-        private static Transform _gomTarget = null;
         private List<GameObject> searchResults;
 
         private static readonly List<VectorLine> _cubeDebugLines = new List<VectorLine>();
@@ -115,14 +113,7 @@ namespace HSPE.AMModules
             }
             return false;
         }
-        internal bool ValidBoneTarget(GameObject gameObject)
-        {
-            if (gameObject != null)
-            {
-                return ValidBoneTarget(gameObject.transform);
-            }
-            return false;
-        }
+
         #endregion
 
         #region Constructor
@@ -214,37 +205,6 @@ namespace HSPE.AMModules
         {
             if (_target.type == GenericOCITarget.Type.Item)
                 ApplyBoneManualCorrection();
-
-            if (!PoseController._drawAdvancedMode || _parent == null)
-                return;
-
-            if (_gom == null)
-                _gom = GuideObjectManager.Instance ?? throw new Exception("Too early for GuideObjectManager");
-
-            var selectObject = _gom.selectObject;
-            var transformTarget = selectObject?.transformTarget;
-            if (_gomTarget == transformTarget)
-                return;
-
-            if (transformTarget == _parent.transform)
-            {
-                if (ValidBoneTarget(_boneTarget))
-                    _gomTarget = _boneTarget;
-            }
-            else if (transformTarget != null && transformTarget.GetComponentInParent<PoseController>() == _parent)
-            {
-                _gomTarget = transformTarget;
-            }
-            else
-            {
-                _gomTarget = null;
-            }
-
-            if (_gomTarget != null)
-            {
-                ChangeBoneTarget(transformTarget);
-                _goToObject = true;
-            }
         }
 
         private void OnDisable()
@@ -356,12 +316,7 @@ namespace HSPE.AMModules
 
                     GUI.color = goKey.transform == _boneTarget ? Color.cyan : Color.magenta;
                     if (GUILayout.Button(value2 + "*", GUILayout.ExpandWidth(false)))
-                    {
-                        if (ValidBoneTarget(goKey))
-                            _gomTarget = goKey.transform;
-
                         ChangeBoneTarget(goKey.transform);
-                    }
                 }
                 GUI.color = Color.white;
             }
@@ -1523,12 +1478,7 @@ namespace HSPE.AMModules
                     if (_dirtyBones.ContainsKey(go))
                     {
                         if (GUILayout.Button(displayedName + "*", GUILayout.ExpandWidth(false)))
-                        {
-                            if (ValidBoneTarget(go))
-                                _gomTarget = go.transform;
-
                             ChangeBoneTarget(go.transform);
-                        }
                     }
                 }
                 else
@@ -1559,12 +1509,7 @@ namespace HSPE.AMModules
                     }
 
                     if (GUILayout.Button(displayedName + (_dirtyBones.ContainsKey(go) ? "*" : ""), GUILayout.ExpandWidth(false)))
-                    {
-                        if (ValidBoneTarget(go))
-                            _gomTarget = go.transform;
-
                         ChangeBoneTarget(go.transform);
-                    }
                     GUILayout.EndHorizontal();
                 }
 
