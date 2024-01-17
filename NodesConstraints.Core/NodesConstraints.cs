@@ -262,6 +262,8 @@ namespace NodesConstraints
                     _hasTimeline = true;
                 }
             }, 10);
+
+            gameObject.AddComponent<NodesConstraintsLater>().nodesConstraints = this;            
         }
 
 #if AISHOUJO || HONEYSELECT2
@@ -358,6 +360,11 @@ namespace NodesConstraints
 
             if (_showUI)
                 _windowRect.height = 600f;
+        }
+
+        public void VeryLateUpdate()
+        {
+            ApplyConstraints();
         }
 
         [HarmonyPatch]
@@ -1782,5 +1789,25 @@ namespace NodesConstraints
                     });
         }
         #endregion
+    }
+
+    /// <summary>
+    /// Component to run after LateUpdate of DynamicBone/ExpressionBone
+    /// </summary>
+    [DefaultExecutionOrder(50000)]
+    class NodesConstraintsLater : MonoBehaviour
+    {
+        public NodesConstraints nodesConstraints = null;
+
+        void LateUpdate()
+        {
+            if (nodesConstraints != null)
+            {
+                nodesConstraints.VeryLateUpdate();
+                return;
+            }
+
+            Destroy(this);
+        }
     }
 }
