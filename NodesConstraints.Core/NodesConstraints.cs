@@ -23,6 +23,7 @@ using HarmonyLib;
 using KKAPI.Studio.SaveLoad;
 using ExtensibleSaveFormat;
 using MessagePack;
+using Expression = ExpressionBone;
 #elif AISHOUJO || HONEYSELECT2
 using AIChara;
 using ExtensibleSaveFormat;
@@ -206,6 +207,9 @@ namespace NodesConstraints
 #endif
         private SimpleListShowNodeType _selectedShowNodeType = SimpleListShowNodeType.All;
         private string[] _simpleListShowNodeTypeNames;
+        private int _totalActiveExpressions = 0;
+        private int _currentExpressionIndex = 0;
+        private readonly HashSet<Expression> _allExpressions = new HashSet<Expression>();
         private string _positionXStr = "0.0000";
         private string _positionYStr = "0.0000";
         private string _positionZStr = "0.0000";
@@ -293,6 +297,8 @@ namespace NodesConstraints
             _allGuideObjects = (Dictionary<Transform, GuideObject>)GuideObjectManager.Instance.GetPrivate("dicGuideObject");
             _dispatcher = Camera.main.gameObject.AddComponent<CameraEventsDispatcher>();
             VectorLine.SetCamera3D(Camera.main);
+            if (Camera.main.GetComponent<Expression>() == null)
+                Camera.main.gameObject.AddComponent<Expression>();
 #if KOIKATSU
             _kkAnimationControllerInstalled = BepInEx.Bootstrap.Chainloader.Plugins
                                                           .Select(MetadataHelper.GetMetadata)
@@ -317,6 +323,8 @@ namespace NodesConstraints
         {
             if (_studioLoaded == false)
                 return;
+            _totalActiveExpressions = _allExpressions.Count(e => e.enabled && e.gameObject.activeInHierarchy);
+            _currentExpressionIndex = 0;
             if (ConfigMainWindowShortcut.Value.IsDown())
             {
                 _showUI = !_showUI;
@@ -416,6 +424,39 @@ namespace NodesConstraints
             }
         }
 #endif
+
+#if HONEYSELECT
+        [HarmonyPatch(typeof(Expression), "Start")]
+#elif KOIKATSU || AISHOUJO || HONEYSELECT2
+        [HarmonyPatch(typeof(Expression), "Initialize")]
+#endif
+        private static class Expression_Start_Patches
+        {
+            private static void Prefix(Expression __instance)
+            {
+                _self._allExpressions.Add(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(Expression), "OnDestroy")]
+        private static class Expression_OnDestroy_Patches
+        {
+            private static void Prefix(Expression __instance)
+            {
+                _self._allExpressions.Remove(__instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(Expression), "LateUpdate"), HarmonyAfter("com.joan6694.illusionplugins.timeline")]
+        private static class Expression_LateUpdate_Patches
+        {
+            private static void Postfix()
+            {
+                _self._currentExpressionIndex++;
+                if (_self._currentExpressionIndex == _self._totalActiveExpressions) //Dirty fucking hack that I hate to make sure this runs after *everything*
+                    _self.ApplyConstraints();
+            }
+        }
 
         [HarmonyPatch(typeof(Studio.Studio), "Duplicate")]
         private class Studio_Duplicate_Patches
