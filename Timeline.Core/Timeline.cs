@@ -322,7 +322,7 @@ namespace Timeline
             ExtensibleSaveFormat.ExtendedSave.SceneBeingSaved += OnSceneSave;
 #endif
             var harmonyInstance = HarmonyExtensions.CreateInstance(GUID);
-            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
+            harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
             OCI_OnDelete_Patches.ManualPatch(harmonyInstance);
         }
 

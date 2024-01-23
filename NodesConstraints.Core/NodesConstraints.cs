@@ -253,7 +253,7 @@ namespace NodesConstraints
             ExtendedSave.SceneBeingSaved += OnSceneSave;
 #endif
             var harmonyInstance = HarmonyExtensions.CreateInstance(GUID);
-            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
+            harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
 
             _simpleListShowNodeTypeNames = Enum.GetNames(typeof(SimpleListShowNodeType));
             this.ExecuteDelayed(() =>
