@@ -949,7 +949,34 @@ namespace NodesConstraints
                     _constraintsSearch = "";
                 GUILayout.EndHorizontal();
 
-                _scroll = GUILayout.BeginScrollView(_scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(150));
+                GUILayout.BeginHorizontal();
+
+                GUILayout.BeginVertical();
+                GUI.enabled = _selectedConstraint != null;
+                if (GUILayout.Button("↑", GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true)))
+                {
+                    int index = _constraints.IndexOf(_selectedConstraint);
+
+                    if (index > 0)
+                    {
+                        _constraints.RemoveAt(index);
+                        _constraints.Insert(index - 1, _selectedConstraint);
+                    }
+                }
+                if (GUILayout.Button("↓", GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true)))
+                {
+                    int index = _constraints.IndexOf(_selectedConstraint);
+
+                    if (index < _constraints.Count - 1)
+                    {
+                        _constraints.RemoveAt(index);
+                        _constraints.Insert(index + 1, _selectedConstraint);
+                    }
+                }
+                GUI.enabled = true;
+                GUILayout.EndVertical();
+
+                _scroll = GUILayout.BeginScrollView(_scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(150), GUILayout.ExpandWidth(true));
                 {
                     int toDelete = -1;
                     Action afterLoopAction = null;
@@ -997,26 +1024,7 @@ namespace NodesConstraints
                                 UpdateDisplayedScaleOffset();
                             }
 
-                            constraint.fixDynamicBone = GUILayout.Toggle(constraint.fixDynamicBone, "Dynamic", GUILayout.Width(70f));
-
-                            if (GUILayout.Button("↑", GUILayout.ExpandWidth(false)) && i != 0)
-                            {
-                                int cachedI = i;
-                                afterLoopAction = () =>
-                                {
-                                    _constraints.RemoveAt(cachedI);
-                                    _constraints.Insert(cachedI - 1, constraint);
-                                };
-                            }
-                            if (GUILayout.Button("↓", GUILayout.ExpandWidth(false)) && i != _constraints.Count - 1)
-                            {
-                                int cachedI = i;
-                                afterLoopAction = () =>
-                                {
-                                    _constraints.RemoveAt(cachedI);
-                                    _constraints.Insert(cachedI + 1, constraint);
-                                };
-                            }
+                            constraint.fixDynamicBone = GUILayout.Toggle(constraint.fixDynamicBone, "Dynamic", GUILayout.ExpandWidth(false));
 
                             GUI.color = Color.red;
                             if (GUILayout.Button("X", GUILayout.ExpandWidth(false)))
@@ -1031,6 +1039,8 @@ namespace NodesConstraints
                         RemoveConstraintAt(toDelete);
                 }
                 GUILayout.EndScrollView();
+
+                GUILayout.EndHorizontal();
 
                 _advancedList = GUILayout.Toggle(_advancedList, "Advanced List");
 
