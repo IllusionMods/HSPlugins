@@ -75,7 +75,7 @@ namespace HSPE
             ConfigCrotchCorrectionByDefault = Config.Bind("Config", "Crotch Correction By Default", false);
             ConfigAnklesCorrectionByDefault = Config.Bind("Config", "AnklesCorrection By Default", false);
 
-            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), GUID);
+            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
         }
 
 #if AISHOUJO || HONEYSELECT2

@@ -276,7 +276,7 @@ namespace HSUS
             UIUtility.Init();
 
             _harmonyInstance = HarmonyExtensions.CreateInstance(GUID);
-            _harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
+            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
             foreach (IFeature feature in _features)
             {
