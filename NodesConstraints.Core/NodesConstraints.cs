@@ -103,6 +103,7 @@ namespace NodesConstraints
             public Quaternion originalChildRotation;
             public Vector3 originalChildScale;
             public string alias = "";
+            public bool fixDynamicBone;
             public int? uniqueLoadId;
             public bool destroyed = false;
             private VectorLine _debugLine;
@@ -131,6 +132,7 @@ namespace NodesConstraints
                 originalChildRotation = other.originalChildRotation;
                 originalChildScale = other.originalChildScale;
                 alias = other.alias;
+                fixDynamicBone = other.fixDynamicBone;
             }
 
             public void SetActiveDebugLines(bool active)
@@ -251,7 +253,7 @@ namespace NodesConstraints
             ExtendedSave.SceneBeingSaved += OnSceneSave;
 #endif
             var harmonyInstance = HarmonyExtensions.CreateInstance(GUID);
-            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
+            harmonyInstance.PatchAll(Assembly.GetExecutingAssembly());
 
             _simpleListShowNodeTypeNames = Enum.GetNames(typeof(SimpleListShowNodeType));
             this.ExecuteDelayed(() =>
@@ -515,7 +517,7 @@ namespace NodesConstraints
                         }
                         if (parentObjectDestination != null && childObjectDestination != null)
                         {
-                            _self.AddConstraint(
+                            var newConstraint = _self.AddConstraint(
                                                 constraint.enabled,
                                                 parentObjectDestination.guideObject.transformTarget.Find(constraint.parentTransform.GetPathFrom(parentObjectSource.guideObject.transformTarget)),
                                                 childObjectDestination.guideObject.transformTarget.Find(constraint.childTransform.GetPathFrom(childObjectSource.guideObject.transformTarget)),
@@ -527,6 +529,11 @@ namespace NodesConstraints
                                                 constraint.scaleOffset,
                                                 constraint.alias
                                                );
+
+                            if( newConstraint != null )
+                            {
+                                newConstraint.fixDynamicBone = constraint.fixDynamicBone;
+                            }
                         }
                     }
                 }, 3);
@@ -659,6 +666,13 @@ namespace NodesConstraints
                 }
                 if (constraint.enabled == false)
                     continue;
+
+                /* There is a timing when Transform is reset by DynamicBone. Skip the reset value so that it is not taken into the constraint.
+                 * It is assumed that the function call is from Expression_LateUpdate_Patches.
+                 */
+                if (constraint.fixDynamicBone)
+                    continue;
+
                 if (constraint.position)
                 {
                     constraint.childTransform.position = constraint.parentTransform.TransformPoint(constraint.positionOffset);
@@ -868,7 +882,12 @@ namespace NodesConstraints
                                 ValidateDisplayedRotationOffset();
                                 ValidateDisplayedScaleOffset();
 
-                                AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.scaleOffset, _displayedConstraint.alias);
+                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.scaleOffset, _displayedConstraint.alias);
+
+                                if (newConstraint != null)
+                                {
+                                    newConstraint.fixDynamicBone = _displayedConstraint.fixDynamicBone;
+                                }   
                             }
                             GUI.enabled = _selectedConstraint != null && _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null && (_displayedConstraint.position || _displayedConstraint.rotation || _displayedConstraint.scale) && _displayedConstraint.parentTransform != _displayedConstraint.childTransform;
                             if (GUILayout.Button("Update selected"))
@@ -912,6 +931,7 @@ namespace NodesConstraints
                                 _selectedConstraint.originalChildRotation = _selectedConstraint.childTransform.localRotation;
                                 _selectedConstraint.originalChildScale = _selectedConstraint.childTransform.localScale;
                                 _selectedConstraint.alias = _displayedConstraint.alias;
+                                _selectedConstraint.fixDynamicBone = _displayedConstraint.fixDynamicBone;
                                 TimelineCompatibility.RefreshInterpolablesList();
                             }
                             GUI.enabled = true;
@@ -929,7 +949,34 @@ namespace NodesConstraints
                     _constraintsSearch = "";
                 GUILayout.EndHorizontal();
 
-                _scroll = GUILayout.BeginScrollView(_scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(150));
+                GUILayout.BeginHorizontal();
+
+                GUILayout.BeginVertical();
+                GUI.enabled = _selectedConstraint != null;
+                if (GUILayout.Button("↑", GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true)))
+                {
+                    int index = _constraints.IndexOf(_selectedConstraint);
+
+                    if (index > 0)
+                    {
+                        _constraints.RemoveAt(index);
+                        _constraints.Insert(index - 1, _selectedConstraint);
+                    }
+                }
+                if (GUILayout.Button("↓", GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true)))
+                {
+                    int index = _constraints.IndexOf(_selectedConstraint);
+
+                    if (index < _constraints.Count - 1)
+                    {
+                        _constraints.RemoveAt(index);
+                        _constraints.Insert(index + 1, _selectedConstraint);
+                    }
+                }
+                GUI.enabled = true;
+                GUILayout.EndVertical();
+
+                _scroll = GUILayout.BeginScrollView(_scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(150), GUILayout.ExpandWidth(true));
                 {
                     int toDelete = -1;
                     Action afterLoopAction = null;
@@ -971,29 +1018,13 @@ namespace NodesConstraints
                                 _displayedConstraint.rotationOffset = _selectedConstraint.rotationOffset;
                                 _displayedConstraint.scaleOffset = _selectedConstraint.scaleOffset;
                                 _displayedConstraint.alias = _selectedConstraint.alias;
+                                _displayedConstraint.fixDynamicBone = _selectedConstraint.fixDynamicBone;
                                 UpdateDisplayedPositionOffset();
                                 UpdateDisplayedRotationOffset();
                                 UpdateDisplayedScaleOffset();
                             }
 
-                            if (GUILayout.Button("↑", GUILayout.ExpandWidth(false)) && i != 0)
-                            {
-                                int cachedI = i;
-                                afterLoopAction = () =>
-                                {
-                                    _constraints.RemoveAt(cachedI);
-                                    _constraints.Insert(cachedI - 1, constraint);
-                                };
-                            }
-                            if (GUILayout.Button("↓", GUILayout.ExpandWidth(false)) && i != _constraints.Count - 1)
-                            {
-                                int cachedI = i;
-                                afterLoopAction = () =>
-                                {
-                                    _constraints.RemoveAt(cachedI);
-                                    _constraints.Insert(cachedI + 1, constraint);
-                                };
-                            }
+                            constraint.fixDynamicBone = GUILayout.Toggle(constraint.fixDynamicBone, "Dynamic", GUILayout.ExpandWidth(false));
 
                             GUI.color = Color.red;
                             if (GUILayout.Button("X", GUILayout.ExpandWidth(false)))
@@ -1008,6 +1039,8 @@ namespace NodesConstraints
                         RemoveConstraintAt(toDelete);
                 }
                 GUILayout.EndScrollView();
+
+                GUILayout.EndHorizontal();
 
                 _advancedList = GUILayout.Toggle(_advancedList, "Advanced List");
 
@@ -1273,6 +1306,7 @@ namespace NodesConstraints
                 newConstraint.rotationOffset = rotationOffset;
                 newConstraint.scaleOffset = scaleOffset;
                 newConstraint.alias = alias;
+                newConstraint.fixDynamicBone = false;
 
                 if (_allGuideObjects.TryGetValue(newConstraint.parentTransform, out newConstraint.parent) == false)
                     newConstraint.parent = null;
@@ -1538,8 +1572,15 @@ namespace NodesConstraints
                                 ),
                         childNode.Attributes["alias"] != null ? childNode.Attributes["alias"].Value : ""
                 );
-                if (c != null && childNode.Attributes["uniqueLoadId"] != null)
-                    c.uniqueLoadId = XmlConvert.ToInt32(childNode.Attributes["uniqueLoadId"].Value);
+
+                if (c != null)
+                {
+                    if (childNode.Attributes["uniqueLoadId"] != null)
+                        c.uniqueLoadId = XmlConvert.ToInt32(childNode.Attributes["uniqueLoadId"].Value);
+
+                    if (childNode.Attributes["dynamic"] != null)
+                        c.fixDynamicBone = XmlConvert.ToBoolean(childNode.Attributes["dynamic"].Value);
+                }
             }
         }
 
@@ -1648,6 +1689,7 @@ namespace NodesConstraints
             constraint.rotationOffset = Quaternion.identity;
             constraint.scale = false;
             constraint.scaleOffset = Vector3.one;
+            constraint.fixDynamicBone = false;
 
             AddConstraint(true, parent, child, true, Vector3.zero, true, Quaternion.identity, false, Vector3.one, "");
         }
@@ -1718,6 +1760,7 @@ namespace NodesConstraints
                 xmlWriter.WriteAttributeString("scaleOffsetZ", XmlConvert.ToString(constraint.scaleOffset.z));
 
                 xmlWriter.WriteAttributeString("alias", constraint.alias);
+                xmlWriter.WriteAttributeString("dynamic", XmlConvert.ToString(constraint.fixDynamicBone));
 
                 xmlWriter.WriteEndElement();
             }
