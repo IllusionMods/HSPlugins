@@ -466,6 +466,9 @@ namespace Timeline
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Start playback or pause it if it's already playing.
+        /// </summary>
         public static void Play()
         {
             if (isPlaying == false)
@@ -477,11 +480,17 @@ namespace Timeline
                 Pause();
         }
 
+        /// <summary>
+        /// Pause playback.
+        /// </summary>
         public static void Pause()
         {
             isPlaying = false;
         }
 
+        /// <summary>
+        /// Stop playback and move cursor to the beginning.
+        /// </summary>
         public static void Stop()
         {
             _self._playbackTime = 0f;
@@ -490,7 +499,10 @@ namespace Timeline
             _self.Interpolate(false);
             isPlaying = false;
         }
-
+        
+        /// <summary>
+        /// Move playback cursor to the previous frame (based on desired framerate).
+        /// </summary>
         public static void PreviousFrame()
         {
             float beat = 1f / _self._desiredFrameRate;
@@ -506,6 +518,9 @@ namespace Timeline
             _self.SeekPlaybackTime(time);
         }
 
+        /// <summary>
+        /// Move playback cursor to the next frame (based on desired framerate).
+        /// </summary>
         public static void NextFrame()
         {
             float beat = 1f / _self._desiredFrameRate;
@@ -519,6 +534,14 @@ namespace Timeline
             if (time > _self._duration)
                 time = _self._duration;
             _self.SeekPlaybackTime(time);
+        }
+
+        /// <summary>
+        /// Move playback cursor to the specified time (in seconds).
+        /// </summary>
+        public static void Seek(float t)
+        {
+            _self.SeekPlaybackTime(t);
         }
 
 
@@ -600,6 +623,50 @@ namespace Timeline
                 });
             }
         }
+
+        /// <summary>
+        /// Get all keyframes that are currently selected.
+        /// </summary>
+        public static IEnumerable<KeyValuePair<float, Keyframe>> GetSelectedKeyframes()
+        {
+            return _self._selectedKeyframes;
+        }
+
+        /// <summary>
+        /// Get all keyframes that are in the current project.
+        /// </summary>
+        /// <param name="onlyEnabled">Only get keyframes of enabled interpolables</param>
+        public static IEnumerable<KeyValuePair<float, Keyframe>> GetAllKeyframes(bool onlyEnabled)
+        {
+            return GetAllInterpolables(onlyEnabled).SelectMany(x => x.keyframes);
+        }
+
+        /// <summary>
+        /// Get all interpolables that are in the current project.
+        /// </summary>
+        /// <param name="onlyEnabled">Only get enabled interpolables</param>
+        public static IEnumerable<Interpolable> GetAllInterpolables(bool onlyEnabled)
+        {
+            return onlyEnabled ? _self._interpolables.Values.Where(x => x.enabled) : _self._interpolables.Values;
+        }
+
+        /// <summary>
+        /// Is the main timeline window visible?
+        /// </summary>
+        public static bool InterfaceVisible
+        {
+            get
+            {
+                return _self._ui.gameObject.activeSelf;
+            }
+            set
+            {
+                if (_self._ui.gameObject.activeSelf != value)
+                    _self.ToggleUiVisible();
+            }
+        }
+
+        public static RectTransform MainWindowRectTransform => _self._timelineWindow;
         #endregion
 
         #region Private Methods
@@ -951,8 +1018,8 @@ namespace Timeline
 
             _loaded = true;
 
-            // Wrap in a try since it can crash if KKAPI is not installed
-            try { StartCoroutine(TimelineButton.Init(() => _interpolables.Count > 0, () => _ui.gameObject.activeSelf, ToggleUiVisible, Logger)); }
+            // Wrap in a try since it will crash if KKAPI is not installed
+            try { StartCoroutine(TimelineButton.Init()); }
             catch (Exception ex) { Logger.LogError(ex); }
         }
 
