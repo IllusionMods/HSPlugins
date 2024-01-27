@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.ComponentModel;
+using System.Linq;
 using BepInEx.Configuration;
-using BepInEx.Logging;
 using KKAPI.Studio.UI;
 using KKAPI.Utilities;
 using UniRx;
@@ -24,27 +23,22 @@ namespace Timeline
         private static Image _buttImage;
         private static bool _currentIsPlaying;
         private static bool _currentShown;
-        private static Func<bool> _anyInterpolables;
-
-        private static ManualLogSource Logger;
-        private static Action _toggleUiShown;
-        private static Func<bool> _uiVisible;
 
         private static ToolbarButton AddButton()
         {
             var buttTex = ResourceUtils.GetEmbeddedResource("timeline_button.png").LoadTexture();
             _button = CustomToolbarButtons.AddLeftToolbarButton(buttTex, () =>
             {
-                if (!_anyInterpolables())
+                if (!AnyInterpolables())
                 {
-                    Logger.LogMessage("Nothing to play. Right click to open the Timeline window.");
+                    Timeline.Logger.LogMessage("Nothing to play. Right click to open the Timeline window.");
                     _nagShown.Value = true;
                     return;
                 }
 
                 if (!_nagShown.Value)
                 {
-                    Logger.LogMessage("Right click to open the Timeline window.");
+                    Timeline.Logger.LogMessage("Right click to open the Timeline window.");
                     _nagShown.Value = true;
                 }
 
@@ -58,9 +52,9 @@ namespace Timeline
             Timeline.Play();
         }
 
-        private static void ToggleWindowShown()
+        private static bool AnyInterpolables()
         {
-            _toggleUiShown();
+            return Timeline.GetAllInterpolables(false).Any();
         }
 
         internal static void OnUpdate()
@@ -79,38 +73,33 @@ namespace Timeline
 
         private static void UpdateButtonColor()
         {
+            if (!_buttImage) return;
+
             if (_currentIsPlaying && _blinkTime > BlinkTime && _buttImage.color != Color.yellow)
                 _buttImage.color = Color.yellow;
             else if (_currentShown)
                 _buttImage.color = Color.green;
             else
-                _buttImage.color = !_currentIsPlaying && _anyInterpolables() ? Color.yellow : Color.white;
+                _buttImage.color = !_currentIsPlaying && AnyInterpolables() ? Color.yellow : Color.white;
         }
 
         internal static void UpdateButton()
         {
-            if (_uiVisible == null) return;
-
-            _currentShown = _uiVisible();
+            _currentShown = Timeline.InterfaceVisible;
 
             var isPlaying = Timeline.isPlaying;
             if (_currentIsPlaying != isPlaying)
             {
                 _currentIsPlaying = isPlaying;
                 _blinkTime = 0;
-                // Save some overhead
-                //Instance.enabled = _currentIsPlaying;
             }
 
             UpdateButtonColor();
         }
 
-        internal static IEnumerator Init(Func<bool> anyInterporables, Func<bool> uiVisible, Action toggleUiShown, ManualLogSource logger)
+        internal static IEnumerator Init()
         {
-            Logger = logger;
-
             var butt = AddButton();
-            //NodesConstraintsButton.AddButton();
 
             yield return new WaitUntil(() => butt.ControlObject != null);
 
@@ -118,14 +107,8 @@ namespace Timeline
             _buttImage.OnPointerClickAsObservable().Subscribe(data =>
             {
                 if (data.button != PointerEventData.InputButton.Left)
-                    ToggleWindowShown();
+                    Timeline.InterfaceVisible = !Timeline.InterfaceVisible;
             });
-
-            _anyInterpolables = anyInterporables;
-            _toggleUiShown = toggleUiShown;
-            _uiVisible = uiVisible;
-
-            //Harmony.CreateAndPatchAll(typeof(Hooks), GUID);
 
             _nagShown = Timeline._self.Config.Bind("Misc", "Right click nag was shown", false, new ConfigDescription("Nag message shown when first clicking the toolbar button.", null, BrowsableAttribute.No));
         }
