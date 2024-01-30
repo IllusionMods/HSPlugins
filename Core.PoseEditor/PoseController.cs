@@ -174,13 +174,14 @@ namespace HSPE
             _dynamicBonesEditor.LoadFrom(other._dynamicBonesEditor);
             _blendShapesEditor.LoadFrom(other._blendShapesEditor);
             _ikEditor.LoadFrom(other._ikEditor);
-            foreach (GameObject ignoredObject in other._childObjects)
+
+            //Register as a child when a parent exists
+            var otherParent = other.transform.parent?.GetComponentInParent<PoseController>();
+
+            if (otherParent != null && otherParent._childObjects.Contains(other.gameObject) )
             {
-                if (ignoredObject == null)
-                    continue;
-                Transform obj = transform.Find(ignoredObject.transform.GetPathFrom(other.transform));
-                if (obj != null && obj != transform)
-                    _childObjects.Add(obj.gameObject);
+                var parent = transform.parent?.GetComponentInParent<PoseController>();
+                parent?._childObjects.Add(gameObject);
             }
         }
 
