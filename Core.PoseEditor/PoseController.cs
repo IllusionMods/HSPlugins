@@ -275,8 +275,32 @@ namespace HSPE
         public static void InstallOnParentageEvent()
         {
             Action<TreeNodeObject, TreeNodeObject> oldDelegate = Studio.Studio.Instance.treeNodeCtrl.onParentage;
-            Studio.Studio.Instance.treeNodeCtrl.onParentage = (parent, node) => PoseController.onParentage?.Invoke(parent, node);
+            Studio.Studio.Instance.treeNodeCtrl.onParentage = OnParentageRoot;
             onParentage += oldDelegate;
+        }
+
+        private static void OnParentageRoot(TreeNodeObject parent, TreeNodeObject child )
+        {
+            PoseController.onParentage?.Invoke(parent, child);
+
+            var dicInfo = Studio.Studio.Instance.dicInfo;
+            
+            if (dicInfo.TryGetValue(child, out var childInfo))
+            {
+                //Body part does not have OCI. So look for OCI while moving to the parent.
+                ObjectCtrlInfo parentInfo = null;
+                while( parent != null && !dicInfo.TryGetValue(parent, out parentInfo) )
+                    parent = parent.parent;
+
+                PoseController parentController = parentInfo?.guideObject.transformTarget.GetComponentInParent<PoseController>();
+
+                if( parentController != null )
+                {
+                    var childTransform = childInfo.guideObject.transformTarget;
+                    var childGObj = childTransform.gameObject;
+                    parentController._childObjects.Add(childGObj);
+                }
+            }
         }
 
         public void StartDrag(DragType dragType)
@@ -412,17 +436,13 @@ namespace HSPE
 
         private void OnParentage(TreeNodeObject parent, TreeNodeObject child)
         {
-            if (parent == null)
+            var dicInfo = Studio.Studio.Instance.dicInfo;
+
+            if ( dicInfo.TryGetValue(child, out var childInfo) )
             {
-                ObjectCtrlInfo info;
-                if (Studio.Studio.Instance.dicInfo.TryGetValue(child, out info) && _childObjects.Contains(info.guideObject.transformTarget.gameObject))
-                    _childObjects.Remove(info.guideObject.transformTarget.gameObject);
-            }
-            else
-            {
-                ObjectCtrlInfo info;
-                if (Studio.Studio.Instance.dicInfo.TryGetValue(child, out info) && info.guideObject.transformTarget != transform && info.guideObject.transformTarget.IsChildOf(transform))
-                    _childObjects.Add(info.guideObject.transformTarget.gameObject);
+                var childTransform = childInfo.guideObject.transformTarget;
+                var childGObj = childTransform.gameObject;
+                _childObjects.Remove(childGObj);   //If it doesn't exist, it does nothing.
             }
 
             foreach (AdvancedModeModule module in _modules)
