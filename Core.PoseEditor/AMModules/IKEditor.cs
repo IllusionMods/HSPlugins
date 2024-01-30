@@ -1404,6 +1404,7 @@ namespace HSPE.AMModules
 
         private void RefreshIKList()
         {
+            _parent._childObjects.RemoveWhere(gobj => gobj == null);
             IK[] iks = _parent.GetComponentsInChildren<IK>(true);
             List<IK> toDelete = null;
             foreach (KeyValuePair<IK, IKWrapper> pair in _iks)

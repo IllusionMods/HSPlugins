@@ -1186,6 +1186,7 @@ namespace HSPE.AMModules
             _rendererNames.Clear();
             _skinnedMeshRenderers.Clear();
             _dirtySkinnedMeshRenderers.Clear();
+            _parent._childObjects.RemoveWhere(gobj => gobj == null);
 
             foreach (SkinnedMeshRenderer skin in skinnedMeshRenderers)
             {
