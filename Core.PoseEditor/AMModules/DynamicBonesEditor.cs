@@ -1509,6 +1509,7 @@ namespace HSPE.AMModules
         private void RefreshDynamicBoneList()
         {
             if (_parent == null) return;
+            _parent._childObjects.RemoveWhere(gobj => gobj == null);
 
             _isBusy = true;
             DynamicBone[] dynamicBones = _parent.GetComponentsInChildren<DynamicBone>(true);
