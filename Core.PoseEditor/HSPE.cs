@@ -65,6 +65,8 @@ namespace HSPE
         internal static ConfigEntry<bool> ConfigCrotchCorrectionByDefault { get; private set; }
         internal static ConfigEntry<bool> ConfigAnklesCorrectionByDefault { get; private set; }
 
+        internal static ConfigEntry<KeyboardShortcut> ConfigReorderFKBones { get; private set; }
+
         protected override void Awake()
         {
             base.Awake();
@@ -74,6 +76,13 @@ namespace HSPE
             ConfigMainWindowShortcut = Config.Bind("Config", "Main Window Shortcut", new KeyboardShortcut(KeyCode.H));
             ConfigCrotchCorrectionByDefault = Config.Bind("Config", "Crotch Correction By Default", false);
             ConfigAnklesCorrectionByDefault = Config.Bind("Config", "AnklesCorrection By Default", false);
+
+            ConfigReorderFKBones = Config.Bind(
+                "Config",
+                "Reorganize bones",
+                new KeyboardShortcut(KeyCode.R, KeyCode.RightControl),
+                new ConfigDescription("Reorganizes the bones within the selected studio items " +
+                    "according to their transform positions."));
 
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), GUID);
         }

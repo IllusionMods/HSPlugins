@@ -231,6 +231,8 @@ namespace HSPE
             _crotchCorrectionByDefaultToggle.isOn = HSPE.ConfigCrotchCorrectionByDefault.Value;
             _anklesCorrectionByDefaultToggle.isOn = HSPE.ConfigAnklesCorrectionByDefault.Value;
             _selectedNodes = (HashSet<TreeNodeObject>)Studio.Studio.Instance.treeNodeCtrl.GetPrivate("hashSelectNode");
+
+            BoneReorganizer.Init(_fkScrollRect);
         }
 
         protected virtual void Update()
@@ -280,6 +282,8 @@ namespace HSPE
             else
                 AdvancedModeModule._repeatTimer = 0f;
             AdvancedModeModule._repeatCalled = false;
+            
+            BoneReorganizer.Update();
         }
 
         protected virtual void OnGUI()
