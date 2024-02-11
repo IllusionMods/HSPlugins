@@ -384,6 +384,7 @@ namespace VideoExport
             base.OnDestroy();
             _configFile.SetInt("selectedScreenshotPlugin", _selectedPlugin);
             _configFile.SetInt("framerate", _fps);
+            _configFile.SetInt("exportFramerate", _exportFps);
             _configFile.SetBool("autoGenerateVideo", _autoGenerateVideo);
             _configFile.SetBool("autoDeleteImages", _autoDeleteImages);
             _configFile.SetBool("limitDuration", _limitDuration);
