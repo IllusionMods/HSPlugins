@@ -2,6 +2,7 @@
   <string key="ScreenshotPlugin" value="屏幕截图插件" />
   <string key="CurrentSize" value="当前尺寸" />
   <string key="Framerate" value="帧率" />
+  <string key="ExportFramerate" value="导出帧率" />
   <string key="AutoGenerateVideo" value="自动生成视频" />
   <string key="AutoDeleteImages" value="自动删除图片" />
   <string key="LimitBy" value="限制" />
