@@ -2,6 +2,7 @@
   <string key="ScreenshotPlugin" value="Screenshot Plugin" />
   <string key="CurrentSize" value="Current Size" />
   <string key="Framerate" value="Framerate" />
+  <string key="ExportFramerate" value="Export Framerate" />
   <string key="AutoGenerateVideo" value="Auto Generate Video" />
   <string key="AutoDeleteImages" value="Auto Delete Images" />
   <string key="LimitBy" value="Limit By" />

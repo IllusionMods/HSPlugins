@@ -71,6 +71,7 @@ namespace VideoExport
             ScreenshotPlugin,
             CurrentSize,
             Framerate,
+            ExportFramerate,
             AutoGenerateVideo,
             AutoDeleteImages,
             LimitBy,
@@ -206,6 +207,7 @@ namespace VideoExport
 
         private int _selectedPlugin = 0;
         private int _fps = 60;
+        private int _exportFps = 60;
         private bool _autoGenerateVideo;
         private bool _autoDeleteImages;
         private bool _limitDuration;
@@ -250,6 +252,7 @@ namespace VideoExport
             _configFile = new GenericConfig(Name, this);
             _selectedPlugin = _configFile.AddInt("selectedScreenshotPlugin", 0, true);
             _fps = _configFile.AddInt("framerate", 60, true);
+            _exportFps = _configFile.AddInt("exportFramerate", 60, true);
             _autoGenerateVideo = _configFile.AddBool("autoGenerateVideo", true, true);
             _autoDeleteImages = _configFile.AddBool("autoDeleteImages", true, true);
             _limitDuration = _configFile.AddBool("limitDuration", false, true);
@@ -381,6 +384,7 @@ namespace VideoExport
             base.OnDestroy();
             _configFile.SetInt("selectedScreenshotPlugin", _selectedPlugin);
             _configFile.SetInt("framerate", _fps);
+            _configFile.SetInt("exportFramerate", _exportFps);
             _configFile.SetBool("autoGenerateVideo", _autoGenerateVideo);
             _configFile.SetBool("autoDeleteImages", _autoDeleteImages);
             _configFile.SetBool("limitDuration", _limitDuration);
@@ -463,6 +467,27 @@ namespace VideoExport
                     if (int.TryParse(s, out res) == false || res < 1)
                         res = 1;
                     _fps = res;
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label(_currentDictionary.GetString(TranslationKey.ExportFramerate), GUILayout.ExpandWidth(false));
+                    _exportFps = Mathf.RoundToInt(GUILayout.HorizontalSlider(Mathf.Clamp(_exportFps, 1, _fps), 1, _fps));
+                    string s = GUILayout.TextField(_exportFps.ToString(), GUILayout.Width(50));
+                    int res;
+                    if (int.TryParse(s, out res) == false || res < 1)
+                        res = 1;
+
+                    //multiply by fps
+                    for (int d = 1; d <= _fps; ++d)
+                        if (_fps % d == 0 && res <= d)
+                        {
+                            res = d;
+                            break;
+                        }
+
+                    _exportFps = res;
                 }
                 GUILayout.EndHorizontal();
 
@@ -918,6 +943,7 @@ namespace VideoExport
             {
                 _recordingFrameLimit = -1;
             }
+            int exportInterval = _fps / _exportFps;
             TimeSpan elapsed = TimeSpan.Zero;
             int i = 0;
             string imageExtension = screenshotPlugin.extension;
@@ -936,10 +962,14 @@ namespace VideoExport
                     Resources.UnloadUnusedAssets();
                     GC.Collect();
                 }
-                string savePath = Path.Combine(framesFolder, $"{_imagesPrefix}{i}{_imagesPostfix}.{imageExtension}");
-                byte[] frame = screenshotPlugin.Capture(savePath);
-                if (frame != null)
-                    File.WriteAllBytes(savePath, frame);
+
+                if(i % exportInterval == 0 )
+                {
+                    string savePath = Path.Combine(framesFolder, $"{_imagesPrefix}{i / exportInterval}{_imagesPostfix}.{imageExtension}");
+                    byte[] frame = screenshotPlugin.Capture(savePath);
+                    if (frame != null)
+                        File.WriteAllBytes(savePath, frame);
+                }
 
                 elapsed = DateTime.Now - startTime;
 
@@ -981,7 +1011,7 @@ namespace VideoExport
                 yield return null;
                 IExtension extension = _extensions[(int)_selectedExtension];
 
-                string arguments = extension.GetArguments(SimplifyPath(framesFolder), _imagesPrefix, _imagesPostfix, imageExtension, screenshotPlugin.bitDepth, _fps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder, tempName)));
+                string arguments = extension.GetArguments(SimplifyPath(framesFolder), _imagesPrefix, _imagesPostfix, imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder, tempName)));
                 startTime = DateTime.Now;
                 Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
                 while (proc.HasExited == false)
