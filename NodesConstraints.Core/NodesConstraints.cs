@@ -195,7 +195,10 @@ namespace NodesConstraints
 
                 if (lookAt)
                 {
-                    childTransform.LookAt(parentTransform);
+                    if (invertRotation)
+                        childTransform.rotation = Quaternion.LookRotation(childTransform.position - parentTransform.position);
+                    else
+                        childTransform.LookAt(parentTransform);
                     childTransform.rotation *= rotationOffset;
                 }
                 else if (invertRotation)
