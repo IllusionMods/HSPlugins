@@ -1006,6 +1006,7 @@ namespace NodesConstraints
                                 _selectedConstraint.invertPosition = _displayedConstraint.invertPosition;
                                 _selectedConstraint.rotation = _displayedConstraint.rotation;
                                 _selectedConstraint.invertRotation = _displayedConstraint.invertRotation;
+                                _selectedConstraint.lookAt = _displayedConstraint.lookAt;
                                 _selectedConstraint.scale = _displayedConstraint.scale;
                                 _selectedConstraint.invertScale = _displayedConstraint.invertScale;
                                 _selectedConstraint.positionOffset = _displayedConstraint.positionOffset;
