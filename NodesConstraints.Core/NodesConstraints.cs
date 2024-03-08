@@ -215,7 +215,7 @@ namespace NodesConstraints
                         childTransform.lossyScale.x - (parentTransform.lossyScale.x - oldScale.x),
                         childTransform.lossyScale.y - (parentTransform.lossyScale.y - oldScale.y),
                         childTransform.lossyScale.z - (parentTransform.lossyScale.z - oldScale.z)
-                    );
+                );
             }
 
             public void UpdateScale()
@@ -1667,6 +1667,8 @@ namespace NodesConstraints
                                 ),
                         childNode.Attributes["alias"] != null ? childNode.Attributes["alias"].Value : ""
                 );
+
+                c.UpdateOldValues();
 
                 if (c != null)
                 {
