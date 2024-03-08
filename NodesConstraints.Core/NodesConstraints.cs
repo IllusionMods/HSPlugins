@@ -881,7 +881,16 @@ namespace NodesConstraints
                             {
                                 _onPreCullAction = () =>
                                 {
-                                    _displayedConstraint.rotationOffset = Quaternion.Inverse(_displayedConstraint.parentTransform.rotation) * _displayedConstraint.childTransform.rotation;
+                                    if (_displayedConstraint.lookAt)
+                                    {
+                                        // https://docs.unity3d.com/ScriptReference/Quaternion.LookRotation.html
+                                        var relativePos = _displayedConstraint.parentTransform.position - _displayedConstraint.childTransform.position;
+                                        var lookAtRot = Quaternion.LookRotation(relativePos);
+                                        // Same as the no LookAt version below, just using the LookAt rotation the child would have without offsets as baseline for getting the offset
+                                        _displayedConstraint.rotationOffset = Quaternion.Inverse(lookAtRot) * _displayedConstraint.childTransform.rotation;
+                                    }
+                                    else
+                                        _displayedConstraint.rotationOffset = Quaternion.Inverse(_displayedConstraint.parentTransform.rotation) * _displayedConstraint.childTransform.rotation;
                                     UpdateDisplayedRotationOffset();
                                 };
                             }
