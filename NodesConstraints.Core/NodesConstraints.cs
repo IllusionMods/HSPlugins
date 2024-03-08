@@ -1826,17 +1826,21 @@ namespace NodesConstraints
                 xmlWriter.WriteAttributeString("uniqueLoadId", XmlConvert.ToString(i));
 
                 xmlWriter.WriteAttributeString("position", XmlConvert.ToString(constraint.position));
+                xmlWriter.WriteAttributeString("invertPosition", XmlConvert.ToString(constraint.invertPosition));
                 xmlWriter.WriteAttributeString("positionOffsetX", XmlConvert.ToString(constraint.positionOffset.x));
                 xmlWriter.WriteAttributeString("positionOffsetY", XmlConvert.ToString(constraint.positionOffset.y));
                 xmlWriter.WriteAttributeString("positionOffsetZ", XmlConvert.ToString(constraint.positionOffset.z));
 
                 xmlWriter.WriteAttributeString("rotation", XmlConvert.ToString(constraint.rotation));
+                xmlWriter.WriteAttributeString("invertRotation", XmlConvert.ToString(constraint.invertRotation));
+                xmlWriter.WriteAttributeString("lookAt", XmlConvert.ToString(constraint.lookAt));
                 xmlWriter.WriteAttributeString("rotationOffsetW", XmlConvert.ToString(constraint.rotationOffset.w));
                 xmlWriter.WriteAttributeString("rotationOffsetX", XmlConvert.ToString(constraint.rotationOffset.x));
                 xmlWriter.WriteAttributeString("rotationOffsetY", XmlConvert.ToString(constraint.rotationOffset.y));
                 xmlWriter.WriteAttributeString("rotationOffsetZ", XmlConvert.ToString(constraint.rotationOffset.z));
 
                 xmlWriter.WriteAttributeString("scale", XmlConvert.ToString(constraint.scale));
+                xmlWriter.WriteAttributeString("invertScale", XmlConvert.ToString(constraint.invertScale));
                 xmlWriter.WriteAttributeString("scaleOffsetX", XmlConvert.ToString(constraint.scaleOffset.x));
                 xmlWriter.WriteAttributeString("scaleOffsetY", XmlConvert.ToString(constraint.scaleOffset.y));
                 xmlWriter.WriteAttributeString("scaleOffsetZ", XmlConvert.ToString(constraint.scaleOffset.z));
