@@ -98,6 +98,7 @@ namespace NodesConstraints
             public bool invertPosition = false;
             public bool rotation = true;
             public bool invertRotation = false;
+            public bool lookAt = false;
             public bool scale = true;
             public bool invertScale = false;
             public Vector3 positionOffset = Vector3.zero;
@@ -191,7 +192,13 @@ namespace NodesConstraints
             public void UpdateRotation()
             {
                 hasUpdated = true;
-                if (invertRotation)
+
+                if (lookAt)
+                {
+                    childTransform.LookAt(parentTransform);
+                    childTransform.rotation *= rotationOffset;
+                }
+                else if (invertRotation)
                     childTransform.rotation = GetInvertedRotation();
                 else
                     childTransform.rotation = parentTransform.rotation * rotationOffset;
@@ -601,6 +608,7 @@ namespace NodesConstraints
                                                 constraint.positionOffset,
                                                 constraint.rotation,
                                                 constraint.invertRotation,
+                                                constraint.lookAt,
                                                 constraint.rotationOffset,
                                                 constraint.scale,
                                                 constraint.invertScale,
@@ -868,6 +876,7 @@ namespace NodesConstraints
                             GUILayout.Label("Z", GUILayout.ExpandWidth(false));
                             _rotationZStr = GUILayout.TextField(_rotationZStr, GUILayout.Width(50));
                             _displayedConstraint.invertRotation = GUILayout.Toggle(_displayedConstraint.invertRotation, "Invert");
+                            _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
                             if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
                             {
                                 _onPreCullAction = () =>
@@ -934,7 +943,7 @@ namespace NodesConstraints
                                 ValidateDisplayedRotationOffset();
                                 ValidateDisplayedScaleOffset();
 
-                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.invertPosition, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.invertRotation, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.invertScale, _displayedConstraint.scaleOffset, _displayedConstraint.alias);
+                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.invertPosition, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.invertRotation, _displayedConstraint.lookAt, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.invertScale, _displayedConstraint.scaleOffset, _displayedConstraint.alias);
 
                                 if (newConstraint != null)
                                 {
@@ -1337,7 +1346,7 @@ namespace NodesConstraints
 
 
 
-        private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, bool invertPosition, Vector3 positionOffset, bool linkRotation, bool invertRotation, Quaternion rotationOffset, bool linkScale, bool invertScale, Vector3 scaleOffset, string alias)
+        private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, bool invertPosition, Vector3 positionOffset, bool linkRotation, bool invertRotation, bool lookAt, Quaternion rotationOffset, bool linkScale, bool invertScale, Vector3 scaleOffset, string alias)
         {
             bool shouldAdd = true;
             foreach (Constraint constraint in _constraints)
@@ -1359,6 +1368,7 @@ namespace NodesConstraints
                 newConstraint.invertPosition = invertPosition;
                 newConstraint.rotation = linkRotation;
                 newConstraint.invertRotation = invertRotation;
+                newConstraint.lookAt = lookAt;
                 newConstraint.scale = linkScale;
                 newConstraint.invertScale = invertScale;
                 newConstraint.positionOffset = positionOffset;
@@ -1616,6 +1626,7 @@ namespace NodesConstraints
                         ),
                         XmlConvert.ToBoolean(childNode.Attributes["rotation"].Value),
                         XmlConvert.ToBoolean(childNode.Attributes["invertRotation"].Value),
+                        XmlConvert.ToBoolean(childNode.Attributes["lookAt"].Value),
                         new Quaternion(
                                 XmlConvert.ToSingle(childNode.Attributes["rotationOffsetX"].Value),
                                 XmlConvert.ToSingle(childNode.Attributes["rotationOffsetY"].Value),
@@ -1718,7 +1729,7 @@ namespace NodesConstraints
                     return;
             }
 
-            AddConstraint(true, parent, child, true, false, Vector3.zero, true, false, Quaternion.identity, false, false, Vector3.one, "");
+            AddConstraint(true, parent, child, true, false, Vector3.zero, true, false, false, Quaternion.identity, false, false, Vector3.one, "");
         }
 
         private void AddEyeLink(OCIChar ociChar, ObjectCtrlInfo selectedObject)
@@ -1753,7 +1764,7 @@ namespace NodesConstraints
             constraint.scaleOffset = Vector3.one;
             constraint.fixDynamicBone = false;
 
-            AddConstraint(true, parent, child, true, false, Vector3.zero, true, false, Quaternion.identity, false, false, Vector3.one, "");
+            AddConstraint(true, parent, child, true, false, Vector3.zero, true, false, false, Quaternion.identity, false, false, Vector3.one, "");
         }
 
         private Transform GetChildRootFromObjectCtrl(ObjectCtrlInfo objectCtrlInfo)
