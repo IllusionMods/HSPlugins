@@ -839,16 +839,18 @@ namespace NodesConstraints
 
                         GUILayout.BeginHorizontal();
                         {
-                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
+                            var enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
+                            GUI.enabled = enabled;
                             _displayedConstraint.position = GUILayout.Toggle(_displayedConstraint.position && _displayedConstraint.childTransform != null, "Link position");
                             GUILayout.FlexibleSpace();
+                            _displayedConstraint.invertPosition = GUILayout.Toggle(_displayedConstraint.invertPosition, "Invert");
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
+                            GUI.enabled = enabled && !_displayedConstraint.invertPosition;
                             _positionXStr = GUILayout.TextField(_positionXStr, GUILayout.Width(50));
                             GUILayout.Label("Y");
                             _positionYStr = GUILayout.TextField(_positionYStr, GUILayout.Width(50));
                             GUILayout.Label("Z");
                             _positionZStr = GUILayout.TextField(_positionZStr, GUILayout.Width(50));
-                            _displayedConstraint.invertPosition = GUILayout.Toggle(_displayedConstraint.invertPosition, "Invert");
                             if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
                                 _onPreCullAction = () =>
                                 {
@@ -866,17 +868,19 @@ namespace NodesConstraints
 
                         GUILayout.BeginHorizontal();
                         {
-                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
+                            var enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
+                            GUI.enabled = enabled;
                             _displayedConstraint.rotation = GUILayout.Toggle(_displayedConstraint.rotation && _displayedConstraint.childTransform != null, "Link rotation");
                             GUILayout.FlexibleSpace();
+                            _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
+                            _displayedConstraint.invertRotation = GUILayout.Toggle(_displayedConstraint.invertRotation, "Invert");
+                            GUI.enabled = enabled && !_displayedConstraint.invertRotation;
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
                             _rotationXStr = GUILayout.TextField(_rotationXStr, GUILayout.Width(50));
                             GUILayout.Label("Y", GUILayout.ExpandWidth(false));
                             _rotationYStr = GUILayout.TextField(_rotationYStr, GUILayout.Width(50));
                             GUILayout.Label("Z", GUILayout.ExpandWidth(false));
                             _rotationZStr = GUILayout.TextField(_rotationZStr, GUILayout.Width(50));
-                            _displayedConstraint.invertRotation = GUILayout.Toggle(_displayedConstraint.invertRotation, "Invert");
-                            _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
                             if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
                             {
                                 _onPreCullAction = () =>
@@ -905,16 +909,18 @@ namespace NodesConstraints
 
                         GUILayout.BeginHorizontal();
                         {
-                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
+                            var enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
+                            GUI.enabled = enabled;
                             _displayedConstraint.scale = GUILayout.Toggle(_displayedConstraint.scale && _displayedConstraint.childTransform != null, "Link scale");
                             GUILayout.FlexibleSpace();
+                            _displayedConstraint.invertScale = GUILayout.Toggle(_displayedConstraint.invertScale, "Invert");
+                            GUI.enabled = enabled && !_displayedConstraint.invertScale;
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
                             _scaleXStr = GUILayout.TextField(_scaleXStr, GUILayout.Width(50));
                             GUILayout.Label("Y");
                             _scaleYStr = GUILayout.TextField(_scaleYStr, GUILayout.Width(50));
                             GUILayout.Label("Z");
                             _scaleZStr = GUILayout.TextField(_scaleZStr, GUILayout.Width(50));
-                            _displayedConstraint.invertScale = GUILayout.Toggle(_displayedConstraint.invertScale, "Invert");
                             if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
                                 _onPreCullAction = () =>
                                 {
