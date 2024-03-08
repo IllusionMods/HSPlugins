@@ -212,9 +212,10 @@ namespace NodesConstraints
             public Vector3 GetInvertedScale()
             {
                 return new Vector3(
-                        childTransform.lossyScale.x - (parentTransform.lossyScale.x - oldScale.x),
-                        childTransform.lossyScale.y - (parentTransform.lossyScale.y - oldScale.y),
-                        childTransform.lossyScale.z - (parentTransform.lossyScale.z - oldScale.z)
+                    //Calculate the factor of change, get the opposite factor by applying the power of -1, multiply by old scale to get the new one
+                    childTransform.lossyScale.x * Mathf.Pow((parentTransform.lossyScale.x - oldScale.x) / oldScale.x + 1, -1),
+                    childTransform.lossyScale.y * Mathf.Pow((parentTransform.lossyScale.y - oldScale.y) / oldScale.y + 1, -1),
+                    childTransform.lossyScale.z * Mathf.Pow((parentTransform.lossyScale.z - oldScale.z) / oldScale.z + 1, -1)
                 );
             }
 
