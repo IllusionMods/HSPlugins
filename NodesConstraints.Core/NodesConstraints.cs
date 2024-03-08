@@ -88,6 +88,7 @@ namespace NodesConstraints
 
         private class Constraint
         {
+            public bool hasUpdated = false;
             public bool enabled = true;
             public GuideObject parent;
             public Transform parentTransform;
@@ -172,7 +173,8 @@ namespace NodesConstraints
 
             public void UpdatePosition()
             {
-                if(invertPosition)
+                hasUpdated = true;
+                if (invertPosition)
                     childTransform.position = GetInvertedPosition();
                 else
                     childTransform.position = parentTransform.TransformPoint(positionOffset);
@@ -188,6 +190,7 @@ namespace NodesConstraints
 
             public void UpdateRotation()
             {
+                hasUpdated = true;
                 if (invertRotation)
                     childTransform.rotation = GetInvertedRotation();
                 else
@@ -207,6 +210,7 @@ namespace NodesConstraints
 
             public void UpdateScale()
             {
+                hasUpdated = true;
                 if (invertScale)
                     childTransform.localScale = GetInvertedScale();
                 else
@@ -676,6 +680,7 @@ namespace NodesConstraints
             for (int i = 0; i < _constraints.Count; i++)
             {
                 Constraint constraint = _constraints[i];
+                constraint.hasUpdated = false;
                 if (constraint.parentTransform == null || constraint.childTransform == null)
                 {
                     if (toDelete == null)
@@ -724,7 +729,7 @@ namespace NodesConstraints
                     }
                     continue;
                 }
-                if (constraint.enabled == false)
+                if (constraint.enabled == false || constraint.hasUpdated)
                     continue;
 
                 /* There is a timing when Transform is reset by DynamicBone. Skip the reset value so that it is not taken into the constraint.
