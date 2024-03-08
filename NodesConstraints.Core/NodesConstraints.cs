@@ -1086,8 +1086,12 @@ namespace NodesConstraints
                                 _displayedConstraint.parentTransform = _selectedConstraint.parentTransform;
                                 _displayedConstraint.childTransform = _selectedConstraint.childTransform;
                                 _displayedConstraint.position = _selectedConstraint.position;
+                                _displayedConstraint.invertPosition = _selectedConstraint.invertPosition;
                                 _displayedConstraint.rotation = _selectedConstraint.rotation;
+                                _displayedConstraint.invertRotation = _selectedConstraint.invertRotation;
+                                _displayedConstraint.lookAt = _selectedConstraint.lookAt;
                                 _displayedConstraint.scale = _selectedConstraint.scale;
+                                _displayedConstraint.invertScale = _selectedConstraint.invertScale;
                                 _displayedConstraint.positionOffset = _selectedConstraint.positionOffset;
                                 _displayedConstraint.rotationOffset = _selectedConstraint.rotationOffset;
                                 _displayedConstraint.scaleOffset = _selectedConstraint.scaleOffset;
