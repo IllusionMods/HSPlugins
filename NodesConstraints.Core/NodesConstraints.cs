@@ -113,9 +113,9 @@ namespace NodesConstraints
             public bool destroyed = false;
             private VectorLine _debugLine;
 
-            private Vector3 oldPosition;
-            private Quaternion oldRotation;
-            private Vector3 oldScale;
+            public Vector3 originalParentPosition;
+            public Quaternion originalParentRotation;
+            public Vector3 originalParentScale;
 
             public Constraint()
             {
@@ -142,8 +142,9 @@ namespace NodesConstraints
                 originalChildScale = other.originalChildScale;
                 alias = other.alias;
                 fixDynamicBone = other.fixDynamicBone;
-
-                UpdateOldValues();
+                originalParentPosition = other.parentTransform.position;
+                originalParentRotation = other.parentTransform.rotation;
+                originalParentScale = other.parentTransform.lossyScale;
             }
 
             public void SetActiveDebugLines(bool active)
@@ -159,17 +160,10 @@ namespace NodesConstraints
                 _debugLine.Draw();
             }
 
-            public void UpdateOldValues()
-            {
-                oldPosition = parentTransform.position;
-                oldRotation = parentTransform.rotation;
-                oldScale = parentTransform.lossyScale;
-            }
-
             public Vector3 GetInvertedPosition()
             {
-                var movement = parentTransform.position - oldPosition;
-                return childTransform.position - movement;
+                var movement = parentTransform.position - originalParentPosition;
+                return originalParentPosition - movement + positionOffset;
             }
 
             public void UpdatePosition()
@@ -185,8 +179,8 @@ namespace NodesConstraints
 
             public Quaternion GetInvertedRotation()
             {
-                var movement = Quaternion.Inverse(oldRotation) * parentTransform.rotation;
-                return childTransform.rotation * Quaternion.Inverse(movement);
+                var movement = Quaternion.Inverse(originalParentRotation) * parentTransform.rotation;
+                return originalParentRotation * Quaternion.Inverse(movement) * rotationOffset;
             }
 
             public void UpdateRotation()
@@ -213,9 +207,9 @@ namespace NodesConstraints
             {
                 return new Vector3(
                     //Calculate the factor of change, get the opposite factor by applying the power of -1, multiply by old scale to get the new one
-                    childTransform.lossyScale.x * Mathf.Pow((parentTransform.lossyScale.x - oldScale.x) / oldScale.x + 1, -1),
-                    childTransform.lossyScale.y * Mathf.Pow((parentTransform.lossyScale.y - oldScale.y) / oldScale.y + 1, -1),
-                    childTransform.lossyScale.z * Mathf.Pow((parentTransform.lossyScale.z - oldScale.z) / oldScale.z + 1, -1)
+                    (originalParentScale.x * scaleOffset.x) * Mathf.Pow((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x + 1, -1),
+                    (originalParentScale.y * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y + 1, -1),
+                    (originalParentScale.z * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z + 1, -1)
                 );
             }
 
@@ -304,9 +298,9 @@ namespace NodesConstraints
         private string _rotationXStr = "0.000";
         private string _rotationYStr = "0.000";
         private string _rotationZStr = "0.000";
-        private string _scaleXStr = "0.0000";
-        private string _scaleYStr = "0.0000";
-        private string _scaleZStr = "0.0000";
+        private string _scaleXStr = "1.0000";
+        private string _scaleYStr = "1.0000";
+        private string _scaleZStr = "1.0000";
         private bool _debugMode;
         private Vector3 _debugLocalPosition;
         private Vector3 _debugWorldPosition;
@@ -714,7 +708,6 @@ namespace NodesConstraints
                     if (constraint.scale && (constraint.child == null || constraint.child.enableScale))
                         constraint.UpdateScale();
                 }
-                constraint.UpdateOldValues();
             }
             if (toDelete != null)
                 for (int i = toDelete.Count - 1; i >= 0; --i)
@@ -843,13 +836,11 @@ namespace NodesConstraints
 
                         GUILayout.BeginHorizontal();
                         {
-                            var enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
-                            GUI.enabled = enabled;
+                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                             _displayedConstraint.position = GUILayout.Toggle(_displayedConstraint.position && _displayedConstraint.childTransform != null, "Link position");
                             GUILayout.FlexibleSpace();
                             _displayedConstraint.invertPosition = GUILayout.Toggle(_displayedConstraint.invertPosition, "Invert");
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
-                            GUI.enabled = enabled && !_displayedConstraint.invertPosition;
                             _positionXStr = GUILayout.TextField(_positionXStr, GUILayout.Width(50));
                             GUILayout.Label("Y");
                             _positionYStr = GUILayout.TextField(_positionYStr, GUILayout.Width(50));
@@ -872,13 +863,11 @@ namespace NodesConstraints
 
                         GUILayout.BeginHorizontal();
                         {
-                            var enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
-                            GUI.enabled = enabled;
+                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                             _displayedConstraint.rotation = GUILayout.Toggle(_displayedConstraint.rotation && _displayedConstraint.childTransform != null, "Link rotation");
                             GUILayout.FlexibleSpace();
                             _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
                             _displayedConstraint.invertRotation = GUILayout.Toggle(_displayedConstraint.invertRotation, "Invert");
-                            GUI.enabled = enabled && !_displayedConstraint.invertRotation;
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
                             _rotationXStr = GUILayout.TextField(_rotationXStr, GUILayout.Width(50));
                             GUILayout.Label("Y", GUILayout.ExpandWidth(false));
@@ -913,12 +902,10 @@ namespace NodesConstraints
 
                         GUILayout.BeginHorizontal();
                         {
-                            var enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
-                            GUI.enabled = enabled;
+                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                             _displayedConstraint.scale = GUILayout.Toggle(_displayedConstraint.scale && _displayedConstraint.childTransform != null, "Link scale");
                             GUILayout.FlexibleSpace();
                             _displayedConstraint.invertScale = GUILayout.Toggle(_displayedConstraint.invertScale, "Invert");
-                            GUI.enabled = enabled && !_displayedConstraint.invertScale;
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
                             _scaleXStr = GUILayout.TextField(_scaleXStr, GUILayout.Width(50));
                             GUILayout.Label("Y");
@@ -968,7 +955,6 @@ namespace NodesConstraints
                                 {
                                     newConstraint.fixDynamicBone = _displayedConstraint.fixDynamicBone;
                                 }
-                                newConstraint.UpdateOldValues();
                             }
                             GUI.enabled = _selectedConstraint != null && _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null && (_displayedConstraint.position || _displayedConstraint.rotation || _displayedConstraint.scale) && _displayedConstraint.parentTransform != _displayedConstraint.childTransform;
                             if (GUILayout.Button("Update selected"))
@@ -1401,6 +1387,10 @@ namespace NodesConstraints
                 newConstraint.alias = alias;
                 newConstraint.fixDynamicBone = false;
 
+                newConstraint.originalParentPosition = parentTransform.position;
+                newConstraint.originalParentRotation = parentTransform.rotation;
+                newConstraint.originalParentScale = parentTransform.lossyScale;
+
                 if (_allGuideObjects.TryGetValue(newConstraint.parentTransform, out newConstraint.parent) == false)
                     newConstraint.parent = null;
                 if (_allGuideObjects.TryGetValue(newConstraint.childTransform, out newConstraint.child) == false)
@@ -1665,12 +1655,9 @@ namespace NodesConstraints
                                         XmlConvert.ToSingle(childNode.Attributes["scaleOffsetX"].Value),
                                         XmlConvert.ToSingle(childNode.Attributes["scaleOffsetY"].Value),
                                         XmlConvert.ToSingle(childNode.Attributes["scaleOffsetZ"].Value)
-
                                 ),
                         childNode.Attributes["alias"] != null ? childNode.Attributes["alias"].Value : ""
                 );
-
-                c.UpdateOldValues();
 
                 if (c != null)
                 {
@@ -1679,6 +1666,25 @@ namespace NodesConstraints
 
                     if (childNode.Attributes["dynamic"] != null)
                         c.fixDynamicBone = XmlConvert.ToBoolean(childNode.Attributes["dynamic"].Value);
+                    if (childNode.Attributes["originalParentPositionX"] != null)
+                        c.originalParentPosition = new Vector3(
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentPositionX"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentPositionY"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentPositionZ"].Value)
+                        );
+                    if (childNode.Attributes["originalParentRotationX"] != null)
+                        c.originalParentRotation = new Quaternion(
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentRotationX"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentRotationY"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentRotationZ"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentRotationW"].Value)
+                        );
+                    if (childNode.Attributes["originalParentScaleX"] != null)
+                        c.originalParentScale = new Vector3(
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentScaleX"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentScaleY"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentScaleZ"].Value)
+                        );
                 }
             }
         }
@@ -1861,6 +1867,19 @@ namespace NodesConstraints
                 xmlWriter.WriteAttributeString("scaleOffsetX", XmlConvert.ToString(constraint.scaleOffset.x));
                 xmlWriter.WriteAttributeString("scaleOffsetY", XmlConvert.ToString(constraint.scaleOffset.y));
                 xmlWriter.WriteAttributeString("scaleOffsetZ", XmlConvert.ToString(constraint.scaleOffset.z));
+
+                xmlWriter.WriteAttributeString("originalParentPositionX", XmlConvert.ToString(constraint.originalParentPosition.x));
+                xmlWriter.WriteAttributeString("originalParentPositionY", XmlConvert.ToString(constraint.originalParentPosition.y));
+                xmlWriter.WriteAttributeString("originalParentPositionZ", XmlConvert.ToString(constraint.originalParentPosition.z));
+
+                xmlWriter.WriteAttributeString("originalParentRotationX", XmlConvert.ToString(constraint.originalParentRotation.x));
+                xmlWriter.WriteAttributeString("originalParentRotationY", XmlConvert.ToString(constraint.originalParentRotation.y));
+                xmlWriter.WriteAttributeString("originalParentRotationZ", XmlConvert.ToString(constraint.originalParentRotation.z));
+                xmlWriter.WriteAttributeString("originalParentRotationW", XmlConvert.ToString(constraint.originalParentRotation.w));
+
+                xmlWriter.WriteAttributeString("originalParentScaleX", XmlConvert.ToString(constraint.originalParentScale.x));
+                xmlWriter.WriteAttributeString("originalParentScaleY", XmlConvert.ToString(constraint.originalParentScale.y));
+                xmlWriter.WriteAttributeString("originalParentScaleZ", XmlConvert.ToString(constraint.originalParentScale.z));
 
                 xmlWriter.WriteAttributeString("alias", constraint.alias);
                 xmlWriter.WriteAttributeString("dynamic", XmlConvert.ToString(constraint.fixDynamicBone));
