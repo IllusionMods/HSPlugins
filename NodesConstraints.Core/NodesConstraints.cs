@@ -187,11 +187,8 @@ namespace NodesConstraints
                 {
                     if (mirrorRotation)
                     {
-                        // The commented out code completely flips the rotation (so an object will always point its back towards the target)
-                        // This can also be achieved by using the offset values instead.
-                        // This is left empty for now to keep room for actual rotation mirroring (something like the avert gaze option)
-                        // And to not break backwards compatibility if someone ever comes back to it and actually implement it
-                        //childTransform.rotation = Quaternion.LookRotation(childTransform.position - parentTransform.position);
+                        var lookAt = Quaternion.LookRotation(parentTransform.position);
+                        childTransform.rotation = new Quaternion(lookAt.x * -1f, lookAt.y * -1f, lookAt.z, lookAt.w);
                     }
                     else
                         childTransform.LookAt(parentTransform);
@@ -863,14 +860,11 @@ namespace NodesConstraints
 
                         GUILayout.BeginHorizontal();
                         {
-                            var enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
-                            GUI.enabled = enabled;
+                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                             _displayedConstraint.rotation = GUILayout.Toggle(_displayedConstraint.rotation && _displayedConstraint.childTransform != null, "Link rotation");
                             GUILayout.FlexibleSpace();
                             _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
-                            GUI.enabled = enabled && !_displayedConstraint.lookAt;
                             _displayedConstraint.mirrorRotation = GUILayout.Toggle(_displayedConstraint.mirrorRotation, "Mirror");
-                            GUI.enabled = enabled;
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
                             _rotationXStr = GUILayout.TextField(_rotationXStr, GUILayout.Width(50));
                             GUILayout.Label("Y", GUILayout.ExpandWidth(false));
@@ -952,7 +946,7 @@ namespace NodesConstraints
                                 ValidateDisplayedRotationOffset();
                                 ValidateDisplayedScaleOffset();
 
-                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.mirrorPosition, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.mirrorRotation && !_displayedConstraint.lookAt, _displayedConstraint.lookAt, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.mirrorScale, _displayedConstraint.scaleOffset, _displayedConstraint.alias);
+                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.mirrorPosition, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.mirrorRotation, _displayedConstraint.lookAt, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.mirrorScale, _displayedConstraint.scaleOffset, _displayedConstraint.alias);
 
                                 if (newConstraint != null)
                                 {
