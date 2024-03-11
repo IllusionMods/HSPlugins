@@ -88,7 +88,6 @@ namespace NodesConstraints
 
         private class Constraint
         {
-            public bool hasUpdated = false;
             public bool enabled = true;
             public GuideObject parent;
             public Transform parentTransform;
@@ -168,7 +167,6 @@ namespace NodesConstraints
 
             public void UpdatePosition()
             {
-                hasUpdated = true;
                 if (invertPosition)
                     childTransform.position = GetInvertedPosition();
                 else
@@ -185,8 +183,6 @@ namespace NodesConstraints
 
             public void UpdateRotation()
             {
-                hasUpdated = true;
-
                 if (lookAt)
                 {
                     if (invertRotation)
@@ -216,7 +212,6 @@ namespace NodesConstraints
 
             public void UpdateScale()
             {
-                hasUpdated = true;
                 if (invertScale)
                     childTransform.localScale = GetInvertedScale();
                 else
@@ -687,7 +682,6 @@ namespace NodesConstraints
             for (int i = 0; i < _constraints.Count; i++)
             {
                 Constraint constraint = _constraints[i];
-                constraint.hasUpdated = false;
                 if (constraint.parentTransform == null || constraint.childTransform == null)
                 {
                     if (toDelete == null)
@@ -715,7 +709,7 @@ namespace NodesConstraints
                     RemoveConstraintAt(toDelete[i]);
         }
 
-        // Applies the constraints that may not have updated in the first loop for whatever reason
+        // Applies all the constraints indiscriminately after everything overwriting everything
         private void ApplyConstraints()
         {
             List<int> toDelete = null;
@@ -734,7 +728,7 @@ namespace NodesConstraints
                     }
                     continue;
                 }
-                if (constraint.enabled == false || constraint.hasUpdated)
+                if (constraint.enabled == false)
                     continue;
 
                 /* There is a timing when Transform is reset by DynamicBone. Skip the reset value so that it is not taken into the constraint.
