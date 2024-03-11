@@ -206,7 +206,8 @@ namespace NodesConstraints
             public Vector3 GetInvertedScale()
             {
                 return new Vector3(
-                    //Calculate the factor of change, get the opposite factor by applying the power of -1, multiply by old scale to get the new one
+                    // Multiply the original scale (+ any offsets) times the inverted change factor compared to the original scale
+                    // Inverting the change factor is done by applying the power of -1 to the change factor
                     (originalParentScale.x * scaleOffset.x) * Mathf.Pow((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x + 1, -1),
                     (originalParentScale.y * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y + 1, -1),
                     (originalParentScale.z * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z + 1, -1)
@@ -714,8 +715,7 @@ namespace NodesConstraints
                     RemoveConstraintAt(toDelete[i]);
         }
 
-        // Applies all the constraints indiscriminately after everything overwriting everything
-        // TODO: This stupid method duplicates changes when it is called by some studid postfix
+        // Applies the constraints that may not have updated in the first loop for whatever reason
         private void ApplyConstraints()
         {
             List<int> toDelete = null;
@@ -1387,6 +1387,8 @@ namespace NodesConstraints
                 newConstraint.alias = alias;
                 newConstraint.fixDynamicBone = false;
 
+                // Use current ParentTransform pos/rot/scale as default to not break backwards compatibility
+                // Update to after adding if needed (e.g. OnSceneLoad/OnSceneImport
                 newConstraint.originalParentPosition = parentTransform.position;
                 newConstraint.originalParentRotation = parentTransform.rotation;
                 newConstraint.originalParentScale = parentTransform.lossyScale;
