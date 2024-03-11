@@ -1628,15 +1628,15 @@ namespace NodesConstraints
                         parentTransform,
                         childTransform,
                         XmlConvert.ToBoolean(childNode.Attributes["position"].Value),
-                        XmlConvert.ToBoolean(childNode.Attributes["invertPosition"].Value),
+                        false,
                         new Vector3(
                                 XmlConvert.ToSingle(childNode.Attributes["positionOffsetX"].Value),
                                 XmlConvert.ToSingle(childNode.Attributes["positionOffsetY"].Value),
                                 XmlConvert.ToSingle(childNode.Attributes["positionOffsetZ"].Value)
                         ),
                         XmlConvert.ToBoolean(childNode.Attributes["rotation"].Value),
-                        XmlConvert.ToBoolean(childNode.Attributes["invertRotation"].Value),
-                        XmlConvert.ToBoolean(childNode.Attributes["lookAt"].Value),
+                        false,
+                        false,
                         new Quaternion(
                                 XmlConvert.ToSingle(childNode.Attributes["rotationOffsetX"].Value),
                                 XmlConvert.ToSingle(childNode.Attributes["rotationOffsetY"].Value),
@@ -1644,7 +1644,7 @@ namespace NodesConstraints
                                 XmlConvert.ToSingle(childNode.Attributes["rotationOffsetW"].Value)
                         ),
                         childNode.Attributes["scale"] != null && XmlConvert.ToBoolean(childNode.Attributes["scale"].Value),
-                        XmlConvert.ToBoolean(childNode.Attributes["invertScale"].Value),
+                        false,
                         childNode.Attributes["scaleOffsetX"] == null
                                 ? Vector3.one
                                 : new Vector3(
@@ -1662,6 +1662,16 @@ namespace NodesConstraints
 
                     if (childNode.Attributes["dynamic"] != null)
                         c.fixDynamicBone = XmlConvert.ToBoolean(childNode.Attributes["dynamic"].Value);
+
+                    if (childNode.Attributes["invertPosition"] != null)
+                        c.invertPosition = XmlConvert.ToBoolean(childNode.Attributes["invertPosition"].Value);
+                    if (childNode.Attributes["invertRotation"] != null)
+                        c.invertRotation = XmlConvert.ToBoolean(childNode.Attributes["invertRotation"].Value);
+                    if (childNode.Attributes["invertScale"] != null)
+                        c.invertScale = XmlConvert.ToBoolean(childNode.Attributes["invertScale"].Value);
+                    if (childNode.Attributes["lookAt"] != null)
+                        c.lookAt = XmlConvert.ToBoolean(childNode.Attributes["lookAt"].Value);
+
                     if (childNode.Attributes["originalParentPositionX"] != null)
                         c.originalParentPosition = new Vector3(
                             XmlConvert.ToSingle(childNode.Attributes["originalParentPositionX"].Value),
