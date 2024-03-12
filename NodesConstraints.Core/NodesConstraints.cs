@@ -94,8 +94,12 @@ namespace NodesConstraints
             public GuideObject child;
             public Transform childTransform;
             public bool position = true;
+            public bool mirrorPosition = false;
             public bool rotation = true;
+            public bool mirrorRotation = false;
+            public bool lookAt = false;
             public bool scale = true;
+            public bool mirrorScale = false;
             public Vector3 positionOffset = Vector3.zero;
             public Quaternion rotationOffset = Quaternion.identity;
             public Vector3 scaleOffset = Vector3.one;
@@ -107,6 +111,10 @@ namespace NodesConstraints
             public int? uniqueLoadId;
             public bool destroyed = false;
             private VectorLine _debugLine;
+
+            public Vector3 originalParentPosition;
+            public Quaternion originalParentRotation;
+            public Vector3 originalParentScale;
 
             public Constraint()
             {
@@ -133,6 +141,9 @@ namespace NodesConstraints
                 originalChildScale = other.originalChildScale;
                 alias = other.alias;
                 fixDynamicBone = other.fixDynamicBone;
+                originalParentPosition = other.parentTransform.position;
+                originalParentRotation = other.parentTransform.rotation;
+                originalParentScale = other.parentTransform.lossyScale;
             }
 
             public void SetActiveDebugLines(bool active)
@@ -146,6 +157,74 @@ namespace NodesConstraints
                 _debugLine.points3[1] = childTransform.position;
                 _debugLine.SetColor((position && rotation ? Color.magenta : (position ? Color.cyan : Color.green)));
                 _debugLine.Draw();
+            }
+
+            public Vector3 GetMirroredPosition()
+            {
+                var movement = parentTransform.position - originalParentPosition;
+                return originalParentPosition - movement + positionOffset;
+            }
+
+            public void UpdatePosition()
+            {
+                if (mirrorPosition)
+                    childTransform.position = GetMirroredPosition();
+                else
+                    childTransform.position = parentTransform.TransformPoint(positionOffset);
+                if (child != null)
+                    child.changeAmount.pos = child.transformTarget.localPosition;
+            }
+
+            public Quaternion GetMirroredRotation()
+            {
+                var movement = Quaternion.Inverse(originalParentRotation) * parentTransform.rotation;
+                return originalParentRotation * Quaternion.Inverse(movement) * rotationOffset;
+            }
+
+            public void UpdateRotation()
+            {
+                if (lookAt)
+                {
+                    if (mirrorRotation)
+                    {
+                        var lookAt = Quaternion.LookRotation(parentTransform.position);
+                        childTransform.rotation = new Quaternion(lookAt.x * -1f, lookAt.y * -1f, lookAt.z, lookAt.w);
+                    }
+                    else
+                        childTransform.LookAt(parentTransform);
+                    childTransform.rotation *= rotationOffset;
+                }
+                else if (mirrorRotation)
+                    childTransform.rotation = GetMirroredRotation();
+                else
+                    childTransform.rotation = parentTransform.rotation * rotationOffset;
+                if (child != null)
+                    child.changeAmount.rot = child.transformTarget.localEulerAngles;
+            }
+
+            public Vector3 GetMirroredScale()
+            {
+                return new Vector3(
+                    // Multiply the original scale (+ any offsets) times the mirrored change factor compared to the original scale
+                    // mirroring the change factor is done by applying the power of -1 to the change factor
+                    (originalParentScale.x * scaleOffset.x) * Mathf.Pow((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x + 1, -1),
+                    (originalParentScale.y * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y + 1, -1),
+                    (originalParentScale.z * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z + 1, -1)
+                );
+            }
+
+            public void UpdateScale()
+            {
+                if (mirrorScale)
+                    childTransform.localScale = GetMirroredScale();
+                else
+                    childTransform.localScale = new Vector3(
+                        (parentTransform.lossyScale.x * scaleOffset.x) / childTransform.parent.lossyScale.x,
+                        (parentTransform.lossyScale.y * scaleOffset.y) / childTransform.parent.lossyScale.y,
+                        (parentTransform.lossyScale.z * scaleOffset.z) / childTransform.parent.lossyScale.z
+                    );
+                if (child != null)
+                    child.changeAmount.scale = child.transformTarget.localScale;
             }
 
             public void Destroy()
@@ -218,9 +297,9 @@ namespace NodesConstraints
         private string _rotationXStr = "0.000";
         private string _rotationYStr = "0.000";
         private string _rotationZStr = "0.000";
-        private string _scaleXStr = "0.0000";
-        private string _scaleYStr = "0.0000";
-        private string _scaleZStr = "0.0000";
+        private string _scaleXStr = "1.0000";
+        private string _scaleYStr = "1.0000";
+        private string _scaleZStr = "1.0000";
         private bool _debugMode;
         private Vector3 _debugLocalPosition;
         private Vector3 _debugWorldPosition;
@@ -522,10 +601,14 @@ namespace NodesConstraints
                                                 parentObjectDestination.guideObject.transformTarget.Find(constraint.parentTransform.GetPathFrom(parentObjectSource.guideObject.transformTarget)),
                                                 childObjectDestination.guideObject.transformTarget.Find(constraint.childTransform.GetPathFrom(childObjectSource.guideObject.transformTarget)),
                                                 constraint.position,
+                                                constraint.mirrorPosition,
                                                 constraint.positionOffset,
                                                 constraint.rotation,
+                                                constraint.mirrorRotation,
+                                                constraint.lookAt,
                                                 constraint.rotationOffset,
                                                 constraint.scale,
+                                                constraint.mirrorScale,
                                                 constraint.scaleOffset,
                                                 constraint.alias
                                                );
@@ -617,27 +700,11 @@ namespace NodesConstraints
                 if (constraint.enabled && (constraint.child != null || constraint.parent != null))
                 {
                     if (constraint.position && (constraint.child == null || constraint.child.enablePos))
-                    {
-                        constraint.childTransform.position = constraint.parentTransform.TransformPoint(constraint.positionOffset);
-                        if (constraint.child != null)
-                            constraint.child.changeAmount.pos = constraint.child.transformTarget.localPosition;
-                    }
+                        constraint.UpdatePosition();
                     if (constraint.rotation && (constraint.child == null || constraint.child.enableRot))
-                    {
-                        constraint.childTransform.rotation = constraint.parentTransform.rotation * constraint.rotationOffset;
-                        if (constraint.child != null)
-                            constraint.child.changeAmount.rot = constraint.child.transformTarget.localEulerAngles;
-                    }
+                        constraint.UpdateRotation();
                     if (constraint.scale && (constraint.child == null || constraint.child.enableScale))
-                    {
-                        constraint.childTransform.localScale = new Vector3(
-                                (constraint.parentTransform.lossyScale.x * constraint.scaleOffset.x) / constraint.childTransform.parent.lossyScale.x,
-                                (constraint.parentTransform.lossyScale.y * constraint.scaleOffset.y) / constraint.childTransform.parent.lossyScale.y,
-                                (constraint.parentTransform.lossyScale.z * constraint.scaleOffset.z) / constraint.childTransform.parent.lossyScale.z
-                        );
-                        if (constraint.child != null)
-                            constraint.child.changeAmount.scale = constraint.child.transformTarget.localScale;
-                    }
+                        constraint.UpdateScale();
                 }
             }
             if (toDelete != null)
@@ -674,27 +741,11 @@ namespace NodesConstraints
                     continue;
 
                 if (constraint.position)
-                {
-                    constraint.childTransform.position = constraint.parentTransform.TransformPoint(constraint.positionOffset);
-                    if (constraint.child != null)
-                        constraint.child.changeAmount.pos = constraint.child.transformTarget.localPosition;
-                }
+                    constraint.UpdatePosition();
                 if (constraint.rotation)
-                {
-                    constraint.childTransform.rotation = constraint.parentTransform.rotation * constraint.rotationOffset;
-                    if (constraint.child != null)
-                        constraint.child.changeAmount.rot = constraint.child.transformTarget.localEulerAngles;
-                }
+                    constraint.UpdateRotation();
                 if (constraint.scale)
-                {
-                    constraint.childTransform.localScale = new Vector3(
-                            (constraint.parentTransform.lossyScale.x * constraint.scaleOffset.x) / constraint.childTransform.parent.lossyScale.x,
-                            (constraint.parentTransform.lossyScale.y * constraint.scaleOffset.y) / constraint.childTransform.parent.lossyScale.y,
-                            (constraint.parentTransform.lossyScale.z * constraint.scaleOffset.z) / constraint.childTransform.parent.lossyScale.z
-                    );
-                    if (constraint.child != null)
-                        constraint.child.changeAmount.scale = constraint.child.transformTarget.localScale;
-                }
+                    constraint.UpdateScale();
             }
             if (toDelete != null)
                 for (int i = toDelete.Count - 1; i >= 0; --i)
@@ -785,6 +836,7 @@ namespace NodesConstraints
                             GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                             _displayedConstraint.position = GUILayout.Toggle(_displayedConstraint.position && _displayedConstraint.childTransform != null, "Link position");
                             GUILayout.FlexibleSpace();
+                            _displayedConstraint.mirrorPosition = GUILayout.Toggle(_displayedConstraint.mirrorPosition, "Mirror");
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
                             _positionXStr = GUILayout.TextField(_positionXStr, GUILayout.Width(50));
                             GUILayout.Label("Y");
@@ -811,6 +863,8 @@ namespace NodesConstraints
                             GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                             _displayedConstraint.rotation = GUILayout.Toggle(_displayedConstraint.rotation && _displayedConstraint.childTransform != null, "Link rotation");
                             GUILayout.FlexibleSpace();
+                            _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
+                            _displayedConstraint.mirrorRotation = GUILayout.Toggle(_displayedConstraint.mirrorRotation, "Mirror");
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
                             _rotationXStr = GUILayout.TextField(_rotationXStr, GUILayout.Width(50));
                             GUILayout.Label("Y", GUILayout.ExpandWidth(false));
@@ -821,7 +875,16 @@ namespace NodesConstraints
                             {
                                 _onPreCullAction = () =>
                                 {
-                                    _displayedConstraint.rotationOffset = Quaternion.Inverse(_displayedConstraint.parentTransform.rotation) * _displayedConstraint.childTransform.rotation;
+                                    if (_displayedConstraint.lookAt)
+                                    {
+                                        // https://docs.unity3d.com/ScriptReference/Quaternion.LookRotation.html
+                                        var relativePos = _displayedConstraint.parentTransform.position - _displayedConstraint.childTransform.position;
+                                        var lookAtRot = Quaternion.LookRotation(relativePos);
+                                        // Same as the no LookAt version below, just using the LookAt rotation the child would have without offsets as baseline for getting the offset
+                                        _displayedConstraint.rotationOffset = Quaternion.Inverse(lookAtRot) * _displayedConstraint.childTransform.rotation;
+                                    }
+                                    else
+                                        _displayedConstraint.rotationOffset = Quaternion.Inverse(_displayedConstraint.parentTransform.rotation) * _displayedConstraint.childTransform.rotation;
                                     UpdateDisplayedRotationOffset();
                                 };
                             }
@@ -839,6 +902,7 @@ namespace NodesConstraints
                             GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                             _displayedConstraint.scale = GUILayout.Toggle(_displayedConstraint.scale && _displayedConstraint.childTransform != null, "Link scale");
                             GUILayout.FlexibleSpace();
+                            _displayedConstraint.mirrorScale = GUILayout.Toggle(_displayedConstraint.mirrorScale, "Mirror");
                             GUILayout.Label("X", GUILayout.ExpandWidth(false));
                             _scaleXStr = GUILayout.TextField(_scaleXStr, GUILayout.Width(50));
                             GUILayout.Label("Y");
@@ -882,12 +946,12 @@ namespace NodesConstraints
                                 ValidateDisplayedRotationOffset();
                                 ValidateDisplayedScaleOffset();
 
-                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.scaleOffset, _displayedConstraint.alias);
+                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.mirrorPosition, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.mirrorRotation, _displayedConstraint.lookAt, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.mirrorScale, _displayedConstraint.scaleOffset, _displayedConstraint.alias);
 
                                 if (newConstraint != null)
                                 {
                                     newConstraint.fixDynamicBone = _displayedConstraint.fixDynamicBone;
-                                }   
+                                }
                             }
                             GUI.enabled = _selectedConstraint != null && _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null && (_displayedConstraint.position || _displayedConstraint.rotation || _displayedConstraint.scale) && _displayedConstraint.parentTransform != _displayedConstraint.childTransform;
                             if (GUILayout.Button("Update selected"))
@@ -922,8 +986,12 @@ namespace NodesConstraints
                                 if (_allGuideObjects.TryGetValue(_selectedConstraint.childTransform, out _selectedConstraint.child) == false)
                                     _selectedConstraint.child = null;
                                 _selectedConstraint.position = _displayedConstraint.position;
+                                _selectedConstraint.mirrorPosition = _displayedConstraint.mirrorPosition;
                                 _selectedConstraint.rotation = _displayedConstraint.rotation;
+                                _selectedConstraint.mirrorRotation = _displayedConstraint.mirrorRotation;
+                                _selectedConstraint.lookAt = _displayedConstraint.lookAt;
                                 _selectedConstraint.scale = _displayedConstraint.scale;
+                                _selectedConstraint.mirrorScale = _displayedConstraint.mirrorScale;
                                 _selectedConstraint.positionOffset = _displayedConstraint.positionOffset;
                                 _selectedConstraint.rotationOffset = _displayedConstraint.rotationOffset;
                                 _selectedConstraint.scaleOffset = _displayedConstraint.scaleOffset;
@@ -1012,8 +1080,12 @@ namespace NodesConstraints
                                 _displayedConstraint.parentTransform = _selectedConstraint.parentTransform;
                                 _displayedConstraint.childTransform = _selectedConstraint.childTransform;
                                 _displayedConstraint.position = _selectedConstraint.position;
+                                _displayedConstraint.mirrorPosition = _selectedConstraint.mirrorPosition;
                                 _displayedConstraint.rotation = _selectedConstraint.rotation;
+                                _displayedConstraint.mirrorRotation = _selectedConstraint.mirrorRotation;
+                                _displayedConstraint.lookAt = _selectedConstraint.lookAt;
                                 _displayedConstraint.scale = _selectedConstraint.scale;
+                                _displayedConstraint.mirrorScale = _selectedConstraint.mirrorScale;
                                 _displayedConstraint.positionOffset = _selectedConstraint.positionOffset;
                                 _displayedConstraint.rotationOffset = _selectedConstraint.rotationOffset;
                                 _displayedConstraint.scaleOffset = _selectedConstraint.scaleOffset;
@@ -1279,9 +1351,12 @@ namespace NodesConstraints
             UpdateDisplayedScaleOffset();
         }
 
-
-
         private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, Vector3 positionOffset, bool linkRotation, Quaternion rotationOffset, bool linkScale, Vector3 scaleOffset, string alias)
+        {
+            return AddConstraint(enabled, parentTransform, childTransform, linkPosition, false, positionOffset, linkRotation, false, false, rotationOffset, linkScale, false, scaleOffset, alias);
+        }
+
+        private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, bool mirrorPosition, Vector3 positionOffset, bool linkRotation, bool mirrorRotation, bool lookAt, Quaternion rotationOffset, bool linkScale, bool mirrorScale, Vector3 scaleOffset, string alias)
         {
             bool shouldAdd = true;
             foreach (Constraint constraint in _constraints)
@@ -1300,13 +1375,23 @@ namespace NodesConstraints
                 newConstraint.parentTransform = parentTransform;
                 newConstraint.childTransform = childTransform;
                 newConstraint.position = linkPosition;
+                newConstraint.mirrorPosition = mirrorPosition;
                 newConstraint.rotation = linkRotation;
+                newConstraint.mirrorRotation = mirrorRotation;
+                newConstraint.lookAt = lookAt;
                 newConstraint.scale = linkScale;
+                newConstraint.mirrorScale = mirrorScale;
                 newConstraint.positionOffset = positionOffset;
                 newConstraint.rotationOffset = rotationOffset;
                 newConstraint.scaleOffset = scaleOffset;
                 newConstraint.alias = alias;
                 newConstraint.fixDynamicBone = false;
+
+                // Use current ParentTransform pos/rot/scale as default to not break backwards compatibility
+                // Update to after adding if needed (e.g. OnSceneLoad/OnSceneImport
+                newConstraint.originalParentPosition = parentTransform.position;
+                newConstraint.originalParentRotation = parentTransform.rotation;
+                newConstraint.originalParentScale = parentTransform.lossyScale;
 
                 if (_allGuideObjects.TryGetValue(newConstraint.parentTransform, out newConstraint.parent) == false)
                     newConstraint.parent = null;
@@ -1568,7 +1653,6 @@ namespace NodesConstraints
                                         XmlConvert.ToSingle(childNode.Attributes["scaleOffsetX"].Value),
                                         XmlConvert.ToSingle(childNode.Attributes["scaleOffsetY"].Value),
                                         XmlConvert.ToSingle(childNode.Attributes["scaleOffsetZ"].Value)
-
                                 ),
                         childNode.Attributes["alias"] != null ? childNode.Attributes["alias"].Value : ""
                 );
@@ -1580,6 +1664,35 @@ namespace NodesConstraints
 
                     if (childNode.Attributes["dynamic"] != null)
                         c.fixDynamicBone = XmlConvert.ToBoolean(childNode.Attributes["dynamic"].Value);
+
+                    if (childNode.Attributes["mirrorPosition"] != null)
+                        c.mirrorPosition = XmlConvert.ToBoolean(childNode.Attributes["mirrorPosition"].Value);
+                    if (childNode.Attributes["mirrorRotation"] != null)
+                        c.mirrorRotation = XmlConvert.ToBoolean(childNode.Attributes["mirrorRotation"].Value);
+                    if (childNode.Attributes["mirrorScale"] != null)
+                        c.mirrorScale = XmlConvert.ToBoolean(childNode.Attributes["mirrorScale"].Value);
+                    if (childNode.Attributes["lookAt"] != null)
+                        c.lookAt = XmlConvert.ToBoolean(childNode.Attributes["lookAt"].Value);
+
+                    if (childNode.Attributes["originalParentPositionX"] != null)
+                        c.originalParentPosition = new Vector3(
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentPositionX"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentPositionY"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentPositionZ"].Value)
+                        );
+                    if (childNode.Attributes["originalParentRotationX"] != null)
+                        c.originalParentRotation = new Quaternion(
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentRotationX"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentRotationY"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentRotationZ"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentRotationW"].Value)
+                        );
+                    if (childNode.Attributes["originalParentScaleX"] != null)
+                        c.originalParentScale = new Vector3(
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentScaleX"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentScaleY"].Value),
+                            XmlConvert.ToSingle(childNode.Attributes["originalParentScaleZ"].Value)
+                        );
                 }
             }
         }
@@ -1744,20 +1857,37 @@ namespace NodesConstraints
                 xmlWriter.WriteAttributeString("uniqueLoadId", XmlConvert.ToString(i));
 
                 xmlWriter.WriteAttributeString("position", XmlConvert.ToString(constraint.position));
+                xmlWriter.WriteAttributeString("mirrorPosition", XmlConvert.ToString(constraint.mirrorPosition));
                 xmlWriter.WriteAttributeString("positionOffsetX", XmlConvert.ToString(constraint.positionOffset.x));
                 xmlWriter.WriteAttributeString("positionOffsetY", XmlConvert.ToString(constraint.positionOffset.y));
                 xmlWriter.WriteAttributeString("positionOffsetZ", XmlConvert.ToString(constraint.positionOffset.z));
 
                 xmlWriter.WriteAttributeString("rotation", XmlConvert.ToString(constraint.rotation));
+                xmlWriter.WriteAttributeString("mirrorRotation", XmlConvert.ToString(constraint.mirrorRotation));
+                xmlWriter.WriteAttributeString("lookAt", XmlConvert.ToString(constraint.lookAt));
                 xmlWriter.WriteAttributeString("rotationOffsetW", XmlConvert.ToString(constraint.rotationOffset.w));
                 xmlWriter.WriteAttributeString("rotationOffsetX", XmlConvert.ToString(constraint.rotationOffset.x));
                 xmlWriter.WriteAttributeString("rotationOffsetY", XmlConvert.ToString(constraint.rotationOffset.y));
                 xmlWriter.WriteAttributeString("rotationOffsetZ", XmlConvert.ToString(constraint.rotationOffset.z));
 
                 xmlWriter.WriteAttributeString("scale", XmlConvert.ToString(constraint.scale));
+                xmlWriter.WriteAttributeString("mirrorScale", XmlConvert.ToString(constraint.mirrorScale));
                 xmlWriter.WriteAttributeString("scaleOffsetX", XmlConvert.ToString(constraint.scaleOffset.x));
                 xmlWriter.WriteAttributeString("scaleOffsetY", XmlConvert.ToString(constraint.scaleOffset.y));
                 xmlWriter.WriteAttributeString("scaleOffsetZ", XmlConvert.ToString(constraint.scaleOffset.z));
+
+                xmlWriter.WriteAttributeString("originalParentPositionX", XmlConvert.ToString(constraint.originalParentPosition.x));
+                xmlWriter.WriteAttributeString("originalParentPositionY", XmlConvert.ToString(constraint.originalParentPosition.y));
+                xmlWriter.WriteAttributeString("originalParentPositionZ", XmlConvert.ToString(constraint.originalParentPosition.z));
+
+                xmlWriter.WriteAttributeString("originalParentRotationX", XmlConvert.ToString(constraint.originalParentRotation.x));
+                xmlWriter.WriteAttributeString("originalParentRotationY", XmlConvert.ToString(constraint.originalParentRotation.y));
+                xmlWriter.WriteAttributeString("originalParentRotationZ", XmlConvert.ToString(constraint.originalParentRotation.z));
+                xmlWriter.WriteAttributeString("originalParentRotationW", XmlConvert.ToString(constraint.originalParentRotation.w));
+
+                xmlWriter.WriteAttributeString("originalParentScaleX", XmlConvert.ToString(constraint.originalParentScale.x));
+                xmlWriter.WriteAttributeString("originalParentScaleY", XmlConvert.ToString(constraint.originalParentScale.y));
+                xmlWriter.WriteAttributeString("originalParentScaleZ", XmlConvert.ToString(constraint.originalParentScale.z));
 
                 xmlWriter.WriteAttributeString("alias", constraint.alias);
                 xmlWriter.WriteAttributeString("dynamic", XmlConvert.ToString(constraint.fixDynamicBone));
