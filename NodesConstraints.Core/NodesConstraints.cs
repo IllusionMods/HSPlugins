@@ -1351,7 +1351,10 @@ namespace NodesConstraints
             UpdateDisplayedScaleOffset();
         }
 
-
+        private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, Vector3 positionOffset, bool linkRotation, Quaternion rotationOffset, bool linkScale, Vector3 scaleOffset, string alias)
+        {
+            return AddConstraint(enabled, parentTransform, childTransform, linkPosition, false, positionOffset, linkRotation, false, false, rotationOffset, linkScale, false, scaleOffset, alias);
+        }
 
         private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, bool mirrorPosition, Vector3 positionOffset, bool linkRotation, bool mirrorRotation, bool lookAt, Quaternion rotationOffset, bool linkScale, bool mirrorScale, Vector3 scaleOffset, string alias)
         {
@@ -1631,15 +1634,12 @@ namespace NodesConstraints
                         parentTransform,
                         childTransform,
                         XmlConvert.ToBoolean(childNode.Attributes["position"].Value),
-                        false,
                         new Vector3(
                                 XmlConvert.ToSingle(childNode.Attributes["positionOffsetX"].Value),
                                 XmlConvert.ToSingle(childNode.Attributes["positionOffsetY"].Value),
                                 XmlConvert.ToSingle(childNode.Attributes["positionOffsetZ"].Value)
                         ),
                         XmlConvert.ToBoolean(childNode.Attributes["rotation"].Value),
-                        false,
-                        false,
                         new Quaternion(
                                 XmlConvert.ToSingle(childNode.Attributes["rotationOffsetX"].Value),
                                 XmlConvert.ToSingle(childNode.Attributes["rotationOffsetY"].Value),
@@ -1647,7 +1647,6 @@ namespace NodesConstraints
                                 XmlConvert.ToSingle(childNode.Attributes["rotationOffsetW"].Value)
                         ),
                         childNode.Attributes["scale"] != null && XmlConvert.ToBoolean(childNode.Attributes["scale"].Value),
-                        false,
                         childNode.Attributes["scaleOffsetX"] == null
                                 ? Vector3.one
                                 : new Vector3(
@@ -1770,7 +1769,7 @@ namespace NodesConstraints
                     return;
             }
 
-            AddConstraint(true, parent, child, true, false, Vector3.zero, true, false, false, Quaternion.identity, false, false, Vector3.one, "");
+            AddConstraint(true, parent, child, true, Vector3.zero, true, Quaternion.identity, false, Vector3.one, "");
         }
 
         private void AddEyeLink(OCIChar ociChar, ObjectCtrlInfo selectedObject)
@@ -1805,7 +1804,7 @@ namespace NodesConstraints
             constraint.scaleOffset = Vector3.one;
             constraint.fixDynamicBone = false;
 
-            AddConstraint(true, parent, child, true, false, Vector3.zero, true, false, false, Quaternion.identity, false, false, Vector3.one, "");
+            AddConstraint(true, parent, child, true, Vector3.zero, true, Quaternion.identity, false, Vector3.one, "");
         }
 
         private Transform GetChildRootFromObjectCtrl(ObjectCtrlInfo objectCtrlInfo)
