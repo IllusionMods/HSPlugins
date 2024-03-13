@@ -89,29 +89,37 @@ namespace NodesConstraints
         private class Constraint
         {
             public bool enabled = true;
+
             public GuideObject parent;
             public Transform parentTransform;
             public GuideObject child;
             public Transform childTransform;
+
             public bool position = true;
-            public bool mirrorPosition = false;
-            public float positionChangeFactor = 1;
-            public float positionDamp = 0;
             public bool rotation = true;
-            public bool mirrorRotation = false;
-            public float rotationChangeFactor = 1;
-            public float rotationDamp = 0;
             public bool lookAt = false;
             public bool scale = true;
+
+            public bool mirrorPosition = false;
+            public bool mirrorRotation = false;
             public bool mirrorScale = false;
+
+            public float positionChangeFactor = 1;
+            public float rotationChangeFactor = 1;
             public float scaleChangeFactor = 1;
+
+            public float positionDamp = 0;
+            public float rotationDamp = 0;
             public float scaleDamp = 0;
+
             public Vector3 positionOffset = Vector3.zero;
             public Quaternion rotationOffset = Quaternion.identity;
             public Vector3 scaleOffset = Vector3.one;
+
             public Vector3 originalChildPosition;
             public Quaternion originalChildRotation;
             public Vector3 originalChildScale;
+
             public string alias = "";
             public bool fixDynamicBone;
             public int? uniqueLoadId;
@@ -165,6 +173,11 @@ namespace NodesConstraints
                 _debugLine.Draw();
             }
 
+            public float GetInterpolationFactor(float damp)
+            {
+                return 1 - Mathf.Exp(-damp * Time.deltaTime);
+            }
+
             public Vector3 GetPositionMovement()
             {
                 return (parentTransform.position - originalParentPosition) * positionChangeFactor;
@@ -180,7 +193,7 @@ namespace NodesConstraints
                 targetPos += positionOffset;
 
                 if (positionDamp > 0)
-                    targetPos = Vector3.Lerp(childTransform.position, targetPos, 1 - Mathf.Exp(-positionDamp * Time.deltaTime));
+                        targetPos = Vector3.Lerp(childTransform.position, targetPos, GetInterpolationFactor(positionDamp));
                 childTransform.position = targetPos;
 
                 if (child != null)
@@ -214,7 +227,7 @@ namespace NodesConstraints
                 targetRot *= rotationOffset;
 
                 if (rotationDamp > 0)
-                    targetRot = Quaternion.Slerp(childTransform.rotation, targetRot, 1 - Mathf.Exp(-rotationDamp * Time.deltaTime));
+                    targetRot = Quaternion.Slerp(childTransform.rotation, targetRot, GetInterpolationFactor(rotationDamp));
                 childTransform.rotation = targetRot;
 
                 if (child != null)
@@ -244,7 +257,7 @@ namespace NodesConstraints
                         (originalParentScale.x * scaleOffset.y) * ((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y * scaleChangeFactor + 1),
                         (originalParentScale.x * scaleOffset.z) * ((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z * scaleChangeFactor + 1)
                     );
-                childTransform.localScale = Vector3.Lerp(childTransform.localScale, targetScale, 1 - Mathf.Exp(-scaleDamp * Time.deltaTime));
+                childTransform.localScale = Vector3.Lerp(childTransform.localScale, targetScale, GetInterpolationFactor(scaleDamp));
                 if (child != null)
                     child.changeAmount.scale = child.transformTarget.localScale;
             }
@@ -313,21 +326,25 @@ namespace NodesConstraints
         private int _totalActiveExpressions = 0;
         private int _currentExpressionIndex = 0;
         private readonly HashSet<Expression> _allExpressions = new HashSet<Expression>();
+
         private string _positionXStr = "0.0000";
         private string _positionYStr = "0.0000";
         private string _positionZStr = "0.0000";
         private string _positionFactorStr = "1.0000";
         private string _positionDampStr = "0.000";
+
         private string _rotationXStr = "0.000";
         private string _rotationYStr = "0.000";
         private string _rotationZStr = "0.000";
         private string _rotationFactorStr = "1.0000";
         private string _rotationDampStr = "0.000";
+
         private string _scaleXStr = "1.0000";
         private string _scaleYStr = "1.0000";
         private string _scaleZStr = "1.0000";
         private string _scaleFactorStr = "1.0000";
         private string _scaleDampStr = "0.000";
+
         private bool _debugMode;
         private Vector3 _debugLocalPosition;
         private Vector3 _debugWorldPosition;
@@ -867,7 +884,7 @@ namespace NodesConstraints
                     GUILayout.FlexibleSpace();
                     if (transform == "rotation")
                         _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
-                    mirror = GUILayout.Toggle(mirror, "Mirror");
+                    mirror = GUILayout.Toggle(mirror, "Mirror", "Button");
                     GUILayout.Label(" | ");
                     GUILayout.Label("Factor");
                     factorStr = GUILayout.TextField(factorStr, GUILayout.Width(50));
