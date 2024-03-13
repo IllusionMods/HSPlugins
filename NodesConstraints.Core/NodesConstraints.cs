@@ -95,11 +95,14 @@ namespace NodesConstraints
             public Transform childTransform;
             public bool position = true;
             public bool mirrorPosition = false;
+            public float positionChangeFactor = 1;
             public bool rotation = true;
             public bool mirrorRotation = false;
+            public float rotationChangeFactor = 1;
             public bool lookAt = false;
             public bool scale = true;
             public bool mirrorScale = false;
+            public float scaleChangeFactor = 1;
             public Vector3 positionOffset = Vector3.zero;
             public Quaternion rotationOffset = Quaternion.identity;
             public Vector3 scaleOffset = Vector3.one;
@@ -159,45 +162,52 @@ namespace NodesConstraints
                 _debugLine.Draw();
             }
 
-            public Vector3 GetMirroredPosition()
+            public Vector3 GetPositionMovement()
             {
-                var movement = parentTransform.position - originalParentPosition;
-                return originalParentPosition - movement + positionOffset;
+                return (parentTransform.position - originalParentPosition) * positionChangeFactor;
             }
 
             public void UpdatePosition()
             {
+                Vector3 targetPos;
                 if (mirrorPosition)
-                    childTransform.position = GetMirroredPosition();
+                    targetPos = originalParentPosition - GetPositionMovement();
                 else
-                    childTransform.position = parentTransform.TransformPoint(positionOffset);
+                    targetPos = originalParentPosition + GetPositionMovement();
+                targetPos += positionOffset;
+                childTransform.position = targetPos;
+
                 if (child != null)
                     child.changeAmount.pos = child.transformTarget.localPosition;
             }
 
-            public Quaternion GetMirroredRotation()
+            public Quaternion GetRotationChange()
             {
-                var movement = Quaternion.Inverse(originalParentRotation) * parentTransform.rotation;
-                return originalParentRotation * Quaternion.Inverse(movement) * rotationOffset;
+                var rot = Quaternion.Inverse(originalParentRotation) * parentTransform.rotation;
+                //TODO: Fix when movement over 180 degrees snapping
+                return Quaternion.Euler(rot.eulerAngles.x * rotationChangeFactor, rot.eulerAngles.y * rotationChangeFactor, rot.eulerAngles.z * rotationChangeFactor);
             }
 
             public void UpdateRotation()
             {
+                Quaternion targetRot;
                 if (lookAt)
                 {
                     if (mirrorRotation)
                     {
                         var lookAt = Quaternion.LookRotation(parentTransform.position);
-                        childTransform.rotation = new Quaternion(lookAt.x * -1f, lookAt.y * -1f, lookAt.z, lookAt.w);
+                        targetRot = new Quaternion(lookAt.x * -1f, lookAt.y * -1f, lookAt.z, lookAt.w);
                     }
                     else
-                        childTransform.LookAt(parentTransform);
-                    childTransform.rotation *= rotationOffset;
+                        targetRot = Quaternion.LookRotation(parentTransform.position);
                 }
                 else if (mirrorRotation)
-                    childTransform.rotation = GetMirroredRotation();
+                    targetRot = originalParentRotation * Quaternion.Inverse(GetRotationChange()) * rotationOffset;
                 else
-                    childTransform.rotation = parentTransform.rotation * rotationOffset;
+                    targetRot = originalParentRotation * GetRotationChange() * rotationOffset;
+                targetRot *= rotationOffset;
+                childTransform.rotation = targetRot;
+
                 if (child != null)
                     child.changeAmount.rot = child.transformTarget.localEulerAngles;
             }
@@ -207,21 +217,22 @@ namespace NodesConstraints
                 return new Vector3(
                     // Multiply the original scale (+ any offsets) times the mirrored change factor compared to the original scale
                     // mirroring the change factor is done by applying the power of -1 to the change factor
-                    (originalParentScale.x * scaleOffset.x) * Mathf.Pow((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x + 1, -1),
-                    (originalParentScale.y * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y + 1, -1),
-                    (originalParentScale.z * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z + 1, -1)
+                    (originalParentScale.x * scaleOffset.x) * Mathf.Pow((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x * scaleChangeFactor + 1, -1),
+                    (originalParentScale.y * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y * scaleChangeFactor + 1, -1),
+                    (originalParentScale.z * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z * scaleChangeFactor + 1, -1)
                 );
             }
 
+            //TODO: Scaling using proper factor
             public void UpdateScale()
             {
                 if (mirrorScale)
                     childTransform.localScale = GetMirroredScale();
                 else
                     childTransform.localScale = new Vector3(
-                        (parentTransform.lossyScale.x * scaleOffset.x) / childTransform.parent.lossyScale.x,
-                        (parentTransform.lossyScale.y * scaleOffset.y) / childTransform.parent.lossyScale.y,
-                        (parentTransform.lossyScale.z * scaleOffset.z) / childTransform.parent.lossyScale.z
+                        (originalParentScale.x * scaleOffset.x) * ((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x * scaleChangeFactor + 1),
+                        (originalParentScale.x * scaleOffset.y) * ((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y * scaleChangeFactor + 1),
+                        (originalParentScale.x * scaleOffset.z) * ((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z * scaleChangeFactor + 1)
                     );
                 if (child != null)
                     child.changeAmount.scale = child.transformTarget.localScale;
@@ -294,12 +305,15 @@ namespace NodesConstraints
         private string _positionXStr = "0.0000";
         private string _positionYStr = "0.0000";
         private string _positionZStr = "0.0000";
+        private string _positionFactorStr = "1.0000";
         private string _rotationXStr = "0.000";
         private string _rotationYStr = "0.000";
         private string _rotationZStr = "0.000";
+        private string _rotationFactorStr = "1.0000";
         private string _scaleXStr = "1.0000";
         private string _scaleYStr = "1.0000";
         private string _scaleZStr = "1.0000";
+        private string _scaleFactorStr = "1.0000";
         private bool _debugMode;
         private Vector3 _debugLocalPosition;
         private Vector3 _debugWorldPosition;
@@ -1304,6 +1318,8 @@ namespace NodesConstraints
                 _displayedConstraint.positionOffset.y = res;
             if (float.TryParse(_positionZStr, out res))
                 _displayedConstraint.positionOffset.z = res;
+            if (float.TryParse(_positionFactorStr, out res))
+                _displayedConstraint.positionChangeFactor = res;
             UpdateDisplayedPositionOffset();
         }
 
@@ -1326,6 +1342,8 @@ namespace NodesConstraints
                 resY = _displayedConstraint.rotationOffset.eulerAngles.y;
             if (!float.TryParse(_rotationZStr, out resZ))
                 resZ = _displayedConstraint.rotationOffset.eulerAngles.z;
+            if (float.TryParse(_rotationFactorStr, out float res))
+                _displayedConstraint.rotationChangeFactor = res;
 
             _displayedConstraint.rotationOffset = Quaternion.Euler(resX, resY, resZ);
             UpdateDisplayedRotationOffset();
@@ -1348,6 +1366,8 @@ namespace NodesConstraints
                 _displayedConstraint.scaleOffset.y = res;
             if (float.TryParse(_scaleZStr, out res))
                 _displayedConstraint.scaleOffset.z = res;
+            if (float.TryParse(_scaleFactorStr, out res))
+                _displayedConstraint.scaleChangeFactor = res;
             UpdateDisplayedScaleOffset();
         }
 
@@ -1356,7 +1376,7 @@ namespace NodesConstraints
             return AddConstraint(enabled, parentTransform, childTransform, linkPosition, false, positionOffset, linkRotation, false, false, rotationOffset, linkScale, false, scaleOffset, alias);
         }
 
-        private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, bool mirrorPosition, Vector3 positionOffset, bool linkRotation, bool mirrorRotation, bool lookAt, Quaternion rotationOffset, bool linkScale, bool mirrorScale, Vector3 scaleOffset, string alias)
+        private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, bool mirrorPosition, Vector3 positionOffset, bool linkRotation, bool mirrorRotation, bool lookAt, Quaternion rotationOffset, bool linkScale, bool mirrorScale, Vector3 scaleOffset, string alias, float positionChangeFactor=1, float rotationChangeFactor=1, float scaleChangeFactor=1)
         {
             bool shouldAdd = true;
             foreach (Constraint constraint in _constraints)
@@ -1376,11 +1396,14 @@ namespace NodesConstraints
                 newConstraint.childTransform = childTransform;
                 newConstraint.position = linkPosition;
                 newConstraint.mirrorPosition = mirrorPosition;
+                newConstraint.positionChangeFactor = positionChangeFactor;
                 newConstraint.rotation = linkRotation;
                 newConstraint.mirrorRotation = mirrorRotation;
+                newConstraint.rotationChangeFactor = rotationChangeFactor;
                 newConstraint.lookAt = lookAt;
                 newConstraint.scale = linkScale;
                 newConstraint.mirrorScale = mirrorScale;
+                newConstraint.scaleChangeFactor = scaleChangeFactor;
                 newConstraint.positionOffset = positionOffset;
                 newConstraint.rotationOffset = rotationOffset;
                 newConstraint.scaleOffset = scaleOffset;
