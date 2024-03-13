@@ -844,31 +844,38 @@ namespace NodesConstraints
         {
             void DrawLinkRow(string transform, ref bool enabled, ref bool mirror, ref string xStr, ref string yStr, ref string zStr, ref string factorStr, ref string dampStr, Action onUseCurrent, Action onReset)
             {
+                GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                 GUILayout.BeginHorizontal();
                 {
-                    GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                     enabled = GUILayout.Toggle(enabled && _displayedConstraint.childTransform != null, $"Link {transform}");
                     GUILayout.FlexibleSpace();
-                    if (transform == "rotation")
-                        _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
-                    mirror = GUILayout.Toggle(mirror, "Mirror");
                     GUILayout.Label("X", GUILayout.ExpandWidth(false));
                     xStr = GUILayout.TextField(xStr, GUILayout.Width(50));
                     GUILayout.Label("Y");
                     yStr = GUILayout.TextField(yStr, GUILayout.Width(50));
                     GUILayout.Label("Z");
                     zStr = GUILayout.TextField(zStr, GUILayout.Width(50));
-                    GUILayout.Label("Factor");
-                    factorStr = GUILayout.TextField(factorStr, GUILayout.Width(50));
-                    GUILayout.Label("Damp");
-                    dampStr = GUILayout.TextField(dampStr, GUILayout.Width(50));
                     if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
                         onUseCurrent();
                     if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
                         onReset();
-                    GUI.enabled = true;
                 }
                 GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.FlexibleSpace();
+                    if (transform == "rotation")
+                        _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
+                    mirror = GUILayout.Toggle(mirror, "Mirror");
+                    GUILayout.Label(" | ");
+                    GUILayout.Label("Factor");
+                    factorStr = GUILayout.TextField(factorStr, GUILayout.Width(50));
+                    GUILayout.Label("Damp");
+                    dampStr = GUILayout.TextField(dampStr, GUILayout.Width(50));
+                }
+                GUILayout.EndHorizontal();
+                GUI.enabled = true;
             }
 
             GUILayout.BeginVertical();
