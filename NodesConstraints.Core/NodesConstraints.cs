@@ -828,6 +828,33 @@ namespace NodesConstraints
 
         private void WindowFunction(int id)
         {
+            void DrawLinkRow(string transform, ref bool enabled, ref bool mirror, ref string xStr, ref string yStr, ref string zStr, ref string factorStr, Action onUseCurrent, Action onReset)
+            {
+                GUILayout.BeginHorizontal();
+                {
+                    GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
+                    enabled = GUILayout.Toggle(enabled && _displayedConstraint.childTransform != null, $"Link {transform}");
+                    GUILayout.FlexibleSpace();
+                    if (transform == "rotation")
+                        _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
+                    mirror = GUILayout.Toggle(mirror, "Mirror");
+                    GUILayout.Label("X", GUILayout.ExpandWidth(false));
+                    xStr = GUILayout.TextField(xStr, GUILayout.Width(50));
+                    GUILayout.Label("Y");
+                    yStr = GUILayout.TextField(yStr, GUILayout.Width(50));
+                    GUILayout.Label("Z");
+                    zStr = GUILayout.TextField(zStr, GUILayout.Width(50));
+                    GUILayout.Label("Factor");
+                    factorStr = GUILayout.TextField(factorStr, GUILayout.Width(50));
+                    if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
+                        onUseCurrent();
+                    if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
+                        onReset();
+                    GUI.enabled = true;
+                }
+                GUILayout.EndHorizontal();
+            }
+
             GUILayout.BeginVertical();
             {
                 GUILayout.BeginHorizontal();
@@ -844,48 +871,23 @@ namespace NodesConstraints
                         }
                         GUILayout.EndHorizontal();
 
-
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
-                            _displayedConstraint.position = GUILayout.Toggle(_displayedConstraint.position && _displayedConstraint.childTransform != null, "Link position");
-                            GUILayout.FlexibleSpace();
-                            _displayedConstraint.mirrorPosition = GUILayout.Toggle(_displayedConstraint.mirrorPosition, "Mirror");
-                            GUILayout.Label("X", GUILayout.ExpandWidth(false));
-                            _positionXStr = GUILayout.TextField(_positionXStr, GUILayout.Width(50));
-                            GUILayout.Label("Y");
-                            _positionYStr = GUILayout.TextField(_positionYStr, GUILayout.Width(50));
-                            GUILayout.Label("Z");
-                            _positionZStr = GUILayout.TextField(_positionZStr, GUILayout.Width(50));
-                            if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
+                        DrawLinkRow("position", ref _displayedConstraint.position, ref _displayedConstraint.mirrorPosition, ref _positionXStr, ref _positionYStr, ref _positionZStr, ref _positionFactorStr,
+                            () =>
+                            {
                                 _onPreCullAction = () =>
                                 {
                                     _displayedConstraint.positionOffset = _displayedConstraint.parentTransform.InverseTransformPoint(_displayedConstraint.childTransform.position);
                                     UpdateDisplayedPositionOffset();
                                 };
-                            if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
+                            },
+                            () =>
                             {
                                 _displayedConstraint.positionOffset = Vector3.zero;
                                 UpdateDisplayedPositionOffset();
-                            }
-                            GUI.enabled = true;
-                        }
-                        GUILayout.EndHorizontal();
+                            });
 
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
-                            _displayedConstraint.rotation = GUILayout.Toggle(_displayedConstraint.rotation && _displayedConstraint.childTransform != null, "Link rotation");
-                            GUILayout.FlexibleSpace();
-                            _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
-                            _displayedConstraint.mirrorRotation = GUILayout.Toggle(_displayedConstraint.mirrorRotation, "Mirror");
-                            GUILayout.Label("X", GUILayout.ExpandWidth(false));
-                            _rotationXStr = GUILayout.TextField(_rotationXStr, GUILayout.Width(50));
-                            GUILayout.Label("Y", GUILayout.ExpandWidth(false));
-                            _rotationYStr = GUILayout.TextField(_rotationYStr, GUILayout.Width(50));
-                            GUILayout.Label("Z", GUILayout.ExpandWidth(false));
-                            _rotationZStr = GUILayout.TextField(_rotationZStr, GUILayout.Width(50));
-                            if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
+                        DrawLinkRow("rotation", ref _displayedConstraint.rotation, ref _displayedConstraint.mirrorRotation, ref _rotationXStr, ref _rotationYStr, ref _rotationZStr, ref _rotationFactorStr,
+                            () =>
                             {
                                 _onPreCullAction = () =>
                                 {
@@ -901,29 +903,16 @@ namespace NodesConstraints
                                         _displayedConstraint.rotationOffset = Quaternion.Inverse(_displayedConstraint.parentTransform.rotation) * _displayedConstraint.childTransform.rotation;
                                     UpdateDisplayedRotationOffset();
                                 };
-                            }
-                            if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
+                            },
+                            () =>
                             {
                                 _displayedConstraint.rotationOffset = Quaternion.identity;
                                 UpdateDisplayedRotationOffset();
-                            }
-                            GUI.enabled = true;
-                        }
-                        GUILayout.EndHorizontal();
+                            });
 
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
-                            _displayedConstraint.scale = GUILayout.Toggle(_displayedConstraint.scale && _displayedConstraint.childTransform != null, "Link scale");
-                            GUILayout.FlexibleSpace();
-                            _displayedConstraint.mirrorScale = GUILayout.Toggle(_displayedConstraint.mirrorScale, "Mirror");
-                            GUILayout.Label("X", GUILayout.ExpandWidth(false));
-                            _scaleXStr = GUILayout.TextField(_scaleXStr, GUILayout.Width(50));
-                            GUILayout.Label("Y");
-                            _scaleYStr = GUILayout.TextField(_scaleYStr, GUILayout.Width(50));
-                            GUILayout.Label("Z");
-                            _scaleZStr = GUILayout.TextField(_scaleZStr, GUILayout.Width(50));
-                            if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
+                        DrawLinkRow("scale", ref _displayedConstraint.scale, ref _displayedConstraint.mirrorScale, ref _scaleXStr, ref _scaleYStr, ref _scaleZStr, ref _scaleFactorStr,
+                            () =>
+                            {
                                 _onPreCullAction = () =>
                                 {
                                     _displayedConstraint.scaleOffset = new Vector3(
@@ -933,14 +922,12 @@ namespace NodesConstraints
                                     );
                                     UpdateDisplayedScaleOffset();
                                 };
-                            if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
+                            },
+                            () =>
                             {
                                 _displayedConstraint.scaleOffset = Vector3.one;
                                 UpdateDisplayedScaleOffset();
-                            }
-                            GUI.enabled = true;
-                        }
-                        GUILayout.EndHorizontal();
+                            });
 
                         GUILayout.BeginHorizontal();
                         {
@@ -960,7 +947,7 @@ namespace NodesConstraints
                                 ValidateDisplayedRotationOffset();
                                 ValidateDisplayedScaleOffset();
 
-                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.mirrorPosition, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.mirrorRotation, _displayedConstraint.lookAt, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.mirrorScale, _displayedConstraint.scaleOffset, _displayedConstraint.alias);
+                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.mirrorPosition, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.mirrorRotation, _displayedConstraint.lookAt, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.mirrorScale, _displayedConstraint.scaleOffset, _displayedConstraint.alias, _displayedConstraint.positionChangeFactor, _displayedConstraint.rotationChangeFactor, _displayedConstraint.scaleChangeFactor);
 
                                 if (newConstraint != null)
                                 {
@@ -1001,11 +988,14 @@ namespace NodesConstraints
                                     _selectedConstraint.child = null;
                                 _selectedConstraint.position = _displayedConstraint.position;
                                 _selectedConstraint.mirrorPosition = _displayedConstraint.mirrorPosition;
+                                _selectedConstraint.positionChangeFactor = _displayedConstraint.positionChangeFactor;
                                 _selectedConstraint.rotation = _displayedConstraint.rotation;
                                 _selectedConstraint.mirrorRotation = _displayedConstraint.mirrorRotation;
+                                _selectedConstraint.rotationChangeFactor = _displayedConstraint.rotationChangeFactor;
                                 _selectedConstraint.lookAt = _displayedConstraint.lookAt;
                                 _selectedConstraint.scale = _displayedConstraint.scale;
                                 _selectedConstraint.mirrorScale = _displayedConstraint.mirrorScale;
+                                _selectedConstraint.scaleChangeFactor = _displayedConstraint.scaleChangeFactor;
                                 _selectedConstraint.positionOffset = _displayedConstraint.positionOffset;
                                 _selectedConstraint.rotationOffset = _displayedConstraint.rotationOffset;
                                 _selectedConstraint.scaleOffset = _displayedConstraint.scaleOffset;
@@ -1095,11 +1085,14 @@ namespace NodesConstraints
                                 _displayedConstraint.childTransform = _selectedConstraint.childTransform;
                                 _displayedConstraint.position = _selectedConstraint.position;
                                 _displayedConstraint.mirrorPosition = _selectedConstraint.mirrorPosition;
+                                _displayedConstraint.positionChangeFactor = _selectedConstraint.positionChangeFactor;
                                 _displayedConstraint.rotation = _selectedConstraint.rotation;
                                 _displayedConstraint.mirrorRotation = _selectedConstraint.mirrorRotation;
+                                _displayedConstraint.rotationChangeFactor = _selectedConstraint.rotationChangeFactor;
                                 _displayedConstraint.lookAt = _selectedConstraint.lookAt;
                                 _displayedConstraint.scale = _selectedConstraint.scale;
                                 _displayedConstraint.mirrorScale = _selectedConstraint.mirrorScale;
+                                _displayedConstraint.scaleChangeFactor = _selectedConstraint.scaleChangeFactor;
                                 _displayedConstraint.positionOffset = _selectedConstraint.positionOffset;
                                 _displayedConstraint.rotationOffset = _selectedConstraint.rotationOffset;
                                 _displayedConstraint.scaleOffset = _selectedConstraint.scaleOffset;
@@ -1307,6 +1300,7 @@ namespace NodesConstraints
             _positionXStr = _displayedConstraint.positionOffset.x.ToString("0.0000");
             _positionYStr = _displayedConstraint.positionOffset.y.ToString("0.0000");
             _positionZStr = _displayedConstraint.positionOffset.z.ToString("0.0000");
+            _positionFactorStr = _displayedConstraint.positionChangeFactor.ToString("0.0000");
         }
 
         private void ValidateDisplayedPositionOffset()
@@ -1329,6 +1323,7 @@ namespace NodesConstraints
             _rotationXStr = euler.x.ToString("0.000");
             _rotationYStr = euler.y.ToString("0.000");
             _rotationZStr = euler.z.ToString("0.000");
+            _rotationFactorStr = _displayedConstraint.rotationChangeFactor.ToString("0.0000");
         }
 
         private void ValidateDisplayedRotationOffset()
@@ -1355,6 +1350,7 @@ namespace NodesConstraints
             _scaleXStr = _displayedConstraint.scaleOffset.x.ToString("0.0000");
             _scaleYStr = _displayedConstraint.scaleOffset.y.ToString("0.0000");
             _scaleZStr = _displayedConstraint.scaleOffset.z.ToString("0.0000");
+            _scaleFactorStr = _displayedConstraint.scaleChangeFactor.ToString("0.0000");
         }
 
         private void ValidateDisplayedScaleOffset()
