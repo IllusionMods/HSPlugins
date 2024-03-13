@@ -90,6 +90,10 @@ namespace NodesConstraints
         {
             public bool enabled = true;
 
+            public TransformLock positionLocks = new TransformLock(true, true, true);
+            public TransformLock rotationLocks = new TransformLock(true, true, true);
+            public TransformLock scaleLocks = new TransformLock(true, true, true);
+
             public GuideObject parent;
             public Transform parentTransform;
             public GuideObject child;
@@ -192,8 +196,15 @@ namespace NodesConstraints
                     targetPos = originalParentPosition + GetPositionMovement();
                 targetPos += positionOffset;
 
+                if (!positionLocks.x)
+                    targetPos.x = childTransform.position.x;
+                if (!positionLocks.y)
+                    targetPos.y = childTransform.position.y;
+                if (!positionLocks.z)
+                    targetPos.z = childTransform.position.z;
+
                 if (positionDamp > 0)
-                        targetPos = Vector3.Lerp(childTransform.position, targetPos, GetInterpolationFactor(positionDamp));
+                    targetPos = Vector3.Lerp(childTransform.position, targetPos, GetInterpolationFactor(positionDamp));
                 childTransform.position = targetPos;
 
                 if (child != null)
@@ -226,6 +237,12 @@ namespace NodesConstraints
                     targetRot = originalParentRotation * GetRotationChange() * rotationOffset;
                 targetRot *= rotationOffset;
 
+                targetRot = Quaternion.Euler(
+                        rotationLocks.x ? targetRot.eulerAngles.x : childTransform.rotation.eulerAngles.x,
+                        rotationLocks.y ? targetRot.eulerAngles.y : childTransform.rotation.eulerAngles.y,
+                        rotationLocks.z ? targetRot.eulerAngles.z : childTransform.rotation.eulerAngles.z
+                    );
+
                 if (rotationDamp > 0)
                     targetRot = Quaternion.Slerp(childTransform.rotation, targetRot, GetInterpolationFactor(rotationDamp));
                 childTransform.rotation = targetRot;
@@ -257,6 +274,14 @@ namespace NodesConstraints
                         (originalParentScale.x * scaleOffset.y) * ((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y * scaleChangeFactor + 1),
                         (originalParentScale.x * scaleOffset.z) * ((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z * scaleChangeFactor + 1)
                     );
+
+                if (!scaleLocks.x)
+                    targetScale.x = childTransform.localScale.x;
+                if (!scaleLocks.y)
+                    targetScale.y = childTransform.localScale.y;
+                if (!scaleLocks.z)
+                    targetScale.z = childTransform.localScale.z;
+
                 childTransform.localScale = Vector3.Lerp(childTransform.localScale, targetScale, GetInterpolationFactor(scaleDamp));
                 if (child != null)
                     child.changeAmount.scale = child.transformTarget.localScale;
@@ -266,6 +291,20 @@ namespace NodesConstraints
             {
                 VectorLine.Destroy(ref _debugLine);
                 destroyed = true;
+            }
+        }
+
+        public class TransformLock
+        {
+            public bool x;
+            public bool y;
+            public bool z;
+
+            public TransformLock(bool x, bool y, bool z)
+            {
+                this.x = x;
+                this.y = y;
+                this.z = z;
             }
         }
 
@@ -859,18 +898,19 @@ namespace NodesConstraints
 
         private void WindowFunction(int id)
         {
-            void DrawLinkRow(string transform, ref bool enabled, ref bool mirror, ref string xStr, ref string yStr, ref string zStr, ref string factorStr, ref string dampStr, Action onUseCurrent, Action onReset)
+            void DrawLinkRow(string transform, ref bool enabled, ref TransformLock locks, ref bool mirror, ref string xStr, ref string yStr, ref string zStr, ref string factorStr, ref string dampStr, Action onUseCurrent, Action onReset)
             {
                 GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                 GUILayout.BeginHorizontal();
                 {
                     enabled = GUILayout.Toggle(enabled && _displayedConstraint.childTransform != null, $"Link {transform}");
                     GUILayout.FlexibleSpace();
-                    GUILayout.Label("X", GUILayout.ExpandWidth(false));
+                    //GUILayout.Label("X", GUILayout.ExpandWidth(false));
+                    locks.x = GUILayout.Toggle(locks.x, "X", "Button");
                     xStr = GUILayout.TextField(xStr, GUILayout.Width(50));
-                    GUILayout.Label("Y");
+                    locks.y = GUILayout.Toggle(locks.y, "Y", "Button");
                     yStr = GUILayout.TextField(yStr, GUILayout.Width(50));
-                    GUILayout.Label("Z");
+                    locks.z = GUILayout.Toggle(locks.z, "Z", "Button");
                     zStr = GUILayout.TextField(zStr, GUILayout.Width(50));
                     if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
                         onUseCurrent();
@@ -881,11 +921,11 @@ namespace NodesConstraints
 
                 GUILayout.BeginHorizontal();
                 {
-                    GUILayout.FlexibleSpace();
+                    GUILayout.Label("   ↳");
+                    mirror = GUILayout.Toggle(mirror, "Mirror");
                     if (transform == "rotation")
                         _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
-                    mirror = GUILayout.Toggle(mirror, "Mirror", "Button");
-                    GUILayout.Label(" | ");
+                    GUILayout.FlexibleSpace();
                     GUILayout.Label("Factor");
                     factorStr = GUILayout.TextField(factorStr, GUILayout.Width(50));
                     GUILayout.Label("Damp");
@@ -911,7 +951,7 @@ namespace NodesConstraints
                         }
                         GUILayout.EndHorizontal();
 
-                        DrawLinkRow("position", ref _displayedConstraint.position, ref _displayedConstraint.mirrorPosition, ref _positionXStr, ref _positionYStr, ref _positionZStr, ref _positionFactorStr, ref _positionDampStr,
+                        DrawLinkRow("position", ref _displayedConstraint.position, ref _displayedConstraint.positionLocks, ref _displayedConstraint.mirrorPosition, ref _positionXStr, ref _positionYStr, ref _positionZStr, ref _positionFactorStr, ref _positionDampStr,
                             () =>
                             {
                                 _onPreCullAction = () =>
@@ -926,7 +966,7 @@ namespace NodesConstraints
                                 UpdateDisplayedPositionOffset();
                             });
 
-                        DrawLinkRow("rotation", ref _displayedConstraint.rotation, ref _displayedConstraint.mirrorRotation, ref _rotationXStr, ref _rotationYStr, ref _rotationZStr, ref _rotationFactorStr, ref _rotationDampStr,
+                        DrawLinkRow("rotation", ref _displayedConstraint.rotation, ref _displayedConstraint.rotationLocks, ref _displayedConstraint.mirrorRotation, ref _rotationXStr, ref _rotationYStr, ref _rotationZStr, ref _rotationFactorStr, ref _rotationDampStr,
                             () =>
                             {
                                 _onPreCullAction = () =>
@@ -952,7 +992,7 @@ namespace NodesConstraints
                                 UpdateDisplayedRotationOffset();
                             });
 
-                        DrawLinkRow("scale", ref _displayedConstraint.scale, ref _displayedConstraint.mirrorScale, ref _scaleXStr, ref _scaleYStr, ref _scaleZStr, ref _scaleFactorStr, ref _scaleDampStr,
+                        DrawLinkRow("scale", ref _displayedConstraint.scale, ref _displayedConstraint.scaleLocks, ref _displayedConstraint.mirrorScale, ref _scaleXStr, ref _scaleYStr, ref _scaleZStr, ref _scaleFactorStr, ref _scaleDampStr,
                             () =>
                             {
                                 _onPreCullAction = () =>
@@ -989,7 +1029,7 @@ namespace NodesConstraints
                                 ValidateDisplayedRotationOffset();
                                 ValidateDisplayedScaleOffset();
 
-                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.mirrorPosition, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.mirrorRotation, _displayedConstraint.lookAt, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.mirrorScale, _displayedConstraint.scaleOffset, _displayedConstraint.alias, _displayedConstraint.positionChangeFactor, _displayedConstraint.rotationChangeFactor, _displayedConstraint.scaleChangeFactor, _displayedConstraint.positionDamp, _displayedConstraint.rotationDamp, _displayedConstraint.scaleDamp);
+                                var newConstraint = AddConstraint(true, _displayedConstraint.parentTransform, _displayedConstraint.childTransform, _displayedConstraint.position, _displayedConstraint.mirrorPosition, _displayedConstraint.positionOffset, _displayedConstraint.rotation, _displayedConstraint.mirrorRotation, _displayedConstraint.lookAt, _displayedConstraint.rotationOffset, _displayedConstraint.scale, _displayedConstraint.mirrorScale, _displayedConstraint.scaleOffset, _displayedConstraint.alias, _displayedConstraint.positionChangeFactor, _displayedConstraint.rotationChangeFactor, _displayedConstraint.scaleChangeFactor, _displayedConstraint.positionDamp, _displayedConstraint.rotationDamp, _displayedConstraint.scaleDamp, _displayedConstraint.positionLocks, _displayedConstraint.rotationLocks, _displayedConstraint.scaleLocks);
 
                                 if (newConstraint != null)
                                 {
@@ -1049,6 +1089,10 @@ namespace NodesConstraints
                                 _selectedConstraint.originalChildScale = _selectedConstraint.childTransform.localScale;
                                 _selectedConstraint.alias = _displayedConstraint.alias;
                                 _selectedConstraint.fixDynamicBone = _displayedConstraint.fixDynamicBone;
+
+                                _selectedConstraint.positionLocks = _displayedConstraint.positionLocks;
+                                _selectedConstraint.rotationLocks = _displayedConstraint.rotationLocks;
+                                _selectedConstraint.scaleLocks = _displayedConstraint.scaleLocks;
                                 TimelineCompatibility.RefreshInterpolablesList();
                             }
                             GUI.enabled = true;
@@ -1426,7 +1470,7 @@ namespace NodesConstraints
             return AddConstraint(enabled, parentTransform, childTransform, linkPosition, false, positionOffset, linkRotation, false, false, rotationOffset, linkScale, false, scaleOffset, alias);
         }
 
-        private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, bool mirrorPosition, Vector3 positionOffset, bool linkRotation, bool mirrorRotation, bool lookAt, Quaternion rotationOffset, bool linkScale, bool mirrorScale, Vector3 scaleOffset, string alias, float positionChangeFactor=1, float rotationChangeFactor=1, float scaleChangeFactor=1, float positionDamp=0, float rotationDamp=0, float scaleDamp=0)
+        private Constraint AddConstraint(bool enabled, Transform parentTransform, Transform childTransform, bool linkPosition, bool mirrorPosition, Vector3 positionOffset, bool linkRotation, bool mirrorRotation, bool lookAt, Quaternion rotationOffset, bool linkScale, bool mirrorScale, Vector3 scaleOffset, string alias, float positionChangeFactor=1, float rotationChangeFactor=1, float scaleChangeFactor=1, float positionDamp=0, float rotationDamp=0, float scaleDamp=0, TransformLock positionLocks=null, TransformLock rotationLocks = null, TransformLock scaleLocks = null)
         {
             bool shouldAdd = true;
             foreach (Constraint constraint in _constraints)
@@ -1462,6 +1506,13 @@ namespace NodesConstraints
                 newConstraint.scaleOffset = scaleOffset;
                 newConstraint.alias = alias;
                 newConstraint.fixDynamicBone = false;
+
+                if (positionLocks != null)
+                    newConstraint.positionLocks = positionLocks;
+                if (rotationLocks != null)
+                    newConstraint.rotationLocks = rotationLocks;
+                if (scaleLocks != null)
+                    newConstraint.scaleLocks = scaleLocks;
 
                 // Use current ParentTransform pos/rot/scale as default to not break backwards compatibility
                 // Update to after adding if needed (e.g. OnSceneLoad/OnSceneImport
