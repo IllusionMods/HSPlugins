@@ -251,29 +251,13 @@ namespace NodesConstraints
                     child.changeAmount.rot = child.transformTarget.localEulerAngles;
             }
 
-            public Vector3 GetMirroredScale()
-            {
-                return new Vector3(
-                    // Multiply the original scale (+ any offsets) times the mirrored change factor compared to the original scale
-                    // mirroring the change factor is done by applying the power of -1 to the change factor
-                    (originalParentScale.x * scaleOffset.x) * Mathf.Pow((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x * scaleChangeFactor + 1, -1),
-                    (originalParentScale.y * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y * scaleChangeFactor + 1, -1),
-                    (originalParentScale.z * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z * scaleChangeFactor + 1, -1)
-                );
-            }
-
-            //TODO: Scaling using proper factor
             public void UpdateScale()
             {
-                Vector3 targetScale;
-                if (mirrorScale)
-                    targetScale = GetMirroredScale();
-                else
-                    targetScale = new Vector3(
-                        (originalParentScale.x * scaleOffset.x) * ((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x * scaleChangeFactor + 1),
-                        (originalParentScale.x * scaleOffset.y) * ((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y * scaleChangeFactor + 1),
-                        (originalParentScale.x * scaleOffset.z) * ((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z * scaleChangeFactor + 1)
-                    );
+                Vector3 targetScale = new Vector3(
+                    (originalParentScale.x * scaleOffset.x) * Mathf.Pow((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
+                    (originalParentScale.x * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
+                    (originalParentScale.x * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor)
+                );
 
                 if (!scaleLocks.x)
                     targetScale.x = childTransform.localScale.x;
@@ -282,7 +266,10 @@ namespace NodesConstraints
                 if (!scaleLocks.z)
                     targetScale.z = childTransform.localScale.z;
 
-                childTransform.localScale = Vector3.Lerp(childTransform.localScale, targetScale, GetInterpolationFactor(scaleDamp));
+                if (scaleDamp > 0)
+                    targetScale = Vector3.Lerp(childTransform.localScale, targetScale, GetInterpolationFactor(scaleDamp));
+                childTransform.localScale = targetScale;
+
                 if (child != null)
                     child.changeAmount.scale = child.transformTarget.localScale;
             }
