@@ -1807,6 +1807,33 @@ namespace NodesConstraints
                             XmlConvert.ToSingle(childNode.Attributes["originalParentScaleY"].Value),
                             XmlConvert.ToSingle(childNode.Attributes["originalParentScaleZ"].Value)
                         );
+                    // All added in the same update, so should alwasy exist if one of them is not null
+                    if (childNode.Attributes["positionChangeFactor"] != null)
+                    {
+                        c.positionChangeFactor = XmlConvert.ToSingle(childNode.Attributes["positionChangeFactor"].Value);
+                        c.rotationChangeFactor = XmlConvert.ToSingle(childNode.Attributes["rotationChangeFactor"].Value);
+                        c.scaleChangeFactor = XmlConvert.ToSingle(childNode.Attributes["scaleChangeFactor"].Value);
+
+                        c.positionDamp = XmlConvert.ToSingle(childNode.Attributes["positionDamp"].Value);
+                        c.rotationDamp = XmlConvert.ToSingle(childNode.Attributes["rotationDamp"].Value);
+                        c.scaleDamp = XmlConvert.ToSingle(childNode.Attributes["scaleDamp"].Value);
+
+                        c.positionLocks = new TransformLock(
+                            XmlConvert.ToBoolean(childNode.Attributes["positionLocksX"].Value),
+                            XmlConvert.ToBoolean(childNode.Attributes["positionLocksY"].Value),
+                            XmlConvert.ToBoolean(childNode.Attributes["positionLocksZ"].Value)
+                        );
+                        c.rotationLocks = new TransformLock(
+                            XmlConvert.ToBoolean(childNode.Attributes["rotationLocksX"].Value),
+                            XmlConvert.ToBoolean(childNode.Attributes["rotationLocksY"].Value),
+                            XmlConvert.ToBoolean(childNode.Attributes["rotationLocksZ"].Value)
+                        );
+                        c.scaleLocks = new TransformLock(
+                            XmlConvert.ToBoolean(childNode.Attributes["scaleLocksX"].Value),
+                            XmlConvert.ToBoolean(childNode.Attributes["scaleLocksY"].Value),
+                            XmlConvert.ToBoolean(childNode.Attributes["scaleLocksZ"].Value)
+                        );
+                    }
                 }
             }
         }
@@ -2002,6 +2029,26 @@ namespace NodesConstraints
                 xmlWriter.WriteAttributeString("originalParentScaleX", XmlConvert.ToString(constraint.originalParentScale.x));
                 xmlWriter.WriteAttributeString("originalParentScaleY", XmlConvert.ToString(constraint.originalParentScale.y));
                 xmlWriter.WriteAttributeString("originalParentScaleZ", XmlConvert.ToString(constraint.originalParentScale.z));
+
+                xmlWriter.WriteAttributeString("positionChangeFactor", XmlConvert.ToString(constraint.positionChangeFactor));
+                xmlWriter.WriteAttributeString("rotationChangeFactor", XmlConvert.ToString(constraint.rotationChangeFactor));
+                xmlWriter.WriteAttributeString("scaleChangeFactor", XmlConvert.ToString(constraint.scaleChangeFactor));
+
+                xmlWriter.WriteAttributeString("positionDamp", XmlConvert.ToString(constraint.positionDamp));
+                xmlWriter.WriteAttributeString("rotationDamp", XmlConvert.ToString(constraint.rotationDamp));
+                xmlWriter.WriteAttributeString("scaleDamp", XmlConvert.ToString(constraint.scaleDamp));
+
+                xmlWriter.WriteAttributeString("positionLocksX", XmlConvert.ToString(constraint.positionLocks.x));
+                xmlWriter.WriteAttributeString("positionLocksY", XmlConvert.ToString(constraint.positionLocks.y));
+                xmlWriter.WriteAttributeString("positionLocksZ", XmlConvert.ToString(constraint.positionLocks.z));
+
+                xmlWriter.WriteAttributeString("rotationLocksX", XmlConvert.ToString(constraint.rotationLocks.x));
+                xmlWriter.WriteAttributeString("rotationLocksY", XmlConvert.ToString(constraint.rotationLocks.y));
+                xmlWriter.WriteAttributeString("rotationLocksZ", XmlConvert.ToString(constraint.rotationLocks.z));
+
+                xmlWriter.WriteAttributeString("scaleLocksX", XmlConvert.ToString(constraint.scaleLocks.x));
+                xmlWriter.WriteAttributeString("scaleLocksY", XmlConvert.ToString(constraint.scaleLocks.y));
+                xmlWriter.WriteAttributeString("scaleLocksZ", XmlConvert.ToString(constraint.scaleLocks.z));
 
                 xmlWriter.WriteAttributeString("alias", constraint.alias);
                 xmlWriter.WriteAttributeString("dynamic", XmlConvert.ToString(constraint.fixDynamicBone));
