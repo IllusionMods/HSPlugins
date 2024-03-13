@@ -213,9 +213,7 @@ namespace NodesConstraints
 
             public Quaternion GetRotationChange()
             {
-                var rot = Quaternion.Inverse(originalParentRotation) * parentTransform.rotation;
-                //TODO: Fix when movement over 180 degrees snapping
-                return Quaternion.Euler(rot.eulerAngles.x * rotationChangeFactor, rot.eulerAngles.y * rotationChangeFactor, rot.eulerAngles.z * rotationChangeFactor);
+                return Quaternion.Inverse(originalParentRotation) * parentTransform.rotation;
             }
 
             public void UpdateRotation()
@@ -236,6 +234,7 @@ namespace NodesConstraints
                 else
                     targetRot = originalParentRotation * GetRotationChange() * rotationOffset;
                 targetRot *= rotationOffset;
+                targetRot = Quaternion.SlerpUnclamped(Quaternion.identity, targetRot, rotationChangeFactor);
 
                 targetRot = Quaternion.Euler(
                         rotationLocks.x ? targetRot.eulerAngles.x : childTransform.rotation.eulerAngles.x,
