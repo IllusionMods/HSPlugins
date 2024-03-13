@@ -919,6 +919,8 @@ namespace NodesConstraints
                                         // https://docs.unity3d.com/ScriptReference/Quaternion.LookRotation.html
                                         var relativePos = _displayedConstraint.parentTransform.position - _displayedConstraint.childTransform.position;
                                         var lookAtRot = Quaternion.LookRotation(relativePos);
+                                        if (_displayedConstraint.mirrorRotation)
+                                            lookAtRot = new Quaternion(lookAtRot.x * -1f, lookAtRot.y * -1f, lookAtRot.z, lookAtRot.w);
                                         // Same as the no LookAt version below, just using the LookAt rotation the child would have without offsets as baseline for getting the offset
                                         _displayedConstraint.rotationOffset = Quaternion.Inverse(lookAtRot) * _displayedConstraint.childTransform.rotation;
                                     }
