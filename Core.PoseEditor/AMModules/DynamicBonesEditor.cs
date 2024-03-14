@@ -109,6 +109,7 @@ namespace HSPE.AMModules
                         debug = new DebugDynamicBone(db);
                         _debugLines.Add(debug);
                     }
+                    debug.SetActive(_showAllDebugDB || db == target);
                     debug.Draw(db, db == target, dirtyDynamicBones.ContainsKey(db));
                     ++i;
                 }
@@ -278,6 +279,7 @@ namespace HSPE.AMModules
         private static DynamicBoneData _copiedDynamicBoneData = null;
         private bool _isBusy = false;
         private static float _dynamicBonesDragRadius = _dynamicBonesDragRadiusBase;
+        internal static bool _showAllDebugDB = true;
         #endregion
 
         #region Public Fields
@@ -538,7 +540,7 @@ namespace HSPE.AMModules
                 GUI.color = c;
             }
             GUILayout.EndScrollView();
-
+            _showAllDebugDB = GUILayout.Toggle(_showAllDebugDB, _showAllDebugDB ? "◀ All Gizmos ▶" : "◀ Current Gizmo ▶", GUI.skin.button, new GUILayoutOption[0]);
             if (GUILayout.Button("Copy to FK"))
                 CopyToFK();
             if (GUILayout.Button("Force refresh list"))
@@ -1481,6 +1483,8 @@ namespace HSPE.AMModules
                 for (int i = 0; i < _dynamicBones.Count; i++)
                 {
                     DynamicBone db = _dynamicBones[i];
+                    if (db == null) continue;
+                    if (!_showAllDebugDB && _dynamicBoneTarget != db) continue;
                     Transform leaf = (db.m_Root ?? db.transform).GetFirstLeaf();
                     Vector3 raycastPos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Vector3.Project(leaf.position - Camera.main.transform.position, Camera.main.transform.forward).magnitude));
                     if ((raycastPos - leaf.position).sqrMagnitude < (_dynamicBonesDragRadius * _dynamicBonesDragRadius) &&
