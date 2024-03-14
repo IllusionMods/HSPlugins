@@ -540,6 +540,7 @@ namespace HSPE.AMModules
                 GUI.color = c;
             }
             GUILayout.EndScrollView();
+
             _showAllDebugDB = GUILayout.Toggle(_showAllDebugDB, _showAllDebugDB ? "◀ All Gizmos ▶" : "◀ Current Gizmo ▶", GUI.skin.button, new GUILayoutOption[0]);
             if (GUILayout.Button("Copy to FK"))
                 CopyToFK();
