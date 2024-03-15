@@ -184,16 +184,16 @@ namespace NodesConstraints
 
             public Vector3 GetPositionMovement()
             {
-                return (parentTransform.position - originalParentPosition) * positionChangeFactor;
+                return (parentTransform.position - originalParentPosition);
             }
 
             public void UpdatePosition()
             {
-                Vector3 targetPos;
+                Vector3 targetPos = Vector3.zero;
                 if (mirrorPosition)
-                    targetPos = originalParentPosition - GetPositionMovement();
+                    targetPos -= GetPositionMovement() * (positionChangeFactor + 1);
                 else
-                    targetPos = originalParentPosition + GetPositionMovement();
+                    targetPos += GetPositionMovement() * (positionChangeFactor - 1);
                 targetPos += positionOffset;
 
                 if (!positionLocks.x)
@@ -203,6 +203,7 @@ namespace NodesConstraints
                 if (!positionLocks.z)
                     targetPos.z = childTransform.position.z;
 
+                targetPos = parentTransform.TransformPoint(targetPos);
                 if (positionDamp > 0)
                     targetPos = Vector3.Lerp(childTransform.position, targetPos, GetInterpolationFactor(positionDamp));
                 childTransform.position = targetPos;
@@ -230,9 +231,9 @@ namespace NodesConstraints
                         targetRot = Quaternion.LookRotation(parentTransform.position - childTransform.position);
                 }
                 else if (mirrorRotation)
-                    targetRot = originalParentRotation * Quaternion.Inverse(GetRotationChange()) * rotationOffset;
+                    targetRot = originalParentRotation * Quaternion.Inverse(GetRotationChange());
                 else
-                    targetRot = originalParentRotation * GetRotationChange() * rotationOffset;
+                    targetRot = originalParentRotation * GetRotationChange();
                 targetRot *= rotationOffset;
                 targetRot = Quaternion.SlerpUnclamped(Quaternion.identity, targetRot, rotationChangeFactor);
 
