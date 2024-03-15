@@ -196,6 +196,8 @@ namespace NodesConstraints
                     targetPos = GetPositionMovement() * (positionChangeFactor - 1);
                 targetPos += positionOffset;
 
+                targetPos = parentTransform.TransformPoint(targetPos);
+
                 if (!positionLocks.x)
                     targetPos.x = childTransform.position.x;
                 if (!positionLocks.y)
@@ -203,7 +205,6 @@ namespace NodesConstraints
                 if (!positionLocks.z)
                     targetPos.z = childTransform.position.z;
 
-                targetPos = parentTransform.TransformPoint(targetPos);
                 if (positionDamp > 0)
                     targetPos = Vector3.Lerp(childTransform.position, targetPos, GetInterpolationFactor(positionDamp));
                 childTransform.position = targetPos;
@@ -292,6 +293,11 @@ namespace NodesConstraints
                 this.x = x;
                 this.y = y;
                 this.z = z;
+            }
+
+            public TransformLock Copy()
+            {
+                return new TransformLock(x, y, z);
             }
         }
 
@@ -1099,9 +1105,9 @@ namespace NodesConstraints
                                 _selectedConstraint.alias = _displayedConstraint.alias;
                                 _selectedConstraint.fixDynamicBone = _displayedConstraint.fixDynamicBone;
 
-                                _selectedConstraint.positionLocks = _displayedConstraint.positionLocks;
-                                _selectedConstraint.rotationLocks = _displayedConstraint.rotationLocks;
-                                _selectedConstraint.scaleLocks = _displayedConstraint.scaleLocks;
+                                _selectedConstraint.positionLocks = _displayedConstraint.positionLocks.Copy();
+                                _selectedConstraint.rotationLocks = _displayedConstraint.rotationLocks.Copy();
+                                _selectedConstraint.scaleLocks = _displayedConstraint.scaleLocks.Copy();
                                 TimelineCompatibility.RefreshInterpolablesList();
                             }
                             GUI.enabled = true;
@@ -1196,6 +1202,9 @@ namespace NodesConstraints
                                 _displayedConstraint.scaleOffset = _selectedConstraint.scaleOffset;
                                 _displayedConstraint.alias = _selectedConstraint.alias;
                                 _displayedConstraint.fixDynamicBone = _selectedConstraint.fixDynamicBone;
+                                _displayedConstraint.positionLocks = _selectedConstraint.positionLocks.Copy();
+                                _displayedConstraint.rotationLocks = _selectedConstraint.rotationLocks.Copy();
+                                _displayedConstraint.scaleLocks = _selectedConstraint.scaleLocks.Copy();
                                 UpdateDisplayedPositionOffset();
                                 UpdateDisplayedRotationOffset();
                                 UpdateDisplayedScaleOffset();
@@ -1517,11 +1526,11 @@ namespace NodesConstraints
                 newConstraint.fixDynamicBone = false;
 
                 if (positionLocks != null)
-                    newConstraint.positionLocks = positionLocks;
+                    newConstraint.positionLocks = positionLocks.Copy();
                 if (rotationLocks != null)
-                    newConstraint.rotationLocks = rotationLocks;
+                    newConstraint.rotationLocks = rotationLocks.Copy();
                 if (scaleLocks != null)
-                    newConstraint.scaleLocks = scaleLocks;
+                    newConstraint.scaleLocks = scaleLocks.Copy();
 
                 // Use current ParentTransform pos/rot/scale as default to not break backwards compatibility
                 // Update to after adding if needed (e.g. OnSceneLoad/OnSceneImport
