@@ -370,6 +370,10 @@ namespace NodesConstraints
         private string _scaleFactorStr = "1.0000";
         private string _scaleDampStr = "0.000";
 
+        private bool showExtraMov = false;
+        private bool showExtraRot = false;
+        private bool showExtraScale = false;
+
         private bool _debugMode;
         private Vector3 _debugLocalPosition;
         private Vector3 _debugWorldPosition;
@@ -884,40 +888,52 @@ namespace NodesConstraints
 
         private void WindowFunction(int id)
         {
-            void DrawLinkRow(string transform, ref bool enabled, ref TransformLock locks, ref bool mirror, ref string xStr, ref string yStr, ref string zStr, ref string factorStr, ref string dampStr, Action onUseCurrent, Action onReset)
+            void DrawLinkRow(string transform, ref bool enabled, ref TransformLock locks, ref bool mirror, ref string xStr, ref string yStr, ref string zStr, ref string factorStr, ref string dampStr, ref bool showExtra, Action onUseCurrent, Action onReset)
             {
                 GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
-                GUILayout.BeginHorizontal();
+                GUILayout.BeginVertical(GUI.skin.box);
                 {
-                    enabled = GUILayout.Toggle(enabled && _displayedConstraint.childTransform != null, $"Link {transform}");
-                    GUILayout.FlexibleSpace();
-                    //GUILayout.Label("X", GUILayout.ExpandWidth(false));
-                    locks.x = GUILayout.Toggle(locks.x, "X", "Button");
-                    xStr = GUILayout.TextField(xStr, GUILayout.Width(50));
-                    locks.y = GUILayout.Toggle(locks.y, "Y", "Button");
-                    yStr = GUILayout.TextField(yStr, GUILayout.Width(50));
-                    locks.z = GUILayout.Toggle(locks.z, "Z", "Button");
-                    zStr = GUILayout.TextField(zStr, GUILayout.Width(50));
-                    if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
-                        onUseCurrent();
-                    if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
-                        onReset();
-                }
-                GUILayout.EndHorizontal();
+                    GUILayout.BeginHorizontal();
+                    {
+                        enabled = GUILayout.Toggle(enabled && _displayedConstraint.childTransform != null, $"Link {transform}");
+                        GUILayout.FlexibleSpace();
+                        //GUILayout.Label("X", GUILayout.ExpandWidth(false));
+                        locks.x = GUILayout.Toggle(locks.x, "X", "Button");
+                        xStr = GUILayout.TextField(xStr, GUILayout.Width(50));
+                        locks.y = GUILayout.Toggle(locks.y, "Y", "Button");
+                        yStr = GUILayout.TextField(yStr, GUILayout.Width(50));
+                        locks.z = GUILayout.Toggle(locks.z, "Z", "Button");
+                        zStr = GUILayout.TextField(zStr, GUILayout.Width(50));
+                        if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
+                            onUseCurrent();
+                        if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
+                            onReset();
+                        if (GUILayout.Button(showExtra ? "▲" : "▼", GUILayout.ExpandWidth(false)))
+                            showExtra = !showExtra;
+                    }
+                    GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal();
-                {
-                    GUILayout.Label("   ↳");
-                    mirror = GUILayout.Toggle(mirror, "Mirror");
-                    if (transform == "rotation")
-                        _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look At");
-                    GUILayout.FlexibleSpace();
-                    GUILayout.Label("Factor");
-                    factorStr = GUILayout.TextField(factorStr, GUILayout.Width(50));
-                    GUILayout.Label("Damp");
-                    dampStr = GUILayout.TextField(dampStr, GUILayout.Width(50));
+                    if (showExtra)
+                    {
+                        GUILayout.BeginHorizontal();
+                        {
+                            GUILayout.Label("↳");
+                            mirror = GUILayout.Toggle(mirror, "Mirror contraint");
+                            if (transform == "rotation")
+                            {
+                                GUILayout.Label(" | ");
+                                _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look at parent");
+                            }
+                            GUILayout.FlexibleSpace();
+                            GUILayout.Label("Change factor");
+                            factorStr = GUILayout.TextField(factorStr, GUILayout.Width(50));
+                            GUILayout.Label("Dampen");
+                            dampStr = GUILayout.TextField(dampStr, GUILayout.Width(50));
+                        }
+                        GUILayout.EndHorizontal();
+                    }
                 }
-                GUILayout.EndHorizontal();
+                GUILayout.EndVertical();
                 GUI.enabled = true;
             }
 
@@ -937,7 +953,7 @@ namespace NodesConstraints
                         }
                         GUILayout.EndHorizontal();
 
-                        DrawLinkRow("position", ref _displayedConstraint.position, ref _displayedConstraint.positionLocks, ref _displayedConstraint.mirrorPosition, ref _positionXStr, ref _positionYStr, ref _positionZStr, ref _positionFactorStr, ref _positionDampStr,
+                        DrawLinkRow("position", ref _displayedConstraint.position, ref _displayedConstraint.positionLocks, ref _displayedConstraint.mirrorPosition, ref _positionXStr, ref _positionYStr, ref _positionZStr, ref _positionFactorStr, ref _positionDampStr, ref showExtraMov,
                             () =>
                             {
                                 _onPreCullAction = () =>
@@ -952,7 +968,7 @@ namespace NodesConstraints
                                 UpdateDisplayedPositionOffset();
                             });
 
-                        DrawLinkRow("rotation", ref _displayedConstraint.rotation, ref _displayedConstraint.rotationLocks, ref _displayedConstraint.mirrorRotation, ref _rotationXStr, ref _rotationYStr, ref _rotationZStr, ref _rotationFactorStr, ref _rotationDampStr,
+                        DrawLinkRow("rotation", ref _displayedConstraint.rotation, ref _displayedConstraint.rotationLocks, ref _displayedConstraint.mirrorRotation, ref _rotationXStr, ref _rotationYStr, ref _rotationZStr, ref _rotationFactorStr, ref _rotationDampStr, ref showExtraRot,
                             () =>
                             {
                                 _onPreCullAction = () =>
@@ -978,7 +994,7 @@ namespace NodesConstraints
                                 UpdateDisplayedRotationOffset();
                             });
 
-                        DrawLinkRow("scale", ref _displayedConstraint.scale, ref _displayedConstraint.scaleLocks, ref _displayedConstraint.mirrorScale, ref _scaleXStr, ref _scaleYStr, ref _scaleZStr, ref _scaleFactorStr, ref _scaleDampStr,
+                        DrawLinkRow("scale", ref _displayedConstraint.scale, ref _displayedConstraint.scaleLocks, ref _displayedConstraint.mirrorScale, ref _scaleXStr, ref _scaleYStr, ref _scaleZStr, ref _scaleFactorStr, ref _scaleDampStr, ref showExtraScale,
                             () =>
                             {
                                 _onPreCullAction = () =>
