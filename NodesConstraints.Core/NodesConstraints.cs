@@ -189,11 +189,11 @@ namespace NodesConstraints
 
             public void UpdatePosition()
             {
-                Vector3 targetPos = Vector3.zero;
+                Vector3 targetPos;
                 if (mirrorPosition)
-                    targetPos -= GetPositionMovement() * (positionChangeFactor + 1);
+                    targetPos = -GetPositionMovement() * (positionChangeFactor + 1);
                 else
-                    targetPos += GetPositionMovement() * (positionChangeFactor - 1);
+                    targetPos = GetPositionMovement() * (positionChangeFactor - 1);
                 targetPos += positionOffset;
 
                 if (!positionLocks.x)
@@ -950,7 +950,7 @@ namespace NodesConstraints
                 {
                     GUILayout.BeginVertical();
                     {
-                        GUILayout.BeginHorizontal();
+                        GUILayout.BeginHorizontal(GUI.skin.box);
                         {
                             GUILayout.Label((_displayedConstraint.parentTransform != null ? _displayedConstraint.parentTransform.name : ""));
                             GUILayout.FlexibleSpace();
