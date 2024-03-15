@@ -179,7 +179,7 @@ namespace NodesConstraints
 
             public float GetInterpolationFactor(float damp)
             {
-                return 1 - Mathf.Exp(-damp * Time.deltaTime);
+                return 1 - Mathf.Exp(-damp * _deltaTime);
             }
 
             public Vector3 GetPositionMovement()
@@ -382,6 +382,8 @@ namespace NodesConstraints
         private Vector3 _debugLocalScale;
         private Vector3 _debugWorldScale;
         private bool _hasTimeline = false;
+
+        private static float _deltaTime;
         #endregion
 
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
@@ -474,6 +476,10 @@ namespace NodesConstraints
 
         protected override void Update()
         {
+            //Contraints without GuideObject (e.g. bones) are updated through a postfix
+            //This postfix does not have access to Time.deltaTime because it's not an update method
+            //This postfix is however postfixed to an update method, so by saving the value here, it can be used there too
+            _deltaTime = Time.deltaTime;
             if (_studioLoaded == false)
                 return;
             _totalActiveExpressions = _allExpressions.Count(e => e.enabled && e.gameObject.activeInHierarchy);
