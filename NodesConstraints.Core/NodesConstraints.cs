@@ -1202,6 +1202,9 @@ namespace NodesConstraints
                                 _displayedConstraint.scaleOffset = _selectedConstraint.scaleOffset;
                                 _displayedConstraint.alias = _selectedConstraint.alias;
                                 _displayedConstraint.fixDynamicBone = _selectedConstraint.fixDynamicBone;
+                                _displayedConstraint.positionDamp = _selectedConstraint.positionDamp;
+                                _displayedConstraint.rotationDamp = _selectedConstraint.rotationDamp;
+                                _displayedConstraint.scaleDamp = _selectedConstraint.scaleDamp;
                                 _displayedConstraint.positionLocks = _selectedConstraint.positionLocks.Copy();
                                 _displayedConstraint.rotationLocks = _selectedConstraint.rotationLocks.Copy();
                                 _displayedConstraint.scaleLocks = _selectedConstraint.scaleLocks.Copy();
