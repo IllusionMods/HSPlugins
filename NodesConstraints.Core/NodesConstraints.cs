@@ -281,7 +281,7 @@ namespace NodesConstraints
                 destroyed = true;
             }
 
-            public void CopyTo(Constraint constraint, bool fullUpdate=false)
+            public void CopyTo(Constraint constraint, bool onlyAttributes=true)
             {
                 constraint.parentTransform = parentTransform;
                 constraint.childTransform = childTransform;
@@ -308,7 +308,7 @@ namespace NodesConstraints
                 constraint.rotationLocks = rotationLocks.Copy();
                 constraint.scaleLocks = scaleLocks.Copy();
 
-                if (!fullUpdate)
+                if (onlyAttributes)
                     return;
 
                 if (constraint.position && position == false)
@@ -1117,7 +1117,7 @@ namespace NodesConstraints
                                 ValidateDisplayedPositionOffset();
                                 ValidateDisplayedRotationOffset();
                                 ValidateDisplayedScaleOffset();
-                                _displayedConstraint.CopyTo(_selectedConstraint, true);
+                                _displayedConstraint.CopyTo(_selectedConstraint, false);
                                 TimelineCompatibility.RefreshInterpolablesList();
                             }
                             GUI.enabled = true;
