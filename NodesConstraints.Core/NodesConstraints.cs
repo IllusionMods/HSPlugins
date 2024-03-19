@@ -280,6 +280,66 @@ namespace NodesConstraints
                 VectorLine.Destroy(ref _debugLine);
                 destroyed = true;
             }
+
+            public void CopyTo(Constraint constraint, bool fullUpdate=false)
+            {
+                constraint.parentTransform = parentTransform;
+                constraint.childTransform = childTransform;
+
+                constraint.position = position;
+                constraint.rotation = rotation;
+                constraint.lookAt = lookAt;
+                constraint.scale = scale;
+                constraint.positionOffset = positionOffset;
+                constraint.rotationOffset = rotationOffset;
+                constraint.scaleOffset = scaleOffset;
+                constraint.positionChangeFactor = positionChangeFactor;
+                constraint.rotationChangeFactor = rotationChangeFactor;
+                constraint.scaleChangeFactor = scaleChangeFactor;
+                constraint.mirrorPosition = mirrorPosition;
+                constraint.mirrorRotation = mirrorRotation;
+                constraint.mirrorScale = mirrorScale;
+                constraint.positionDamp = positionDamp;
+                constraint.rotationDamp = rotationDamp;
+                constraint.scaleDamp = scaleDamp;
+                constraint.alias = alias;
+                constraint.fixDynamicBone = fixDynamicBone;
+                constraint.positionLocks = positionLocks.Copy();
+                constraint.rotationLocks = rotationLocks.Copy();
+                constraint.scaleLocks = scaleLocks.Copy();
+
+                if (!fullUpdate)
+                    return;
+
+                if (constraint.position && position == false)
+                {
+                    constraint.childTransform.localPosition = constraint.originalChildPosition;
+                    if (constraint.child != null)
+                        constraint.child.changeAmount.pos = constraint.originalChildPosition;
+                }
+                if (constraint.rotation && rotation == false)
+                {
+                    constraint.childTransform.localRotation = constraint.originalChildRotation;
+                    if (constraint.child != null)
+                        constraint.child.changeAmount.rot = constraint.originalChildRotation.eulerAngles;
+                }
+
+                if (constraint.scale && scale == false)
+                {
+                    constraint.childTransform.localScale = constraint.originalChildScale;
+                    if (constraint.child != null)
+                        constraint.child.changeAmount.scale = constraint.originalChildScale;
+                }
+
+                if (_allGuideObjects.TryGetValue(constraint.parentTransform, out constraint.parent) == false)
+                    constraint.parent = null;
+                if (_allGuideObjects.TryGetValue(constraint.childTransform, out constraint.child) == false)
+                    constraint.child = null;
+
+                constraint.originalChildPosition = constraint.childTransform.localPosition;
+                constraint.originalChildRotation = constraint.childTransform.localRotation;
+                constraint.originalChildScale = constraint.childTransform.localScale;
+            }
         }
 
         public class TransformLock
@@ -339,7 +399,7 @@ namespace NodesConstraints
         private Vector2 _advancedModeScroll;
         private Vector2 _simpleModeScroll;
         private HashSet<TreeNodeObject> _selectedWorkspaceObjects;
-        private Dictionary<Transform, GuideObject> _allGuideObjects;
+        private static Dictionary<Transform, GuideObject> _allGuideObjects;
         private VectorLine _parentCircle;
         private VectorLine _childCircle;
         private VectorLine _selectedCircle;
@@ -1057,57 +1117,7 @@ namespace NodesConstraints
                                 ValidateDisplayedPositionOffset();
                                 ValidateDisplayedRotationOffset();
                                 ValidateDisplayedScaleOffset();
-                                if (_selectedConstraint.position && _displayedConstraint.position == false)
-                                {
-                                    _selectedConstraint.childTransform.localPosition = _selectedConstraint.originalChildPosition;
-                                    if (_selectedConstraint.child != null)
-                                        _selectedConstraint.child.changeAmount.pos = _selectedConstraint.originalChildPosition;
-                                }
-                                if (_selectedConstraint.rotation && _displayedConstraint.rotation == false)
-                                {
-                                    _selectedConstraint.childTransform.localRotation = _selectedConstraint.originalChildRotation;
-                                    if (_selectedConstraint.child != null)
-                                        _selectedConstraint.child.changeAmount.rot = _selectedConstraint.originalChildRotation.eulerAngles;
-                                }
-
-                                if (_selectedConstraint.scale && _displayedConstraint.scale == false)
-                                {
-                                    _selectedConstraint.childTransform.localScale = _selectedConstraint.originalChildScale;
-                                    if (_selectedConstraint.child != null)
-                                        _selectedConstraint.child.changeAmount.scale = _selectedConstraint.originalChildScale;
-                                }
-
-                                _selectedConstraint.parentTransform = _displayedConstraint.parentTransform;
-                                if (_allGuideObjects.TryGetValue(_selectedConstraint.parentTransform, out _selectedConstraint.parent) == false)
-                                    _selectedConstraint.parent = null;
-                                _selectedConstraint.childTransform = _displayedConstraint.childTransform;
-                                if (_allGuideObjects.TryGetValue(_selectedConstraint.childTransform, out _selectedConstraint.child) == false)
-                                    _selectedConstraint.child = null;
-                                _selectedConstraint.position = _displayedConstraint.position;
-                                _selectedConstraint.mirrorPosition = _displayedConstraint.mirrorPosition;
-                                _selectedConstraint.positionChangeFactor = _displayedConstraint.positionChangeFactor;
-                                _selectedConstraint.positionDamp = _displayedConstraint.positionDamp;
-                                _selectedConstraint.rotation = _displayedConstraint.rotation;
-                                _selectedConstraint.mirrorRotation = _displayedConstraint.mirrorRotation;
-                                _selectedConstraint.rotationChangeFactor = _displayedConstraint.rotationChangeFactor;
-                                _selectedConstraint.rotationDamp = _displayedConstraint.rotationDamp;
-                                _selectedConstraint.lookAt = _displayedConstraint.lookAt;
-                                _selectedConstraint.scale = _displayedConstraint.scale;
-                                _selectedConstraint.mirrorScale = _displayedConstraint.mirrorScale;
-                                _selectedConstraint.scaleChangeFactor = _displayedConstraint.scaleChangeFactor;
-                                _selectedConstraint.scaleDamp = _displayedConstraint.scaleDamp;
-                                _selectedConstraint.positionOffset = _displayedConstraint.positionOffset;
-                                _selectedConstraint.rotationOffset = _displayedConstraint.rotationOffset;
-                                _selectedConstraint.scaleOffset = _displayedConstraint.scaleOffset;
-                                _selectedConstraint.originalChildPosition = _selectedConstraint.childTransform.localPosition;
-                                _selectedConstraint.originalChildRotation = _selectedConstraint.childTransform.localRotation;
-                                _selectedConstraint.originalChildScale = _selectedConstraint.childTransform.localScale;
-                                _selectedConstraint.alias = _displayedConstraint.alias;
-                                _selectedConstraint.fixDynamicBone = _displayedConstraint.fixDynamicBone;
-
-                                _selectedConstraint.positionLocks = _displayedConstraint.positionLocks.Copy();
-                                _selectedConstraint.rotationLocks = _displayedConstraint.rotationLocks.Copy();
-                                _selectedConstraint.scaleLocks = _displayedConstraint.scaleLocks.Copy();
+                                _displayedConstraint.CopyTo(_selectedConstraint, true);
                                 TimelineCompatibility.RefreshInterpolablesList();
                             }
                             GUI.enabled = true;
@@ -1182,35 +1192,16 @@ namespace NodesConstraints
                             {
                                 if (_selectedConstraint != null)
                                     _selectedConstraint.SetActiveDebugLines(false);
+
                                 _selectedConstraint = constraint;
-                                TimelineCompatibility.RefreshInterpolablesList();
+                                _selectedConstraint.CopyTo(_displayedConstraint);
                                 _selectedConstraint.SetActiveDebugLines(true);
-                                _displayedConstraint.parentTransform = _selectedConstraint.parentTransform;
-                                _displayedConstraint.childTransform = _selectedConstraint.childTransform;
-                                _displayedConstraint.position = _selectedConstraint.position;
-                                _displayedConstraint.mirrorPosition = _selectedConstraint.mirrorPosition;
-                                _displayedConstraint.positionChangeFactor = _selectedConstraint.positionChangeFactor;
-                                _displayedConstraint.rotation = _selectedConstraint.rotation;
-                                _displayedConstraint.mirrorRotation = _selectedConstraint.mirrorRotation;
-                                _displayedConstraint.rotationChangeFactor = _selectedConstraint.rotationChangeFactor;
-                                _displayedConstraint.lookAt = _selectedConstraint.lookAt;
-                                _displayedConstraint.scale = _selectedConstraint.scale;
-                                _displayedConstraint.mirrorScale = _selectedConstraint.mirrorScale;
-                                _displayedConstraint.scaleChangeFactor = _selectedConstraint.scaleChangeFactor;
-                                _displayedConstraint.positionOffset = _selectedConstraint.positionOffset;
-                                _displayedConstraint.rotationOffset = _selectedConstraint.rotationOffset;
-                                _displayedConstraint.scaleOffset = _selectedConstraint.scaleOffset;
-                                _displayedConstraint.alias = _selectedConstraint.alias;
-                                _displayedConstraint.fixDynamicBone = _selectedConstraint.fixDynamicBone;
-                                _displayedConstraint.positionDamp = _selectedConstraint.positionDamp;
-                                _displayedConstraint.rotationDamp = _selectedConstraint.rotationDamp;
-                                _displayedConstraint.scaleDamp = _selectedConstraint.scaleDamp;
-                                _displayedConstraint.positionLocks = _selectedConstraint.positionLocks.Copy();
-                                _displayedConstraint.rotationLocks = _selectedConstraint.rotationLocks.Copy();
-                                _displayedConstraint.scaleLocks = _selectedConstraint.scaleLocks.Copy();
+
                                 UpdateDisplayedPositionOffset();
                                 UpdateDisplayedRotationOffset();
                                 UpdateDisplayedScaleOffset();
+
+                                TimelineCompatibility.RefreshInterpolablesList();
                             }
 
                             constraint.fixDynamicBone = GUILayout.Toggle(constraint.fixDynamicBone, "Dynamic", GUILayout.ExpandWidth(false));
