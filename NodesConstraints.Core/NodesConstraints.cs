@@ -764,7 +764,19 @@ namespace NodesConstraints
                                                 constraint.scale,
                                                 constraint.mirrorScale,
                                                 constraint.scaleOffset,
-                                                constraint.alias
+                                                constraint.alias,
+                                                constraint.positionChangeFactor,
+                                                constraint.rotationChangeFactor,
+                                                constraint.scaleChangeFactor,
+                                                constraint.positionDamp,
+                                                constraint.rotationDamp,
+                                                constraint.scaleDamp,
+                                                constraint.positionLocks,
+                                                constraint.rotationLocks,
+                                                constraint.scaleLocks,
+                                                constraint.resetOriginalPosition,
+                                                constraint.resetOriginalRotation,
+                                                constraint.resetOriginalScale
                                                );
 
                             if( newConstraint != null )
