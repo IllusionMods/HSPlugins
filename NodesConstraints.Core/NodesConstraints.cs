@@ -618,6 +618,9 @@ namespace NodesConstraints
 
         protected override void OnGUI()
         {
+            var skin = GUI.skin;
+            GUI.skin = KKAPI.Utilities.IMGUIUtils.SolidBackgroundGuiSkin;
+
             if (_showUI == false)
                 return;
             if (_initUI == false)
@@ -632,7 +635,7 @@ namespace NodesConstraints
                                                                                                                        + "b"
 #endif
             );
-            IMGUIExtensions.DrawBackground(_windowRect);
+            GUI.skin = skin;
         }
         #endregion
 
@@ -1034,13 +1037,20 @@ namespace NodesConstraints
                 GUI.enabled = true;
             }
 
+            int visibleAreaSize = GUI.skin.window.border.top - 4;
+            if (GUI.Button(new Rect(_windowRect.width - visibleAreaSize - 2, 2, visibleAreaSize, visibleAreaSize), "X"))
+            {
+                _showUI = false;
+                return;
+            }
+
             GUILayout.BeginVertical();
             {
                 GUILayout.BeginHorizontal();
                 {
                     GUILayout.BeginVertical();
                     {
-                        GUILayout.BeginHorizontal(GUI.skin.box);
+                        GUILayout.BeginHorizontal();
                         {
                             GUILayout.Label((_displayedConstraint.parentTransform != null ? _displayedConstraint.parentTransform.name : ""));
                             GUILayout.FlexibleSpace();
