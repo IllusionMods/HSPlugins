@@ -990,13 +990,13 @@ namespace NodesConstraints
                         enabled = GUILayout.Toggle(enabled && _displayedConstraint.childTransform != null, $"Link {transform}");
                         GUILayout.FlexibleSpace();
                         //GUILayout.Label("X", GUILayout.ExpandWidth(false));
-                        locks.x = GUILayout.Toggle(locks.x, "X", "Button");
+                        locks.x = GUILayout.Toggle(locks.x, new GUIContent("X", "If this axis is contrained to the parent or not"), "Button");
                         xStr = GUILayout.TextField(xStr, GUILayout.Width(50));
-                        locks.y = GUILayout.Toggle(locks.y, "Y", "Button");
+                        locks.y = GUILayout.Toggle(locks.y, new GUIContent("Y", "If this axis is contrained to the parent or not"), "Button");
                         yStr = GUILayout.TextField(yStr, GUILayout.Width(50));
-                        locks.z = GUILayout.Toggle(locks.z, "Z", "Button");
+                        locks.z = GUILayout.Toggle(locks.z, new GUIContent("Z", "If this axis is contrained to the parent or not"), "Button");
                         zStr = GUILayout.TextField(zStr, GUILayout.Width(50));
-                        if (GUILayout.Button("Use current", GUILayout.ExpandWidth(false)))
+                        if (GUILayout.Button(new GUIContent("Use current", "Match current differences in parent and child as offsets, so these differences are kept upon contraining"), GUILayout.ExpandWidth(false)))
                             onUseCurrent();
                         if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
                             onReset();
@@ -1010,12 +1010,13 @@ namespace NodesConstraints
                         GUILayout.BeginHorizontal();
                         {
                             GUILayout.Label("↳");
-                            mirror = GUILayout.Toggle(mirror, "Mirror contraint");
+                            mirror = GUILayout.Toggle(mirror, new GUIContent("Mirror contraint", "Mirror the movement of the parent to the child"));
                             GUILayout.FlexibleSpace();
-                            resetOriginal = GUILayout.Toggle(resetOriginal, "Reset child");
-                            GUILayout.Label(" | Change factor");
+                            resetOriginal = GUILayout.Toggle(resetOriginal, new GUIContent("Reset child", "Reset this tranform back to its original state or not when disabling/deleting the constraint"));
+                            GUILayout.Label(" | ");
+                            GUILayout.Label(new GUIContent("Change factor", "Multiply the movement of the parent by this amount to the child movement"));
                             factorStr = GUILayout.TextField(factorStr, GUILayout.Width(50));
-                            GUILayout.Label("Dampen");
+                            GUILayout.Label(new GUIContent("Dampen", "Dampen the childs movement towards the parent. higher values mean faster movement towards the parent. 0 is no dampening"));
                             dampStr = GUILayout.TextField(dampStr, GUILayout.Width(50));
                         }
                         GUILayout.EndHorizontal();
@@ -1023,7 +1024,7 @@ namespace NodesConstraints
                         {
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("  ");
-                            _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, "Look at parent");
+                            _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, new GUIContent("Look at parent", "Make the front of the child always look at the position of the parent. Use offset to adjust what is considered the front (you can use 'Use Current' with this enabled to get the right offset)"));
                             GUILayout.FlexibleSpace();
                             GUILayout.EndHorizontal();
                         }
@@ -1392,6 +1393,7 @@ namespace NodesConstraints
             }
             GUILayout.EndVertical();
             GUI.DragWindow();
+            KKAPI.Utilities.IMGUIUtils.DrawTooltip(_windowRect);
         }
 
         private void SetConstraintEnabled(Constraint constraint, bool newEnabled)
