@@ -260,8 +260,8 @@ namespace NodesConstraints
             {
                 Vector3 targetScale = new Vector3(
                     (originalParentScale.x * scaleOffset.x) * Mathf.Pow((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
-                    (originalParentScale.x * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
-                    (originalParentScale.x * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor)
+                    (originalParentScale.y * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
+                    (originalParentScale.z * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor)
                 );
 
                 if (!scaleLocks.x)
