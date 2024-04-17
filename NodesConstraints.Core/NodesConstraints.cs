@@ -259,9 +259,9 @@ namespace NodesConstraints
             public void UpdateScale()
             {
                 Vector3 targetScale = new Vector3(
-                    (originalParentScale.x * scaleOffset.x) * Mathf.Pow((parentTransform.lossyScale.x - originalParentScale.x) / originalParentScale.x + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
-                    (originalParentScale.y * scaleOffset.y) * Mathf.Pow((parentTransform.lossyScale.y - originalParentScale.y) / originalParentScale.y + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
-                    (originalParentScale.z * scaleOffset.z) * Mathf.Pow((parentTransform.lossyScale.z - originalParentScale.z) / originalParentScale.z + 1, mirrorScale ? -scaleChangeFactor : scaleChangeFactor)
+                    (originalParentScale.x * scaleOffset.x / childTransform.parent.lossyScale.x) * Mathf.Pow(parentTransform.lossyScale.x / originalParentScale.x, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
+                    (originalParentScale.y * scaleOffset.y / childTransform.parent.lossyScale.y) * Mathf.Pow(parentTransform.lossyScale.y / originalParentScale.y, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
+                    (originalParentScale.z * scaleOffset.z / childTransform.parent.lossyScale.z) * Mathf.Pow(parentTransform.lossyScale.z / originalParentScale.z, mirrorScale ? -scaleChangeFactor : scaleChangeFactor)
                 );
 
                 if (!scaleLocks.x)
@@ -712,6 +712,12 @@ namespace NodesConstraints
                         constraint.childTransform.localRotation = constraint.originalChildRotation;
                         if (constraint.child != null)
                             constraint.child.changeAmount.rot = constraint.originalChildRotation.eulerAngles;
+                    }
+                    if (constraint.scale)
+                    {
+                        constraint.childTransform.localScale = constraint.originalChildScale;
+                        if (constraint.child != null)
+                            constraint.child.changeAmount.scale = constraint.originalChildScale;
                     }
                 }
 
@@ -1421,6 +1427,12 @@ namespace NodesConstraints
                     constraint.childTransform.localRotation = constraint.originalChildRotation;
                     if (constraint.child != null)
                         constraint.child.changeAmount.rot = constraint.originalChildRotation.eulerAngles;
+                }
+                if (constraint.scale && constraint.resetOriginalScale)
+                {
+                    constraint.childTransform.localScale = constraint.originalChildScale;
+                    if (constraint.child != null)
+                        constraint.child.changeAmount.scale = constraint.originalChildScale;
                 }
             }
             if (constraint.enabled == false && newEnabled)
