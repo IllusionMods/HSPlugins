@@ -461,6 +461,8 @@ namespace NodesConstraints
         #endregion
 
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
+        internal static ConfigEntry<int> ConstraintsAreaHeight { get; private set; }
+        internal static ConfigEntry<int> NodesAreaHeight { get; private set; }
 
         #region Unity Methods
         protected override void Awake()
@@ -468,6 +470,8 @@ namespace NodesConstraints
             base.Awake();
 
             ConfigMainWindowShortcut = Config.Bind("Config", "Open NodeConstraints UI", new KeyboardShortcut(KeyCode.I, KeyCode.LeftControl));
+            ConstraintsAreaHeight = Config.Bind("Interface", "Constraints Area Height", 150, new ConfigDescription("", new AcceptableValueRange<int>(40, 300)));
+            NodesAreaHeight = Config.Bind("Interface", "Nodes Area Height", 200, new ConfigDescription("", new AcceptableValueRange<int>(40, 300)));
 
             _self = this;
 #if HONEYSELECT
@@ -592,7 +596,7 @@ namespace NodesConstraints
                 _imguiBackground.gameObject.SetActive(false);
 
             if (_showUI)
-                _windowRect.height = 600f;
+                _windowRect.height = 200f + ConstraintsAreaHeight.Value + NodesAreaHeight.Value;
         }
 
         [HarmonyPatch]
@@ -1177,7 +1181,7 @@ namespace NodesConstraints
 
                 GUILayout.BeginHorizontal();
 
-                GUILayout.BeginVertical();
+                GUILayout.BeginVertical(GUILayout.Height(ConstraintsAreaHeight.Value));
                 GUI.enabled = _selectedConstraint != null;
                 if (GUILayout.Button("↑", GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(true)))
                 {
@@ -1202,7 +1206,7 @@ namespace NodesConstraints
                 GUI.enabled = true;
                 GUILayout.EndVertical();
 
-                _scroll = GUILayout.BeginScrollView(_scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(150), GUILayout.ExpandWidth(true));
+                _scroll = GUILayout.BeginScrollView(_scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(ConstraintsAreaHeight.Value), GUILayout.ExpandWidth(true));
                 {
                     int toDelete = -1;
                     Action afterLoopAction = null;
@@ -1293,7 +1297,7 @@ namespace NodesConstraints
                     _selectedShowNodeType = (SimpleListShowNodeType)GUILayout.SelectionGrid((int)_selectedShowNodeType, _simpleListShowNodeTypeNames, 3);
                     GUILayout.EndHorizontal();
 
-                    _simpleModeScroll = GUILayout.BeginScrollView(_simpleModeScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(200));
+                    _simpleModeScroll = GUILayout.BeginScrollView(_simpleModeScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(NodesAreaHeight.Value));
                     if (_selectedWorkspaceObject != null)
                     {
                         foreach (KeyValuePair<Transform, GuideObject> pair in _allGuideObjects)
@@ -1335,7 +1339,7 @@ namespace NodesConstraints
                 }
                 else
                 {
-                    _advancedModeScroll = GUILayout.BeginScrollView(_advancedModeScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(200));
+                    _advancedModeScroll = GUILayout.BeginScrollView(_advancedModeScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(NodesAreaHeight.Value));
                     if (_selectedWorkspaceObject != null)
                         foreach (Transform t in _selectedWorkspaceObject.transformTarget)
                             DisplayObjectTree(t.gameObject, 0);
