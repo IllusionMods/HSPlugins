@@ -295,6 +295,14 @@ namespace Timeline
         internal static ConfigEntry<KeyboardShortcut> ConfigKeyframeCopyShortcut { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigKeyframeCutShortcut { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigKeyframePasteShortcut { get; private set; }
+        internal static ConfigEntry<Autoplay> ConfigAutoplay { get; private set; }
+
+        internal enum Autoplay
+        {
+            Ignore,
+            Yes,
+            No
+        }
 
 
         #region Unity Methods
@@ -307,6 +315,7 @@ namespace Timeline
             ConfigKeyframeCopyShortcut = Config.Bind("Config", "Copy Keyframes", new KeyboardShortcut(KeyCode.C, KeyCode.LeftControl));
             ConfigKeyframeCutShortcut = Config.Bind("Config", "Cut Keyframes", new KeyboardShortcut(KeyCode.X, KeyCode.LeftControl));
             ConfigKeyframePasteShortcut = Config.Bind("Config", "PasteKeyframes", new KeyboardShortcut(KeyCode.V, KeyCode.LeftControl));
+            ConfigAutoplay = Config.Bind("Config", "Autoplay", Autoplay.Ignore);
 
             _self = this;
             Logger = base.Logger;
@@ -3738,6 +3747,16 @@ namespace Timeline
             _blockLengthInputField.text = _blockLength.ToString();
             _divisionsInputField.text = _divisions.ToString();
             _speedInputField.text = Time.timeScale.ToString("0.#####");
+
+            if (ConfigAutoplay.Value == Autoplay.Yes)
+            {
+                Stop();
+                Play();
+            }
+            else if (ConfigAutoplay.Value == Autoplay.No)
+            {
+                Stop();
+            }
         }
 
         private void LoadSingle(string path)
