@@ -86,6 +86,7 @@ namespace Timeline
         private class InterpolableDisplay
         {
             public GameObject gameObject;
+            public LayoutElement layoutElement;
             public RectTransform container;
             public CanvasGroup group;
             public Toggle enabled;
@@ -101,6 +102,7 @@ namespace Timeline
         private class InterpolableModelDisplay
         {
             public GameObject gameObject;
+            public LayoutElement layoutElement;
             public Text name;
 
             public InterpolableModel model;
@@ -166,7 +168,9 @@ namespace Timeline
         private readonly Tree<Interpolable, InterpolableGroup> _interpolablesTree = new Tree<Interpolable, InterpolableGroup>();
 
         private const float _baseGridWidth = 300f;
-        private const int _interpolableHeight = 32;
+        private const int _interpolableMaxHeight = 32;
+        private const int _interpolableMinHeight = 15;
+        private int interpolableHeight = _interpolableMaxHeight;
         private const float _curveGridCellSizePercent = 1f / 24f;
         private Canvas _ui;
         private Sprite _linkSprite;
@@ -884,7 +888,16 @@ namespace Timeline
                         alphaGroup.alpha = Mathf.Max(alphaGroup.alpha - 0.05f, 0.1f);
                     e.Reset();
                 }
-            };
+                else
+                {
+                    if (e.scrollDelta.y > 0)
+                      interpolableHeight = Mathf.Min(interpolableHeight + 1, _interpolableMaxHeight);
+                    else
+                      interpolableHeight = Mathf.Max(interpolableHeight - 1, _interpolableMinHeight);
+
+                    UpdateInterpolablesView();
+                }
+              };
             DragHandler handler = _gridTop.gameObject.AddComponent<DragHandler>();
             //handler.onBeginDrag = (e) =>
             //{
@@ -1242,7 +1255,7 @@ namespace Timeline
                 header.container.offsetMin = Vector2.zero;
                 header.group = null;
                 header.name.text = ownerPair.Key;
-                height += _interpolableHeight;
+                height += interpolableHeight;
                 _gridHeights.Add(height);
 
                 if (header.expanded)
@@ -1260,7 +1273,8 @@ namespace Timeline
                         display.gameObject.transform.SetAsLastSibling();
                         display.model = model;
                         display.name.text = model.name;
-                        height += _interpolableHeight;
+                        display.layoutElement.preferredHeight = interpolableHeight;
+                        height += interpolableHeight;
                         _gridHeights.Add(height);
                         ++interpolableModelDisplayIndex;
                     }
@@ -1320,9 +1334,10 @@ namespace Timeline
                         else
                             display.name.text = interpolable.alias;
                         display.gridBackground.gameObject.SetActive(true);
-                        display.gridBackground.rectTransform.SetRect(new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -height - _interpolableHeight), new Vector2(0f, -height));
+                        display.gridBackground.rectTransform.SetRect(new Vector2(0f, 1f), Vector2.one, new Vector2(0f, -height - interpolableHeight), new Vector2(0f, -height));
                         UpdateInterpolableColor(display, interpolable.color);
-                        height += _interpolableHeight;
+                        display.layoutElement.preferredHeight = interpolableHeight;
+                        height += interpolableHeight;
                         _gridHeights.Add(height);
                         ++interpolableDisplayIndex;
                         break;
@@ -1337,7 +1352,7 @@ namespace Timeline
                         headerDisplay.container.offsetMin = new Vector2(indent, 0f);
                         headerDisplay.group = (GroupNode<InterpolableGroup>)node;
                         headerDisplay.name.text = group.obj.name;
-                        height += _interpolableHeight * 2f / 3f;
+                        height += Math.Max(interpolableHeight * 2f / 3f, _interpolableMinHeight);
                         _gridHeights.Add(height);
                         ++headerDisplayIndex;
                         if (group.obj.expanded)
@@ -1415,6 +1430,7 @@ namespace Timeline
                 display = new InterpolableDisplay();
                 display.gameObject = GameObject.Instantiate(_interpolablePrefab);
                 display.gameObject.hideFlags = HideFlags.None;
+                display.layoutElement = display.gameObject.GetComponent<LayoutElement>();
                 display.group = display.gameObject.GetComponent<CanvasGroup>();
                 display.container = (RectTransform)display.gameObject.transform.Find("Container");
                 display.enabled = display.container.Find("Enabled").GetComponent<Toggle>();
@@ -1711,6 +1727,7 @@ namespace Timeline
                 display = new InterpolableModelDisplay();
                 display.gameObject = GameObject.Instantiate(_interpolableModelPrefab);
                 display.gameObject.hideFlags = HideFlags.None;
+                display.layoutElement = display.gameObject.GetComponent<LayoutElement>();
                 display.name = display.gameObject.transform.Find("Label").GetComponent<Text>();
 
                 display.gameObject.transform.SetParent(_verticalScrollView.content);
@@ -1963,7 +1980,7 @@ namespace Timeline
                 _displayedOwnerHeader.Add(display);
             }
             display.gameObject.SetActive(true);
-            display.layoutElement.preferredHeight = treeHeader ? _interpolableHeight * 2f / 3f : _interpolableHeight;
+            display.layoutElement.preferredHeight = treeHeader ? Math.Max(interpolableHeight * 2f / 3f, _interpolableMinHeight) : interpolableHeight;
             return display;
         }
 
