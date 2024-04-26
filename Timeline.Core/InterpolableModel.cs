@@ -7,12 +7,12 @@ using UILib;
 
 namespace Timeline
 {
-	[Obsolete("use Timeline.InterpolableModel.InterpolableDelegate<Data, Param>() for more transparent visualization of data")]
+	[Obsolete("use delegate Timeline.InterpolableModel.InterpolableDelegate<Data, Param>() for more transparent visualization of data")]
 	public delegate void InterpolableDelegate(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue, float factor);
 
 	public delegate void InterpolableDelegate<Data, Param>(ObjectCtrlInfo oci, Param parameter, Data leftValue, Data rightValue, float factor);
 
-	[Obsolete("use Timeline.InterpolableModel<Data, Peram> for more transparent visualization of data")]
+	[Obsolete("use class Timeline.InterpolableModel<Data, Peram> for more transparent visualization of data")]
 	public class InterpolableModel
 	{
 		private readonly int _hashCode;
@@ -237,7 +237,7 @@ namespace Timeline
 		{
 		}
 
-		public InterpolableModelBase(string owner, string id, string name, InterpolableDelegate<object, object> interpolateBefore, InterpolableDelegate<object, object> interpolateAfter, Func<ObjectCtrlInfo, bool> isCompatibleWithTarget, Func<ObjectCtrlInfo, object, object> getValue, Func<object, XmlNode, object> readValueFromXml, Action<object, XmlTextWriter, object> writeValueToXml, Func<ObjectCtrlInfo, object> getParameter, Func<ObjectCtrlInfo, XmlNode, object> readParameterFromXml = null, Action<ObjectCtrlInfo, XmlTextWriter, object> writeParameterToXml = null, Func<ObjectCtrlInfo, object, object, object, bool> checkIntegrity = null, bool useOciInHash = true, Func<string, ObjectCtrlInfo, object, string> getFinalName = null, Func<ObjectCtrlInfo, object, bool> shouldShow = null) 
+		public InterpolableModelBase(string owner, string id, string name, InterpolableDelegate<object, object> interpolateBefore, InterpolableDelegate<object, object> interpolateAfter, Func<ObjectCtrlInfo, bool> isCompatibleWithTarget, Func<ObjectCtrlInfo, object, object> getValue, Func<object, XmlNode, object> readValueFromXml, Action<object, XmlTextWriter, object> writeValueToXml, Func<ObjectCtrlInfo, object> getParameter, Func<ObjectCtrlInfo, XmlNode, object> readParameterFromXml = null, Action<ObjectCtrlInfo, XmlTextWriter, object> writeParameterToXml = null, Func<ObjectCtrlInfo, object, object, object, bool> checkIntegrity = null, bool useOciInHash = true, Func<string, ObjectCtrlInfo, object, string> getFinalName = null, Func<ObjectCtrlInfo, object, bool> shouldShow = null)
 			: base(owner, id, name, (m, n, b, j, l) => interpolateBefore?.Invoke(m, n, b, j, l),
 				  (m, n, b, j, l) => interpolateAfter?.Invoke(m, n, b, j, l), isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, getParameter, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow)
 		{
@@ -251,7 +251,7 @@ namespace Timeline
 		{
 		}
 
-		internal InterpolableModelBase(string owner, string id, object parameter, string name, InterpolableDelegate<object, object> interpolateBefore, InterpolableDelegate<object, object> interpolateAfter, Func<ObjectCtrlInfo, bool> isCompatibleWithTarget, Func<ObjectCtrlInfo, object, object> getValue, Func<object, XmlNode, object> readValueFromXml, Action<object, XmlTextWriter, object> writeValueToXml, Func<ObjectCtrlInfo, object> getParameter, Func<ObjectCtrlInfo, XmlNode, object> readParameterFromXml = null, Action<ObjectCtrlInfo, XmlTextWriter, object> writeParameterToXml = null, Func<ObjectCtrlInfo, object, object, object, bool> checkIntegrity = null, bool useOciInHash = true, Func<string, ObjectCtrlInfo, object, string> getFinalName = null, Func<ObjectCtrlInfo, object, bool> shouldShow = null) 
+		internal InterpolableModelBase(string owner, string id, object parameter, string name, InterpolableDelegate<object, object> interpolateBefore, InterpolableDelegate<object, object> interpolateAfter, Func<ObjectCtrlInfo, bool> isCompatibleWithTarget, Func<ObjectCtrlInfo, object, object> getValue, Func<object, XmlNode, object> readValueFromXml, Action<object, XmlTextWriter, object> writeValueToXml, Func<ObjectCtrlInfo, object> getParameter, Func<ObjectCtrlInfo, XmlNode, object> readParameterFromXml = null, Action<ObjectCtrlInfo, XmlTextWriter, object> writeParameterToXml = null, Func<ObjectCtrlInfo, object, object, object, bool> checkIntegrity = null, bool useOciInHash = true, Func<string, ObjectCtrlInfo, object, string> getFinalName = null, Func<ObjectCtrlInfo, object, bool> shouldShow = null)
 			: base(owner, id, parameter, name, (m, n, b, j, l) => interpolateBefore?.Invoke(m, n, b, j, l),
 				  (m, n, b, j, l) => interpolateAfter?.Invoke(m, n, b, j, l), isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, getParameter, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow)
 		{

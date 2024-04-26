@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Timeline
 {
-	[Obsolete("use Interpolable<Data, Param> for more transparent visualization of data")]
+	[Obsolete("use class Timeline.Interpolable<Data, Param> for more transparent visualization of data")]
 	public class Interpolable : InterpolableModel
 	{
 		private readonly int _hashCode;

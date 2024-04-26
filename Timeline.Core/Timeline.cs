@@ -42,7 +42,7 @@ namespace Timeline
 #if BEPINEX
 	[BepInPlugin(GUID, Name, Version)]
 #if KOIKATSU || SUNSHINE
-    [BepInProcess("CharaStudio")]
+	[BepInProcess("CharaStudio")]
 #elif AISHOUJO || HONEYSELECT2
 	[BepInProcess("StudioNEOV2")]
 #endif
@@ -354,12 +354,12 @@ namespace Timeline
 		}
 
 #elif KOIKATSU
-        protected override void LevelLoaded(Scene scene, LoadSceneMode mode)
-        {
-            base.LevelLoaded(scene, mode);
-            if (mode == LoadSceneMode.Single && scene.buildIndex == 1)
-                Init();
-        }
+		protected override void LevelLoaded(Scene scene, LoadSceneMode mode)
+		{
+			base.LevelLoaded(scene, mode);
+			if(mode == LoadSceneMode.Single && scene.buildIndex == 1)
+				Init();
+		}
 #endif
 
 		protected override void Update()
@@ -562,7 +562,6 @@ namespace Timeline
 		/// Adds an InterpolableModel to the list.
 		/// </summary>
 		/// <param name="model"></param>
-		[Obsolete]
 		public static void AddInterpolableModel(InterpolableModel model)
 		{
 			List<InterpolableModel> models;
@@ -576,28 +575,33 @@ namespace Timeline
 		}
 
 		/// <summary>
-		/// Adds an InterpolableModel to the list.
+		/// Adds an InterpolableModel to the list with a constant parameter
 		/// </summary>
-		/// <param name="model"></param>
-		public static void AddInterpolableModel<Data, Param>(InterpolableModel<Data, Param> model)
+		public static void AddInterpolableModelStatic(string owner,
+													 string id,
+													 object parameter,
+													 string name,
+													 InterpolableDelegate interpolateBefore,
+													 InterpolableDelegate interpolateAfter,
+													 Func<ObjectCtrlInfo, bool> isCompatibleWithTarget,
+													 Func<ObjectCtrlInfo, object, object> getValue,
+													 Func<object, XmlNode, object> readValueFromXml,
+													 Action<object, XmlTextWriter, object> writeValueToXml,
+													 Func<ObjectCtrlInfo, XmlNode, object> readParameterFromXml = null,
+													 Action<ObjectCtrlInfo, XmlTextWriter, object> writeParameterToXml = null,
+													 Func<ObjectCtrlInfo, object, object, object, bool> checkIntegrity = null,
+													 bool useOciInHash = true,
+													 Func<string, ObjectCtrlInfo, object, string> getFinalName = null,
+													 Func<ObjectCtrlInfo, object, bool> shouldShow = null)
 		{
-			List<InterpolableModel> models;
-			if(_self._interpolableModelsDictionary.TryGetValue(model.owner, out models) == false)
-			{
-				models = new List<InterpolableModel>();
-				_self._interpolableModelsDictionary.Add(model.owner, models);
-			}
-			models.Add(model);
-			_self._interpolableModelsList.Add(model);
+			AddInterpolableModel(new InterpolableModel(owner, id, parameter, name, interpolateBefore, interpolateAfter, isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow));
 		}
 
 		/// <summary>
-		/// Adds an InterpolableModel to the list with a constant parameter
+		/// Adds an interpolableModel to the list with a dynamic parameter
 		/// </summary>
-		[Obsolete]
-		public static void AddInterpolableModelStatic(string owner,
+		public static void AddInterpolableModelDynamic(string owner,
 													  string id,
-													  object parameter,
 													  string name,
 													  InterpolableDelegate interpolateBefore,
 													  InterpolableDelegate interpolateAfter,
@@ -605,6 +609,7 @@ namespace Timeline
 													  Func<ObjectCtrlInfo, object, object> getValue,
 													  Func<object, XmlNode, object> readValueFromXml,
 													  Action<object, XmlTextWriter, object> writeValueToXml,
+													  Func<ObjectCtrlInfo, object> getParameter,
 													  Func<ObjectCtrlInfo, XmlNode, object> readParameterFromXml = null,
 													  Action<ObjectCtrlInfo, XmlTextWriter, object> writeParameterToXml = null,
 													  Func<ObjectCtrlInfo, object, object, object, bool> checkIntegrity = null,
@@ -612,78 +617,9 @@ namespace Timeline
 													  Func<string, ObjectCtrlInfo, object, string> getFinalName = null,
 													  Func<ObjectCtrlInfo, object, bool> shouldShow = null)
 		{
-			AddInterpolableModel(new InterpolableModel(owner, id, parameter, name, interpolateBefore, interpolateAfter, isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow));
-		}
-
-		/// <summary>
-		/// Adds an InterpolableModel to the list with a constant parameter
-		/// </summary>
-		public static void AddInterpolableModelStatic<Data, Param>(string owner,
-													  string id,
-													  Param parameter,
-													  string name,
-													  InterpolableDelegate<Data, Param> interpolateBefore,
-													  InterpolableDelegate<Data, Param> interpolateAfter,
-													  Func<ObjectCtrlInfo, bool> isCompatibleWithTarget,
-													  Func<ObjectCtrlInfo, Param, Data> getValue,
-													  Func<Param, XmlNode, Data> readValueFromXml,
-													  Action<Param, XmlTextWriter, Data> writeValueToXml,
-													  Func<ObjectCtrlInfo, XmlNode, Param> readParameterFromXml = null,
-													  Action<ObjectCtrlInfo, XmlTextWriter, Param> writeParameterToXml = null,
-													  Func<ObjectCtrlInfo, Param, Data, Data, bool> checkIntegrity = null,
-													  bool useOciInHash = true,
-													  Func<string, ObjectCtrlInfo, Param, string> getFinalName = null,
-													  Func<ObjectCtrlInfo, Param, bool> shouldShow = null)
-		{
-			AddInterpolableModel(new InterpolableModel<Data,Param>(owner, id, parameter, name, interpolateBefore, interpolateAfter, isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow));
-		}
-
-		/// <summary>
-		/// Adds an interpolableModel to the list with a dynamic parameter
-		/// </summary>
-		[Obsolete]
-		public static void AddInterpolableModelDynamic(string owner,
-													   string id,
-													   string name,
-													   InterpolableDelegate interpolateBefore,
-													   InterpolableDelegate interpolateAfter,
-													   Func<ObjectCtrlInfo, bool> isCompatibleWithTarget,
-													   Func<ObjectCtrlInfo, object, object> getValue,
-													   Func<object, XmlNode, object> readValueFromXml,
-													   Action<object, XmlTextWriter, object> writeValueToXml,
-													   Func<ObjectCtrlInfo, object> getParameter,
-													   Func<ObjectCtrlInfo, XmlNode, object> readParameterFromXml = null,
-													   Action<ObjectCtrlInfo, XmlTextWriter, object> writeParameterToXml = null,
-													   Func<ObjectCtrlInfo, object, object, object, bool> checkIntegrity = null,
-													   bool useOciInHash = true,
-													   Func<string, ObjectCtrlInfo, object, string> getFinalName = null,
-													   Func<ObjectCtrlInfo, object, bool> shouldShow = null)
-		{
 			AddInterpolableModel(new InterpolableModel(owner, id, name, interpolateBefore, interpolateAfter, isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, getParameter, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow));
 		}
-		
-		/// <summary>
-		/// Adds an interpolableModel to the list with a dynamic parameter
-		/// </summary>
-		public static void AddInterpolableModelDynamic<Data,Param>(string owner,
-													   string id,
-													   string name,
-													   InterpolableDelegate<Data, Param> interpolateBefore,
-													   InterpolableDelegate<Data, Param> interpolateAfter,
-													   Func<ObjectCtrlInfo, bool> isCompatibleWithTarget,
-													   Func<ObjectCtrlInfo, Param, Data> getValue,
-													   Func<Param, XmlNode, Data> readValueFromXml,
-													   Action<Param, XmlTextWriter, Data> writeValueToXml,
-													   Func<ObjectCtrlInfo, Param> getParameter,
-													   Func<ObjectCtrlInfo, XmlNode, Param> readParameterFromXml = null,
-													   Action<ObjectCtrlInfo, XmlTextWriter, Param> writeParameterToXml = null,
-													   Func<ObjectCtrlInfo, Param, Data, Data, bool> checkIntegrity = null,
-													   bool useOciInHash = true,
-													   Func<string, ObjectCtrlInfo, Param, string> getFinalName = null,
-													   Func<ObjectCtrlInfo, Param, bool> shouldShow = null)
-		{
-			AddInterpolableModel(new InterpolableModel<Data,Param>(owner, id, name, interpolateBefore, interpolateAfter, isCompatibleWithTarget, getValue, readValueFromXml, writeValueToXml, getParameter, readParameterFromXml, writeParameterToXml, checkIntegrity, useOciInHash, getFinalName, shouldShow));
-		}
+
 
 		/// <summary>
 		/// Refreshes the list of displayed interpolables. This function is quite heavy as it must go through each InterpolableModel and check if it's compatible with the current target.
@@ -1676,16 +1612,16 @@ namespace Timeline
                                             }
                                         };
 #elif KOIKATSU
-                                        Studio.Studio.Instance.colorPalette.visible = false;
-                                        Studio.Studio.Instance.colorPalette.Setup("Interpolable Color", currentlySelectedInterpolables[0].color, (col) =>
-                                        {
-                                            foreach (Interpolable interp in currentlySelectedInterpolables)
-                                            {
-                                                InterpolableDisplay disp = _displayedInterpolables.Find(id => id.interpolable.obj == interp);
-                                                interp.color = col;
-                                                UpdateInterpolableColor(disp, col);
-                                            }
-                                        }, true);
+									Studio.Studio.Instance.colorPalette.visible = false;
+									Studio.Studio.Instance.colorPalette.Setup("Interpolable Color", currentlySelectedInterpolables[0].color, (col) =>
+									{
+										foreach(Interpolable interp in currentlySelectedInterpolables)
+										{
+											InterpolableDisplay disp = _displayedInterpolables.Find(id => id.interpolable.obj == interp);
+											interp.color = col;
+											UpdateInterpolableColor(disp, col);
+										}
+									}, true);
 
 #endif
 								}
@@ -3850,16 +3786,16 @@ namespace Timeline
 				document.Load(path);
 				ReadInterpolableTree(document.FirstChild, dic, _selectedOCI);
 #if KOIKATSU || SUNSHINE
-                string docGUID = document.FirstChild.Attributes?["GUID"]?.InnerText;
-                int docGr = document.FirstChild.ReadInt("animationGroup");
-                int docCa = document.FirstChild.ReadInt("animationCategory");
-                int docNo = document.FirstChild.ReadInt("animationNo");
-                OCIChar character = _selectedOCI as OCIChar;
-                StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == docNo && x.GUID == docGUID && x.Group == docGr && x.Category == docCa);
-                if (character != null)
-                {
-                    character.LoadAnime(docGr, docCa, resolveInfo != null ? resolveInfo.LocalSlot : docNo);
-                }
+				string docGUID = document.FirstChild.Attributes?["GUID"]?.InnerText;
+				int docGr = document.FirstChild.ReadInt("animationGroup");
+				int docCa = document.FirstChild.ReadInt("animationCategory");
+				int docNo = document.FirstChild.ReadInt("animationNo");
+				OCIChar character = _selectedOCI as OCIChar;
+				StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == docNo && x.GUID == docGUID && x.Group == docGr && x.Category == docCa);
+				if(character != null)
+				{
+					character.LoadAnime(docGr, docCa, resolveInfo != null ? resolveInfo.LocalSlot : docNo);
+				}
 #else           //AI&HS2 Studio use original ID(management number) for animation zipmods by default
 				OCIChar character = _selectedOCI as OCIChar;
 				if(character != null)
@@ -3889,12 +3825,12 @@ namespace Timeline
 				if(character != null)
 				{
 #if KOIKATSU || SUNSHINE
-                    OICharInfo.AnimeInfo info = character.oiCharInfo.animeInfo;
-                    StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.LocalSlot == info.no && x.Group == info.group && x.Category == info.category);
-                    writer.WriteAttributeString("GUID", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.GUID : "");
-                    writer.WriteValue("animationGroup", info.group);
-                    writer.WriteValue("animationCategory", info.category);
-                    writer.WriteValue("animationNo", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.Slot : info.no);
+					OICharInfo.AnimeInfo info = character.oiCharInfo.animeInfo;
+					StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.LocalSlot == info.no && x.Group == info.group && x.Category == info.category);
+					writer.WriteAttributeString("GUID", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.GUID : "");
+					writer.WriteValue("animationGroup", info.group);
+					writer.WriteValue("animationCategory", info.category);
+					writer.WriteValue("animationNo", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.Slot : info.no);
 #else           //AI&HS2 Studio use original ID(management number) for animation zipmods by default
 					OICharInfo.AnimeInfo info = character.oiCharInfo.animeInfo;
 					writer.WriteValue("animationCategory", info.category);
@@ -4148,7 +4084,7 @@ namespace Timeline
 #if HONEYSELECT
         [HarmonyPatch(typeof(Expression), "Start")]
 #elif KOIKATSU
-        [HarmonyPatch(typeof(Expression), "Initialize")]
+		[HarmonyPatch(typeof(Expression), "Initialize")]
 #endif
 		private static class Expression_Start_Patches
 		{
@@ -4292,27 +4228,27 @@ namespace Timeline
 		}
 
 #if KOIKATSU
-        [HarmonyPatch(typeof(ShortcutKeyCtrl), "Update")]
-        private static class ShortcutKeyCtrl_Update_Patches
-        {
-            private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                List<CodeInstruction> instructionList = instructions.ToList();
-                for (int i = 0; i < instructionList.Count; i++)
-                {
-                    CodeInstruction instruction = instructionList[i];
-                    if (i != 0 && instruction.opcode == OpCodes.Call && instructionList[i - 1].opcode == OpCodes.Ldc_I4_S && (sbyte)instructionList[i - 1].operand == 99)
-                        yield return new CodeInstruction(OpCodes.Call, typeof(ShortcutKeyCtrl_Update_Patches).GetMethod(nameof(PreventKeyIfCtrl), BindingFlags.NonPublic | BindingFlags.Static));
-                    else
-                        yield return instruction;
-                }
-            }
+		[HarmonyPatch(typeof(ShortcutKeyCtrl), "Update")]
+		private static class ShortcutKeyCtrl_Update_Patches
+		{
+			private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+			{
+				List<CodeInstruction> instructionList = instructions.ToList();
+				for(int i = 0; i < instructionList.Count; i++)
+				{
+					CodeInstruction instruction = instructionList[i];
+					if(i != 0 && instruction.opcode == OpCodes.Call && instructionList[i - 1].opcode == OpCodes.Ldc_I4_S && (sbyte)instructionList[i - 1].operand == 99)
+						yield return new CodeInstruction(OpCodes.Call, typeof(ShortcutKeyCtrl_Update_Patches).GetMethod(nameof(PreventKeyIfCtrl), BindingFlags.NonPublic | BindingFlags.Static));
+					else
+						yield return instruction;
+				}
+			}
 
-            private static bool PreventKeyIfCtrl(KeyCode key)
-            {
-                return Input.GetKey(KeyCode.LeftControl) == false && Input.GetKeyDown(key);
-            }
-        }
+			private static bool PreventKeyIfCtrl(KeyCode key)
+			{
+				return Input.GetKey(KeyCode.LeftControl) == false && Input.GetKeyDown(key);
+			}
+		}
 #endif
 		#endregion
 	}
