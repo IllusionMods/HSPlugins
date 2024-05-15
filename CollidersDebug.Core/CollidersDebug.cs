@@ -245,9 +245,9 @@ namespace CollidersDebug
 
         protected override void LateUpdate()
         {
-            if (MakerAPI.InsideMaker)
+            if (MakerAPI.InsideMaker && this._debugLines != null)
             {
-                if (this._toggle.Value && this._target != null)
+                if (this._toggle != null && this._toggle.Value && this._target != null)
                 {
                     if (this._target.enabled != this._debugLines.IsActive())
                         this._debugLines.SetActive(this._target.enabled);
