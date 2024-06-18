@@ -2137,6 +2137,14 @@ namespace Timeline
                 Vector2 min = new Vector2(Mathf.Min(_areaSelectFirstPoint.x, localPoint.x), Mathf.Min(_areaSelectFirstPoint.y, localPoint.y));
                 Vector2 max = new Vector2(Mathf.Max(_areaSelectFirstPoint.x, localPoint.x), Mathf.Max(_areaSelectFirstPoint.y, localPoint.y));
 
+                if( Input.GetKey(KeyCode.LeftAlt) )
+                {
+                    //Maximize the top and bottom of the selection
+                    var rect = _keyframesContainer.rect;
+                    min.y = rect.yMin;
+                    max.y = rect.yMax;
+                }
+
                 _selectionArea.offsetMin = min;
                 _selectionArea.offsetMax = max;
             }
@@ -2166,6 +2174,14 @@ namespace Timeline
             }
             float minY = Mathf.Min(_areaSelectFirstPoint.y, localPoint.y);
             float maxY = Mathf.Max(_areaSelectFirstPoint.y, localPoint.y);
+
+            if (Input.GetKey(KeyCode.LeftAlt) )
+            {
+                //Maximize the top and bottom of the selection
+                var rect = _keyframesContainer.rect;
+                minY = rect.yMin;
+                maxY = rect.yMax;
+            }
 
             _selectionArea.gameObject.SetActive(false);
             _isAreaSelecting = false;
