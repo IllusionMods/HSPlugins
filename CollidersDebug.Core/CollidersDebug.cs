@@ -16,7 +16,7 @@ namespace CollidersDebug
     {
         private const string _name = "ColllidersDebug";
         private const string _guid = "com.joan6694.illusionplugins.collidersdebug";
-        private const string _versionNum = "1.0.0";
+        private const string _versionNum = "1.0.1";
         private const int _uniqueId = ('C' << 24) | ('O' << 16) | ('L' << 8) | ('D');
         private static readonly Color _colliderColor = Color.Lerp(Color.green, Color.white, 0.5f);
 
