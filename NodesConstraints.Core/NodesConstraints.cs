@@ -1051,6 +1051,7 @@ namespace NodesConstraints
             if (GUI.Button(new Rect(_windowRect.width - visibleAreaSize - 2, 2, visibleAreaSize, visibleAreaSize), "X"))
             {
                 _showUI = false;
+                _selectedConstraint?.SetActiveDebugLines(false);
                 return;
             }
 
