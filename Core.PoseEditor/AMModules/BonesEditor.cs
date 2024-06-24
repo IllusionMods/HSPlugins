@@ -565,13 +565,13 @@ namespace HSPE.AMModules
                             boneTargetScale = Vector3.one;
                         }
 
-                        if (GUILayout.RepeatButton((-_scaleInc).ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        if (GUILayout.RepeatButton((-_scaleInc).ToString("+0.#####;-0.#####")) && RepeatControl() && _boneTarget != null)
                         {
                             shouldSaveValue = true;
                             boneTargetScale -= _scaleInc * Vector3.one;
                         }
 
-                        if (GUILayout.RepeatButton(_scaleInc.ToString("+0.#####;-0.#####")) && _boneTarget != null)
+                        if (GUILayout.RepeatButton(_scaleInc.ToString("+0.#####;-0.#####")) && RepeatControl() && _boneTarget != null)
                         {
                             shouldSaveValue = true;
                             boneTargetScale += _scaleInc * Vector3.one;
