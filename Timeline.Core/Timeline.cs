@@ -2055,14 +2055,31 @@ namespace Timeline
             return elements;
         }
 
-        private void HighlightInterpolable(Interpolable interpolable)
-        {
-            StartCoroutine(HighlightInterpolable_Routine(interpolable));
-        }
-
-        private IEnumerator HighlightInterpolable_Routine(Interpolable interpolable)
+        private void HighlightInterpolable(Interpolable interpolable, bool scrollTo = true)
         {
             InterpolableDisplay display = _displayedInterpolables.FirstOrDefault(d => d.interpolable.obj == interpolable);
+            if (display == null)
+                return;
+
+            if (scrollTo)
+            {
+                var rectTransform = (RectTransform)display.container.parent;                
+                var parent = (RectTransform)rectTransform.parent;
+                var view = (RectTransform)parent.parent;
+
+                float scrollY = -rectTransform.anchoredPosition.y - view.rect.height * 0.5f;
+                scrollY = Mathf.Clamp(scrollY, 0, parent.rect.height - view.rect.height * 0.5f);
+
+                var position = parent.anchoredPosition;
+                position.y = scrollY;
+                parent.anchoredPosition = position;
+            }
+
+            StartCoroutine(HighlightInterpolable_Routine(display, interpolable));
+        }
+
+        private IEnumerator HighlightInterpolable_Routine(InterpolableDisplay display, Interpolable interpolable)
+        {
             if (display != null)
             {
                 Color first = interpolable.color.GetContrastingColor();
@@ -4188,15 +4205,77 @@ namespace Timeline
             }
         }
 
-        [HarmonyPatch(typeof(GuideSelect), "OnPointerClick", new[] { typeof(PointerEventData) })]
+        private static void OnGuideClick()
+        {
+            var manager = GuideObjectManager.Instance;
+            GuideObject go = manager.selectObject;
+
+            if (go == null || !Input.GetKey(KeyCode.LeftAlt))
+                return;
+
+            var interpolables = _self._interpolables.Where(i => i.Value.parameter is GuideObject g && g == go).Select( pair => pair.Value ).ToArray();
+
+            if (interpolables.Length <= 0)
+                return;
+
+            int select = 0;
+
+            if(interpolables.Length > 1)
+            {
+                //If there is a mode selected in the studio, select that interpolation.
+                string keyword = null;
+
+                switch(manager.mode)
+                {
+                    case 0:
+                        keyword = "Position";
+                        break;
+
+                    case 1:
+                        keyword = "Rotation";
+                        break;
+
+                    case 2:
+                        keyword = "Scale";
+                        break;
+                }
+
+                if( keyword != null )
+                {
+                    for( int i = 0; i < interpolables.Length; ++i )
+                        if( interpolables[i].name.Contains(keyword) )
+                        {
+                            select = i;
+                            break;
+                        }
+                }
+            }
+
+            _self.HighlightInterpolable(interpolables[select]);
+        }
+
+        [HarmonyPatch(typeof(GuideSelect), nameof(GuideSelect.OnPointerClick), new[] { typeof(PointerEventData) })]
         private static class GuideSelect_OnPointerClick_Patches
         {
-            private static void Postfix()
-            {
-                GuideObject go = GuideObjectManager.Instance.selectObject;
-                if (go != null && Input.GetKey(KeyCode.LeftAlt))
-                    _self.HighlightInterpolable(_self._interpolables.FirstOrDefault(i => i.Value.parameter is GuideObject g && g == go).Value);
-            }
+            private static void Postfix() => OnGuideClick();
+        }
+
+        [HarmonyPatch(typeof(GuideMove), nameof(GuideMove.OnPointerDown), new[] { typeof(PointerEventData) })]
+        private static class GuideMove_OnPointerDown_Patches
+        {
+            private static void Postfix() => OnGuideClick();
+        }
+
+        [HarmonyPatch(typeof(GuideRotation), nameof(GuideRotation.OnPointerDown), new[] { typeof(PointerEventData) })]
+        private static class GuideRotation_OnPointerDown_Patches
+        {
+            private static void Postfix() => OnGuideClick();
+        }
+
+        [HarmonyPatch(typeof(GuideScale), nameof(GuideScale.OnPointerDown), new[] { typeof(PointerEventData) })]
+        private static class GuideScale_OnPointerDown_Patches
+        {
+            private static void Postfix() => OnGuideClick();
         }
 
         private static class OCI_OnDelete_Patches
