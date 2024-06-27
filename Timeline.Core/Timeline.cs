@@ -1240,6 +1240,7 @@ namespace Timeline
         {
             UpdateFilterRegex(arg0);
             UpdateInterpolablesView();
+            _verticalScrollView.verticalNormalizedPosition = 1f;    // Reset scroll position
         }
 
         private void UpdateFilterRegex( string filterText )
