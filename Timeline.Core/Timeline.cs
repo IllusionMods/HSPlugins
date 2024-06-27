@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using BepInEx.Logging;
 using ToolBox;
@@ -197,6 +198,7 @@ namespace Timeline
         private ScrollRect _horizontalScrollView;
         private Toggle _allToggle;
         private InputField _interpolablesSearchField;
+        private Regex _interpolablesSearchRegex;
         private InputField _frameRateInputField;
         private InputField _timeInputField;
         private InputField _durationInputField;
@@ -839,6 +841,7 @@ namespace Timeline
             _horizontalScrollView = _ui.transform.Find("Timeline Window/Main Container/Timeline/Scroll View").GetComponent<ScrollRect>();
             _allToggle = _ui.transform.Find("Timeline Window/Main Container/Timeline/Interpolables/Top/All").GetComponent<Toggle>();
             _interpolablesSearchField = _ui.transform.Find("Timeline Window/Main Container/Search").GetComponent<InputField>();
+            _interpolablesSearchRegex = new Regex(".*", RegexOptions.IgnoreCase);
             _grid = (RectTransform)_ui.transform.Find("Timeline Window/Main Container/Timeline/Scroll View/Viewport/Content/Grid Container");
             _gridImage = _ui.transform.Find("Timeline Window/Main Container/Timeline/Scroll View/Viewport/Content/Grid Container/Grid/Viewport/Background").GetComponent<RawImage>();
             _gridImage.material = new Material(_gridImage.material);
@@ -1235,7 +1238,106 @@ namespace Timeline
 
         private void InterpolablesSearch(string arg0)
         {
+            UpdateFilterRegex(arg0);
             UpdateInterpolablesView();
+        }
+
+        private void UpdateFilterRegex( string filterText )
+        {
+            filterText = filterText.Trim();
+
+            if ( string.IsNullOrEmpty(filterText) )
+            {
+                _interpolablesSearchRegex = new Regex(".*", RegexOptions.IgnoreCase);
+                return;
+            }
+
+            var filters = filterText.Split('|');
+            StringBuilder builder = new StringBuilder();
+            
+            for( int i = 0; i < filters.Length; ++i )
+            {
+                var filter = filters[i].Trim();
+
+                if (string.IsNullOrEmpty(filter))
+                    continue;
+
+                if (builder.Length > 0)
+                    builder.Append('|');
+
+                var fs = Regex.Escape(filters[i]).Replace("\\?", ".").Replace("\\*", ".*").Split('&', ',');
+                int[] indices = new int[fs.Length];
+                for (int j = 0; j < indices.Length; ++j) indices[j] = j;
+
+                //Reorder the filter keywords so that they can be entered in any order.
+                while (true)
+                {
+                    builder.Append("(");
+
+                    for (int j = 0; j < fs.Length; ++j)
+                    {
+                        builder.Append(".*");
+                        builder.Append(fs[indices[j]]);
+                    }
+
+                    builder.Append(".*)");
+
+                    if (NextPermutation(indices))
+                        builder.Append('|');
+                    else
+                        break;
+                }
+            }
+
+            try
+            {
+                if (builder.Length > 0)
+                {
+                    _interpolablesSearchRegex = new Regex(builder.ToString(), RegexOptions.IgnoreCase);
+                    return;
+                }   
+            }
+            catch( System.Exception e )
+            {
+                Logger.LogError(e);
+            }
+
+            _interpolablesSearchRegex = new Regex(".*", RegexOptions.IgnoreCase);
+        }
+
+        private static bool NextPermutation(int[] array)
+        {
+            int i = array.Length - 2;
+            while (i >= 0 && array[i] >= array[i + 1])
+            {
+                i--;
+            }
+
+            if (i < 0)
+            {
+                return false;
+            }
+
+            int j = array.Length - 1;
+            while (array[j] <= array[i])
+            {
+                j--;
+            }
+
+            int tmp = array[i];
+            array[i] = array[j];
+            array[j] = tmp;
+
+            Array.Reverse(array, i + 1, array.Length - (i + 1));
+            return true;
+        }
+
+        private bool IsFilterInterpolationMatch( InterpolableModel interpolableModel )
+        {
+            if( interpolableModel is Interpolable interporable && _interpolablesSearchRegex.IsMatch(interporable.alias) )
+                return true;
+
+            return _interpolablesSearchRegex.IsMatch(interpolableModel.name);
         }
 
         private void UpdateInterpolablesView()
@@ -1266,7 +1368,7 @@ namespace Timeline
                         if ( /*usedInterpolables.TryGetValue(model.GetHashCode(), out usedInterpolable) ||*/ model.IsCompatibleWithTarget(_selectedOCI) == false)
                             continue;
 
-                        if (model.name.IndexOf(_interpolablesSearchField.text, StringComparison.OrdinalIgnoreCase) == -1)
+                        if (!IsFilterInterpolationMatch(model))
                             continue;
 
                         InterpolableModelDisplay display = GetInterpolableModelDisplay(interpolableModelDisplayIndex);
@@ -1369,7 +1471,7 @@ namespace Timeline
             //if (usedInterpolables.ContainsKey(interpolable.GetBaseHashCode()) == false)
             //    usedInterpolables.Add(interpolable.GetBaseHashCode(), interpolable);
 
-            if (interpolable.name.IndexOf(_interpolablesSearchField.text, StringComparison.OrdinalIgnoreCase) == -1)
+            if (!IsFilterInterpolationMatch(interpolable))
                 return false;
             return true;
         }
@@ -2330,7 +2432,7 @@ namespace Timeline
                         if (showAll == false && ((interpolable.oci != null && interpolable.oci != _selectedOCI) || !interpolable.ShouldShow()))
                             continue;
 
-                        if (interpolable.name.IndexOf(_interpolablesSearchField.text, StringComparison.OrdinalIgnoreCase) == -1)
+                        if (!IsFilterInterpolationMatch(interpolable))
                             continue;
 
                         InterpolableDisplay interpolableDisplay = _displayedInterpolables[interpolableIndex];
