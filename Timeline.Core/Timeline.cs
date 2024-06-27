@@ -859,6 +859,13 @@ namespace Timeline
             _miscContainer = (RectTransform)_ui.transform.Find("Timeline Window/Main Container/Timeline/Scroll View/Viewport/Content/Grid Container/Grid/Viewport/Misc Content");
             _resizeHandle = (RectTransform)_ui.transform.Find("Timeline Window/Resize Handle");
 
+#if SUNSHINE
+            // The input text is not visible when typing in Sunshine. So change the color.
+            var colors = _interpolablesSearchField.colors;
+            colors.selectedColor = colors.normalColor * 0.75f;
+            _interpolablesSearchField.colors = colors;
+#endif
+
             _ui.transform.Find("Timeline Window/Buttons/Play Buttons/Play").GetComponent<Button>().onClick.AddListener(Play);
             _ui.transform.Find("Timeline Window/Buttons/Play Buttons/Pause").GetComponent<Button>().onClick.AddListener(Pause);
             _ui.transform.Find("Timeline Window/Buttons/Play Buttons/Stop").GetComponent<Button>().onClick.AddListener(Stop);
