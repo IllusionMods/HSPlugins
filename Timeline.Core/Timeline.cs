@@ -1273,7 +1273,14 @@ namespace Timeline
                 if (builder.Length > 0)
                     builder.Append('|');
 
-                var fs = Regex.Escape(filters[i]).Replace("\\?", ".").Replace("\\*", ".*").Split('&', ',');
+                var fs = filter.Split('&', ',')
+                    .Select(s => Regex.Escape(s.Trim()).Replace("\\?", ".").Replace("\\*", ".*"))
+                    .Where(s => s.Length > 0)
+                    .ToArray();
+
+                if (fs.Length <= 0)
+                    continue;
+
                 int[] indices = new int[fs.Length];
                 for (int j = 0; j < indices.Length; ++j) indices[j] = j;
 
