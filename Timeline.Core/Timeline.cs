@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using BepInEx.Logging;
 using ToolBox;
@@ -197,6 +198,7 @@ namespace Timeline
         private ScrollRect _horizontalScrollView;
         private Toggle _allToggle;
         private InputField _interpolablesSearchField;
+        private Regex _interpolablesSearchRegex;
         private InputField _frameRateInputField;
         private InputField _timeInputField;
         private InputField _durationInputField;
@@ -839,6 +841,7 @@ namespace Timeline
             _horizontalScrollView = _ui.transform.Find("Timeline Window/Main Container/Timeline/Scroll View").GetComponent<ScrollRect>();
             _allToggle = _ui.transform.Find("Timeline Window/Main Container/Timeline/Interpolables/Top/All").GetComponent<Toggle>();
             _interpolablesSearchField = _ui.transform.Find("Timeline Window/Main Container/Search").GetComponent<InputField>();
+            _interpolablesSearchRegex = new Regex(".*", RegexOptions.IgnoreCase);
             _grid = (RectTransform)_ui.transform.Find("Timeline Window/Main Container/Timeline/Scroll View/Viewport/Content/Grid Container");
             _gridImage = _ui.transform.Find("Timeline Window/Main Container/Timeline/Scroll View/Viewport/Content/Grid Container/Grid/Viewport/Background").GetComponent<RawImage>();
             _gridImage.material = new Material(_gridImage.material);
@@ -855,6 +858,13 @@ namespace Timeline
             _selectionArea = (RectTransform)_ui.transform.Find("Timeline Window/Main Container/Timeline/Scroll View/Viewport/Content/Grid Container/Grid/Viewport/Content/Selection");
             _miscContainer = (RectTransform)_ui.transform.Find("Timeline Window/Main Container/Timeline/Scroll View/Viewport/Content/Grid Container/Grid/Viewport/Misc Content");
             _resizeHandle = (RectTransform)_ui.transform.Find("Timeline Window/Resize Handle");
+
+#if SUNSHINE
+            // The input text is not visible when typing in Sunshine. So change the color.
+            var colors = _interpolablesSearchField.colors;
+            colors.selectedColor = colors.normalColor * 0.75f;
+            _interpolablesSearchField.colors = colors;
+#endif
 
             _ui.transform.Find("Timeline Window/Buttons/Play Buttons/Play").GetComponent<Button>().onClick.AddListener(Play);
             _ui.transform.Find("Timeline Window/Buttons/Play Buttons/Pause").GetComponent<Button>().onClick.AddListener(Pause);
@@ -1235,7 +1245,114 @@ namespace Timeline
 
         private void InterpolablesSearch(string arg0)
         {
+            UpdateFilterRegex(arg0);
             UpdateInterpolablesView();
+            _verticalScrollView.verticalNormalizedPosition = 1f;    // Reset scroll position
+        }
+
+        private void UpdateFilterRegex( string filterText )
+        {
+            filterText = filterText.Trim();
+
+            if ( string.IsNullOrEmpty(filterText) )
+            {
+                _interpolablesSearchRegex = new Regex(".*", RegexOptions.IgnoreCase);
+                return;
+            }
+
+            var filters = filterText.Split('|');
+            StringBuilder builder = new StringBuilder();
+            
+            for( int i = 0; i < filters.Length; ++i )
+            {
+                var filter = filters[i].Trim();
+
+                if (string.IsNullOrEmpty(filter))
+                    continue;
+
+                if (builder.Length > 0)
+                    builder.Append('|');
+
+                var fs = filter.Split('&', ',')
+                    .Select(s => Regex.Escape(s.Trim()).Replace("\\?", ".").Replace("\\*", ".*"))
+                    .Where(s => s.Length > 0)
+                    .ToArray();
+
+                if (fs.Length <= 0)
+                    continue;
+
+                int[] indices = new int[fs.Length];
+                for (int j = 0; j < indices.Length; ++j) indices[j] = j;
+
+                //Reorder the filter keywords so that they can be entered in any order.
+                while (true)
+                {
+                    builder.Append("(");
+
+                    for (int j = 0; j < fs.Length; ++j)
+                    {
+                        builder.Append(".*");
+                        builder.Append(fs[indices[j]]);
+                    }
+
+                    builder.Append(".*)");
+
+                    if (NextPermutation(indices))
+                        builder.Append('|');
+                    else
+                        break;
+                }
+            }
+
+            try
+            {
+                if (builder.Length > 0)
+                {
+                    _interpolablesSearchRegex = new Regex(builder.ToString(), RegexOptions.IgnoreCase);
+                    return;
+                }   
+            }
+            catch( System.Exception e )
+            {
+                Logger.LogError(e);
+            }
+
+            _interpolablesSearchRegex = new Regex(".*", RegexOptions.IgnoreCase);
+        }
+
+        private static bool NextPermutation(int[] array)
+        {
+            int i = array.Length - 2;
+            while (i >= 0 && array[i] >= array[i + 1])
+            {
+                i--;
+            }
+
+            if (i < 0)
+            {
+                return false;
+            }
+
+            int j = array.Length - 1;
+            while (array[j] <= array[i])
+            {
+                j--;
+            }
+
+            int tmp = array[i];
+            array[i] = array[j];
+            array[j] = tmp;
+
+            Array.Reverse(array, i + 1, array.Length - (i + 1));
+            return true;
+        }
+
+        private bool IsFilterInterpolationMatch( InterpolableModel interpolableModel )
+        {
+            if( interpolableModel is Interpolable interporable && _interpolablesSearchRegex.IsMatch(interporable.alias) )
+                return true;
+
+            return _interpolablesSearchRegex.IsMatch(interpolableModel.name);
         }
 
         private void UpdateInterpolablesView()
@@ -1266,7 +1383,7 @@ namespace Timeline
                         if ( /*usedInterpolables.TryGetValue(model.GetHashCode(), out usedInterpolable) ||*/ model.IsCompatibleWithTarget(_selectedOCI) == false)
                             continue;
 
-                        if (model.name.IndexOf(_interpolablesSearchField.text, StringComparison.OrdinalIgnoreCase) == -1)
+                        if (!IsFilterInterpolationMatch(model))
                             continue;
 
                         InterpolableModelDisplay display = GetInterpolableModelDisplay(interpolableModelDisplayIndex);
@@ -1369,7 +1486,7 @@ namespace Timeline
             //if (usedInterpolables.ContainsKey(interpolable.GetBaseHashCode()) == false)
             //    usedInterpolables.Add(interpolable.GetBaseHashCode(), interpolable);
 
-            if (interpolable.name.IndexOf(_interpolablesSearchField.text, StringComparison.OrdinalIgnoreCase) == -1)
+            if (!IsFilterInterpolationMatch(interpolable))
                 return false;
             return true;
         }
@@ -2055,14 +2172,31 @@ namespace Timeline
             return elements;
         }
 
-        private void HighlightInterpolable(Interpolable interpolable)
-        {
-            StartCoroutine(HighlightInterpolable_Routine(interpolable));
-        }
-
-        private IEnumerator HighlightInterpolable_Routine(Interpolable interpolable)
+        private void HighlightInterpolable(Interpolable interpolable, bool scrollTo = true)
         {
             InterpolableDisplay display = _displayedInterpolables.FirstOrDefault(d => d.interpolable.obj == interpolable);
+            if (display == null)
+                return;
+
+            if (scrollTo)
+            {
+                var rectTransform = (RectTransform)display.container.parent;                
+                var parent = (RectTransform)rectTransform.parent;
+                var view = (RectTransform)parent.parent;
+
+                float scrollY = -rectTransform.anchoredPosition.y - view.rect.height * 0.5f;
+                scrollY = Mathf.Clamp(scrollY, 0, parent.rect.height - view.rect.height * 0.5f);
+
+                var position = parent.anchoredPosition;
+                position.y = scrollY;
+                parent.anchoredPosition = position;
+            }
+
+            StartCoroutine(HighlightInterpolable_Routine(display, interpolable));
+        }
+
+        private IEnumerator HighlightInterpolable_Routine(InterpolableDisplay display, Interpolable interpolable)
+        {
             if (display != null)
             {
                 Color first = interpolable.color.GetContrastingColor();
@@ -2313,7 +2447,7 @@ namespace Timeline
                         if (showAll == false && ((interpolable.oci != null && interpolable.oci != _selectedOCI) || !interpolable.ShouldShow()))
                             continue;
 
-                        if (interpolable.name.IndexOf(_interpolablesSearchField.text, StringComparison.OrdinalIgnoreCase) == -1)
+                        if (!IsFilterInterpolationMatch(interpolable))
                             continue;
 
                         InterpolableDisplay interpolableDisplay = _displayedInterpolables[interpolableIndex];
@@ -4188,15 +4322,77 @@ namespace Timeline
             }
         }
 
-        [HarmonyPatch(typeof(GuideSelect), "OnPointerClick", new[] { typeof(PointerEventData) })]
+        private static void OnGuideClick()
+        {
+            var manager = GuideObjectManager.Instance;
+            GuideObject go = manager.selectObject;
+
+            if (go == null || !Input.GetKey(KeyCode.LeftAlt))
+                return;
+
+            var interpolables = _self._interpolables.Where(i => i.Value.parameter is GuideObject g && g == go).Select( pair => pair.Value ).ToArray();
+
+            if (interpolables.Length <= 0)
+                return;
+
+            int select = 0;
+
+            if(interpolables.Length > 1)
+            {
+                //If there is a mode selected in the studio, select that interpolation.
+                string keyword = null;
+
+                switch(manager.mode)
+                {
+                    case 0:
+                        keyword = "Position";
+                        break;
+
+                    case 1:
+                        keyword = "Rotation";
+                        break;
+
+                    case 2:
+                        keyword = "Scale";
+                        break;
+                }
+
+                if( keyword != null )
+                {
+                    for( int i = 0; i < interpolables.Length; ++i )
+                        if( interpolables[i].name.Contains(keyword) )
+                        {
+                            select = i;
+                            break;
+                        }
+                }
+            }
+
+            _self.HighlightInterpolable(interpolables[select]);
+        }
+
+        [HarmonyPatch(typeof(GuideSelect), nameof(GuideSelect.OnPointerClick), new[] { typeof(PointerEventData) })]
         private static class GuideSelect_OnPointerClick_Patches
         {
-            private static void Postfix()
-            {
-                GuideObject go = GuideObjectManager.Instance.selectObject;
-                if (go != null && Input.GetKey(KeyCode.LeftAlt))
-                    _self.HighlightInterpolable(_self._interpolables.FirstOrDefault(i => i.Value.parameter is GuideObject g && g == go).Value);
-            }
+            private static void Postfix() => OnGuideClick();
+        }
+
+        [HarmonyPatch(typeof(GuideMove), nameof(GuideMove.OnPointerDown), new[] { typeof(PointerEventData) })]
+        private static class GuideMove_OnPointerDown_Patches
+        {
+            private static void Postfix() => OnGuideClick();
+        }
+
+        [HarmonyPatch(typeof(GuideRotation), nameof(GuideRotation.OnPointerDown), new[] { typeof(PointerEventData) })]
+        private static class GuideRotation_OnPointerDown_Patches
+        {
+            private static void Postfix() => OnGuideClick();
+        }
+
+        [HarmonyPatch(typeof(GuideScale), nameof(GuideScale.OnPointerDown), new[] { typeof(PointerEventData) })]
+        private static class GuideScale_OnPointerDown_Patches
+        {
+            private static void Postfix() => OnGuideClick();
         }
 
         private static class OCI_OnDelete_Patches
