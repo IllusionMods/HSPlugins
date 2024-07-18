@@ -1036,8 +1036,6 @@ namespace HSPE.AMModules
                 SetColliderRadius(collider, radius);
 
             float height = FloatEditor(collider.m_Height, 2 * collider.m_Radius, Mathf.Max(4f, 4f * collider.m_Radius), "Height\t");
-            if (height < collider.m_Radius * 2)
-                height = collider.m_Radius * 2;
             if (Mathf.Approximately(height, collider.m_Height) == false)
                 SetColliderHeight(collider, height);
 
