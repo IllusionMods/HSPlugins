@@ -183,6 +183,7 @@ namespace HSPE
                 var parent = transform.parent?.GetComponentInParent<PoseController>();
                 parent?._childObjects.Add(gameObject);
             }
+            this.ExecuteDelayed2(() => { enabled = other.enabled; }, 3);
         }
 
         public void AdvancedModeWindow(int id)
