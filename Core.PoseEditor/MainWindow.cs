@@ -1229,11 +1229,15 @@ namespace HSPE
         public void OnDuplicate(ObjectCtrlInfo source, ObjectCtrlInfo destination)
         {
             PoseController destinationController;
+            var sourceController = source.guideObject.transformTarget.gameObject.GetComponent<PoseController>();
             if (destination is OCIChar)
                 destinationController = destination.guideObject.transformTarget.gameObject.AddComponent<CharaPoseController>();
             else
+            {
                 destinationController = destination.guideObject.transformTarget.gameObject.AddComponent<PoseController>();
-            destinationController.LoadFrom(source.guideObject.transformTarget.gameObject.GetComponent<PoseController>());
+                destinationController.enabled = sourceController.enabled;
+            }
+            destinationController.LoadFrom(sourceController);
         }
         #endregion
 
