@@ -77,7 +77,7 @@ namespace HSPE
             ConfigMainWindowShortcut = Config.Bind("Config", "Main Window Shortcut", new KeyboardShortcut(KeyCode.H));
             ConfigCrotchCorrectionByDefault = Config.Bind("Config", "Crotch Correction By Default", false);
             ConfigAnklesCorrectionByDefault = Config.Bind("Config", "AnklesCorrection By Default", false);
-            ConfigKeepAdvancedModeEnabledOnCopy = Config.Bind("Config", "Disable advanced mode on copied objects", true);
+            ConfigKeepAdvancedModeEnabledOnCopy = Config.Bind("Config", "Disable advanced mode on copied objects", true, "If disabled, advanced mode state is copied from the original studio object. If enabled, advanced mode is always disabled on the newly copied items.");
 
             ConfigReorderFKBones = Config.Bind(
                 "Config",
