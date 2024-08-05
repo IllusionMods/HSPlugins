@@ -1235,7 +1235,7 @@ namespace HSPE
             else
             {
                 destinationController = destination.guideObject.transformTarget.gameObject.AddComponent<PoseController>();
-                if (HSPE.ConfigKeepAdvancedModeEnabledOnCopy.Value)
+                if (!HSPE.ConfigDisableAdvancedModeOnCopy.Value)
                     destinationController.enabled = sourceController.enabled;
                 else destinationController.enabled = false;
             }
