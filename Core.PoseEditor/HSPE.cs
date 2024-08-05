@@ -64,6 +64,7 @@ namespace HSPE
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
         internal static ConfigEntry<bool> ConfigCrotchCorrectionByDefault { get; private set; }
         internal static ConfigEntry<bool> ConfigAnklesCorrectionByDefault { get; private set; }
+        internal static ConfigEntry<bool> ConfigKeepAdvancedModeEnabledOnCopy { get; private set; }
 
         internal static ConfigEntry<KeyboardShortcut> ConfigReorderFKBones { get; private set; }
 
@@ -76,6 +77,7 @@ namespace HSPE
             ConfigMainWindowShortcut = Config.Bind("Config", "Main Window Shortcut", new KeyboardShortcut(KeyCode.H));
             ConfigCrotchCorrectionByDefault = Config.Bind("Config", "Crotch Correction By Default", false);
             ConfigAnklesCorrectionByDefault = Config.Bind("Config", "AnklesCorrection By Default", false);
+            ConfigKeepAdvancedModeEnabledOnCopy = Config.Bind("Config", "Copy advanced mode enabled state on copy", false);
 
             ConfigReorderFKBones = Config.Bind(
                 "Config",
