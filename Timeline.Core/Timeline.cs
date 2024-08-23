@@ -2802,7 +2802,7 @@ namespace Timeline
                 Keyframe keyframe;
                 KeyValuePair<float, Keyframe> pair = interpolable.keyframes.LastOrDefault(k => k.Key < time);
                 if (pair.Value != null)
-                    keyframe = new Keyframe(interpolable.GetValue(), interpolable, pair.Value.curve);
+                    keyframe = new Keyframe(interpolable.GetValue(), interpolable, new AnimationCurve(pair.Value.curve.keys));
                 else
                     keyframe = new Keyframe(interpolable.GetValue(), interpolable, AnimationCurve.Linear(0f, 0f, 1f, 1f));
                 interpolable.keyframes.Add(time, keyframe);
