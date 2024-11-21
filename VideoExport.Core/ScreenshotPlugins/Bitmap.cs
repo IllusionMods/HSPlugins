@@ -367,6 +367,7 @@ namespace VideoExport.ScreenshotPlugins
             if (height % 2 != 0)
                 height += 1;
 
+            this._graphics.Clear(System.Drawing.Color.Black);
             this._graphics.CopyFromScreen(rect.left, rect.top, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
 
             switch (this._imageFormat)
