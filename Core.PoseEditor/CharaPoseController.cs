@@ -167,6 +167,15 @@ namespace HSPE
         private Quaternion _siriDamLRotation;
         private Quaternion _siriDamRRotation;
         private Quaternion _kosiRotation;
+#if KOIKATSU
+        private Transform _ana;
+        private Quaternion _anaOriginalRotation;
+        private Quaternion _anaOriginalRotationOffset;
+        private Vector3 _anaOriginalPosition;
+        private Vector3 _anaOriginalPositionOffset;
+        private Quaternion _anaRotation;
+        private Vector3 _anaPosition;
+#endif
         private bool _lastCrotchJointCorrection = false;
 
         private Transform _leftFoot2;
@@ -264,6 +273,7 @@ namespace HSPE
             _siriDamL = transform.FindDescendant("cf_d_siri_L");
             _siriDamR = transform.FindDescendant("cf_d_siri_R");
             _kosi = transform.FindDescendant("cf_s_waist02");
+            _ana = transform.FindDescendant("cf_d_ana");
 #elif AISHOUJO || HONEYSELECT2
             this._siriDamL = this.transform.Find("BodyTop/p_cf_anim/cf_J_Root/cf_N_height/cf_J_Hips/cf_J_Kosi01/cf_J_Kosi02/cf_J_SiriDam_L");
             this._siriDamR = this.transform.Find("BodyTop/p_cf_anim/cf_J_Root/cf_N_height/cf_J_Hips/cf_J_Kosi01/cf_J_Kosi02/cf_J_SiriDam_R");
@@ -292,6 +302,13 @@ namespace HSPE
             _siriDamLOriginalRotation = _siriDamL.localRotation;
             _siriDamROriginalRotation = _siriDamR.localRotation;
             _kosiOriginalRotation = _kosi.localRotation;
+
+#if KOIKATSU
+            _anaOriginalRotation = _ana.localRotation;
+            _anaOriginalPosition = _ana.localPosition;
+            _anaOriginalRotationOffset = Quaternion.Inverse(_kosi.localRotation) * _ana.localRotation;
+            _anaOriginalPositionOffset = _ana.localPosition - _kosi.localPosition;
+#endif
 
             IKSolver_Patches.onPostUpdate += IKSolverOnPostUpdate;
             IKExecutionOrder_Patches.onPostLateUpdate += IKExecutionOrderOnPostLateUpdate;
@@ -1090,6 +1107,11 @@ namespace HSPE
                 _siriDamLRotation = Quaternion.Lerp(Quaternion.identity, _body.solver.leftLegMapping.bone1.localRotation, 0.4f);
                 _siriDamRRotation = Quaternion.Lerp(Quaternion.identity, _body.solver.rightLegMapping.bone1.localRotation, 0.4f);
                 _kosiRotation = Quaternion.Lerp(Quaternion.identity, Quaternion.Lerp(_body.solver.leftLegMapping.bone1.localRotation, _body.solver.rightLegMapping.bone1.localRotation, 0.5f), 0.25f);
+                
+#if KOIKATSU                
+                _anaRotation = _kosiRotation * _anaOriginalRotationOffset;
+                _anaPosition = _kosiRotation * _anaOriginalPositionOffset;
+#endif
             }
 
             if (leftFootJointCorrection)
@@ -1106,12 +1128,20 @@ namespace HSPE
                 _siriDamL.localRotation = _siriDamLRotation;
                 _siriDamR.localRotation = _siriDamRRotation;
                 _kosi.localRotation = _kosiRotation;
+#if KOIKATSU
+                _ana.localRotation = _anaRotation;
+                _ana.localPosition = _anaPosition;
+#endif
             }
             else if (_lastCrotchJointCorrection)
             {
                 _siriDamL.localRotation = _siriDamLOriginalRotation;
                 _siriDamR.localRotation = _siriDamROriginalRotation;
                 _kosi.localRotation = _kosiOriginalRotation;
+#if KOIKATSU
+                _ana.localRotation = _anaOriginalRotation;
+                _ana.localPosition = _anaOriginalPosition;
+#endif
             }
 
             if (leftFootJointCorrection)
