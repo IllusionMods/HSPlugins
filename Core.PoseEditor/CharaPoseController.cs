@@ -161,19 +161,25 @@ namespace HSPE
         private Transform _siriDamL;
         private Transform _siriDamR;
         private Transform _kosi;
+#if KOIKATSU
         private Transform _ana;
+#endif
         private Quaternion _siriDamLOriginalRotation;
         private Quaternion _siriDamROriginalRotation;
         private Quaternion _kosiOriginalRotation;
+#if KOIKATSU
         private Quaternion _anaOriginalRotation;
         private Quaternion _anaOriginalRotationOffset;
         private Vector3 _anaOriginalPosition;
         private Vector3 _anaOriginalPositionOffset;
+#endif
         private Quaternion _siriDamLRotation;
         private Quaternion _siriDamRRotation;
         private Quaternion _kosiRotation;
+#if KOIKATSU
         private Quaternion _anaRotation;
         private Vector3 _anaPosition;
+#endif
         private bool _lastCrotchJointCorrection = false;
 
         private Transform _leftFoot2;
@@ -301,10 +307,12 @@ namespace HSPE
             _siriDamROriginalRotation = _siriDamR.localRotation;
             _kosiOriginalRotation = _kosi.localRotation;
 
+#if KOIKATSU
             _anaOriginalRotation = _ana.localRotation;
             _anaOriginalPosition = _ana.localPosition;
             _anaOriginalRotationOffset = Quaternion.Inverse(_kosi.localRotation) * _ana.localRotation;
             _anaOriginalPositionOffset = _ana.localPosition - _kosi.localPosition;
+#endif
 
             IKSolver_Patches.onPostUpdate += IKSolverOnPostUpdate;
             IKExecutionOrder_Patches.onPostLateUpdate += IKExecutionOrderOnPostLateUpdate;
@@ -1104,8 +1112,10 @@ namespace HSPE
                 _siriDamRRotation = Quaternion.Lerp(Quaternion.identity, _body.solver.rightLegMapping.bone1.localRotation, 0.4f);
                 _kosiRotation = Quaternion.Lerp(Quaternion.identity, Quaternion.Lerp(_body.solver.leftLegMapping.bone1.localRotation, _body.solver.rightLegMapping.bone1.localRotation, 0.5f), 0.25f);
                 
+#if KOIKATSU                
                 _anaRotation = _kosiRotation * _anaOriginalRotationOffset;
                 _anaPosition = _kosiRotation * _anaOriginalPositionOffset;
+#endif
             }
 
             if (leftFootJointCorrection)
@@ -1122,16 +1132,20 @@ namespace HSPE
                 _siriDamL.localRotation = _siriDamLRotation;
                 _siriDamR.localRotation = _siriDamRRotation;
                 _kosi.localRotation = _kosiRotation;
+#if KOIKATSU
                 _ana.localRotation = _anaRotation;
                 _ana.localPosition = _anaPosition;
+#endif
             }
             else if (_lastCrotchJointCorrection)
             {
                 _siriDamL.localRotation = _siriDamLOriginalRotation;
                 _siriDamR.localRotation = _siriDamROriginalRotation;
                 _kosi.localRotation = _kosiOriginalRotation;
+#if KOIKATSU
                 _ana.localRotation = _anaOriginalRotation;
                 _ana.localPosition = _anaOriginalPosition;
+#endif
             }
 
             if (leftFootJointCorrection)
