@@ -161,22 +161,18 @@ namespace HSPE
         private Transform _siriDamL;
         private Transform _siriDamR;
         private Transform _kosi;
-#if KOIKATSU
-        private Transform _ana;
-#endif
         private Quaternion _siriDamLOriginalRotation;
         private Quaternion _siriDamROriginalRotation;
         private Quaternion _kosiOriginalRotation;
-#if KOIKATSU
-        private Quaternion _anaOriginalRotation;
-        private Quaternion _anaOriginalRotationOffset;
-        private Vector3 _anaOriginalPosition;
-        private Vector3 _anaOriginalPositionOffset;
-#endif
         private Quaternion _siriDamLRotation;
         private Quaternion _siriDamRRotation;
         private Quaternion _kosiRotation;
 #if KOIKATSU
+        private Transform _ana;
+        private Quaternion _anaOriginalRotation;
+        private Quaternion _anaOriginalRotationOffset;
+        private Vector3 _anaOriginalPosition;
+        private Vector3 _anaOriginalPositionOffset;
         private Quaternion _anaRotation;
         private Vector3 _anaPosition;
 #endif
