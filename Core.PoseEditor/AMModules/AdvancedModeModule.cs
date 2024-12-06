@@ -453,6 +453,9 @@ namespace HSPE.AMModules
         BoobsEditor,
         DynamicBonesEditor,
         BlendShapes,
-        IK
+        IK,
+#if AISHOUJO || HONEYSELECT2
+        ClothesTransformEditor,
+#endif
     }
 }
