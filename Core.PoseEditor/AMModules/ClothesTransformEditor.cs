@@ -675,7 +675,6 @@ namespace HSPE.AMModules
 
         private void FindTargetTransforms()
         {
-            HSPE.Logger.LogError("Call FindTargetTransforms");
 
             Dictionary<string, Transform> transforms = new Dictionary<string, Transform>();
             var result = _parent.GetComponentsInChildren<Transform>();
@@ -760,8 +759,6 @@ namespace HSPE.AMModules
 
         private void GetClothesRenderers()
         {
-            HSPE.Logger.LogError("Call GetClothesRenderers");
-
             for (int i = 0; i < (int)ChoiceType.Count; i++)
             {
                 _clothesRenderers[i].Clear();
@@ -832,8 +829,6 @@ namespace HSPE.AMModules
             {
                 return;
             }
-
-            HSPE.Logger.LogError("Call ChangeClothesRenderersBone");
 
             Dictionary<SkinnedMeshRenderer, Transform[]> createdBones = new Dictionary<SkinnedMeshRenderer, Transform[]>();
 
