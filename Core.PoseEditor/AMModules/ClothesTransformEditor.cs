@@ -1,3 +1,4 @@
+using Illusion.Extensions;
 using Studio;
 using System;
 using System.Collections.Generic;
@@ -677,7 +678,33 @@ namespace HSPE.AMModules
         {
 
             Dictionary<string, Transform> transforms = new Dictionary<string, Transform>();
-            var result = _parent.GetComponentsInChildren<Transform>();
+
+            Transform rootTransform = null;
+
+            List<Transform> transformStack = new List<Transform>();
+
+            transformStack.Add(_parent.gameObject.transform);
+
+            while (transformStack.Count != 0)
+            {
+                Transform currTransform = transformStack.Pop();
+
+                if(currTransform.Find("p_cf_anim"))
+                {
+                    rootTransform = currTransform.Find("p_cf_anim");
+                    break;
+                }
+
+                for(int i =0; i< currTransform.childCount; i++)
+                {
+                    transformStack.Add(currTransform.GetChild(i));
+                }
+            }
+
+
+            if (rootTransform == null) return;
+
+            var result = rootTransform.GetComponentsInChildren<Transform>();
 
             _currTargetTransform = null;
             _currTargetTransferList = null;
