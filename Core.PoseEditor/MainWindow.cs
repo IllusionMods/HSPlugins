@@ -1611,7 +1611,7 @@ namespace HSPE
                 return;
             this.ExecuteDelayed2(() =>
             {
-                LoadSceneGeneric(node, new SortedDictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl).ToList());
+                LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl);
             }, 3);
         }
 
@@ -1628,7 +1628,7 @@ namespace HSPE
             Dictionary<int, ObjectCtrlInfo> toIgnore = new Dictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl);
             this.ExecuteDelayed2(() =>
             {
-                LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl.Where(e => toIgnore.ContainsKey(e.Key) == false).OrderBy(e => SceneInfo_Import_Patches._newToOldKeys[e.Key]).ToList());
+                LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl.Where(e => toIgnore.ContainsKey(e.Key) == false).ToDictionary(d => d.Key, m => m.Value));
             }, 3);
         }
 
@@ -1638,17 +1638,38 @@ namespace HSPE
         /// <param name="node"></param>
         public void ExternalLoadScene(XmlNode node)
         {
-            LoadSceneGeneric(node, new SortedDictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl).ToList());
+            LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl);
         }
 
-        private void LoadSceneGeneric(XmlNode node, List<KeyValuePair<int, ObjectCtrlInfo>> dic)
+        private void LoadSceneGeneric(XmlNode node, Dictionary<int, ObjectCtrlInfo> dic)
         {
             if (node == null || node.Name != "root")
                 return;
-            string v = node.Attributes["version"].Value;
-            int i = 0;
+
             foreach (XmlNode childNode in node.ChildNodes)
             {
+                if (childNode.Name.Equals("itemInfo") == false)
+                {
+                    continue;
+                }
+
+                var attribute = childNode.Attributes?["index"];
+
+				if (attribute == null)
+	            {
+                    continue;
+	            }
+
+	            if (int.TryParse(attribute.Value, out var index) == false)
+	            {
+		            continue;
+	            }
+
+	            if (dic[index] is OCIItem ociItem)
+	            {
+		            LoadElement(ociItem, childNode);
+	            }
+	            /*
                 switch (childNode.Name)
                 {
                     case "itemInfo":
@@ -1657,11 +1678,13 @@ namespace HSPE
                             ++i;
                         if (i == dic.Count)
                             break;
+                        HSPE.Logger.LogMessage($"{i} matched {dic[i].Value.objectInfo.dicKey}, if this isn't right, kys.");
                         LoadElement(ociItem, childNode);
                         ++i;
                         break;
                 }
-            }
+                */
+			}
         }
 
         private void OnSceneSave(string path)
