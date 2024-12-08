@@ -282,7 +282,7 @@ namespace HSPE
             else
                 AdvancedModeModule._repeatTimer = 0f;
             AdvancedModeModule._repeatCalled = false;
-            
+
             BoneReorganizer.Update();
         }
 
@@ -1655,21 +1655,21 @@ namespace HSPE
 
                 var attribute = childNode.Attributes?["index"];
 
-				if (attribute == null)
-	            {
+                if (attribute == null)
+                {
                     continue;
-	            }
+                }
 
-	            if (int.TryParse(attribute.Value, out var index) == false)
-	            {
-		            continue;
-	            }
+                if (int.TryParse(attribute.Value, out var index) == false)
+                {
+                    continue;
+                }
 
-	            if (dic[index] is OCIItem ociItem)
-	            {
-		            LoadElement(ociItem, childNode);
-	            }
-	            /*
+                if (dic[index] is OCIItem ociItem)
+                {
+                    LoadElement(ociItem, childNode);
+                }
+                /*
                 switch (childNode.Name)
                 {
                     case "itemInfo":
@@ -1684,7 +1684,7 @@ namespace HSPE
                         break;
                 }
                 */
-			}
+            }
         }
 
         private void OnSceneSave(string path)
