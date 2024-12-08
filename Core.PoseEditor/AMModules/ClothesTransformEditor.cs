@@ -810,25 +810,36 @@ namespace HSPE.AMModules
                     _ChoiceKey.TryGetValue(_clothesKeyTransforms[i].name, out currChoice);
                     if (currChoice < ChoiceType.Gloves)
                     {
+                        var allRenderers = _clothesKeyTransforms[i].GetComponentsInChildren<SkinnedMeshRenderer>();
                         var clotheTransform = GetDefHalfClothesTransform(_clothesKeyTransforms[i]);
 
-                        if (clotheTransform.Key != null)
+                        foreach(var currRenderer in allRenderers)
                         {
-                            var renderers = clotheTransform.Key.GetComponentsInChildren<SkinnedMeshRenderer>();
-
-                            if (renderers.Length > 0)
+                            Transform currTransform = currRenderer.transform;
+                            
+                            while(currTransform != null)
                             {
-                                _clothesRenderers[(int)currChoice].AddRange(renderers);
-                            }
-                        }
+                                if(currTransform == clotheTransform.Key)
+                                {
+                                    _clothesRenderers[(int)currChoice].Add(currRenderer);
+                                    break;
+                                }
+                                else if(currTransform == clotheTransform.Value)
+                                {
+                                    _clothesRenderers[(int)_ChoiceKey[_clothesKeys[i] + "_half"]].Add(currRenderer);
+                                    break;
+                                }
 
-                        if (clotheTransform.Value != null)
-                        {
-                            var renderers = clotheTransform.Value.GetComponentsInChildren<SkinnedMeshRenderer>();
-
-                            if (renderers.Length > 0)
-                            {
-                                _clothesRenderers[(int)_ChoiceKey[_clothesKeys[i] + "_half"]].AddRange(renderers);
+                                if(currTransform.transform == _clothesKeyTransforms[i])
+                                {
+                                    _clothesRenderers[(int)currChoice].Add(currRenderer);
+                                    _clothesRenderers[(int)_ChoiceKey[_clothesKeys[i] + "_half"]].Add(currRenderer);
+                                    break;
+                                }
+                                else
+                                {
+                                    currTransform = currTransform.parent;
+                                }
                             }
                         }
                     }
