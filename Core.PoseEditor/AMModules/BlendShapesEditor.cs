@@ -474,7 +474,7 @@ namespace HSPE.AMModules
             return result;
         }
 
-        public void SetBlendShapeWeightByOut(SkinnedMeshRenderer renderer, int index, float weight)
+        public void SetBlendShapeWeight(SkinnedMeshRenderer renderer, int index, float weight)
         {
             if (_blenderRenderbySkinnedRenderer.TryGetValue(renderer, out BlendRenderer blendRenderer))
             {
