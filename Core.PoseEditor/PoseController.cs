@@ -39,6 +39,7 @@ namespace HSPE
         internal BlendShapesEditor _blendShapesEditor;
         internal CollidersEditor _collidersEditor;
         internal IKEditor _ikEditor;
+        internal ClothesTransformEditor _clothesTransformEditor;
         protected readonly List<AdvancedModeModule> _modules = new List<AdvancedModeModule>();
         protected AdvancedModeModule _currentModule;
         internal GenericOCITarget _target;
@@ -96,6 +97,11 @@ namespace HSPE
 
             _ikEditor = new IKEditor(this, _target);
             _modules.Add(_ikEditor);
+
+#if AISHOUJO || HONEYSELECT2
+            _clothesTransformEditor = new ClothesTransformEditor(this, _target);
+            _modules.Add(_clothesTransformEditor);
+#endif
 
             if (_collidersEditor._isLoneCollider)
             {
@@ -178,7 +184,7 @@ namespace HSPE
             //Register as a child when a parent exists
             var otherParent = other.transform.parent?.GetComponentInParent<PoseController>();
 
-            if (otherParent != null && otherParent._childObjects.Contains(other.gameObject) )
+            if (otherParent != null && otherParent._childObjects.Contains(other.gameObject))
             {
                 var parent = transform.parent?.GetComponentInParent<PoseController>();
                 parent?._childObjects.Add(gameObject);
@@ -279,22 +285,22 @@ namespace HSPE
             onParentage += oldDelegate;
         }
 
-        private static void OnParentageRoot(TreeNodeObject parent, TreeNodeObject child )
+        private static void OnParentageRoot(TreeNodeObject parent, TreeNodeObject child)
         {
             PoseController.onParentage?.Invoke(parent, child);
 
             var dicInfo = Studio.Studio.Instance.dicInfo;
-            
+
             if (dicInfo.TryGetValue(child, out var childInfo))
             {
                 //Body part does not have OCI. So look for OCI while moving to the parent.
                 ObjectCtrlInfo parentInfo = null;
-                while( parent != null && !dicInfo.TryGetValue(parent, out parentInfo) )
+                while (parent != null && !dicInfo.TryGetValue(parent, out parentInfo))
                     parent = parent.parent;
 
                 PoseController parentController = parentInfo?.guideObject.transformTarget.GetComponentInParent<PoseController>();
 
-                if( parentController != null )
+                if (parentController != null)
                 {
                     var childTransform = childInfo.guideObject.transformTarget;
                     var childGObj = childTransform.gameObject;
@@ -438,7 +444,7 @@ namespace HSPE
         {
             var dicInfo = Studio.Studio.Instance.dicInfo;
 
-            if ( dicInfo.TryGetValue(child, out var childInfo) )
+            if (dicInfo.TryGetValue(child, out var childInfo))
             {
                 var childTransform = childInfo.guideObject.transformTarget;
                 var childGObj = childTransform.gameObject;
