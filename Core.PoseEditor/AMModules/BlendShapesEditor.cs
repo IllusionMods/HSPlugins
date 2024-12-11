@@ -461,7 +461,7 @@ namespace HSPE.AMModules
             });
         }
 
-        static public string FixFullPath(string fullpath)
+        private static string FixFullPath(string fullpath)
         {
             string result = fullpath;
 
