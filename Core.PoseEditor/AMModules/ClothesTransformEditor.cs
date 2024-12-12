@@ -113,13 +113,11 @@ namespace HSPE.AMModules
         private Dictionary<string, ClothesTransferList> _clothesTransferListsByStr = new Dictionary<string, ClothesTransferList>();
 
         private static readonly string _cloneToken = "_CTClone_";
-        private static readonly string _targetTransStartToken = "cf_J_";
-        private static readonly string _targetTransEndToken = "_s";
-        private static readonly string[] _notInTheRuleNodes = { "cf_J_Kokan", "cf_J_Ana", "cf_J_Foot", "cf_J_Toes",
-                                                            "cf_J_Hand_Index","cf_J_Hand_Little","cf_J_Hand_Middle","cf_J_Hand_Ring","cf_J_Hand_Thumb" };
-        //private static readonly string[] _targetTransformKategoryKey = { "hand","spine","toe", };
+        //private static readonly string _targetTransStartToken = "cf_J_";
+        //private static readonly string _targetTransEndToken = "_s";
+        //private static readonly string[] _notInTheRuleNodes = { "cf_J_Kokan", "cf_J_Ana", "cf_J_Foot", "cf_J_Toes",
+        //                                                    "cf_J_Hand_Index","cf_J_Hand_Little","cf_J_Hand_Middle","cf_J_Hand_Ring","cf_J_Hand_Thumb" };
 
-        //private Dictionary<string, List<Transform>> _targetTransforms = new Dictionary<string, List<Transform>>();
         private List<Transform> _targetTransforms = new List<Transform>();
 
         private Transform _currTargetTransform = null;
@@ -397,7 +395,7 @@ namespace HSPE.AMModules
         }
         private void DeleteAllTransfers()
         {
-            if(_clothesTransferLists.Count == 0 && _clothesTransferListsByStr.Count == 0)
+            if (_clothesTransferLists.Count == 0 && _clothesTransferListsByStr.Count == 0)
             {
                 return;
             }
@@ -412,7 +410,7 @@ namespace HSPE.AMModules
                     {
                         for (int j = 0; j < renderer.bones.Length; j++)
                         {
-                            if(renderer.bones[j] != null)
+                            if (renderer.bones[j] != null)
                             {
                                 if (renderer.bones[j].name.Contains(_cloneToken))
                                 {
@@ -673,81 +671,6 @@ namespace HSPE.AMModules
             GUILayout.EndHorizontal();
         }
 
-
-        private void FindTargetTransforms()
-        {
-
-            Dictionary<string, Transform> transforms = new Dictionary<string, Transform>();
-
-            Transform rootTransform = null;
-
-            List<Transform> transformStack = new List<Transform>();
-
-            transformStack.Add(_parent.gameObject.transform);
-
-            while (transformStack.Count != 0)
-            {
-                Transform currTransform = transformStack.Pop();
-
-                if(currTransform.Find("p_cf_anim"))
-                {
-                    rootTransform = currTransform.Find("p_cf_anim");
-                    break;
-                }
-
-                for(int i =0; i< currTransform.childCount; i++)
-                {
-                    transformStack.Add(currTransform.GetChild(i));
-                }
-            }
-
-
-            if (rootTransform == null) return;
-
-            var result = rootTransform.GetComponentsInChildren<Transform>();
-
-            _currTargetTransform = null;
-            _currTargetTransferList = null;
-            _currTargetTransfer = null;
-            _targetTransforms.Clear();
-            _clothesTransferLists.Clear();
-
-            int endTokenSearchStartIndex = _targetTransStartToken.Length;
-            foreach (Transform t in result)
-            {
-                if (t.name.IndexOf(_targetTransStartToken) != -1)
-                {
-                    int lastTokenIndex = t.name.IndexOf(_targetTransEndToken, endTokenSearchStartIndex);
-                    if (lastTokenIndex != -1)
-                    {
-                        transforms.Add(t.name, t);
-                        _targetTransforms.Add(t);
-                    }
-                    else
-                    {
-                        if (t.name.ContainsAny(_notInTheRuleNodes))
-                        {
-                            transforms.Add(t.name, t);
-                            _targetTransforms.Add(t);
-                        }
-                    }
-                }
-            }
-
-            if (_clothesTransferListsByStr.Count > 0)
-            {
-                foreach (var transformNames in _clothesTransferListsByStr)
-                {
-                    Transform transform = null;
-
-                    if (transforms.TryGetValue(transformNames.Key, out transform))
-                    {
-                        _clothesTransferLists.Add(transform, transformNames.Value);
-                    }
-                }
-            }
-        }
-
         private KeyValuePair<Transform, Transform> GetDefHalfClothesTransform(Transform clotheKeyTransform)
         {
 #if AISHOUJO || HONEYSELECT2
@@ -784,6 +707,124 @@ namespace HSPE.AMModules
             return new KeyValuePair<Transform, Transform>(null, null);
         }
 
+        private SkinnedMeshRenderer GetBodyRenderer()
+        {
+            SkinnedMeshRenderer bodyRenderer = null;
+#if AISHOUJO || HONEYSELECT2
+            List<Transform> transformStack = new List<Transform>();
+
+            transformStack.Add(_parent.gameObject.transform);
+
+            while (transformStack.Count != 0)
+            {
+                Transform currTransform = transformStack.Pop();
+
+                if (currTransform.Find("p_cf_body_00"))
+                {
+                    Transform bodyTransform = currTransform.Find("p_cf_body_00");
+                    AIChara.CmpBody bodyCmp = bodyTransform.GetComponent<AIChara.CmpBody>();
+
+                    if (bodyCmp != null)
+                    {
+                        if (bodyCmp.targetCustom != null && bodyCmp.targetCustom.rendBody != null)
+                        {
+                            bodyRenderer = bodyCmp.targetCustom.rendBody.transform.GetComponent<SkinnedMeshRenderer>();
+                        }
+                        else
+                        {
+                            if (bodyCmp.targetEtc != null && bodyCmp.targetEtc.objBody != null)
+                            {
+                                bodyRenderer = bodyCmp.targetEtc.objBody.GetComponent<SkinnedMeshRenderer>();
+                            }
+                        }
+                    }
+
+                    break;
+                }
+                else if(currTransform.Find("p_cm_body_00"))
+                {
+                    Transform bodyTransform = currTransform.Find("p_cm_body_00");
+                    AIChara.CmpBody bodyCmp = bodyTransform.GetComponent<AIChara.CmpBody>();
+
+                    if (bodyCmp != null)
+                    {
+                        if (bodyCmp.targetCustom != null && bodyCmp.targetCustom.rendBody != null)
+                        {
+                            bodyRenderer = bodyCmp.targetCustom.rendBody.transform.GetComponent<SkinnedMeshRenderer>();
+                        }
+                        else
+                        {
+                            if (bodyCmp.targetEtc != null && bodyCmp.targetEtc.objBody != null)
+                            {
+                                bodyRenderer = bodyCmp.targetEtc.objBody.GetComponent<SkinnedMeshRenderer>();
+                            }
+                        }
+                    }
+
+                    break;
+                }
+
+                for (int i = 0; i < currTransform.childCount; i++)
+                {
+                    transformStack.Add(currTransform.GetChild(i));
+                }
+            }
+#endif
+            return bodyRenderer;
+        }
+
+        private void FindTargetTransforms()
+        {
+
+            Dictionary<string, Transform> bodyTransforms = new Dictionary<string, Transform>();
+
+            SkinnedMeshRenderer bodyRenderer = null;
+
+            bodyRenderer = GetBodyRenderer();
+            if (bodyRenderer == null) return;
+
+            _currTargetTransform = null;
+            _currTargetTransferList = null;
+            _currTargetTransfer = null;
+            _targetTransforms.Clear();
+            _clothesTransferLists.Clear();
+
+            foreach (Transform bone in bodyRenderer.bones)
+            {
+                Transform sameNameTransform = null;
+
+                if (!bodyTransforms.TryGetValue(bone.name, out sameNameTransform))
+                {
+                    bodyTransforms.Add(bone.name, bone);
+                    _targetTransforms.Add(bone);
+                }
+                else
+                {
+                    HSPE.Logger.LogError("this body has same name bones :" + sameNameTransform.name);
+                }
+            }
+
+            if (_clothesTransferListsByStr.Count > 0)
+            {
+                foreach (var transformNames in _clothesTransferListsByStr)
+                {
+                    Transform transform = null;
+
+                    if (bodyTransforms.TryGetValue(transformNames.Key, out transform))
+                    {
+                        _clothesTransferLists.Add(transform, transformNames.Value);
+                    }
+                }
+
+                _clothesTransferListsByStr.Clear();
+
+                foreach (var clothesTransferList in _clothesTransferLists)
+                {
+                    _clothesTransferListsByStr.Add(clothesTransferList.Key.name, clothesTransferList.Value);
+                }
+            }
+        }
+
         private void GetClothesRenderers()
         {
             for (int i = 0; i < (int)ChoiceType.Count; i++)
@@ -813,24 +854,24 @@ namespace HSPE.AMModules
                         var allRenderers = _clothesKeyTransforms[i].GetComponentsInChildren<SkinnedMeshRenderer>();
                         var clotheTransform = GetDefHalfClothesTransform(_clothesKeyTransforms[i]);
 
-                        foreach(var currRenderer in allRenderers)
+                        foreach (var currRenderer in allRenderers)
                         {
                             Transform currTransform = currRenderer.transform;
-                            
-                            while(currTransform != null)
+
+                            while (currTransform != null)
                             {
-                                if(currTransform == clotheTransform.Key)
+                                if (currTransform == clotheTransform.Key)
                                 {
                                     _clothesRenderers[(int)currChoice].Add(currRenderer);
                                     break;
                                 }
-                                else if(currTransform == clotheTransform.Value)
+                                else if (currTransform == clotheTransform.Value)
                                 {
                                     _clothesRenderers[(int)_ChoiceKey[_clothesKeys[i] + "_half"]].Add(currRenderer);
                                     break;
                                 }
 
-                                if(currTransform.transform == _clothesKeyTransforms[i])
+                                if (currTransform.transform == _clothesKeyTransforms[i])
                                 {
                                     _clothesRenderers[(int)currChoice].Add(currRenderer);
                                     _clothesRenderers[(int)_ChoiceKey[_clothesKeys[i] + "_half"]].Add(currRenderer);
