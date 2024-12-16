@@ -479,6 +479,13 @@ namespace HSPE.AMModules
                             _currTargetTransfer = result.Value;
                         }
 
+                        if (GUILayout.Button("Refresh Clothes Renderer"))
+                        {
+                            GetClothesRenderers();
+                            ChangeClothesRenderersBone();
+                        }
+
+
                         GUILayout.EndHorizontal();
                     }
 
