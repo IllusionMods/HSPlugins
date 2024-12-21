@@ -348,6 +348,7 @@ namespace HSPE.AMModules
 
             MainWindow._self.ExecuteDelayed(() =>
             {
+                GetClothesRenderers();
                 ChangeClothesRenderersBone();
             }, 2);
 
