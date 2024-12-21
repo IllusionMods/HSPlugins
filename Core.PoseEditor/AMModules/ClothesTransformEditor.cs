@@ -485,8 +485,6 @@ namespace HSPE.AMModules
                             GetClothesRenderers();
                             ChangeClothesRenderersBone();
                         }
-
-
                         GUILayout.EndHorizontal();
                     }
 
