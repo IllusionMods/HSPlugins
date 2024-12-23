@@ -664,6 +664,11 @@ namespace HSPE.AMModules
                 GUI.color = Color.red;
             }
 
+            if (GUILayout.Button("test refresh"))
+            {
+                RefreshSkinnedMeshRendererList();
+            }
+
             if (GUILayout.Button(hasOriginBlend ? "NonOriginChar" : "OriginChar"))
             {
                 _originBlendRenderers.Clear();
@@ -787,7 +792,6 @@ namespace HSPE.AMModules
 
                 bool zeroResult = true;
 
-
                 foreach (var currBlend in _skinnedMeshTarget._blendIndics)
                 {
                     string str1;
@@ -830,6 +834,7 @@ namespace HSPE.AMModules
                             GUILayout.Label(currBlend.Value.ToString(), GUILayout.ExpandWidth(false));
                             _renameString = GUILayout.TextField(_renameString, GUILayout.ExpandWidth(true));
                         }
+
                         if (GUILayout.Button(_renameIndex != currBlend.Value ? "Rename" : "Save", GUILayout.ExpandWidth(false)))
                         {
                             if (_renameIndex != currBlend.Value)
@@ -1449,6 +1454,19 @@ namespace HSPE.AMModules
         {
             foreach (var currBlendRenderer in _blendRenderers)
             {
+                if(currBlendRenderer.Value._dirtyBlends.Count != currBlendRenderer.Value._renderer.sharedMesh.blendShapeCount)
+                {
+                    currBlendRenderer.Value._blendIndics.Clear();
+                    currBlendRenderer.Value._blendNames.Clear();
+
+                    for (int index = 0; index < currBlendRenderer.Value._renderer.sharedMesh.blendShapeCount; index++)
+                    {
+                        string blendName = currBlendRenderer.Value._renderer.sharedMesh.GetBlendShapeName(index);
+                        currBlendRenderer.Value._blendIndics[blendName] = index;
+                        currBlendRenderer.Value._blendNames.Add(blendName);
+                    }
+                }
+
                 currBlendRenderer.Value.ApplyDirty();
             }
         }
