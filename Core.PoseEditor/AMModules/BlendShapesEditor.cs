@@ -664,7 +664,7 @@ namespace HSPE.AMModules
                 GUI.color = Color.red;
             }
 
-            if (GUILayout.Button("test refresh"))
+            if (GUILayout.Button("refresh renderer"))
             {
                 RefreshSkinnedMeshRendererList();
             }
