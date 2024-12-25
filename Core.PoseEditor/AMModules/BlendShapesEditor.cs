@@ -1850,6 +1850,11 @@ namespace HSPE.AMModules
                                 {
                                     float weight = Mathf.LerpUnclamped(left[i], right[i], factor);
                                     renderer.SetBlendShapeWeight(i, weight);
+
+                                    if (p.editor._linkEyesComponents)
+                                    {
+                                        p.blendRenderer.ApplyLink(weight, i);
+                                    }
                                 }
                             }
                         },
@@ -1889,10 +1894,7 @@ namespace HSPE.AMModules
                                     float weight = Mathf.LerpUnclamped(left[index], right[index], factor);
                                     renderer.SetBlendShapeWeight(index, weight);
 
-                                    if (p.editor._linkEyesComponents)
-                                    {
-                                        renderer.ApplyLink(weight, index);
-                                    }
+                                    renderer.ApplyLink(weight, index);
                                 }
                             }
                         },
