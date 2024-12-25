@@ -160,26 +160,21 @@ namespace HSPE.AMModules
                 _nonMatchBlendCorrection.Clear();
             }
 
-            public void ApplyLink(float weight, int index = int.MaxValue, bool nonDirty = false)
+            public void ApplyLink(float weight, bool female, int index, bool nonDirty = false)
             {
+                int eyesComponentsCount = female ? _femaleEyesComponentsCount : _maleEyesComponentsCount;
+
                 if (_linkedBlendRenderers.Count > 0)
                 {
-                    if (index != int.MaxValue)
+                    if (index < eyesComponentsCount)
                     {
                         string blendName = GetBlendShapeName(index);
-                        ApplyLink(weight, blendName, nonDirty);
-                    }
-                    else
-                    {
-                        foreach (string blendName in _blendNames)
-                        {
-                            ApplyLink(weight, blendName, nonDirty); 
-                        }
+                        ApplyLink(weight, blendName, nonDirty, eyesComponentsCount);
                     }
                 }
             }
 
-            private void ApplyLink(float weight, string blendName, bool nonDirty)
+            private void ApplyLink(float weight, string blendName, bool nonDirty, int eyeComponentsCount)
             {
                 if (blendName != null)
                 {
@@ -205,13 +200,13 @@ namespace HSPE.AMModules
                             {
                                 if (blendName[i] < '0' || blendName[i] > '9')
                                 {
-                                    nameIndexEnd = i -1;
+                                    nameIndexEnd = i - 1;
                                     break;
                                 }
                             }
                         }
 
-                        if(nameIndex != -1 && nameIndexEnd != -1)
+                        if (nameIndex != -1 && nameIndexEnd != -1)
                         {
                             nameIndexStr = blendName.Substring(nameIndex, nameIndexEnd - nameIndex + 1);
                             //blendKeyIndex = int.Parse(nameIndexStr);
@@ -227,15 +222,30 @@ namespace HSPE.AMModules
 
                     foreach (var linkedBlendRenderer in _linkedBlendRenderers)
                     {
-                        foreach (var targetBlendName in linkedBlendRenderer._blendNames)
+                        for(int i=0; i< linkedBlendRenderer._blendNames.Count; i++)
                         {
-                            if (targetBlendName != null)
+                            if(i < eyeComponentsCount)
                             {
-                                if (targetBlendName.ToUpper().Contains(mainKey))
+                                string targetBlendName = linkedBlendRenderer._blendNames[i];
+                                if (targetBlendName != null)
                                 {
-                                    if(nameIndexStr != null)
+                                    if (targetBlendName.ToUpper().Contains(mainKey))
                                     {
-                                        if(targetBlendName.Contains(nameIndexStr))
+                                        if (nameIndexStr != null)
+                                        {
+                                            if (targetBlendName.Contains(nameIndexStr))
+                                            {
+                                                if (nonDirty)
+                                                {
+                                                    linkedBlendRenderer.NonDirty(targetBlendName);
+                                                }
+                                                else
+                                                {
+                                                    linkedBlendRenderer.SetBlendShapeWeight(targetBlendName, weight);
+                                                }
+                                            }
+                                        }
+                                        else
                                         {
                                             if (nonDirty)
                                             {
@@ -247,18 +257,11 @@ namespace HSPE.AMModules
                                             }
                                         }
                                     }
-                                    else
-                                    {
-                                        if (nonDirty)
-                                        {
-                                            linkedBlendRenderer.NonDirty(targetBlendName);
-                                        }
-                                        else
-                                        {
-                                            linkedBlendRenderer.SetBlendShapeWeight(targetBlendName, weight);
-                                        }
-                                    }
                                 }
+                            }
+                            else
+                            {
+                                break;
                             }
                         }
                     }
@@ -993,7 +996,7 @@ namespace HSPE.AMModules
 
                             if (_linkEyesComponents)
                             {
-                                _skinnedMeshTarget.ApplyLink(weight, currBlend.Value);
+                                _skinnedMeshTarget.ApplyLink(weight, _target.isFemale, currBlend.Value);
 
                             }
                         }
@@ -1005,7 +1008,7 @@ namespace HSPE.AMModules
 
                             if (_linkEyesComponents)
                             {
-                                _skinnedMeshTarget.ApplyLink(0.0f, int.MaxValue, true);
+                                _skinnedMeshTarget.ApplyLink(0.0f, _target.isFemale, currBlend.Value, true);
                             }
                         }
 
@@ -1786,7 +1789,7 @@ namespace HSPE.AMModules
 
                                 if (p.editor._linkEyesComponents)
                                 {
-                                    p.blendRenderer.ApplyLink(weight, p.index);
+                                    p.blendRenderer.ApplyLink(weight, p.editor._target.isFemale, p.index);
                                 }
                             }
                         },
@@ -1853,7 +1856,7 @@ namespace HSPE.AMModules
 
                                     if (p.editor._linkEyesComponents)
                                     {
-                                        p.blendRenderer.ApplyLink(weight, i);
+                                        p.blendRenderer.ApplyLink(weight, p.editor._target.isFemale, i);
                                     }
                                 }
                             }
@@ -1894,7 +1897,7 @@ namespace HSPE.AMModules
                                     float weight = Mathf.LerpUnclamped(left[index], right[index], factor);
                                     renderer.SetBlendShapeWeight(index, weight);
 
-                                    renderer.ApplyLink(weight, index);
+                                    renderer.ApplyLink(weight, p.editor._target.isFemale, index);
                                 }
                             }
                         },
