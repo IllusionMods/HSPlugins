@@ -449,6 +449,11 @@ namespace HSPE.AMModules
         private Vector2 _ignoredDynamicBonesScroll;
         #endregion
 
+        #region Public Variables
+        public bool _addNewDynamicBonesAsDefault = true;
+        public bool _addNewDynamicBonesAsDefaultSaved = true;
+        #endregion
+
         #region Public Accessors
         public override AdvancedModeModuleType type { get { return AdvancedModeModuleType.CollidersEditor; } }
         public override string displayName { get { return "Colliders"; } }
@@ -660,6 +665,9 @@ namespace HSPE.AMModules
                 GUILayout.BeginVertical(GUI.skin.box);
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("Affected Dynamic Bones", GUILayout.ExpandWidth(false));
+
+                _addNewDynamicBonesAsDefault = GUILayout.Toggle(_addNewDynamicBonesAsDefault, "Enable New Dynamic Bones", GUILayout.ExpandWidth(false));
+
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("All off", GUILayout.ExpandWidth(false)))
                     SetIgnoreAllDynamicBones(_colliderTarget, true);
@@ -869,6 +877,9 @@ namespace HSPE.AMModules
                 }
                 xmlWriter.WriteEndElement();
             }
+            xmlWriter.WriteStartElement("collidersEditor");
+            xmlWriter.WriteAttributeString("addNewDynamicBonesAsDefault", XmlConvert.ToString(_addNewDynamicBonesAsDefault));
+            xmlWriter.WriteEndElement();
             return written;
         }
 
@@ -982,6 +993,11 @@ namespace HSPE.AMModules
                         HSPE.Logger.LogError("Couldn't load collider for object " + _parent.name + " " + node.OuterXml + "\n" + e);
                     }
                 }
+            }
+            XmlNode collidersEdtior = xmlNode.FindChildNode("collidersEditor");
+            if (collidersEdtior != null)
+            {
+                _addNewDynamicBonesAsDefaultSaved = collidersEdtior.Attributes["addNewDynamicBonesAsDefault"] == null || XmlConvert.ToBoolean(collidersEdtior.Attributes["addNewDynamicBonesAsDefault"].Value);
             }
             return changed;
         }
@@ -1126,7 +1142,7 @@ namespace HSPE.AMModules
             }
         }
 
-        private void SetIgnoreDynamicBone(DynamicBoneColliderBase collider, PoseController dynamicBoneParent, object dynamicBone, bool ignore)
+        public void SetIgnoreDynamicBone(DynamicBoneColliderBase collider, PoseController dynamicBoneParent, object dynamicBone, bool ignore)
         {
             ColliderDataBase colliderData = SetColliderDirty(collider);
             DynamicBoneCollider normalCollider = collider as DynamicBoneCollider;

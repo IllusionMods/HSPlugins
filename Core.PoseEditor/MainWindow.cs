@@ -1731,6 +1731,8 @@ namespace HSPE
             controller.ScheduleLoad(node, e =>
             {
                 controller.enabled = controllerEnabled;
+                if (controller._collidersEditor != null) //applying here the saved value so that it is only loaded after the loading/importing of an scene is finished!
+                    controller._collidersEditor._addNewDynamicBonesAsDefault = controller._collidersEditor._addNewDynamicBonesAsDefaultSaved;
             });
 
         }
@@ -1746,6 +1748,8 @@ namespace HSPE
             controller.ScheduleLoad(node, e =>
             {
                 controller.enabled = controllerEnabled;
+                if (controller._collidersEditor != null) //applying here the saved value so that it is only loaded after the loading/importing of an scene is finished!
+                    controller._collidersEditor._addNewDynamicBonesAsDefault = controller._collidersEditor._addNewDynamicBonesAsDefaultSaved;
             });
 
         }
