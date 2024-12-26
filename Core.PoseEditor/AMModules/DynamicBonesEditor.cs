@@ -1582,6 +1582,9 @@ namespace HSPE.AMModules
                             bone.m_Colliders.Add(pair.Key);
                             NotifyDynamicBoneForUpdate(bone);
                         }
+
+                        if (pair.Value._addNewDynamicBonesAsDefault == false)
+                            pair.Value.SetIgnoreDynamicBone(pair.Key, _parent, bone, true);
                     }
                 }
             }
