@@ -447,6 +447,7 @@ namespace HSPE.AMModules
 #endif
         internal readonly Dictionary<DynamicBoneColliderBase, ColliderDataBase> _dirtyColliders = new Dictionary<DynamicBoneColliderBase, ColliderDataBase>();
         private Vector2 _ignoredDynamicBonesScroll;
+        private string _ignoredDynamicBonesFilter = "";
         #endregion
 
         #region Public Variables
@@ -665,16 +666,23 @@ namespace HSPE.AMModules
                 GUILayout.BeginVertical(GUI.skin.box);
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("Affected Dynamic Bones", GUILayout.ExpandWidth(false));
+                GUILayout.FlexibleSpace();
 
                 _addNewDynamicBonesAsDefault = GUILayout.Toggle(_addNewDynamicBonesAsDefault, "Enable New Dynamic Bones", GUILayout.ExpandWidth(false));
 
-                GUILayout.FlexibleSpace();
                 if (GUILayout.Button("All off", GUILayout.ExpandWidth(false)))
                     SetIgnoreAllDynamicBones(_colliderTarget, true);
                 if (GUILayout.Button("All on", GUILayout.ExpandWidth(false)))
                     SetIgnoreAllDynamicBones(_colliderTarget, false);
                 GUILayout.EndHorizontal();
                 {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("Search : ", GUILayout.ExpandWidth(false));
+                    _ignoredDynamicBonesFilter = GUILayout.TextField(_ignoredDynamicBonesFilter);
+                    if (GUILayout.Button("X", GUILayout.ExpandWidth(false)))
+                        _ignoredDynamicBonesFilter = "";
+                    GUILayout.EndHorizontal();
+
                     ColliderDataBase cd;
                     if (_dirtyColliders.TryGetValue(_colliderTarget, out cd) == false)
                         cd = null;
@@ -682,13 +690,13 @@ namespace HSPE.AMModules
                     _ignoredDynamicBonesScroll = GUILayout.BeginScrollView(_ignoredDynamicBonesScroll);
                     foreach (PoseController controller in PoseController._poseControllers)
                     {
-                        int total = controller._dynamicBonesEditor._dynamicBones.Count;
+                        int total = controller._dynamicBonesEditor._dynamicBones.Where(d => d != null && d.m_Root != null && d.m_Root.name.IndexOf(_ignoredDynamicBonesFilter, StringComparison.OrdinalIgnoreCase) != -1).Count();
                         CharaPoseController charaPoseController = null;
                         if (CharaPoseController._charaPoseControllers.Contains(controller))
                         {
                             charaPoseController = (CharaPoseController)controller;
                             if (charaPoseController._boobsEditor != null)
-                                total += charaPoseController._boobsEditor._dynamicBones.Length;
+                                total += charaPoseController._boobsEditor._dynamicBones.Where(d => d != null && d.Root != null && d.Root.name.IndexOf(_ignoredDynamicBonesFilter, StringComparison.OrdinalIgnoreCase) != -1).Count();
                         }
                         if (total == 0)
                             continue;
@@ -705,7 +713,7 @@ namespace HSPE.AMModules
                         GUILayout.BeginHorizontal();
                         foreach (DynamicBone dynamicBone in controller._dynamicBonesEditor._dynamicBones)
                         {
-                            if (dynamicBone.m_Root == null)
+                            if (dynamicBone == null || dynamicBone.m_Root == null || dynamicBone.m_Root.name.IndexOf(_ignoredDynamicBonesFilter, StringComparison.OrdinalIgnoreCase) == -1)
                                 continue;
                             bool e = ignored == null || ignored.Contains(dynamicBone) == false;
                             bool newE = GUILayout.Toggle(e, dynamicBone.m_Root.name);
@@ -729,6 +737,8 @@ namespace HSPE.AMModules
                         {
                             foreach (DynamicBone_Ver02 dynamicBone in charaPoseController._boobsEditor._dynamicBones)
                             {
+                                if (dynamicBone == null || dynamicBone.Root == null || dynamicBone.Root.name.IndexOf(_ignoredDynamicBonesFilter, StringComparison.OrdinalIgnoreCase) == -1)
+                                    continue;
                                 bool e = ignored == null || ignored.Contains(dynamicBone) == false;
                                 bool newE = GUILayout.Toggle(e, dynamicBone.Root.name);
                                 if (e != newE)
