@@ -76,6 +76,7 @@ namespace HSPE.AMModules
         #endregion
 
         #region Statics
+        private static string[] _linkSuffixKeys = new string[] { "L", "R", "CL", "OP", "HALF" };
         private static InstanceDict _instanceByFaceBlendShape = new InstanceDict();
         private static string[] _presets = new string[0];
         internal static readonly Dictionary<string, string> _blendShapeAliases = new Dictionary<string, string>();
@@ -159,6 +160,113 @@ namespace HSPE.AMModules
                 _nonMatchBlendCorrection.Clear();
             }
 
+            public void ApplyLink(float weight, bool female, int index, bool nonDirty = false)
+            {
+                int eyesComponentsCount = female ? _femaleEyesComponentsCount : _maleEyesComponentsCount;
+
+                if (_linkedBlendRenderers.Count > 0)
+                {
+                    if (index < eyesComponentsCount)
+                    {
+                        string blendName = GetBlendShapeName(index);
+                        ApplyLink(weight, blendName, nonDirty, eyesComponentsCount);
+                    }
+                }
+            }
+
+            private void ApplyLink(float weight, string blendName, bool nonDirty, int eyeComponentsCount)
+            {
+                if (blendName != null)
+                {
+                    int suffixPointIndex = blendName.LastIndexOf('_');
+                    string mainKey = blendName.Substring(suffixPointIndex + 1).ToUpper();
+                    //int blendKeyIndex = -1;
+                    string nameIndexStr = null;
+
+                    {
+                        int nameIndex = -1;
+                        int nameIndexEnd = -1;
+
+                        for (int i = 0; i < blendName.Length; i++)
+                        {
+                            if (nameIndex == -1)
+                            {
+                                if (blendName[i] >= '0' && blendName[i] <= '9')
+                                {
+                                    nameIndex = i;
+                                }
+                            }
+                            else
+                            {
+                                if (blendName[i] < '0' || blendName[i] > '9')
+                                {
+                                    nameIndexEnd = i - 1;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (nameIndex != -1 && nameIndexEnd != -1)
+                        {
+                            nameIndexStr = blendName.Substring(nameIndex, nameIndexEnd - nameIndex + 1);
+                            //blendKeyIndex = int.Parse(nameIndexStr);
+                        }
+                    }
+
+                    if (_linkSuffixKeys.Contains(mainKey))
+                    {
+                        string prefix = blendName.Substring(0, suffixPointIndex);
+                        suffixPointIndex = prefix.LastIndexOf('_');
+                        mainKey = blendName.Substring(suffixPointIndex + 1).ToUpper();
+                    }
+
+                    foreach (var linkedBlendRenderer in _linkedBlendRenderers)
+                    {
+                        for(int i=0; i< linkedBlendRenderer._blendNames.Count; i++)
+                        {
+                            if(i < eyeComponentsCount)
+                            {
+                                string targetBlendName = linkedBlendRenderer._blendNames[i];
+                                if (targetBlendName != null)
+                                {
+                                    if (targetBlendName.ToUpper().Contains(mainKey))
+                                    {
+                                        if (nameIndexStr != null)
+                                        {
+                                            if (targetBlendName.Contains(nameIndexStr))
+                                            {
+                                                if (nonDirty)
+                                                {
+                                                    linkedBlendRenderer.NonDirty(targetBlendName);
+                                                }
+                                                else
+                                                {
+                                                    linkedBlendRenderer.SetBlendShapeWeight(targetBlendName, weight);
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (nonDirty)
+                                            {
+                                                linkedBlendRenderer.NonDirty(targetBlendName);
+                                            }
+                                            else
+                                            {
+                                                linkedBlendRenderer.SetBlendShapeWeight(targetBlendName, weight);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
             public void ClearDirty()
             {
                 foreach (var currDirty in _dirtyBlends)
@@ -888,17 +996,8 @@ namespace HSPE.AMModules
 
                             if (_linkEyesComponents)
                             {
-                                string suffix = currBlend.Key.Substring(currBlend.Key.IndexOf('.'));
-                                foreach (var linkedBlendRenderer in _skinnedMeshTarget._linkedBlendRenderers)
-                                {
-                                    string firtsBlendName = linkedBlendRenderer._blendNames.First();
+                                _skinnedMeshTarget.ApplyLink(weight, _target.isFemale, currBlend.Value);
 
-                                    if (firtsBlendName != null)
-                                    {
-                                        string prefix = firtsBlendName.Substring(0, firtsBlendName.IndexOf('.'));
-                                        linkedBlendRenderer.SetBlendShapeWeight(prefix + suffix, weight);
-                                    }
-                                }
                             }
                         }
                         GUILayout.EndVertical();
@@ -909,16 +1008,7 @@ namespace HSPE.AMModules
 
                             if (_linkEyesComponents)
                             {
-                                string suffix = currBlend.Key.Substring(currBlend.Key.IndexOf('.'));
-                                foreach (var linkedBlendRenderer in _skinnedMeshTarget._linkedBlendRenderers)
-                                {
-                                    string firtsBlendName = linkedBlendRenderer._blendNames.First();
-                                    if (firtsBlendName != null)
-                                    {
-                                        string prefix = firtsBlendName.Substring(0, firtsBlendName.IndexOf('.'));
-                                        linkedBlendRenderer.NonDirty(prefix + suffix);
-                                    }
-                                }
+                                _skinnedMeshTarget.ApplyLink(0.0f, _target.isFemale, currBlend.Value, true);
                             }
                         }
 
@@ -1454,7 +1544,7 @@ namespace HSPE.AMModules
         {
             foreach (var currBlendRenderer in _blendRenderers)
             {
-                if(currBlendRenderer.Value._dirtyBlends.Count != currBlendRenderer.Value._renderer.sharedMesh.blendShapeCount)
+                if (currBlendRenderer.Value._dirtyBlends.Count != currBlendRenderer.Value._renderer.sharedMesh.blendShapeCount)
                 {
                     currBlendRenderer.Value._blendIndics.Clear();
                     currBlendRenderer.Value._blendNames.Clear();
@@ -1699,26 +1789,7 @@ namespace HSPE.AMModules
 
                                 if (p.editor._linkEyesComponents)
                                 {
-                                    string blendName = p.blendRenderer.GetBlendShapeName(p.index);
-                                    if (blendName != null && p.blendRenderer._linkedBlendRenderers != null)
-                                    {
-                                        int startIndex = blendName.IndexOf('.');
-
-                                        if (startIndex > 0)
-                                        {
-                                            string suffix = blendName.Substring(startIndex);
-                                            foreach (var linkedBlendRenderer in p.blendRenderer._linkedBlendRenderers)
-                                            {
-                                                string firtsBlendName = linkedBlendRenderer._blendNames.First();
-
-                                                if (firtsBlendName != null)
-                                                {
-                                                    string prefix = firtsBlendName.Substring(0, firtsBlendName.IndexOf('.'));
-                                                    linkedBlendRenderer.SetBlendShapeWeight(prefix + suffix, weight);
-                                                }
-                                            }
-                                        }
-                                    }
+                                    p.blendRenderer.ApplyLink(weight, p.editor._target.isFemale, p.index);
                                 }
                             }
                         },
@@ -1785,26 +1856,7 @@ namespace HSPE.AMModules
 
                                     if (p.editor._linkEyesComponents)
                                     {
-                                        string blendName = renderer.GetBlendShapeName(i);
-                                        if (blendName != null && renderer._linkedBlendRenderers != null)
-                                        {
-                                            int startIndex = blendName.IndexOf('.');
-
-                                            if (startIndex > 0)
-                                            {
-                                                string suffix = blendName.Substring(startIndex);
-                                                foreach (var linkedBlendRenderer in renderer._linkedBlendRenderers)
-                                                {
-                                                    string firtsBlendName = linkedBlendRenderer._blendNames.First();
-
-                                                    if (firtsBlendName != null)
-                                                    {
-                                                        string prefix = firtsBlendName.Substring(0, firtsBlendName.IndexOf('.'));
-                                                        linkedBlendRenderer.SetBlendShapeWeight(prefix + suffix, weight);
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        p.blendRenderer.ApplyLink(weight, p.editor._target.isFemale, i);
                                     }
                                 }
                             }
@@ -1845,29 +1897,7 @@ namespace HSPE.AMModules
                                     float weight = Mathf.LerpUnclamped(left[index], right[index], factor);
                                     renderer.SetBlendShapeWeight(index, weight);
 
-                                    if (p.editor._linkEyesComponents)
-                                    {
-                                        string blendName = renderer.GetBlendShapeName(index);
-                                        if (blendName != null && renderer._linkedBlendRenderers != null)
-                                        {
-                                            int startIndex = blendName.IndexOf('.');
-
-                                            if (startIndex > 0)
-                                            {
-                                                string suffix = blendName.Substring(startIndex);
-                                                foreach (var linkedBlendRenderer in renderer._linkedBlendRenderers)
-                                                {
-                                                    string firtsBlendName = linkedBlendRenderer._blendNames.First();
-
-                                                    if (firtsBlendName != null)
-                                                    {
-                                                        string prefix = firtsBlendName.Substring(0, firtsBlendName.IndexOf('.'));
-                                                        linkedBlendRenderer.SetBlendShapeWeight(prefix + suffix, weight);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    renderer.ApplyLink(weight, p.editor._target.isFemale, index);
                                 }
                             }
                         },
