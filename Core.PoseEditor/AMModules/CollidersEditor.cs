@@ -700,15 +700,53 @@ namespace HSPE.AMModules
                         }
                         if (total == 0)
                             continue;
+
+                        if (cd == null || cd.ignoredDynamicBones.TryGetValue(controller, out HashSet<object> ignored) == false)
+                            ignored = null;
+
+                        GUILayout.BeginVertical(GUI.skin.box);
                         GUILayout.BeginHorizontal();
                         GUILayout.Label(controller.target.oci.treeNodeObject.textName + " (" + controller.target.oci.guideObject.transformTarget.name + ") ", GUILayout.ExpandWidth(false));
                         if (GUILayout.Button("Center camera on", GUILayout.ExpandWidth(false)))
                             Studio.Studio.Instance.cameraCtrl.targetPos = controller.target.oci.guideObject.transformTarget.position;
+                        if (GUILayout.Button("All off", GUILayout.ExpandWidth(false)))
+                        {
+                            foreach (DynamicBone dynamicBone in controller._dynamicBonesEditor._dynamicBones)
+                                SetIgnoreDynamicBone(_colliderTarget, controller, dynamicBone, true);
+
+                            if (
+#if AISHOUJO || HONEYSELECT2
+                                this._isTargetNormalCollider && 
+#endif
+                                charaPoseController != null &&
+                                charaPoseController._boobsEditor != null
+                                )
+                            {
+                                foreach (DynamicBone_Ver02 dynamicBone in charaPoseController._boobsEditor._dynamicBones)
+                                    SetIgnoreDynamicBone(_colliderTarget, controller, dynamicBone, true);
+
+                            }
+                        }
+                        if (GUILayout.Button("All on", GUILayout.ExpandWidth(false)))
+                        {
+                            foreach (DynamicBone dynamicBone in controller._dynamicBonesEditor._dynamicBones)
+                                SetIgnoreDynamicBone(_colliderTarget, controller, dynamicBone, false);
+
+                            if (
+#if AISHOUJO || HONEYSELECT2
+                                this._isTargetNormalCollider && 
+#endif
+                                charaPoseController != null &&
+                                charaPoseController._boobsEditor != null
+                                )
+                            {
+                                foreach (DynamicBone_Ver02 dynamicBone in charaPoseController._boobsEditor._dynamicBones)
+                                    SetIgnoreDynamicBone(_colliderTarget, controller, dynamicBone, false);
+
+                            }
+                        }
                         GUILayout.EndHorizontal();
 
-                        HashSet<object> ignored;
-                        if (cd == null || cd.ignoredDynamicBones.TryGetValue(controller, out ignored) == false)
-                            ignored = null;
                         int i = 1;
                         GUILayout.BeginHorizontal();
                         foreach (DynamicBone dynamicBone in controller._dynamicBonesEditor._dynamicBones)
@@ -752,6 +790,7 @@ namespace HSPE.AMModules
                             }
                         }
                         GUILayout.EndHorizontal();
+                        GUILayout.EndVertical();
                     }
                     GUILayout.EndScrollView();
                 }
