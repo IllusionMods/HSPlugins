@@ -484,6 +484,7 @@ namespace HSPE.AMModules
         private string _selectedNonMathBlendName;
         private bool _nonMatchCorrectionMode = false;
         private bool _linkEyesComponents = true;
+        private bool _linkSameName = false;
         private static readonly string _headCheckKey = "ct_head";
         private static readonly string _blendMatchCorrectionFileName = "__MatchCorrectionData__.xml";
         private readonly Dictionary<string, string> _matchCorractionList = new Dictionary<string, string>();
@@ -758,6 +759,7 @@ namespace HSPE.AMModules
 
             if (_target.type == GenericOCITarget.Type.Character)
                 _linkEyesComponents = GUILayout.Toggle(_linkEyesComponents, "Link eyes components");
+            _linkSameName = GUILayout.Toggle(_linkSameName, "Link same names");
             if (GUILayout.Button("Force refresh list"))
                 RefreshSkinnedMeshRendererList();
             GUI.color = Color.red;
@@ -994,6 +996,12 @@ namespace HSPE.AMModules
                             _lastEditedBlendShape = currBlend.Value;
                             _skinnedMeshTarget.SetBlendShapeWeight(currBlend.Key, weight);
 
+                            if (_linkSameName)
+                            {
+                                foreach (var blendRenderer in _blendRenderers)
+                                    blendRenderer.Value.SetBlendShapeWeight(currBlend.Key, weight);
+                            }
+
                             if (_linkEyesComponents)
                             {
                                 _skinnedMeshTarget.ApplyLink(weight, _target.isFemale, currBlend.Value);
@@ -1005,6 +1013,12 @@ namespace HSPE.AMModules
                         if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false), GUILayout.Height(50f)))
                         {
                             _skinnedMeshTarget.NonDirty(currBlend.Key);
+
+                            if (_linkSameName)
+                            {
+                                foreach (var blendRenderer in _blendRenderers)
+                                    blendRenderer.Value.NonDirty(currBlend.Key);
+                            }
 
                             if (_linkEyesComponents)
                             {
@@ -1918,6 +1932,63 @@ namespace HSPE.AMModules
                                 skinnedMeshName = p.blendRenderer._renderer.name;
                             return $"BS ({skinnedMeshName}, L)";
                         });
+                ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
+                   owner: HSPE.Name,
+                   id: "groupBlendShapeNameLink",
+                   name: "BlendShape (Last Modified, Name Link)",
+                   interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
+                   {
+                       IndividualParameter p = (IndividualParameter)parameter;
+                       if (p.editor._isBusy == false && p.index >= 0)
+                       {
+                           float weight = Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor);
+                           var name = p.blendRenderer.GetBlendShapeName(p.index);
+                           foreach (var blendRenderer in p.editor._blendRenderers)
+                               p.blendRenderer.SetBlendShapeWeight(name, weight);
+                       }
+                   },
+                   interpolateAfter: null,
+                   isCompatibleWithTarget: oci => oci != null && oci.guideObject != null && oci.guideObject.transformTarget != null && oci.guideObject.transformTarget.GetComponent<PoseController>() != null,
+                   getValue: (oci, parameter) =>
+                   {
+                       IndividualParameter p = (IndividualParameter)parameter;
+                       return p.blendRenderer.GetBlendShapeWeight(p.index);
+                   },
+                   readValueFromXml: (parameter, node) => node.ReadFloat("value"),
+                   writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o),
+                   getParameter: oci =>
+                   {
+                       PoseController controller = oci.guideObject.transformTarget.GetComponent<PoseController>();
+                       return new IndividualParameter(controller._blendShapesEditor, controller._blendShapesEditor._skinnedMeshTarget, controller._blendShapesEditor._lastEditedBlendShape);
+                   },
+                   readParameterFromXml: (oci, node) => new IndividualParameter(oci.guideObject.transformTarget.GetComponent<PoseController>()._blendShapesEditor, node.Attributes["parameter1"].Value, node.ReadInt("parameter2")),
+                   writeParameterToXml: (oci, writer, o) =>
+                   {
+                       IndividualParameter p = (IndividualParameter)o;
+                       writer.WriteAttributeString("parameter1", p.rendererPath);
+                       writer.WriteValue("parameter2", p.index);
+                   },
+                    checkIntegrity: (oci, parameter, leftValue, rightValue) =>
+                    {
+                        if (parameter == null)
+                            return false;
+                        IndividualParameter p = (IndividualParameter)parameter;
+                        if (p.editor == null)
+                            return false;
+                        if (p.editor._isBusy)
+                            return true;
+                        if (p.blendRenderer == null || p.blendRenderer._renderer == null)
+                            return false;
+                        return true;
+                    },
+                    getFinalName: (name, oci, parameter) =>
+                    {
+                        IndividualParameter p = (IndividualParameter)parameter;
+                        string skinnedMeshName = null;
+                        if (p.blendRenderer._renderer != null && _skinnedMeshAliases.TryGetValue(p.blendRenderer._renderer.name, out skinnedMeshName) == false)
+                            skinnedMeshName = p.blendRenderer._renderer.name;
+                        return $"BS ({skinnedMeshName} {p.index}) NameLink";
+                    });
 
                 //TODO maybe do that, or maybe not, idk
                 //ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
