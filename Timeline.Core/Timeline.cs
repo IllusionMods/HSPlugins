@@ -681,6 +681,50 @@ namespace Timeline
             }
         }
 
+        /// <summary>
+        /// Get an estimation of the real duration of the entire timeline, accounting for time scale changes.
+        /// Calculation cost is not trivial (expect ~1ms execution cost for 50 seconds of timeline).
+        /// </summary>
+        public static float EstimateRealDuration()
+        {
+            float realDuration = 0;
+            Interpolable interpolable = _self._interpolables.Values.FirstOrDefault(x => x.id == "timeScale");
+            if (interpolable == null)
+                return (Time.timeScale == 0) ? duration : duration / Time.timeScale;
+
+            List<KeyValuePair<float, Keyframe>> keyframes = interpolable.keyframes.TakeWhile(x => x.Key <= duration).ToList();
+            if (keyframes.Count == 0)
+                return (Time.timeScale == 0) ? duration : duration / Time.timeScale;
+
+            // In the interval [0, firstKeyframe], Timeline uses the value of the first keyframe
+            realDuration += keyframes.First().Key / (float)keyframes.First().Value.value;
+
+            KeyValuePair<float, Keyframe> keyframeAfterEnd = interpolable.keyframes.FirstOrDefault(x => x.Key > duration);
+            if (!keyframeAfterEnd.Equals(default(KeyValuePair<float, Keyframe>)))
+            {
+                // In the interval [lastKeyframe, duration], Timeline still interpolates if there is a keyframe outside of the duration window
+                KeyValuePair<float, Keyframe> lastKeyframe = keyframes.Last();
+                float normalizedTime = (duration - lastKeyframe.Key) / (keyframeAfterEnd.Key - lastKeyframe.Key);
+                float normalizedValue = keyframeAfterEnd.Value.curve.Evaluate(normalizedTime);
+                float valueAtEnd = (float)lastKeyframe.Value.value + normalizedValue * ((float)keyframeAfterEnd.Value.value - (float)lastKeyframe.Value.value);
+                realDuration += IntegrateTimescaleReciprocal(keyframeAfterEnd.Value.curve, (float)lastKeyframe.Value.value, valueAtEnd, duration - lastKeyframe.Key);
+            }
+            else
+            {
+                // In the interval [lastKeyframe, duration], Timeline uses the value of the last keyframe
+                realDuration += (duration - keyframes.Last().Key) / (float)keyframes.Last().Value.value;
+            }
+
+            for (int i = 0; i < keyframes.Count - 1; i++)
+            {
+                KeyValuePair<float, Keyframe> current = keyframes.ElementAt(i);
+                KeyValuePair<float, Keyframe> next = keyframes.ElementAt(i + 1);
+                float value = IntegrateTimescaleReciprocal(current.Value.curve, (float)current.Value.value, (float)next.Value.value, next.Key - current.Key);
+                realDuration += value;
+            }
+            return realDuration;
+        }
+
         public static RectTransform MainWindowRectTransform => _self._timelineWindow;
         #endregion
 
@@ -1151,6 +1195,37 @@ namespace Timeline
             if (float.TryParse(timeComponents[1], out seconds) == false)
                 return -1;
             return minutes * 60 + seconds;
+        }
+
+        // Estimate the real time duration when timescale changes from startTimescale to endTimescale over duration according to curve.
+        private static float IntegrateTimescaleReciprocal(AnimationCurve curve, float startTimescale, float endTimescale, float duration)
+        {
+            const int STEPS_PER_SECOND = 20;
+            int steps = Mathf.FloorToInt(STEPS_PER_SECOND * duration);
+            steps = Math.Max(steps, STEPS_PER_SECOND);
+
+            Func<float, float> reciprocal = (t) =>
+            {
+                float value = startTimescale + curve.Evaluate(t) * (endTimescale - startTimescale);
+                return Mathf.Approximately(value, 0f) ? 0f : 1f / value;
+            };
+
+            float total = 0f;
+            float dt = 1f / steps;
+
+            for (int i = 0; i < steps; i++)
+            {
+                float t = i * dt;
+
+                float k1 = dt * reciprocal(t);
+                float k2 = dt * reciprocal(t + dt / 2);
+                float k3 = dt * reciprocal(t + dt / 2);
+                float k4 = dt * reciprocal(t + dt);
+
+                total += (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+            }
+
+            return total * duration;
         }
 
         #region Main Window
