@@ -1544,7 +1544,7 @@ namespace HSPE.AMModules
         {
             foreach (var currBlendRenderer in _blendRenderers)
             {
-                if (currBlendRenderer.Value._dirtyBlends.Count != currBlendRenderer.Value._renderer.sharedMesh.blendShapeCount)
+                if (currBlendRenderer.Value._blendIndics.Count != currBlendRenderer.Value._renderer.sharedMesh.blendShapeCount)
                 {
                     currBlendRenderer.Value._blendIndics.Clear();
                     currBlendRenderer.Value._blendNames.Clear();
