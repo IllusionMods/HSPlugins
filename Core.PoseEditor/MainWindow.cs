@@ -1611,7 +1611,9 @@ namespace HSPE
                 return;
             this.ExecuteDelayed2(() =>
             {
-                LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl);
+                LoadSceneGeneric(node,
+                    Studio.Studio.Instance.dicObjectCtrl,
+                    Studio.Studio.Instance.sceneInfo.dicChangeKey?.ToDictionary(m => m.Value, d => d.Key));
             }, 3);
         }
 
@@ -1628,7 +1630,9 @@ namespace HSPE
             Dictionary<int, ObjectCtrlInfo> toIgnore = new Dictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl);
             this.ExecuteDelayed2(() =>
             {
-                LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl.Where(e => toIgnore.ContainsKey(e.Key) == false).ToDictionary(d => d.Key, m => m.Value));
+                LoadSceneGeneric(node,
+                    Studio.Studio.Instance.dicObjectCtrl.Where(e => toIgnore.ContainsKey(e.Key) == false).ToDictionary(d => d.Key, m => m.Value),
+                    Studio.Studio.Instance.sceneInfo.dicChangeKey?.ToDictionary(m => m.Value, d => d.Key));
             }, 3);
         }
 
@@ -1638,10 +1642,12 @@ namespace HSPE
         /// <param name="node"></param>
         public void ExternalLoadScene(XmlNode node)
         {
-            LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl);
+            LoadSceneGeneric(node,
+                Studio.Studio.Instance.dicObjectCtrl,
+                Studio.Studio.Instance.sceneInfo.dicChangeKey?.ToDictionary(m => m.Value, d => d.Key));
         }
 
-        private void LoadSceneGeneric(XmlNode node, Dictionary<int, ObjectCtrlInfo> dic)
+        private void LoadSceneGeneric(XmlNode node, Dictionary<int, ObjectCtrlInfo> dic, Dictionary<int, int> changeDictionary)
         {
             if (node == null || node.Name != "root")
                 return;
@@ -1665,7 +1671,22 @@ namespace HSPE
                     continue;
                 }
 
-                if (dic[index] is OCIItem ociItem)
+                retryInfoGet:
+                
+                var item = dic.GetValueSafe(index);
+                
+                if (item == null)
+                {
+                    if (changeDictionary != null && changeDictionary.TryGetValue(index, out var newIndex))
+                    {
+                        index = newIndex;
+                        goto retryInfoGet;
+                    }
+                    HSPE.Logger.LogWarning($"Item at key {index} could not be found. PE data will not be loaded for it.");
+                    continue;
+                }
+
+                if (item is OCIItem ociItem)
                 {
                     LoadElement(ociItem, childNode);
                 }
