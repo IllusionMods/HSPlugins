@@ -242,7 +242,6 @@ namespace HSPE.AMModules
                     string linkKeyname = _linkKeynameList[index];
                     if (linkKeyname != null)
                     {
-                        HSPE.Logger.LogInfo(linkKeyname);
                         foreach (var linkedBlendRenderer in _linkedBlendRenderers)
                         {
                             if (linkedBlendRenderer._linkKeynames.TryGetValue(linkKeyname, out int linkIndex))
