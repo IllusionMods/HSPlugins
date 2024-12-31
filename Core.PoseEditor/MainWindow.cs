@@ -1625,12 +1625,18 @@ namespace HSPE
             XmlNode node = doc.FirstChild;
             if (node == null)
                 return;
-            Dictionary<int, ObjectCtrlInfo> toIgnore = new Dictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl);
-            this.ExecuteDelayed2(() =>
-            {
-                LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl.Where(e => toIgnore.ContainsKey(e.Key) == false).ToDictionary(d => d.Key, m => m.Value));
-            }, 3);
-        }
+
+			this.ExecuteDelayed2(() =>
+			{
+				var changedKeys = Studio.Studio.Instance.sceneInfo.dicChangeKey;
+
+				var newItems = Studio.Studio.Instance.sceneInfo.dicImport
+					.Where(d => changedKeys.ContainsKey(d.Key) && Studio.Studio.Instance.dicObjectCtrl.ContainsKey(d.Key))
+					.ToDictionary(m => changedKeys[m.Key], f => Studio.Studio.Instance.dicObjectCtrl[f.Key]);
+
+				LoadSceneGeneric(node, newItems);
+			}, 3);
+		}
 
         /// <summary>
         /// Other plugins should use this to force load some data.
@@ -1665,10 +1671,14 @@ namespace HSPE
                     continue;
                 }
 
-                if (dic[index] is OCIItem ociItem)
-                {
-                    LoadElement(ociItem, childNode);
-                }
+				if (dic.TryGetValue(index, out var objectCtrlInfo) && objectCtrlInfo is OCIItem ociItem)
+				{
+					LoadElement(ociItem, childNode);
+				}
+				else
+				{
+					HSPE.Logger.LogWarning($"[HSPE] Failed to find item of index {index}! It will be skipped.");
+				}
                 /*
                 switch (childNode.Name)
                 {
