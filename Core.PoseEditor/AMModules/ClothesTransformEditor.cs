@@ -133,9 +133,15 @@ namespace HSPE.AMModules
 
         public ClothesTransformEditor(PoseController parent, GenericOCITarget target) : base(parent)
         {
+            if (target.type != GenericOCITarget.Type.Character)
+            {
+                return;
+            }
+
             _target = target;
             _parent.onLateUpdate += LateUpdate;
             _parent.onDisable += OnDisable;
+            
 
             if (_cubeDebugLines.Count == 0)
             {
@@ -208,6 +214,8 @@ namespace HSPE.AMModules
 
         public override int SaveXml(XmlTextWriter xmlWriter)
         {
+            if (_target == null) return 0;
+
             int written = 0;
             if (_clothesTransferListsByStr.Count != 0)
             {
@@ -261,9 +269,10 @@ namespace HSPE.AMModules
         }
         public override bool LoadXml(XmlNode xmlNode)
         {
+            if (_target == null) return false;
+
             bool changed = false;
             DeleteAllTransfers();
-
             XmlNode objects = xmlNode.FindChildNode("clothesTransferLists");
 
 
@@ -357,6 +366,13 @@ namespace HSPE.AMModules
 
         public override AdvancedModeModuleType type { get { return AdvancedModeModuleType.ClothesTransformEditor; } }
         public override string displayName { get { return "Clothes"; } }
+        public override bool shouldDisplay
+        {
+            get
+            {
+                return _target != null;
+            }
+        }
 
         private KeyValuePair<ClothesTransferList, ClothesTransfer> CreateTransfer(Transform targetTransform, string name = null)
         {
