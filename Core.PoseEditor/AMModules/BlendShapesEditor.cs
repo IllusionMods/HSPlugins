@@ -167,6 +167,7 @@ namespace HSPE.AMModules
             public void CreateLinkKeynames(bool female)
             {
                 _linkKeynames.Clear();
+                _linkKeynameList.Clear();
 
                 if (_linkedBlendRenderers.Count > 0)
                 {
