@@ -1626,17 +1626,17 @@ namespace HSPE
             if (node == null)
                 return;
 
-			this.ExecuteDelayed2(() =>
-			{
-				var changedKeys = Studio.Studio.Instance.sceneInfo.dicChangeKey;
+            this.ExecuteDelayed2(() =>
+            {
+                var changedKeys = Studio.Studio.Instance.sceneInfo.dicChangeKey;
 
-				var newItems = Studio.Studio.Instance.sceneInfo.dicImport
-					.Where(d => changedKeys.ContainsKey(d.Key) && Studio.Studio.Instance.dicObjectCtrl.ContainsKey(d.Key))
-					.ToDictionary(m => changedKeys[m.Key], f => Studio.Studio.Instance.dicObjectCtrl[f.Key]);
+                var newItems = Studio.Studio.Instance.sceneInfo.dicImport
+                    .Where(d => changedKeys.ContainsKey(d.Key) && Studio.Studio.Instance.dicObjectCtrl.ContainsKey(d.Key))
+                    .ToDictionary(m => changedKeys[m.Key], f => Studio.Studio.Instance.dicObjectCtrl[f.Key]);
 
-				LoadSceneGeneric(node, newItems);
-			}, 3);
-		}
+                LoadSceneGeneric(node, newItems);
+            }, 3);
+        }
 
         /// <summary>
         /// Other plugins should use this to force load some data.
@@ -1671,14 +1671,14 @@ namespace HSPE
                     continue;
                 }
 
-				if (dic.TryGetValue(index, out var objectCtrlInfo) && objectCtrlInfo is OCIItem ociItem)
-				{
-					LoadElement(ociItem, childNode);
-				}
-				else
-				{
-					HSPE.Logger.LogWarning($"[HSPE] Failed to find item of index {index}! It will be skipped.");
-				}
+                if (dic.TryGetValue(index, out var objectCtrlInfo) && objectCtrlInfo is OCIItem ociItem)
+                {
+                    LoadElement(ociItem, childNode);
+                }
+                else
+                {
+                    HSPE.Logger.LogWarning($"[HSPE] Failed to find item of index {index}! It will be skipped.");
+                }
                 /*
                 switch (childNode.Name)
                 {
