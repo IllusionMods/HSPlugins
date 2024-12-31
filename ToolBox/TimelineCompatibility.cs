@@ -18,9 +18,11 @@ namespace ToolBox
         private static Func<float> _getDuration;
         private static Func<bool> _getIsPlaying;
         private static Action _play;
+        private static Action _stop;
         private static MethodInfo _addInterpolableModelStatic;
         private static MethodInfo _addInterpolableModelDynamic;
         private static Action _refreshInterpolablesList;
+        private static MethodInfo _estimateRealDuration;
         private static Type _interpolableDelegate;
 
         public static bool Init()
@@ -34,9 +36,11 @@ namespace ToolBox
                     _getDuration = (Func<float>)Delegate.CreateDelegate(typeof(Func<float>), timelineType.GetProperty("duration", BindingFlags.Public | BindingFlags.Static).GetGetMethod());
                     _getIsPlaying = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), timelineType.GetProperty("isPlaying", BindingFlags.Public | BindingFlags.Static).GetGetMethod());
                     _play = (Action)Delegate.CreateDelegate(typeof(Action), timelineType.GetMethod("Play", BindingFlags.Public | BindingFlags.Static));
+                    _stop = (Action)Delegate.CreateDelegate(typeof(Action), timelineType.GetMethod("Stop", BindingFlags.Public | BindingFlags.Static));
                     _addInterpolableModelStatic = timelineType.GetMethod("AddInterpolableModelStatic", BindingFlags.Public | BindingFlags.Static);
                     _addInterpolableModelDynamic = timelineType.GetMethod("AddInterpolableModelDynamic", BindingFlags.Public | BindingFlags.Static);
                     _refreshInterpolablesList = (Action)Delegate.CreateDelegate(typeof(Action), timelineType.GetMethod("RefreshInterpolablesList", BindingFlags.Public | BindingFlags.Static));
+                    _estimateRealDuration = timelineType.GetMethod("EstimateRealDuration", BindingFlags.Public | BindingFlags.Static);
                     _interpolableDelegate = Type.GetType("Timeline.InterpolableDelegate,Timeline");
                     return true;
                 }
@@ -66,6 +70,11 @@ namespace ToolBox
         public static void Play()
         {
             _play();
+        }
+
+        public static void Stop()
+        {
+            _stop();
         }
 
         /// <summary>
@@ -160,6 +169,13 @@ namespace ToolBox
                 getFinalName,
                 shouldShow
             });
+        }
+
+        public static float EstimateRealDuration()
+        {
+            if (_estimateRealDuration != null)
+                return (float)_estimateRealDuration.Invoke(null, null);
+            return _getDuration();
         }
 
         public static void RefreshInterpolablesList()

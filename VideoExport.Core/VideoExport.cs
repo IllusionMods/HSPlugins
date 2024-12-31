@@ -204,6 +204,7 @@ namespace VideoExport
         private double _currentRecordingTime;
         private int _recordingFrameLimit;
         private bool _timelinePresent = false;
+        private float _realTimelineDuration;
 
         private int _selectedPlugin = 0;
         private int _fps = 60;
@@ -617,7 +618,10 @@ namespace VideoExport
 
                                 if (_timelinePresent)
                                 {
-                                    float totalLength = TimelineCompatibility.GetDuration() * _limitDurationNumber;
+                                    if (!_isRecording)
+                                        _realTimelineDuration = TimelineCompatibility.EstimateRealDuration();
+
+                                    float totalLength = _realTimelineDuration * _limitDurationNumber;
                                     float totalFrames = totalLength * _fps;
                                     GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.Estimated)} {totalLength:0.0000} {_currentDictionary.GetString(TranslationKey.Seconds)}, {Mathf.RoundToInt(totalFrames)} {_currentDictionary.GetString(TranslationKey.Frames)} ({totalFrames:0.000})");
                                 }
@@ -934,7 +938,7 @@ namespace VideoExport
                         limit = Mathf.RoundToInt(currentAnimator.GetCurrentAnimatorStateInfo(0).length * _limitDurationNumber * _fps);
                         break;
                     case LimitDurationType.Timeline:
-                        limit = Mathf.RoundToInt(TimelineCompatibility.GetDuration() * _limitDurationNumber * _fps);
+                        limit = Mathf.RoundToInt(TimelineCompatibility.EstimateRealDuration() * _limitDurationNumber * _fps);
                         break;
                 }
                 _recordingFrameLimit = limit;
@@ -943,6 +947,15 @@ namespace VideoExport
             {
                 _recordingFrameLimit = -1;
             }
+
+            if (_selectedLimitDuration == LimitDurationType.Timeline)
+            {
+                // Restart Timeline because warmup might not end at 00:00.00
+                if (TimelineCompatibility.GetIsPlaying() == true)
+                    TimelineCompatibility.Stop();
+                TimelineCompatibility.Play();
+            }
+
             int exportInterval = _fps / _exportFps;
             TimeSpan elapsed = TimeSpan.Zero;
             int i = 0;

@@ -323,6 +323,9 @@ namespace HSPE.AMModules
                     {
                         if (bone.Colliders.Contains(normalCollider) == false)
                             bone.Colliders.Add(normalCollider);
+
+                        if (pair.Value._addNewDynamicBonesAsDefault == false)
+                            pair.Value.SetIgnoreDynamicBone(normalCollider, _parent, bone, true);
                     }
                 }
             }
