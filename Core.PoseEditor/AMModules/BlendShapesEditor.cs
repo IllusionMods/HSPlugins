@@ -1046,9 +1046,14 @@ namespace HSPE.AMModules
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
                 {
-                    foreach (var currBlendRenderer in _blendRenderers)
+                    _skinnedMeshTarget.ClearDirty();
+          
+                    if (_linkEyesComponents)
                     {
-                        currBlendRenderer.Value.ClearDirty();
+                        foreach (var linkedBlendRenderer in _skinnedMeshTarget._linkedBlendRenderers)
+                        {
+                            linkedBlendRenderer.ClearDirty();
+                        }
                     }
                 }
 
