@@ -1348,10 +1348,12 @@ namespace NodesConstraints
                 }
 
                 GUILayout.BeginHorizontal();
-                GUI.enabled = _selectedBone != null;
-                if (GUILayout.Button("Set as parent"))
+                if (GUILayout.Button(selectedGuideObject != null ? "Set as parent" : "Set as parent (Camera)"))
                 {
-                    _displayedConstraint.parentTransform = _advancedList ? _selectedBone : selectedGuideObject.transformTarget;
+                    if (selectedGuideObject != null)
+                        _displayedConstraint.parentTransform = _advancedList ? _selectedBone : selectedGuideObject.transformTarget;
+                    else
+                        _displayedConstraint.parentTransform = Studio.Studio.Instance.cameraCtrl.mainCmaera.transform;
                 }
                 GUI.enabled = true;
 
@@ -1799,8 +1801,15 @@ namespace NodesConstraints
                 int parentObjectIndex = XmlConvert.ToInt32(childNode.Attributes["parentObjectIndex"].Value);
                 if (parentObjectIndex >= dic.Count)
                     continue;
-                Transform parentTransform = dic[parentObjectIndex].Value.guideObject.transformTarget;
-                parentTransform = parentTransform.Find(childNode.Attributes["parentPath"].Value);
+
+                Transform parentTransform;
+                if (parentObjectIndex == -2)
+                    parentTransform = Studio.Studio.Instance.cameraCtrl.mainCmaera.transform;
+                else
+                {
+                    parentTransform = dic[parentObjectIndex].Value.guideObject.transformTarget;
+                    parentTransform = parentTransform.Find(childNode.Attributes["parentPath"].Value);
+                }
                 if (parentTransform == null)
                     continue;
 
@@ -2064,8 +2073,11 @@ namespace NodesConstraints
                 Constraint constraint = _constraints[i];
                 int parentObjectIndex = -1;
                 Transform parentT = constraint.parentTransform;
-                while ((parentObjectIndex = dic.FindIndex(e => e.Value.guideObject.transformTarget == parentT)) == -1)
-                    parentT = parentT.parent;
+                if (parentT == Studio.Studio.Instance.cameraCtrl.mainCmaera.transform)
+                    parentObjectIndex = -2;
+                else
+                    while ((parentObjectIndex = dic.FindIndex(e => e.Value.guideObject.transformTarget == parentT)) == -1)
+                        parentT = parentT.parent;
                 string parentPath = constraint.parentTransform.GetPathFrom(parentT);
 
                 int childObjectIndex = -1;
