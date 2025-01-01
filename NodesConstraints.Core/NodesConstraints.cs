@@ -60,6 +60,7 @@ namespace NodesConstraints
         private const float _circleRadius = 0.1f;
 #endif
 
+        private const int MainCameraParenObjectIndex = -2;
         private static NodesConstraints _self;
 
 #if IPA
@@ -1803,7 +1804,7 @@ namespace NodesConstraints
                     continue;
 
                 Transform parentTransform;
-                if (parentObjectIndex == -2)
+                if (parentObjectIndex == MainCameraParenObjectIndex)
                     parentTransform = Studio.Studio.Instance.cameraCtrl.mainCmaera.transform;
                 else
                 {
@@ -2074,7 +2075,7 @@ namespace NodesConstraints
                 int parentObjectIndex = -1;
                 Transform parentT = constraint.parentTransform;
                 if (parentT == Studio.Studio.Instance.cameraCtrl.mainCmaera.transform)
-                    parentObjectIndex = -2;
+                    parentObjectIndex = MainCameraParenObjectIndex;
                 else
                     while ((parentObjectIndex = dic.FindIndex(e => e.Value.guideObject.transformTarget == parentT)) == -1)
                         parentT = parentT.parent;
