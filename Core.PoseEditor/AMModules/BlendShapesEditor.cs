@@ -11,6 +11,8 @@ using BepInEx;
 using Harmony;
 #elif BEPINEX
 using HarmonyLib;
+using Illusion.Extensions;
+
 #endif
 using Studio;
 using ToolBox.Extensions;
@@ -503,6 +505,8 @@ namespace HSPE.AMModules
         }
 
         private bool _showSaveLoadWindow = false;
+        private Rect _saveLoadWindowRect = new Rect();
+        private RectTransform _imguiBackground = null;
         private Vector2 _presetsScroll;
         private string _presetName = "";
         private bool _removePresetMode;
@@ -566,6 +570,8 @@ namespace HSPE.AMModules
             _parent.onLateUpdate += LateUpdate;
             _parent.onDisable += OnDisable;
             _target = target;
+
+            _imguiBackground = IMGUIExtensions.CreateUGUIPanelForIMGUI();
             MainWindow._self.ExecuteDelayed(() =>
             {
                 if (_parent == null)
@@ -618,11 +624,17 @@ namespace HSPE.AMModules
 
         public void OnGUI()
         {
-            if (_showSaveLoadWindow == false)
-                return;
-            Rect windowRect = Rect.MinMaxRect(MainWindow._self._advancedModeRect.xMin - 180, MainWindow._self._advancedModeRect.yMin, MainWindow._self._advancedModeRect.xMin, MainWindow._self._advancedModeRect.yMax);
-            IMGUIExtensions.DrawBackground(windowRect);
-            GUILayout.Window(MainWindow._uniqueId + 1, windowRect, SaveLoadWindow, "Presets");
+            if (_showSaveLoadWindow == true)
+            {
+                _imguiBackground.gameObject.SetActive(true);
+                IMGUIExtensions.DrawBackground(_saveLoadWindowRect);
+                _saveLoadWindowRect = GUILayout.Window(MainWindow._uniqueId + 1, _saveLoadWindowRect, SaveLoadWindow, "Presets");
+                IMGUIExtensions.FitRectTransformToRect(_imguiBackground, _saveLoadWindowRect);
+            }
+            else
+            {
+                _imguiBackground.gameObject.SetActive(false);
+            }
         }
 
         private void OnDisable()
@@ -766,6 +778,7 @@ namespace HSPE.AMModules
             GUI.color = Color.green;
             if (GUILayout.Button("Save/Load preset"))
             {
+                _saveLoadWindowRect = Rect.MinMaxRect(MainWindow._self._advancedModeRect.xMin - 180, MainWindow._self._advancedModeRect.yMin, MainWindow._self._advancedModeRect.xMin, MainWindow._self._advancedModeRect.yMax);
                 _showSaveLoadWindow = true;
                 RefreshPresets();
             }
@@ -1465,8 +1478,9 @@ namespace HSPE.AMModules
                 _showSaveLoadWindow = false;
 
             GUILayout.EndVertical();
-
             GUILayout.EndVertical();
+
+            GUI.DragWindow();
         }
 
         private void SavePreset(string name)
@@ -1842,7 +1856,28 @@ namespace HSPE.AMModules
             _blendRenderers.Clear();
             _blenderRenderbySkinnedRenderer.Clear();
 
-            SkinnedMeshRenderer[] skinnedMeshRenderers = _parent.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            string parentName = _parent.name;
+            List<SkinnedMeshRenderer> skinnedMeshRenderers = new List<SkinnedMeshRenderer>();
+            List<Transform> transformStack = new List<Transform>();
+            transformStack.Add(_parent.transform);
+
+            while (transformStack.Count > 0)
+            {
+                Transform currTransform = transformStack.Pop();
+                foreach (Transform child in currTransform)
+                {
+                    SkinnedMeshRenderer skinnedMeshRenderer = child.GetComponent<SkinnedMeshRenderer>();
+                    if (skinnedMeshRenderer != null)
+                    {
+                        skinnedMeshRenderers.Add(skinnedMeshRenderer);
+                    }
+
+                    if (child.name != parentName)
+                    {
+                        transformStack.Add(child);
+                    }
+                }
+            }
 
             foreach (SkinnedMeshRenderer skin in skinnedMeshRenderers)
             {
