@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using Graphics = System.Drawing.Graphics;
 #if IPA
 using Harmony;
 #elif BEPINEX
@@ -14,15 +9,8 @@ using HarmonyLib;
 
 namespace VideoExport.ScreenshotPlugins
 {
-    public class Bitmap : IScreenshotPlugin
+    public class Builtin : IScreenshotPlugin
     {
-        [DllImport("user32.dll")]
-        static extern IntPtr GetActiveWindow();
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetClientRect(IntPtr hWnd, ref Rect rect);
-        [DllImport("user32.dll")]
-        public static extern bool ClientToScreen(IntPtr hWnd, ref System.Drawing.Point lpPoint);
-
         [StructLayout(LayoutKind.Sequential)]
         public struct Rect
         {
@@ -36,16 +24,6 @@ namespace VideoExport.ScreenshotPlugins
         {
             Normal,
             Immediate,
-            Win32
-        }
-
-        private enum ImgFormat
-        {
-            BMP,
-            PNG,
-#if !HONEYSELECT //Someday I hope...
-            EXR
-#endif
         }
 
         public string name { get { return VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.BuiltInCaptureTool); } }
@@ -53,24 +31,9 @@ namespace VideoExport.ScreenshotPlugins
         {
             get
             {
-                int width = 0;
-                int height = 0;
-                switch (this._captureMode)
-                {
-                    case CaptureMode.Normal:
-                    case CaptureMode.Immediate:
-                        width = Mathf.RoundToInt(Screen.width * this._scaleFactor);
-                        height = Mathf.RoundToInt(Screen.height * this._scaleFactor);
-                        break;
-                    case CaptureMode.Win32:
-                        if (this._windowHandle == IntPtr.Zero)
-                            this._windowHandle = GetActiveWindow();
-                        Rect rect = new Rect();
-                        GetClientRect(this._windowHandle, ref rect);
-                        width = rect.right - rect.left;
-                        height = rect.bottom - rect.top;
-                        break;
-                }
+                int width = Mathf.RoundToInt(Screen.width * this._scaleFactor);
+                int height = Mathf.RoundToInt(Screen.height * this._scaleFactor);
+
                 if (width % 2 != 0)
                     width += 1;
                 if (height % 2 != 0)
@@ -87,12 +50,12 @@ namespace VideoExport.ScreenshotPlugins
                 switch (this._imageFormat)
                 {
                     default:
-                    case ImgFormat.BMP:
+                    case VideoExport.ImgFormat.BMP:
                         return "bmp";
-                    case ImgFormat.PNG:
+                    case VideoExport.ImgFormat.PNG:
                         return "png";
 #if !HONEYSELECT
-                    case ImgFormat.EXR:
+                    case VideoExport.ImgFormat.EXR:
                         return "exr";
 #endif
                 }
@@ -105,7 +68,7 @@ namespace VideoExport.ScreenshotPlugins
 #if HONEYSELECT
                 return 8;
 #else
-                return (byte)(this._imageFormat == ImgFormat.EXR ? 10 : 8);
+                return (byte)(this._imageFormat == VideoExport.ImgFormat.EXR ? 10 : 8);
 #endif
             }
         }
@@ -113,11 +76,9 @@ namespace VideoExport.ScreenshotPlugins
         private float _scaleFactor;
         private CaptureMode _captureMode;
         private string[] _captureModeNames;
-        private ImgFormat _imageFormat;
+        private VideoExport.ImgFormat _imageFormat;
         private string[] _imageFormatNames;
-        private IntPtr _windowHandle;
-        private System.Drawing.Bitmap _bitmap;
-        private System.Drawing.Graphics _graphics;
+
         private RenderTexture _cachedRenderTexture;
         private Texture2D _texture;
         private readonly byte[] _bmpHeader = {
@@ -146,10 +107,10 @@ namespace VideoExport.ScreenshotPlugins
         public bool Init(Harmony harmony)
 #endif
         {
-            this._scaleFactor = VideoExport._configFile.AddFloat("bmpSizeMultiplier", 1f, true);
-            this._captureMode = (CaptureMode)VideoExport._configFile.AddInt("bmpCaptureMode", (int)CaptureMode.Normal, true);
-            this._imageFormat = (ImgFormat)VideoExport._configFile.AddInt("bmpImageFormat", (int)ImgFormat.BMP, true);
-            this._imageFormatNames = Enum.GetNames(typeof(ImgFormat));
+            this._scaleFactor = VideoExport._configFile.AddFloat("builtinSizeMultiplier", 1f, true);
+            this._captureMode = (CaptureMode)VideoExport._configFile.AddInt("builtinCaptureMode", (int)CaptureMode.Normal, true);
+            this._imageFormat = (VideoExport.ImgFormat)VideoExport._configFile.AddInt("builtinImageFormat", (int)VideoExport.ImgFormat.BMP, true);
+            this._imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat));
 
             return true;
         }
@@ -160,7 +121,6 @@ namespace VideoExport.ScreenshotPlugins
             {
                 VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.CaptureModeNormal),
                 VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.CaptureModeImmediate),
-                VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.CaptureModeWin32)
             };
         }
 
@@ -171,7 +131,7 @@ namespace VideoExport.ScreenshotPlugins
             RenderTextureFormat renderTextureFormat = RenderTextureFormat.ARGB32;
             int renderTextureDepth = 0;
 #if !HONEYSELECT
-            if (this._imageFormat == ImgFormat.EXR)
+            if (this._imageFormat == VideoExport.ImgFormat.EXR)
             {
                 textureFormat = TextureFormat.RGBAHalf;
                 renderTextureFormat = RenderTextureFormat.ARGBHalf;
@@ -188,16 +148,6 @@ namespace VideoExport.ScreenshotPlugins
                     this._cachedRenderTexture = Camera.main.targetTexture;
                     Camera.main.targetTexture = RenderTexture.GetTemporary((int)size.x, (int)size.y, renderTextureDepth, renderTextureFormat);
                     break;
-                case CaptureMode.Win32:
-                    this._windowHandle = GetActiveWindow();
-                    Rect rect = new Rect();
-                    GetClientRect(this._windowHandle, ref rect);
-                    int width = rect.right - rect.left;
-                    int height = rect.bottom - rect.top;
-                    this._bitmap = new System.Drawing.Bitmap(width, height, PixelFormat.Format32bppArgb);
-                    this._graphics = Graphics.FromImage(this._bitmap);
-                    VideoExport._showUi = false;
-                    break;
             }
         }
 
@@ -209,8 +159,6 @@ namespace VideoExport.ScreenshotPlugins
                     return this.CaptureNormal();
                 case CaptureMode.Immediate:
                     return this.CaptureImmediate();
-                case CaptureMode.Win32:
-                    return this.CaptureWin32(saveTo);
             }
             return null;
         }
@@ -227,13 +175,6 @@ namespace VideoExport.ScreenshotPlugins
                     RenderTexture.ReleaseTemporary(Camera.main.targetTexture);
                     Camera.main.targetTexture = this._cachedRenderTexture;
                     break;
-#if !KOIKATSU
-                case CaptureMode.Win32:
-                    this._graphics.Dispose();
-                    this._graphics = null;
-                    VideoExport._showUi = true;
-                    break;
-#endif
             }
         }
 
@@ -264,21 +205,16 @@ namespace VideoExport.ScreenshotPlugins
             GUILayout.BeginHorizontal();
             {
                 GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.ImageFormat), GUILayout.ExpandWidth(false));
-                this._imageFormat = (ImgFormat)GUILayout.SelectionGrid((int)this._imageFormat, this._imageFormatNames, this._imageFormatNames.Length);
+                this._imageFormat = (VideoExport.ImgFormat)GUILayout.SelectionGrid((int)this._imageFormat, this._imageFormatNames, this._imageFormatNames.Length);
             }
             GUILayout.EndHorizontal();
-
-#if !HONEYSELECT
-            if (this._captureMode == CaptureMode.Win32 && this._imageFormat == ImgFormat.EXR)
-                this._imageFormat = ImgFormat.BMP;
-#endif
         }
 
         public void SaveParams()
         {
-            VideoExport._configFile.SetFloat("bmpSizeMultiplier", this._scaleFactor);
-            VideoExport._configFile.SetInt("bmpCaptureMode", (int)this._captureMode);
-            VideoExport._configFile.SetInt("bmpImageFormat", (int)this._imageFormat);
+            VideoExport._configFile.SetFloat("builtinSizeMultiplier", this._scaleFactor);
+            VideoExport._configFile.SetInt("builtinCaptureMode", (int)this._captureMode);
+            VideoExport._configFile.SetInt("builtinImageFormat", (int)this._imageFormat);
         }
 
         private byte[] CaptureNormal()
@@ -290,7 +226,7 @@ namespace VideoExport.ScreenshotPlugins
             RenderTextureFormat renderTextureFormat = RenderTextureFormat.ARGB32;
             int renderTextureDepth = 0;
 #if !HONEYSELECT
-            if (this._imageFormat == ImgFormat.EXR)
+            if (this._imageFormat == VideoExport.ImgFormat.EXR)
             {
                 renderTextureFormat = RenderTextureFormat.ARGBHalf;
                 renderTextureDepth = 16;
@@ -312,12 +248,12 @@ namespace VideoExport.ScreenshotPlugins
             switch (this._imageFormat)
             {
                 default:
-                case ImgFormat.BMP:
+                case VideoExport.ImgFormat.BMP:
                     return this.EncodeToBMP(this._texture, width, height);
-                case ImgFormat.PNG:
+                case VideoExport.ImgFormat.PNG:
                     return this._texture.EncodeToPNG();
 #if !HONEYSELECT
-                case ImgFormat.EXR:
+                case VideoExport.ImgFormat.EXR:
                     return this._texture.EncodeToEXR();
 #endif
             }
@@ -337,50 +273,15 @@ namespace VideoExport.ScreenshotPlugins
             switch (this._imageFormat)
             {
                 default:
-                case ImgFormat.BMP:
+                case VideoExport.ImgFormat.BMP:
                     return this.EncodeToBMP(this._texture, width, height);
-                case ImgFormat.PNG:
+                case VideoExport.ImgFormat.PNG:
                     return this._texture.EncodeToPNG();
 #if !HONEYSELECT
-                case ImgFormat.EXR:
+                case VideoExport.ImgFormat.EXR:
                     return this._texture.EncodeToEXR();
 #endif
             }
-        }
-
-        private byte[] CaptureWin32(string saveTo)
-        {
-            Rect rect = new Rect();
-            GetClientRect(this._windowHandle, ref rect);
-            System.Drawing.Point point = new System.Drawing.Point(0, 0);
-            ClientToScreen(this._windowHandle, ref point);
-            rect.left += point.X;
-            rect.top += point.Y;
-            rect.right += point.X;
-            rect.bottom += point.Y;
-
-            int width = rect.right - rect.left;
-            int height = rect.bottom - rect.top;
-
-            if (width % 2 != 0)
-                width += 1;
-            if (height % 2 != 0)
-                height += 1;
-
-            this._graphics.Clear(System.Drawing.Color.Black);
-            this._graphics.CopyFromScreen(rect.left, rect.top, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
-
-            switch (this._imageFormat)
-            {
-                default:
-                case ImgFormat.BMP:
-                    this._bitmap.Save(saveTo, ImageFormat.Bmp);
-                    break;
-                case ImgFormat.PNG:
-                    this._bitmap.Save(saveTo, ImageFormat.Png);
-                    break;
-            }
-            return null;
         }
 
         private byte[] EncodeToBMP(Texture2D texture, int width, int height)

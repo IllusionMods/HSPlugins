@@ -60,6 +60,15 @@ namespace VideoExport
 #endif
 
         #region Types
+        public enum ImgFormat
+        {
+            BMP,
+            PNG,
+#if !HONEYSELECT //Someday I hope...
+            EXR
+#endif
+        }
+
         private enum Language
         {
             English,
@@ -110,6 +119,7 @@ namespace VideoExport
             VideosFolderDesc,
             FramesFolderDesc,
             BuiltInCaptureTool,
+            Win32CaptureTool,
             SizeMultiplier,
             CaptureMode,
             ImageFormat,
@@ -299,11 +309,10 @@ namespace VideoExport
                 this.AddScreenshotPlugin(new PlayShot24ZHNeo(), harmony);
 #endif
                 AddScreenshotPlugin(new ScreencapPlugin(), harmony);
-                if (Type.GetType("System.Drawing.Graphics, System.Drawing", false) != null)
-                {
-                    // Need to do it this way because KK blows up with a type load exception if it sees the Bitmap type anywhere in the method body
-                    new Action(() => AddScreenshotPlugin(new Bitmap(), harmony))();
-                }
+                AddScreenshotPlugin(new Builtin(), harmony);
+#if !KOIKATSU
+                AddScreenshotPlugin(new Win32Plugin(), harmony);
+#endif
 
                 if (_screenshotPlugins.Count == 0)
                     Logger.LogError("No compatible screenshot plugin found, please install one.");

@@ -41,6 +41,7 @@
   <string key="VideosFolderDesc" value="The folder where videos are stored" />
   <string key="FramesFolderDesc" value="The folder where frames are stored" />
   <string key="BuiltInCaptureTool" value="Built-in" />
+  <string key="Win32CaptureTool" value="Win32" />
   <string key="SizeMultiplier" value="Size Multiplier" />
   <string key="CaptureMode" value="Capture Mode" />
   <string key="CaptureModeNormal" value="Normal" />

@@ -41,11 +41,11 @@
   <string key="VideosFolderDesc" value="视频存储目录" />
   <string key="FramesFolderDesc" value="单帧存储目录" />
   <string key="BuiltInCaptureTool" value="内置" />
+  <string key="Win32CaptureTool" value="Win32" />
   <string key="SizeMultiplier" value="截图倍率" />
   <string key="CaptureMode" value="截图模式" />
   <string key="CaptureModeNormal" value="标准" />
   <string key="CaptureModeImmediate" value="高速" />
-  <string key="CaptureModeWin32" value="普通" />
   <string key="ImageFormat" value="图像格式" />
   <string key="Transparent" value="Alpha透明通道" />
   <string key="ScreencapCaptureType" value="截图类型" />

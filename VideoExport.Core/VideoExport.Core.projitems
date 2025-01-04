@@ -16,7 +16,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MP4Extension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBMExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\Bitmap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\Win32Plugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\Builtin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\HoneyShot.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\IScreenshotPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\PlayShot24ZHNeo.cs" />
