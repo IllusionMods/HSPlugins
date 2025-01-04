@@ -31,6 +31,7 @@
   <string key="StartRecording" value="Start Recording" />
   <string key="StopRecording" value="Stop Recording" />
   <string key="PrewarmingAnimation" value="Prewarming animation" />
+  <string key="RealignTimeline" value="Realign timeline to 00:00.00" />
   <string key="TakingScreenshot" value="Taking screenshot" />
   <string key="ETA" value="ETA" />
   <string key="Elapsed" value="Elapsed" />

@@ -31,6 +31,7 @@
   <string key="StartRecording" value="开始录制" />
   <string key="StopRecording" value="停止录制" />
   <string key="PrewarmingAnimation" value="动画速率" />
+  <string key="RealignTimeline" value="将时间线重新对齐至 00:00.00" />
   <string key="TakingScreenshot" value="获取截图中" />
   <string key="ETA" value="预计还需" />
   <string key="Elapsed" value="已用时间" />

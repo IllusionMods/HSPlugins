@@ -100,6 +100,7 @@ namespace VideoExport
             StartRecording,
             StopRecording,
             PrewarmingAnimation,
+            RealignTimeline,
             TakingScreenshot,
             ETA,
             Elapsed,
@@ -219,6 +220,7 @@ namespace VideoExport
         private int _resizeX;
         private int _resizeY;
         private UpdateDynamicBonesType _selectedUpdateDynamicBones;
+        private bool _realignTimeline = true;
         private int _prewarmLoopCount = 3;
         private string _imagesPrefix = "";
         private string _imagesPostfix = "";
@@ -264,6 +266,7 @@ namespace VideoExport
             _resizeX = _configFile.AddInt("resizeX", Screen.width, true);
             _resizeY = _configFile.AddInt("resizeY", Screen.height, true);
             _selectedUpdateDynamicBones = (UpdateDynamicBonesType)_configFile.AddInt("selectedUpdateDynamicBonesMode", (int)UpdateDynamicBonesType.Default, true);
+            _realignTimeline = _configFile.AddBool("realignTimeline", true, true);
             _prewarmLoopCount = _configFile.AddInt("prewarmLoopCount", 3, true);
             _imagesPrefix = _configFile.AddString("imagesPrefix", "", true);
             _imagesPostfix = _configFile.AddString("imagesPostfix", "", true);
@@ -396,6 +399,7 @@ namespace VideoExport
             _configFile.SetInt("resizeX", _resizeX);
             _configFile.SetInt("resizeY", _resizeY);
             _configFile.SetInt("selectedUpdateDynamicBonesMode", (int)_selectedUpdateDynamicBones);
+            _configFile.SetBool("realignTimeline", _realignTimeline);
             _configFile.SetInt("prewarmLoopCount", _prewarmLoopCount);
             _configFile.SetString("imagesPrefix", _imagesPrefix);
             _configFile.SetString("imagesPostfix", _imagesPostfix);
@@ -594,6 +598,12 @@ namespace VideoExport
                             }
                         case LimitDurationType.Timeline:
                             {
+                                GUILayout.BeginHorizontal();
+                                {
+                                    _realignTimeline = GUILayout.Toggle(_realignTimeline, _currentDictionary.GetString(TranslationKey.RealignTimeline));
+                                }
+                                GUILayout.EndHorizontal();
+
                                 GUILayout.BeginHorizontal();
                                 {
                                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCount), GUILayout.ExpandWidth(false));
@@ -950,10 +960,20 @@ namespace VideoExport
 
             if (_selectedLimitDuration == LimitDurationType.Timeline)
             {
-                // Restart Timeline because warmup might not end at 00:00.00
-                if (TimelineCompatibility.GetIsPlaying() == true)
+                if (_realignTimeline)
+                {
                     TimelineCompatibility.Stop();
-                TimelineCompatibility.Play();
+                    TimelineCompatibility.Play();
+                    yield return new WaitForEndOfFrame();
+                    TimelineCompatibility.Stop();
+
+                    // Wait for dynamic bones and other physics to settle
+                    for (int x = 0; x < _fps; x++)
+                        yield return new WaitForEndOfFrame();
+                }
+
+                if (TimelineCompatibility.GetIsPlaying() == false)
+                    TimelineCompatibility.Play();
             }
 
             int exportInterval = _fps / _exportFps;
