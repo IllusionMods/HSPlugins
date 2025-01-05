@@ -17,6 +17,8 @@ using Illusion.Extensions;
 using Studio;
 using ToolBox.Extensions;
 using UnityEngine;
+using static RootMotion.FinalIK.RagdollUtility;
+
 
 
 #if HONEYSELECT || KOIKATSU || AISHOUJO || HONEYSELECT2
@@ -1059,10 +1061,7 @@ namespace HSPE.AMModules
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)))
                 {
-                    foreach (var currBlendRenderer in _blendRenderers)
-                    {
-                        currBlendRenderer.Value.ClearDirty();
-                    }
+                    _skinnedMeshTarget.ClearDirty();
                 }
 
                 GUI.color = c;
@@ -1813,6 +1812,11 @@ namespace HSPE.AMModules
         {
             foreach (var currBlendRenderer in _blendRenderers)
             {
+                if(currBlendRenderer.Value._renderer == null)
+                {
+                    continue;
+                }
+
                 if (currBlendRenderer.Value._blendNames.Count != currBlendRenderer.Value._renderer.sharedMesh.blendShapeCount)
                 {
                     currBlendRenderer.Value._blendIndics.Clear();
@@ -1856,7 +1860,6 @@ namespace HSPE.AMModules
             _blendRenderers.Clear();
             _blenderRenderbySkinnedRenderer.Clear();
 
-            string parentName = _parent.name;
             List<SkinnedMeshRenderer> skinnedMeshRenderers = new List<SkinnedMeshRenderer>();
             List<Transform> transformStack = new List<Transform>();
             transformStack.Add(_parent.transform);
@@ -1864,18 +1867,23 @@ namespace HSPE.AMModules
             while (transformStack.Count > 0)
             {
                 Transform currTransform = transformStack.Pop();
+
+                SkinnedMeshRenderer skinnedMeshRenderer = currTransform.GetComponent<SkinnedMeshRenderer>();
+                BlendShapesEditor currBlendShapesEditor = currTransform.GetComponent<BlendShapesEditor>();
+
+                if (currBlendShapesEditor != null && currBlendShapesEditor != this)
+                {
+                    continue;
+                }
+
+                if (skinnedMeshRenderer != null)
+                {
+                    skinnedMeshRenderers.Add(skinnedMeshRenderer);
+                }
+
                 foreach (Transform child in currTransform)
                 {
-                    SkinnedMeshRenderer skinnedMeshRenderer = child.GetComponent<SkinnedMeshRenderer>();
-                    if (skinnedMeshRenderer != null)
-                    {
-                        skinnedMeshRenderers.Add(skinnedMeshRenderer);
-                    }
-
-                    if (child.name != parentName)
-                    {
-                        transformStack.Add(child);
-                    }
+                    transformStack.Add(child);
                 }
             }
 

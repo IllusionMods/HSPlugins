@@ -106,9 +106,9 @@ namespace HSPE.AMModules
             }
         }
 
+        private bool _renderersChanged = false;
         private Transform[] _clothesKeyTransforms = new Transform[_clothesKeys.Length];
         private List<SkinnedMeshRenderer>[] _clothesRenderers = new List<SkinnedMeshRenderer>[(int)ChoiceType.Count];
-        private bool _clothesRenderLoaded = false;
         private Dictionary<Transform, ClothesTransferList> _clothesTransferLists = new Dictionary<Transform, ClothesTransferList>();
         private Dictionary<string, ClothesTransferList> _clothesTransferListsByStr = new Dictionary<string, ClothesTransferList>();
 
@@ -141,7 +141,7 @@ namespace HSPE.AMModules
             _target = target;
             _parent.onLateUpdate += LateUpdate;
             _parent.onDisable += OnDisable;
-            
+
 
             if (_cubeDebugLines.Count == 0)
             {
@@ -188,15 +188,40 @@ namespace HSPE.AMModules
                 _clothesRenderers[i] = new List<SkinnedMeshRenderer>();
             }
 
-
             FindTargetTransforms();
         }
 
         private void LateUpdate()
         {
-            if (_clothesRenderLoaded == false)
+            if(_renderersChanged == false)
             {
-                GetClothesRenderers();
+                Transform searchStartPointNode = _parent.gameObject.transform.Find("BodyTop");
+
+                if (searchStartPointNode != null)
+                {
+                    Transform currClothesTransform = null;
+                    for (int index = 0; index < _clothesKeys.Length; index++)
+                    {
+                        currClothesTransform = searchStartPointNode.Find(_clothesKeys[index]);
+                        if (_clothesKeyTransforms[index] != currClothesTransform)
+                        {
+                            //HSPE.Logger.LogInfo("intKey : " + currClothesTransform + " from " + _clothesKeyTransforms[index]);
+                            _renderersChanged = true;
+                            break;
+                        }
+                    }
+
+                    if (_renderersChanged)
+                    {
+                        MainWindow._self.ExecuteDelayed(() =>
+                        {
+                            RefreshClothesRenderers();
+                            ChangeClothesRenderersBone();
+
+                            _renderersChanged = false;
+                        }, 5);
+                    }
+                }
             }
         }
 
@@ -355,12 +380,6 @@ namespace HSPE.AMModules
                 }
             }
 
-            MainWindow._self.ExecuteDelayed(() =>
-            {
-                GetClothesRenderers();
-                ChangeClothesRenderersBone();
-            }, 2);
-
             return changed;
         }
 
@@ -498,7 +517,7 @@ namespace HSPE.AMModules
 
                         if (GUILayout.Button("Refresh Clothes Renderer"))
                         {
-                            GetClothesRenderers();
+                            RefreshClothesRenderers();
                             ChangeClothesRenderersBone();
                         }
                         GUILayout.EndHorizontal();
@@ -797,7 +816,6 @@ namespace HSPE.AMModules
 
         private void FindTargetTransforms()
         {
-
             Dictionary<string, Transform> bodyTransforms = new Dictionary<string, Transform>();
 
             SkinnedMeshRenderer bodyRenderer = null;
@@ -847,7 +865,56 @@ namespace HSPE.AMModules
             }
         }
 
-        private void GetClothesRenderers()
+        private void RefreshClothesRenderer(int index, Transform targetClothesTransform)
+        {
+            _clothesRenderers[index].Clear();
+
+            _clothesKeyTransforms[index] = targetClothesTransform;
+
+            if (targetClothesTransform != null)
+            {
+                ChoiceType currChoice = ChoiceType.Count;
+                _ChoiceKey.TryGetValue(targetClothesTransform.name, out currChoice);
+                if (currChoice < ChoiceType.Gloves)
+                {
+                    var allRenderers = targetClothesTransform.GetComponentsInChildren<SkinnedMeshRenderer>();
+                    var clotheTransform = GetDefHalfClothesTransform(targetClothesTransform);
+
+                    foreach (var currRenderer in allRenderers)
+                    {
+                        Transform currTransform = currRenderer.transform;
+
+                        while (currTransform != null)
+                        {
+                            if (currTransform == clotheTransform.Key)
+                            {
+                                _clothesRenderers[(int)currChoice].Add(currRenderer);
+                                break;
+                            }
+                            else if (currTransform == clotheTransform.Value)
+                            {
+                                _clothesRenderers[(int)_ChoiceKey[_clothesKeys[index] + "_half"]].Add(currRenderer);
+                                break;
+                            }
+
+                            if (currTransform.transform == targetClothesTransform)
+                            {
+                                _clothesRenderers[(int)currChoice].Add(currRenderer);
+                                _clothesRenderers[(int)_ChoiceKey[_clothesKeys[index] + "_half"]].Add(currRenderer);
+                                break;
+                            }
+                            else
+                            {
+                                currTransform = currTransform.parent;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        private void RefreshClothesRenderers()
         {
             for (int i = 0; i < (int)ChoiceType.Count; i++)
             {
@@ -920,8 +987,6 @@ namespace HSPE.AMModules
                     }
                 }
             }
-
-            _clothesRenderLoaded = true;
         }
 
         private void ChangeClothesRenderersBone()
@@ -1080,8 +1145,6 @@ namespace HSPE.AMModules
             MainWindow._self.ExecuteDelayed(() =>
             {
                 FindTargetTransforms();
-                GetClothesRenderers();
-                ChangeClothesRenderersBone();
             }, 5);
         }
 #if HONEYSELECT || KOIKATSU
@@ -1091,21 +1154,11 @@ namespace HSPE.AMModules
         public override void OnCoordinateReplaced(ChaFileDefine.CoordinateType coordinateType, bool force)
 #endif
         {
-            MainWindow._self.ExecuteDelayed(() =>
-            {
-                GetClothesRenderers();
-                ChangeClothesRenderersBone();
-            }, 2);
         }
 #endif
 
         public override void OnLoadClothesFile()
         {
-            MainWindow._self.ExecuteDelayed(() =>
-            {
-                GetClothesRenderers();
-                ChangeClothesRenderersBone();
-            }, 2);
         }
 
 
