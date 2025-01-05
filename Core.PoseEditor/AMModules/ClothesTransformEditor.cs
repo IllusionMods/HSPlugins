@@ -380,6 +380,15 @@ namespace HSPE.AMModules
                 }
             }
 
+            _renderersChanged = true;
+            MainWindow._self.ExecuteDelayed(() =>
+            {
+                RefreshClothesRenderers();
+                ChangeClothesRenderersBone();
+
+                _renderersChanged = false;
+            }, 2);
+
             return changed;
         }
 
@@ -1142,9 +1151,14 @@ namespace HSPE.AMModules
             _targetTransforms.Clear();
             _clothesTransferLists.Clear();
 
+            _renderersChanged = true;
             MainWindow._self.ExecuteDelayed(() =>
             {
                 FindTargetTransforms();
+                RefreshClothesRenderers();
+                ChangeClothesRenderersBone();
+
+                _renderersChanged = false;
             }, 5);
         }
 #if HONEYSELECT || KOIKATSU
