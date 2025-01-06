@@ -111,6 +111,7 @@ namespace HSPE.AMModules
         private List<SkinnedMeshRenderer>[] _clothesRenderers = new List<SkinnedMeshRenderer>[(int)ChoiceType.Count];
         private Dictionary<Transform, ClothesTransferList> _clothesTransferLists = new Dictionary<Transform, ClothesTransferList>();
         private Dictionary<string, ClothesTransferList> _clothesTransferListsByStr = new Dictionary<string, ClothesTransferList>();
+        private Transform _currSearchStartTargetTransform = null;
 
         private static readonly string _cloneToken = "_CTClone_";
         //private static readonly string _targetTransStartToken = "cf_J_";
@@ -195,17 +196,12 @@ namespace HSPE.AMModules
         {
             if(_renderersChanged == false)
             {
-                Transform searchStartPointNode = _parent.gameObject.transform.Find("BodyTop");
-
-                if (searchStartPointNode != null)
+                if (_currSearchStartTargetTransform != null)
                 {
-                    Transform currClothesTransform = null;
                     for (int index = 0; index < _clothesKeys.Length; index++)
                     {
-                        currClothesTransform = searchStartPointNode.Find(_clothesKeys[index]);
-                        if (_clothesKeyTransforms[index] != currClothesTransform)
+                        if(_clothesKeyTransforms[index] == null)
                         {
-                            //HSPE.Logger.LogInfo("intKey : " + currClothesTransform + " from " + _clothesKeyTransforms[index]);
                             _renderersChanged = true;
                             break;
                         }
@@ -929,16 +925,16 @@ namespace HSPE.AMModules
             {
                 _clothesRenderers[i].Clear();
             }
-            Transform searchStartPointNode = _parent.gameObject.transform.Find("BodyTop");
+            _currSearchStartTargetTransform = _parent.gameObject.transform.Find("BodyTop");
 
-            if (searchStartPointNode == null)
+            if (_currSearchStartTargetTransform == null)
             {
                 return;
             }
 
             for (int i = 0; i < _clothesKeys.Length; i++)
             {
-                _clothesKeyTransforms[i] = searchStartPointNode.Find(_clothesKeys[i]);
+                _clothesKeyTransforms[i] = _currSearchStartTargetTransform.Find(_clothesKeys[i]);
             }
 
             for (int i = 0; i < _clothesKeys.Length; i++)

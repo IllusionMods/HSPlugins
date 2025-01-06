@@ -17,8 +17,6 @@ using Illusion.Extensions;
 using Studio;
 using ToolBox.Extensions;
 using UnityEngine;
-using static RootMotion.FinalIK.RagdollUtility;
-
 
 
 #if HONEYSELECT || KOIKATSU || AISHOUJO || HONEYSELECT2
