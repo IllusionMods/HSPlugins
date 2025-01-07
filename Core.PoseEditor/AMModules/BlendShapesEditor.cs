@@ -590,6 +590,11 @@ namespace HSPE.AMModules
             });
         }
 
+        public void DisableSubWindow()
+        {
+            _imguiBackground.gameObject.SetActive(false);
+        }
+
         private static string FixFullPath(string fullpath)
         {
             string result = fullpath;
