@@ -296,7 +296,14 @@ namespace HSPE
                 IMGUIExtensions.FitRectTransformToRect(_imguiBackground, _advancedModeRect);
             }
             else if (_imguiBackground != null)
+            {
                 _imguiBackground.gameObject.SetActive(false);
+
+                if (_poseTarget != null && _poseTarget._blendShapesEditor != null)
+                {
+                    _poseTarget._blendShapesEditor.DisableSubWindow();
+                }
+            }
         }
 
         protected virtual void OnDestroy()
