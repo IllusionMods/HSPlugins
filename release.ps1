@@ -27,6 +27,9 @@ foreach ($subdir in Get-ChildItem -Path $dir -Directory -Exclude "Out")
     $outdir = $dir + "\out\" + $subdir.BaseName
     New-Item -ItemType Directory -Force -Path $outdir
 
+    Copy-Item -Path ($dir + "\..\LICENSE") -Destination $outdir
+    Copy-Item -Path ($dir + "\..\Readme.md") -Destination $outdir
+
     # Create releases ---------
     function CreateZip ($pluginFile)
     {
