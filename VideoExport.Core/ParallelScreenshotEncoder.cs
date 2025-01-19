@@ -2,47 +2,70 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using ToolBox.Extensions;
 using UnityEngine;
 
 namespace VideoExport.Core
 {
     class ParallelScreenshotEncoder
     {
-        private Dictionary<int, Texture2D> keepAlive;
-        private Mutex keepAliveMutex;
-
+        private readonly Dictionary<int, Texture2D> keepAlive;
         private int currentKey;
 
         public ParallelScreenshotEncoder()
         {
-            Init();
-        }
-
-        public void Init()
-        {
-            currentKey = 0;
             keepAlive = new Dictionary<int, Texture2D>();
-            keepAliveMutex = new Mutex();
+            currentKey = 0;
         }
 
         /// <summary>
-        /// WARNING: Texture2D is not thread-safe
+        /// WARNING: Texture2D is not thread-safe. Once queued, wait for the encoder to finish before using the texture again.
         /// </summary>
-        public void QueueScreenshot(Texture2D texture, VideoExport.ImgFormat format, string savePath)
+        public void QueueScreenshotUnsafe(Texture2D texture, VideoExport.ImgFormat format, string savePath)
         {
             int key = currentKey;
-            lock (keepAliveMutex)
+            lock (keepAlive)
             {
                 keepAlive.Add(key, texture);
             }
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
-                lock (keepAliveMutex)
+                lock (keepAlive)
                 {
                     byte[] frame = TextureEncoder.EncodeTexture(texture, format);
                     File.WriteAllBytes(savePath, frame);
                     keepAlive.Remove(key);
+                }
+            });
+
+            currentKey++;
+        }
+
+        /// <summary>
+        /// WARNING: Texture2D is not thread-safe. This function also schedules the texture for destruction on the main thread.
+        /// </summary>
+        public void QueueScreenshotDestructive(Texture2D texture, VideoExport.ImgFormat format, string savePath)
+        {
+            int key = currentKey;
+            lock (keepAlive)
+            {
+                keepAlive.Add(key, texture);
+            }
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                lock (keepAlive)
+                {
+                    byte[] frame = TextureEncoder.EncodeTexture(texture, format);
+                    File.WriteAllBytes(savePath, frame);
+
+                    Texture2D tex;
+                    if (keepAlive.TryGetValue(key, out tex))
+                    {
+                        keepAlive.Remove(key);
+                        MainThreadDispatcher.Instance.Dispatch(() => { UnityEngine.Object.Destroy(tex); });
+                    }
                 }
             });
 

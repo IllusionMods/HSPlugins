@@ -140,7 +140,9 @@ namespace VideoExport.ScreenshotPlugins
                     break;
             }
 
-            return TextureEncoder.EncodeTexture(texture, imageFormat);
+            byte[] result = TextureEncoder.EncodeTexture(texture, imageFormat);
+            UnityEngine.Object.Destroy(texture);
+            return result;
         }
 
         public bool IsTextureCaptureAvailable()

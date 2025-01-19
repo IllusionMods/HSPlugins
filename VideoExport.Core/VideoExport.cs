@@ -1008,12 +1008,6 @@ namespace VideoExport
                     break;
                 }
 
-                if (i % 5 == 0)
-                {
-                    Resources.UnloadUnusedAssets();
-                    GC.Collect();
-                }
-
                 if(i % exportInterval == 0 )
                 {
                     string savePath = Path.Combine(framesFolder, $"{_imagesPrefix}{i / exportInterval}{_imagesPostfix}.{imageExtension}");
@@ -1026,7 +1020,8 @@ namespace VideoExport
                         {
                             if (_parallelScreenshotEncoding)
                             {
-                                parallelEncoder.QueueScreenshot(texture, screenshotPlugin.imageFormat, savePath);
+                                // WARNING: Textures are scheduled for destruction by the encoder threads.
+                                parallelEncoder.QueueScreenshotDestructive(texture, screenshotPlugin.imageFormat, savePath);
                             }
                             else
                             {

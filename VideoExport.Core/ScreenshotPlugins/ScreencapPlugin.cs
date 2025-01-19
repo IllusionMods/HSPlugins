@@ -366,7 +366,9 @@ namespace VideoExport.ScreenshotPlugins
             _videoExportCapture = true;
             Texture2D texture = this.CaptureTexture();
             _videoExportCapture = false;
-            return texture.EncodeToPNG();
+            byte[] result = texture.EncodeToPNG();
+            UnityEngine.Object.Destroy(texture);
+            return result;
         }
 
         public bool IsTextureCaptureAvailable()
