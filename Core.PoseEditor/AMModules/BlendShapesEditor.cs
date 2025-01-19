@@ -246,6 +246,11 @@ namespace HSPE.AMModules
                     if (_oriBlendIndex.Count > 0)
                     {
                         linkKeyname = GetOriginBlendShapeName(index);
+
+                        if(_blendIndics.TryGetValue(linkKeyname, out int blendIndex))
+                        {
+                            linkKeyname = _linkKeynameList[blendIndex];
+                        }
                     }
                     else
                     {
