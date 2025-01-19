@@ -14,6 +14,8 @@ using UnityEngine;
 using VideoExport.Extensions;
 using VideoExport.ScreenshotPlugins;
 using Resources = UnityEngine.Resources;
+using VideoExport.Core;
+
 #if IPA
 using IllusionPlugin;
 using Harmony;
@@ -1008,9 +1010,30 @@ namespace VideoExport
                 if(i % exportInterval == 0 )
                 {
                     string savePath = Path.Combine(framesFolder, $"{_imagesPrefix}{i / exportInterval}{_imagesPostfix}.{imageExtension}");
+
+#if !HONEYSELECT
+                    if (screenshotPlugin.IsTextureCaptureAvailable() == true)
+                    {
+                        Texture2D texture = screenshotPlugin.CaptureTexture();
+                        if (texture)
+                        {
+                            TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
+                            Destroy(texture);
+                        }
+                    }
+                    else
+                    {
+                        byte[] frame = screenshotPlugin.Capture(savePath);
+                        if (frame != null)
+                            File.WriteAllBytes(savePath, frame);
+                    }
+
+#else
                     byte[] frame = screenshotPlugin.Capture(savePath);
                     if (frame != null)
                         File.WriteAllBytes(savePath, frame);
+#endif
+
                 }
 
                 elapsed = DateTime.Now - startTime;

@@ -4,6 +4,8 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using Graphics = System.Drawing.Graphics;
+using System.Linq;
+
 #if IPA
 using Harmony;
 #elif BEPINEX
@@ -71,6 +73,8 @@ namespace VideoExport.ScreenshotPlugins
         }
         public byte bitDepth { get { return (byte)8; } }
 
+        public VideoExport.ImgFormat imageFormat { get { return _imageFormat; } }
+
         private VideoExport.ImgFormat _imageFormat;
         private string[] _imageFormatNames;
         private IntPtr _windowHandle;
@@ -84,7 +88,7 @@ namespace VideoExport.ScreenshotPlugins
 #endif
         {
             this._imageFormat = (VideoExport.ImgFormat)VideoExport._configFile.AddInt("win32ImageFormat", (int)VideoExport.ImgFormat.BMP, true);
-            this._imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat));
+            this._imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat)).Where(x => x != nameof(VideoExport.ImgFormat.EXR)).ToArray();
 
             return true;
         }
@@ -107,8 +111,17 @@ namespace VideoExport.ScreenshotPlugins
 
         public byte[] Capture(string saveTo)
         {
-
             return this.CaptureWin32(saveTo);
+        }
+
+        public bool IsTextureCaptureAvailable()
+        {
+            return false;
+        }
+
+        public Texture2D CaptureTexture()
+        {
+            return null;
         }
 
         public void OnEndRecording()

@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using System.Linq;
+using VideoExport.Core;
+
+
 #if IPA
 using Harmony;
 #elif BEPINEX
@@ -11,15 +15,6 @@ namespace VideoExport.ScreenshotPlugins
 {
     public class Builtin : IScreenshotPlugin
     {
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Rect
-        {
-            public int left;
-            public int top;
-            public int right;
-            public int bottom;
-        }
-
         private enum CaptureMode
         {
             Normal,
@@ -73,6 +68,8 @@ namespace VideoExport.ScreenshotPlugins
             }
         }
 
+        public VideoExport.ImgFormat imageFormat { get { return _imageFormat; } }
+
         private float _scaleFactor;
         private CaptureMode _captureMode;
         private string[] _captureModeNames;
@@ -80,26 +77,6 @@ namespace VideoExport.ScreenshotPlugins
         private string[] _imageFormatNames;
 
         private RenderTexture _cachedRenderTexture;
-        private Texture2D _texture;
-        private readonly byte[] _bmpHeader = {
-            0x42, 0x4D,
-            0, 0, 0, 0,
-            0, 0,
-            0, 0,
-            54, 0, 0, 0,
-            40, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            1, 0,
-            24, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0
-        };
-        private byte[] _fileBytes = new byte[0];
 
 #if IPA
         public bool Init(HarmonyInstance harmony)
@@ -111,6 +88,9 @@ namespace VideoExport.ScreenshotPlugins
             this._captureMode = (CaptureMode)VideoExport._configFile.AddInt("builtinCaptureMode", (int)CaptureMode.Normal, true);
             this._imageFormat = (VideoExport.ImgFormat)VideoExport._configFile.AddInt("builtinImageFormat", (int)VideoExport.ImgFormat.BMP, true);
             this._imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat));
+#if HONEYSELECT
+            this._imageFormatNames = this._imageFormatNames.Where(x => x != nameof(VideoExport.ImgFormat.EXR)).ToArray();
+#endif
 
             return true;
         }
@@ -127,13 +107,11 @@ namespace VideoExport.ScreenshotPlugins
         public void OnStartRecording()
         {
             Vector2 size = this.currentSize;
-            TextureFormat textureFormat = TextureFormat.RGB24;
             RenderTextureFormat renderTextureFormat = RenderTextureFormat.ARGB32;
             int renderTextureDepth = 0;
 #if !HONEYSELECT
             if (this._imageFormat == VideoExport.ImgFormat.EXR)
             {
-                textureFormat = TextureFormat.RGBAHalf;
                 renderTextureFormat = RenderTextureFormat.ARGBHalf;
                 renderTextureDepth = 16;
             }
@@ -141,10 +119,8 @@ namespace VideoExport.ScreenshotPlugins
             switch (this._captureMode)
             {
                 case CaptureMode.Normal:
-                    this._texture = new Texture2D((int)size.x, (int)size.y, textureFormat, false, true);
                     break;
                 case CaptureMode.Immediate:
-                    this._texture = new Texture2D((int)size.x, (int)size.y, textureFormat, false, true);
                     this._cachedRenderTexture = Camera.main.targetTexture;
                     Camera.main.targetTexture = RenderTexture.GetTemporary((int)size.x, (int)size.y, renderTextureDepth, renderTextureFormat);
                     break;
@@ -153,14 +129,38 @@ namespace VideoExport.ScreenshotPlugins
 
         public byte[] Capture(string saveTo)
         {
+            Texture2D texture = null;
             switch (this._captureMode)
             {
                 case CaptureMode.Normal:
-                    return this.CaptureNormal();
+                    texture = this.CaptureNormal();
+                    break;
                 case CaptureMode.Immediate:
-                    return this.CaptureImmediate();
+                    texture = this.CaptureImmediate();
+                    break;
             }
-            return null;
+
+            return TextureEncoder.EncodeTexture(texture, imageFormat);
+        }
+
+        public bool IsTextureCaptureAvailable()
+        {
+            return true;
+        }
+
+        public Texture2D CaptureTexture()
+        {
+            Texture2D texture = null;
+            switch (this._captureMode)
+            {
+                case CaptureMode.Normal:
+                    texture = this.CaptureNormal();
+                    break;
+                case CaptureMode.Immediate:
+                    texture = this.CaptureImmediate();
+                    break;
+            }
+            return texture;
         }
 
         public void OnEndRecording()
@@ -168,10 +168,8 @@ namespace VideoExport.ScreenshotPlugins
             switch (this._captureMode)
             {
                 case CaptureMode.Normal:
-                    UnityEngine.Object.Destroy(this._texture);
                     break;
                 case CaptureMode.Immediate:
-                    UnityEngine.Object.Destroy(this._texture);
                     RenderTexture.ReleaseTemporary(Camera.main.targetTexture);
                     Camera.main.targetTexture = this._cachedRenderTexture;
                     break;
@@ -217,17 +215,19 @@ namespace VideoExport.ScreenshotPlugins
             VideoExport._configFile.SetInt("builtinImageFormat", (int)this._imageFormat);
         }
 
-        private byte[] CaptureNormal()
+        private Texture2D CaptureNormal()
         {
             Vector2 size = this.currentSize;
             int width = (int)size.x;
             int height = (int)size.y;
 
+            TextureFormat textureFormat = TextureFormat.RGB24;
             RenderTextureFormat renderTextureFormat = RenderTextureFormat.ARGB32;
             int renderTextureDepth = 0;
 #if !HONEYSELECT
             if (this._imageFormat == VideoExport.ImgFormat.EXR)
             {
+                textureFormat = TextureFormat.RGBAHalf;
                 renderTextureFormat = RenderTextureFormat.ARGBHalf;
                 renderTextureDepth = 16;
             }
@@ -239,93 +239,39 @@ namespace VideoExport.ScreenshotPlugins
 
             RenderTexture cached2 = RenderTexture.active;
             RenderTexture.active = Camera.main.targetTexture;
-            this._texture.ReadPixels(new UnityEngine.Rect(0, 0, width, height), 0, 0, false);
+
+            Texture2D texture = new Texture2D((int)size.x, (int)size.y, textureFormat, false, true);
+            texture.ReadPixels(new UnityEngine.Rect(0, 0, width, height), 0, 0, false);
             RenderTexture.active = cached2;
 
             RenderTexture.ReleaseTemporary(Camera.main.targetTexture);
             Camera.main.targetTexture = cached;
 
-            switch (this._imageFormat)
-            {
-                default:
-                case VideoExport.ImgFormat.BMP:
-                    return this.EncodeToBMP(this._texture, width, height);
-                case VideoExport.ImgFormat.PNG:
-                    return this._texture.EncodeToPNG();
-#if !HONEYSELECT
-                case VideoExport.ImgFormat.EXR:
-                    return this._texture.EncodeToEXR();
-#endif
-            }
+            return texture;
         }
 
-        private byte[] CaptureImmediate()
+        private Texture2D CaptureImmediate()
         {
             Vector2 size = this.currentSize;
             int width = (int)size.x;
             int height = (int)size.y;
 
+            TextureFormat textureFormat = TextureFormat.RGB24;
+#if !HONEYSELECT
+            if (this._imageFormat == VideoExport.ImgFormat.EXR)
+            {
+                textureFormat = TextureFormat.RGBAHalf;
+            }
+#endif
+
             RenderTexture cached2 = RenderTexture.active;
             RenderTexture.active = Camera.main.targetTexture;
-            this._texture.ReadPixels(new UnityEngine.Rect(0, 0, width, height), 0, 0, false);
+
+            Texture2D texture = new Texture2D((int)size.x, (int)size.y, textureFormat, false, true);
+            texture.ReadPixels(new UnityEngine.Rect(0, 0, width, height), 0, 0, false);
             RenderTexture.active = cached2;
 
-            switch (this._imageFormat)
-            {
-                default:
-                case VideoExport.ImgFormat.BMP:
-                    return this.EncodeToBMP(this._texture, width, height);
-                case VideoExport.ImgFormat.PNG:
-                    return this._texture.EncodeToPNG();
-#if !HONEYSELECT
-                case VideoExport.ImgFormat.EXR:
-                    return this._texture.EncodeToEXR();
-#endif
-            }
-        }
-
-        private byte[] EncodeToBMP(Texture2D texture, int width, int height)
-        {
-            unsafe
-            {
-                uint byteSize = (uint)(width * height * 3);
-                uint fileSize = (uint)(this._bmpHeader.Length + byteSize);
-                if (this._fileBytes.Length != fileSize)
-                {
-                    this._fileBytes = new byte[fileSize];
-                    Array.Copy(this._bmpHeader, this._fileBytes, this._bmpHeader.Length);
-
-                    this._fileBytes[2] = ((byte*)&fileSize)[0];
-                    this._fileBytes[3] = ((byte*)&fileSize)[1];
-                    this._fileBytes[4] = ((byte*)&fileSize)[2];
-                    this._fileBytes[5] = ((byte*)&fileSize)[3];
-
-                    this._fileBytes[18] = ((byte*)&width)[0];
-                    this._fileBytes[19] = ((byte*)&width)[1];
-                    this._fileBytes[20] = ((byte*)&width)[2];
-                    this._fileBytes[21] = ((byte*)&width)[3];
-
-                    this._fileBytes[22] = ((byte*)&height)[0];
-                    this._fileBytes[23] = ((byte*)&height)[1];
-                    this._fileBytes[24] = ((byte*)&height)[2];
-                    this._fileBytes[25] = ((byte*)&height)[3];
-
-                    this._fileBytes[34] = ((byte*)&byteSize)[0];
-                    this._fileBytes[35] = ((byte*)&byteSize)[1];
-                    this._fileBytes[36] = ((byte*)&byteSize)[2];
-                    this._fileBytes[37] = ((byte*)&byteSize)[3];
-                }
-
-                int i = this._bmpHeader.Length;
-                Color32[] pixels = texture.GetPixels32();
-                foreach (Color32 c in pixels)
-                {
-                    this._fileBytes[i++] = c.b;
-                    this._fileBytes[i++] = c.g;
-                    this._fileBytes[i++] = c.r;
-                }
-                return this._fileBytes;
-            }
+            return texture;
         }
     }
 }

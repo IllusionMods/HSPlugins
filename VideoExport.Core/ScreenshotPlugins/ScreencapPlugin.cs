@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -9,6 +10,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using Illusion.Game;
+using Screencap;
 using ToolBox.Extensions;
 using UnityEngine;
 
@@ -46,6 +48,8 @@ namespace VideoExport.ScreenshotPlugins
                 return Vector2.zero;
             }
         }
+        public VideoExport.ImgFormat imageFormat { get { return VideoExport.ImgFormat.PNG; } }
+
         public bool transparency { get { return this._captureAlpha.Value; } }
         public string extension { get { return this._useJpg.Value ? "jpg" : "png"; } }
         public byte bitDepth { get { return 8; } }
@@ -186,6 +190,24 @@ namespace VideoExport.ScreenshotPlugins
             return _imageBytes;
         }
 
+        public bool IsTextureCaptureAvailable()
+        {
+            return _captureType == CaptureType.Normal && !_in3d;
+        }
+
+        public Texture2D CaptureTexture()
+        {
+            _videoExportCapture = true;
+            Texture2D texture = ScreenshotManager.Instance.Capture(
+                ScreenshotManager.ResolutionX.Value,
+                ScreenshotManager.ResolutionY.Value,
+                ScreenshotManager.DownscalingRate.Value,
+                ScreenshotManager.CaptureAlpha.Value
+            );
+            _videoExportCapture = false;
+            return texture;
+        }
+
         public void OnEndRecording()
         {
         }
@@ -281,6 +303,7 @@ namespace VideoExport.ScreenshotPlugins
         public bool transparency { get { return this._alpha.Value; } }
         public string extension { get { return "png"; } }
         public byte bitDepth { get { return 8; } }
+        public VideoExport.ImgFormat imageFormat { get { return VideoExport.ImgFormat.PNG; } }
 #endregion
 
 #region Private Variables
@@ -289,9 +312,11 @@ namespace VideoExport.ScreenshotPlugins
         private static Texture2D _texture = new Texture2D(Screen.width, Screen.height, TextureFormat.ARGB32, false, true);
 
         private Action<bool> _capture;
+        private Func<int, int, int, bool, RenderTexture> _captureTexture;
 
         private ConfigEntry<int> _captureWidth;
         private ConfigEntry<int> _captureHeight;
+        private ConfigEntry<int> _downscaling;
         private ConfigEntry<bool> _alpha;
 #endregion
 
@@ -306,11 +331,17 @@ namespace VideoExport.ScreenshotPlugins
             this._captureHeight = (ConfigEntry<int>)screenshotManager.GetPrivateProperty("CaptureHeight");
             this._alpha = (ConfigEntry<bool>)screenshotManager.GetPrivateProperty("Alpha");
 
+            PropertyInfo downscalingProperty = screencapType.GetProperty("Downscaling", BindingFlags.Static | BindingFlags.NonPublic);
+            if (downscalingProperty != null)
+                _downscaling = downscalingProperty.GetValue(null) as ConfigEntry<int>;
+
             MethodInfo capture = screencapType.GetMethod("CaptureAndWrite", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (capture == null)
+            MethodInfo captureTexture = screencapType.GetMethod("Capture", BindingFlags.Public | BindingFlags.Instance);
+            if (capture == null || captureTexture == null)
                 return false;
             this._capture = (Action<bool>)Delegate.CreateDelegate(typeof(Action<bool>), screenshotManager, capture);
-            if (this._capture == null)
+            this._captureTexture = (Func<int, int, int, bool, RenderTexture>)Delegate.CreateDelegate(typeof(Func<int, int, int, bool, RenderTexture>), screenshotManager, captureTexture);
+            if (this._capture == null || this._captureTexture == null)
                 return false;
             try
             {
@@ -333,9 +364,29 @@ namespace VideoExport.ScreenshotPlugins
         public byte[] Capture(string saveTo)
         {
             _videoExportCapture = true;
-            this._capture(this._alpha.Value);
+            Texture2D texture = this.CaptureTexture();
             _videoExportCapture = false;
-            return _imageBytes;
+            return texture.EncodeToPNG();
+        }
+
+        public bool IsTextureCaptureAvailable()
+        {
+            return true;
+        }
+
+        public Texture2D CaptureTexture()
+        {
+            RenderTexture rt = this._captureTexture(_captureWidth.Value, _captureHeight.Value, _downscaling.Value, _alpha.Value);
+            RenderTexture cached = RenderTexture.active;
+            RenderTexture.active = rt;
+
+            Texture2D texture = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false, true);
+            texture.ReadPixels(new Rect(0f, 0f, rt.width, rt.height), 0, 0, false);
+            RenderTexture.ReleaseTemporary(RenderTexture.active);
+            RenderTexture.active = cached;
+            texture.Apply();
+
+            return texture;
         }
 
         public void OnEndRecording() { }
