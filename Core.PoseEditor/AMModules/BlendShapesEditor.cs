@@ -241,7 +241,17 @@ namespace HSPE.AMModules
             {
                 if (_linkedBlendRenderers.Count > 0 && index < _linkKeynameList.Count)
                 {
-                    string linkKeyname = _linkKeynameList[index];
+                    string linkKeyname = null;
+
+                    if (_oriBlendIndex.Count > 0)
+                    {
+                        linkKeyname = GetOriginBlendShapeName(index);
+                    }
+                    else
+                    {
+                        linkKeyname = _linkKeynameList[index];
+                    }
+
                     if (linkKeyname != null)
                     {
                         foreach (var linkedBlendRenderer in _linkedBlendRenderers)
@@ -254,7 +264,7 @@ namespace HSPE.AMModules
                                 }
                                 else
                                 {
-                                    linkedBlendRenderer.SetBlendShapeWeight(linkedBlendRenderer._blendNames[linkIndex], weight);
+                                    linkedBlendRenderer.SetBlendShapeWeight(linkIndex, weight);
                                 }
                             }
                         }
@@ -299,41 +309,50 @@ namespace HSPE.AMModules
                 return result;
             }
 
+            private string GetOriginBlendShapeName(int index)
+            {
+                string blendName = null;
+
+                if (_oriBlendIndex.TryGetValue(index, out blendName))
+                {
+                    if (_nonMatchBlendCorrection.TryGetValue(blendName, out string correctionName))
+                    {
+                        if (_blendIndics.ContainsKey(correctionName))
+                        {
+                            blendName = correctionName;
+                        }
+                        else
+                        {
+                            _nonMatchBlendCorrection.Remove(blendName);
+                            blendName = null;
+                        }
+                    }
+                    else
+                    {
+                        if (!_blendIndics.ContainsKey(blendName))
+                        {
+                            blendName = null;
+                        }
+                    }
+                }
+                else
+                {
+                    if (_blendNames.Count > index)
+                    {
+                        blendName = _blendNames[index];
+                    }
+                }
+
+                return blendName;
+            }
+
             public string GetBlendShapeName(int index)
             {
                 string blendName = null;
 
                 if (_oriBlendIndex.Count > 0)
                 {
-                    if (_oriBlendIndex.TryGetValue(index, out blendName))
-                    {
-                        if (_nonMatchBlendCorrection.TryGetValue(blendName, out string correctionName))
-                        {
-                            if (_blendIndics.ContainsKey(correctionName))
-                            {
-                                blendName = correctionName;
-                            }
-                            else
-                            {
-                                _nonMatchBlendCorrection.Remove(blendName);
-                                blendName = null;
-                            }
-                        }
-                        else
-                        {
-                            if (!_blendIndics.ContainsKey(blendName))
-                            {
-                                blendName = null;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (_blendNames.Count > index)
-                        {
-                            blendName = _blendNames[index];
-                        }
-                    }
+                    blendName = GetOriginBlendShapeName(index);
                 }
                 else
                 {
@@ -483,7 +502,8 @@ namespace HSPE.AMModules
         private static readonly string _blendMatchCorrectionFileName = "__MatchCorrectionData__.xml";
         private readonly Dictionary<string, string> _matchCorractionList = new Dictionary<string, string>();
         private readonly Dictionary<string, BlendRenderer> _blendRenderers = new Dictionary<string, BlendRenderer>();
-        private readonly Dictionary<string, BlendRenderer> _originBlendRenderers = new Dictionary<string, BlendRenderer>();
+        private readonly Dictionary<string, BlendRenderer> _headRenderers = new Dictionary<string, BlendRenderer>();
+        private readonly Dictionary<string, BlendRenderer> _headOriginBlendRenderers = new Dictionary<string, BlendRenderer>();
         private readonly Dictionary<SkinnedMeshRenderer, BlendRenderer> _blenderRenderbySkinnedRenderer = new Dictionary<SkinnedMeshRenderer, BlendRenderer>();
 
         private string _search = "";
@@ -671,13 +691,13 @@ namespace HSPE.AMModules
             _isBusy = true;
             InstanceDict newInstanceByFBS = null;
 
-            if (_originBlendRenderers.Count == 0)
+            if (_headOriginBlendRenderers.Count == 0)
             {
                 foreach (var blendRenderer in _blendRenderers)
                 {
                     blendRenderer.Value._nonMatchedOriBlendsNames.Clear();
                     blendRenderer.Value._nonMatchBlendCorrection.Clear();
-                    _originBlendRenderers.Add(blendRenderer.Key, blendRenderer.Value);
+                    _headOriginBlendRenderers.Add(blendRenderer.Key, blendRenderer.Value);
 
                     for (int i = 0; i < blendRenderer.Value._blendNames.Count; i++)
                     {
@@ -799,7 +819,7 @@ namespace HSPE.AMModules
             GUI.color = c;
 
 
-            bool hasOriginBlend = _originBlendRenderers.Count > 0;
+            bool hasOriginBlend = _headOriginBlendRenderers.Count > 0;
             if (hasOriginBlend)
             {
                 GUI.color = Color.red;
@@ -812,7 +832,7 @@ namespace HSPE.AMModules
 
             if (GUILayout.Button(hasOriginBlend ? "NonOriginChar" : "OriginChar"))
             {
-                _originBlendRenderers.Clear();
+                _headOriginBlendRenderers.Clear();
 
                 if (hasOriginBlend)
                 {
@@ -830,7 +850,7 @@ namespace HSPE.AMModules
                     {
                         blendRenderer.Value._nonMatchedOriBlendsNames.Clear();
                         blendRenderer.Value._nonMatchBlendCorrection.Clear();
-                        _originBlendRenderers.Add(blendRenderer.Key, blendRenderer.Value);
+                        _headOriginBlendRenderers.Add(blendRenderer.Key, blendRenderer.Value);
 
                         for (int i = 0; i < blendRenderer.Value._blendNames.Count; i++)
                         {
@@ -841,7 +861,7 @@ namespace HSPE.AMModules
             }
             GUI.color = c;
 
-            if (_originBlendRenderers.Count > 0)
+            if (_headOriginBlendRenderers.Count > 0)
             {
                 if (GUILayout.Button("SaveMatch"))
                 {
@@ -1073,7 +1093,7 @@ namespace HSPE.AMModules
             }
             else if (_nonMatchCorrectionMode)
             {
-                if (_originBlendRenderers.Count > 0)
+                if (_headOriginBlendRenderers.Count > 0)
                 {
                     GUILayout.BeginVertical(GUI.skin.box);
 
@@ -1815,7 +1835,7 @@ namespace HSPE.AMModules
         {
             foreach (var currBlendRenderer in _blendRenderers)
             {
-                if(currBlendRenderer.Value._renderer == null)
+                if (currBlendRenderer.Value._renderer == null)
                 {
                     continue;
                 }
@@ -1847,7 +1867,7 @@ namespace HSPE.AMModules
 
             Dictionary<string, BlendRenderer> nonMatchedBlendRenderers = new Dictionary<string, BlendRenderer>();
 
-            foreach (var currBlend in _originBlendRenderers)
+            foreach (var currBlend in _headOriginBlendRenderers)
             {
                 currBlend.Value._renderer = null;
 
@@ -1926,7 +1946,7 @@ namespace HSPE.AMModules
                     currBlend.Value._blendNames.Add(blendName);
                 }
 
-                if (_originBlendRenderers.Count > 0)
+                if (_headOriginBlendRenderers.Count > 0)
                 {
                     currBlend.Value._nonMatchedOriBlendsNames.Clear();
                     currBlend.Value._nonMatchBlendCorrection.Clear();
