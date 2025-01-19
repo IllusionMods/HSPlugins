@@ -27,6 +27,7 @@
   <string key="ExampleResult" value="比如" />
   <string key="EmptyScene" value="比如" />
   <string key="CloseStudio" value="完成后退出工作室" />
+  <string key="ParallelScreenshotEncoding" value="并行编码（测试版" />
   <string key="StartRecordingOnNextClick" value="下次点击时录制" />
   <string key="StartRecording" value="开始录制" />
   <string key="StopRecording" value="停止录制" />

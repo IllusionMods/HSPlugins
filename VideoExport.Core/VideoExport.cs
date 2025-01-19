@@ -107,6 +107,7 @@ namespace VideoExport
             ExampleResult,
             EmptyScene,
             CloseStudio,
+            ParallelScreenshotEncoding,
             StartRecordingOnNextClick,
             StartRecording,
             StopRecording,
@@ -238,6 +239,7 @@ namespace VideoExport
         private string _imagesPostfix = "";
         private bool _clearSceneBeforeEncoding;
         private bool _closeWhenDone;
+        private bool _parallelScreenshotEncoding;
         private ConfigEntry<Language> _language;
         #endregion
 
@@ -746,6 +748,7 @@ namespace VideoExport
 
                 _clearSceneBeforeEncoding = GUILayout.Toggle(_clearSceneBeforeEncoding, _currentDictionary.GetString(TranslationKey.EmptyScene));
                 _closeWhenDone = GUILayout.Toggle(_closeWhenDone, _currentDictionary.GetString(TranslationKey.CloseStudio));
+                _parallelScreenshotEncoding = GUILayout.Toggle(_parallelScreenshotEncoding, _currentDictionary.GetString(TranslationKey.ParallelScreenshotEncoding));
 
                 GUI.color = c;
                 GUI.enabled = guiEnabled;
@@ -987,6 +990,10 @@ namespace VideoExport
                     TimelineCompatibility.Play();
             }
 
+            ParallelScreenshotEncoder parallelEncoder = null;
+            if (_parallelScreenshotEncoding)
+                parallelEncoder = new ParallelScreenshotEncoder();
+
             int exportInterval = _fps / _exportFps;
             TimeSpan elapsed = TimeSpan.Zero;
             int i = 0;
@@ -1017,8 +1024,15 @@ namespace VideoExport
                         Texture2D texture = screenshotPlugin.CaptureTexture();
                         if (texture)
                         {
-                            TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
-                            Destroy(texture);
+                            if (_parallelScreenshotEncoding)
+                            {
+                                parallelEncoder.QueueScreenshot(texture, screenshotPlugin.imageFormat, savePath);
+                            }
+                            else
+                            {
+                                TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
+                                Destroy(texture);
+                            }
                         }
                     }
                     else
@@ -1051,6 +1065,14 @@ namespace VideoExport
                 _currentRecordingTime = (i + 1) / (double)_fps;
                 yield return new WaitForEndOfFrame();
             }
+
+            if (_parallelScreenshotEncoding)
+            {
+                bool success = parallelEncoder.WaitForAll();
+                if (!success)
+                    Logger.LogWarning("Parallel encoder could not finish in a reasonable time.");
+            }
+
             screenshotPlugin.OnEndRecording();
             Time.captureFramerate = cachedCaptureFramerate;
 

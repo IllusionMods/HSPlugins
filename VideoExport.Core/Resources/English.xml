@@ -27,6 +27,7 @@
   <string key="ExampleResult" value="Example Result" />
   <string key="EmptyScene" value="Empty Scene Before Encoding" />
   <string key="CloseStudio" value="Close Studio When Done" />
+  <string key="ParallelScreenshotEncoding" value="Parallel Encoding (BETA)" />
   <string key="StartRecordingOnNextClick" value="Start Recording On Next Click" />
   <string key="StartRecording" value="Start Recording" />
   <string key="StopRecording" value="Stop Recording" />
