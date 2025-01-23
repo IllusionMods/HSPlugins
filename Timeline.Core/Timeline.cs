@@ -3183,14 +3183,14 @@ namespace Timeline
 
         private void UseCurrentTime()
         {
-            float currentTime = _playbackTime % _duration;
+            float currentTime = _playbackTime;
             SaveKeyframeTime(currentTime);
             UpdateKeyframeTimeTextField();
         }
 
         private void DragAtCurrentTime()
         {
-            float currentTime = _playbackTime % _duration;
+            float currentTime = _playbackTime;
             float min = _selectedKeyframes.Min(k => k.Key);
 
             // Checking if all keyframes can be moved.
