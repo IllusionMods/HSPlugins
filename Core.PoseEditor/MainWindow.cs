@@ -40,9 +40,8 @@ namespace HSPE
     {
         #region Public Static Variables
         internal static MainWindow _self;
-
-        public static int _lastLoadId = 0;
-        public static LoadType _lastLoadType = LoadType.None;
+        internal static int _lastLoadId = 0;
+        internal static LoadType _lastLoadType = LoadType.None;
         #endregion
 
         #region Private Types
