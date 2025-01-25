@@ -3184,6 +3184,8 @@ namespace Timeline
         private void UseCurrentTime()
         {
             float currentTime = _playbackTime % _duration;
+            if (currentTime == 0f && _playbackTime == _duration)
+                currentTime = _duration;
             SaveKeyframeTime(currentTime);
             UpdateKeyframeTimeTextField();
         }
@@ -3191,6 +3193,8 @@ namespace Timeline
         private void DragAtCurrentTime()
         {
             float currentTime = _playbackTime % _duration;
+            if (currentTime == 0f && _playbackTime == _duration)
+                currentTime = _duration;
             float min = _selectedKeyframes.Min(k => k.Key);
 
             // Checking if all keyframes can be moved.
