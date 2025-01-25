@@ -2677,7 +2677,8 @@ namespace Timeline
                                         MoveKeyframe(pair.Key.keyframe, time);
 
                                         int index = _selectedKeyframes.FindIndex(k => k.Value == pair.Key.keyframe);
-                                        _selectedKeyframes[index] = new KeyValuePair<float, Keyframe>(time, pair.Key.keyframe);
+                                        if (index != -1)
+                                            _selectedKeyframes[index] = new KeyValuePair<float, Keyframe>(time, pair.Key.keyframe);
                                     }
 
                                     e.Reset();
@@ -3165,6 +3166,7 @@ namespace Timeline
         {
             if (_selectedKeyframes.Count != 1)
                 return;
+
             KeyValuePair<float, Keyframe> firstSelected = _selectedKeyframes[0];
             KeyValuePair<float, Keyframe> keyframe = firstSelected.Value.parent.keyframes.LastOrDefault(f => f.Key < firstSelected.Key);
             if (keyframe.Value != null)
@@ -3175,6 +3177,7 @@ namespace Timeline
         {
             if (_selectedKeyframes.Count != 1)
                 return;
+
             KeyValuePair<float, Keyframe> firstSelected = _selectedKeyframes[0];
             KeyValuePair<float, Keyframe> keyframe = firstSelected.Value.parent.keyframes.FirstOrDefault(f => f.Key > firstSelected.Key);
             if (keyframe.Value != null)
@@ -3239,6 +3242,9 @@ namespace Timeline
 
         private void OnCurveMouseDown(PointerEventData eventData)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             if (eventData.button == PointerEventData.InputButton.Middle && Input.GetKey(KeyCode.LeftControl) == false && RectTransformUtility.ScreenPointToLocalPointInRectangle(_curveContainer.rectTransform, eventData.position, eventData.pressEventCamera, out Vector2 localPoint))
             {
                 float time = localPoint.x / _curveContainer.rectTransform.rect.width;
@@ -3267,6 +3273,9 @@ namespace Timeline
 
         private void UpdateCurvePointTime(string s)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex >= 1 && _selectedKeyframeCurvePointIndex < curve.length - 1)
             {
@@ -3290,6 +3299,9 @@ namespace Timeline
 
         private void UpdateCurvePointTime(float f)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex >= 1 && _selectedKeyframeCurvePointIndex < curve.length - 1)
             {
@@ -3309,6 +3321,9 @@ namespace Timeline
 
         private void UpdateCurvePointTime()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             UnityEngine.Keyframe curveKey;
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex != -1 && _selectedKeyframeCurvePointIndex < curve.length)
@@ -3321,6 +3336,9 @@ namespace Timeline
 
         private void UpdateCurvePointValue(string s)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex >= 1 && _selectedKeyframeCurvePointIndex < curve.length - 1)
             {
@@ -3340,6 +3358,9 @@ namespace Timeline
 
         private void UpdateCurvePointValue(float f)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex >= 1 && _selectedKeyframeCurvePointIndex < curve.length - 1)
             {
@@ -3355,6 +3376,9 @@ namespace Timeline
 
         private void UpdateCurvePointValue()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             UnityEngine.Keyframe curveKey;
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex != -1 && _selectedKeyframeCurvePointIndex < curve.length)
@@ -3367,6 +3391,9 @@ namespace Timeline
 
         private void UpdateCurvePointInTangent(string s)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex != -1 && _selectedKeyframeCurvePointIndex < curve.length)
             {
@@ -3389,6 +3416,9 @@ namespace Timeline
 
         private void UpdateCurvePointInTangent(float f)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex != -1 && _selectedKeyframeCurvePointIndex < curve.length)
             {
@@ -3407,6 +3437,9 @@ namespace Timeline
 
         private void UpdateCurvePointInTangent()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             UnityEngine.Keyframe curveKey;
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex != -1 && _selectedKeyframeCurvePointIndex < curve.length)
@@ -3420,6 +3453,9 @@ namespace Timeline
 
         private void UpdateCurvePointOutTangent(string s)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex != -1 && _selectedKeyframeCurvePointIndex < curve.length)
             {
@@ -3442,6 +3478,9 @@ namespace Timeline
 
         private void UpdateCurvePointOutTangent(float f)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex != -1 && _selectedKeyframeCurvePointIndex < curve.length)
             {
@@ -3460,6 +3499,9 @@ namespace Timeline
 
         private void UpdateCurvePointOutTangent()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             UnityEngine.Keyframe curveKey;
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             if (_selectedKeyframeCurvePointIndex != -1 && _selectedKeyframeCurvePointIndex < curve.length)
@@ -3473,11 +3515,17 @@ namespace Timeline
 
         private void CopyKeyframeCurve()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             _copiedKeyframeCurve.keys = _selectedKeyframes[0].Value.curve.keys;
         }
 
         private void PasteKeyframeCurve()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             _selectedKeyframes[0].Value.curve.keys = _copiedKeyframeCurve.keys;
             SaveKeyframeCurve();
             UpdateCurve();
@@ -3485,6 +3533,9 @@ namespace Timeline
 
         private void InvertKeyframeCurve()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             UnityEngine.Keyframe[] keys = curve.keys;
             for (int i = 0; i < keys.Length; i++)
@@ -3506,6 +3557,9 @@ namespace Timeline
 
         private void ApplyKeyframeCurvePreset(AnimationCurve preset)
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             _selectedKeyframes[0].Value.curve = new AnimationCurve(preset.keys);
             SaveKeyframeCurve();
             UpdateCurve();
@@ -3620,6 +3674,9 @@ namespace Timeline
 
         private void SaveKeyframeCurve()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             AnimationCurve modifiedCurve = _selectedKeyframes[0].Value.curve;
             foreach (KeyValuePair<float, Keyframe> pair in _selectedKeyframes)
                 pair.Value.curve = new AnimationCurve(modifiedCurve.keys);
@@ -3653,6 +3710,9 @@ namespace Timeline
 
         private void UpdateKeyframeTimeTextField()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             float t = _selectedKeyframes[0].Key;
             foreach (KeyValuePair<float, Keyframe> pair in _selectedKeyframes)
             {
@@ -3667,6 +3727,9 @@ namespace Timeline
 
         private void UpdateKeyframeValueText()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             object v = _selectedKeyframes[0].Value.value;
             foreach (KeyValuePair<float, Keyframe> pair in _selectedKeyframes)
             {
@@ -3683,6 +3746,7 @@ namespace Timeline
         {
             if (_selectedKeyframes.Count == 0)
                 return;
+
             AnimationCurve curve = _selectedKeyframes[0].Value.curve;
             foreach (KeyValuePair<float, Keyframe> pair in _selectedKeyframes)
             {
