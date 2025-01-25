@@ -14,7 +14,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)GenericPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HarmonyExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IMGUIExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MainThreadDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonoBehaviourExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ReflectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineCompatibility.cs" />

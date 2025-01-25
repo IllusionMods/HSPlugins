@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using BepInEx;
 using ToolBox.Extensions;
 using UnityEngine;
 
@@ -64,7 +65,7 @@ namespace VideoExport.Core
                     if (keepAlive.TryGetValue(key, out tex))
                     {
                         keepAlive.Remove(key);
-                        MainThreadDispatcher.Instance.Dispatch(() => { UnityEngine.Object.Destroy(tex); });
+                        ThreadingHelper.Instance.StartSyncInvoke(() => UnityEngine.Object.Destroy(tex));
                     }
                 }
             });
