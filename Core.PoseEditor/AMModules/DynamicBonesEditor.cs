@@ -1562,30 +1562,42 @@ namespace HSPE.AMModules
                 _dynamicBoneTarget = _dynamicBones.FirstOrDefault(d => d.m_Root != null);
             foreach (KeyValuePair<DynamicBoneColliderBase, CollidersEditor> pair in CollidersEditor._loneColliders)
             {
-                HashSet<object> ignoredDynamicBones;
-                if (pair.Value._dirtyColliders.TryGetValue(pair.Key, out CollidersEditor.ColliderDataBase data) == false || data.ignoredDynamicBones.TryGetValue(_parent, out ignoredDynamicBones) == false)
-                    ignoredDynamicBones = null;
+                Dictionary<object, bool> dynamicBonesDic;
+                if (pair.Value._dirtyColliders.TryGetValue(pair.Key, out CollidersEditor.ColliderDataBase data) == false || data.allDynamicBones.TryGetValue(_parent, out dynamicBonesDic) == false)
+                    dynamicBonesDic = null;
                 foreach (DynamicBone bone in _dynamicBones)
                 {
-                    if (ignoredDynamicBones != null && ignoredDynamicBones.Contains(bone)) // Should be ignored
+                    bool update = false;
+                    if (dynamicBonesDic != null)
                     {
-                        if (bone.m_Colliders.Contains(pair.Key))
+                        if (dynamicBonesDic.ContainsKey(bone) == false)
+                            dynamicBonesDic.Add(bone, pair.Value._addNewDynamicBonesAsDefault);
+
+                        if (dynamicBonesDic[bone] == false)
                         {
-                            bone.m_Colliders.Remove(pair.Key);
-                            NotifyDynamicBoneForUpdate(bone);
+                            if (bone.m_Colliders.Contains(pair.Key))
+                            {
+                                bone.m_Colliders.Remove(pair.Key);
+                                update = true;
+                            }
+                        }
+                        else
+                        {
+                            if (bone.m_Colliders.Contains(pair.Key) == false)
+                            {
+                                bone.m_Colliders.Add(pair.Key);
+                                update = true;
+                            }
                         }
                     }
                     else
                     {
-                        if (bone.m_Colliders.Contains(pair.Key) == false)
-                        {
-                            bone.m_Colliders.Add(pair.Key);
-                            NotifyDynamicBoneForUpdate(bone);
-                        }
-
-                        if (pair.Value._addNewDynamicBonesAsDefault == false)
-                            pair.Value.SetIgnoreDynamicBone(pair.Key, _parent, bone, true);
+                        pair.Value.SetIgnoreDynamicBone(pair.Key, _parent, bone, !pair.Value._addNewDynamicBonesAsDefault);
+                        update = true;
                     }
+
+                    if (update)
+                        NotifyDynamicBoneForUpdate(bone);
                 }
             }
         }

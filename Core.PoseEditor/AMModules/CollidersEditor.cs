@@ -306,7 +306,7 @@ namespace HSPE.AMModules
             public EditableValue<Vector3> originalCenter;
             public EditableValue<DynamicBoneCollider.Direction> originalDirection;
             public EditableValue<DynamicBoneCollider.Bound> originalBound;
-            public Dictionary<PoseController, HashSet<object>> ignoredDynamicBones = new Dictionary<PoseController, HashSet<object>>();
+            public Dictionary<PoseController, Dictionary<object, bool>> allDynamicBones = new Dictionary<PoseController, Dictionary<object, bool>>();
 
             public virtual bool hasValue { get { return originalCenter.hasValue || originalDirection.hasValue || originalBound.hasValue; } }
 
@@ -320,18 +320,20 @@ namespace HSPE.AMModules
                 originalCenter = other.originalCenter;
                 originalDirection = other.originalDirection;
                 originalBound = other.originalBound;
-                foreach (KeyValuePair<PoseController, HashSet<object>> pair in other.ignoredDynamicBones)
+
+                foreach (KeyValuePair<PoseController, Dictionary<object, bool>> pair in other.allDynamicBones)
                 {
-                    HashSet<object> dbs;
-                    if (ignoredDynamicBones.TryGetValue(pair.Key, out dbs) == false)
+
+                    if (allDynamicBones.TryGetValue(pair.Key, out var dbs) == false)
                     {
-                        dbs = new HashSet<object>();
-                        ignoredDynamicBones.Add(pair.Key, dbs);
+                        dbs = new Dictionary<object, bool>();
+                        allDynamicBones.Add(pair.Key, dbs);
                     }
-                    foreach (DynamicBone db in pair.Value)
+
+                    foreach (KeyValuePair<object, bool> db in pair.Value)
                     {
                         if (dbs.Contains(db) == false)
-                            dbs.Add(db);
+                            dbs.Add(db.Key, db.Value);
                     }
                 }
             }
@@ -354,10 +356,16 @@ namespace HSPE.AMModules
                     originalBound.Reset();
                 }
                 DynamicBoneCollider normalCollider = collider as DynamicBoneCollider;
-                foreach (KeyValuePair<PoseController, HashSet<object>> pair in ignoredDynamicBones)
+                //Set all the dynamic bones to enable
+                foreach (KeyValuePair<PoseController, Dictionary<object, bool>> pair in allDynamicBones)
                 {
-                    foreach (object dynamicBone in pair.Value)
+                    List<object> dicToList = pair.Value.Keys.ToList();
+                    foreach (object key in dicToList)
+                        pair.Value[key] = true;
+
+                    foreach (var kvp in pair.Value)
                     {
+                        object dynamicBone = kvp.Key;
                         if (dynamicBone is DynamicBone db)
                         {
                             List<DynamicBoneColliderBase> colliders = db.m_Colliders;
@@ -372,8 +380,6 @@ namespace HSPE.AMModules
                         }
                     }
                 }
-                ignoredDynamicBones.Clear();
-
             }
         }
 
@@ -452,7 +458,6 @@ namespace HSPE.AMModules
 
         #region Public Variables
         public bool _addNewDynamicBonesAsDefault = true;
-        public bool _addNewDynamicBonesAsDefaultSaved = true;
         #endregion
 
         #region Public Accessors
@@ -486,7 +491,7 @@ namespace HSPE.AMModules
                 if (colliderTransform != null)
                 {
                     DynamicBoneColliderBase collider = colliderTransform.GetComponent<DynamicBoneColliderBase>();
-                    if (collider != null)
+                    if (collider != null && _loneColliders.ContainsKey(collider) == false)
                     {
                         _parent.onUpdate += Update;
                         _isLoneCollider = true;
@@ -533,37 +538,38 @@ namespace HSPE.AMModules
         {
             foreach (KeyValuePair<DynamicBoneColliderBase, ColliderDataBase> colliderPair in _dirtyColliders)
             {
-                Dictionary<PoseController, HashSet<object>> newIgnored = null;
-                foreach (KeyValuePair<PoseController, HashSet<object>> pair in colliderPair.Value.ignoredDynamicBones)
+                Dictionary<PoseController, Dictionary<object, bool>> newDynamicBones = null;
+                foreach (KeyValuePair<PoseController, Dictionary<object, bool>> pair in colliderPair.Value.allDynamicBones)
                 {
-                    if (pair.Key == null || pair.Value.Any(e => e == null))
+                    if (pair.Key == null || pair.Value == null || pair.Value.Count == 0 || pair.Value.Any(o => o.Key == null))
                     {
-                        newIgnored = new Dictionary<PoseController, HashSet<object>>();
+                        newDynamicBones = new Dictionary<PoseController, Dictionary<object, bool>>();
                         break;
                     }
                 }
-                if (newIgnored != null)
+                if (newDynamicBones != null)
                 {
-                    foreach (KeyValuePair<PoseController, HashSet<object>> pair in colliderPair.Value.ignoredDynamicBones)
+                    foreach (KeyValuePair<PoseController, Dictionary<object, bool>> pair in colliderPair.Value.allDynamicBones)
                     {
                         if (pair.Key != null)
                         {
-                            HashSet<object> newValue;
+                            Dictionary<object, bool> newValue;
                             if (pair.Value.Count != 0)
                             {
-                                newValue = new HashSet<object>();
-                                foreach (object o in pair.Value)
+                                newValue = new Dictionary<object, bool>();
+                                foreach (var kvp in pair.Value)
                                 {
-                                    if (o != null)
-                                        newValue.Add(o);
+                                    if (kvp.Key != null)
+                                        newValue.Add(kvp.Key, kvp.Value);
                                 }
                             }
                             else
                                 newValue = pair.Value;
-                            newIgnored.Add(pair.Key, newValue);
+
+                            newDynamicBones.Add(pair.Key, newValue);
                         }
                     }
-                    colliderPair.Value.ignoredDynamicBones = newIgnored;
+                    colliderPair.Value.allDynamicBones = newDynamicBones;
                 }
             }
         }
@@ -668,7 +674,12 @@ namespace HSPE.AMModules
                 GUILayout.Label("Affected Dynamic Bones", GUILayout.ExpandWidth(false));
                 GUILayout.FlexibleSpace();
 
-                _addNewDynamicBonesAsDefault = GUILayout.Toggle(_addNewDynamicBonesAsDefault, "Enable New Dynamic Bones", GUILayout.ExpandWidth(false));
+                bool addNewDbDefault = GUILayout.Toggle(_addNewDynamicBonesAsDefault, "Enable New Dynamic Bones", GUILayout.ExpandWidth(false));
+                if (addNewDbDefault != _addNewDynamicBonesAsDefault)
+                {
+                    _addNewDynamicBonesAsDefault = addNewDbDefault;
+                    SetColliderDirty(_colliderTarget);
+                }
 
                 if (GUILayout.Button("All off", GUILayout.ExpandWidth(false)))
                     SetIgnoreAllDynamicBones(_colliderTarget, true);
@@ -690,6 +701,9 @@ namespace HSPE.AMModules
                     _ignoredDynamicBonesScroll = GUILayout.BeginScrollView(_ignoredDynamicBonesScroll);
                     foreach (PoseController controller in PoseController._poseControllers)
                     {
+                        if (controller == null || controller._dynamicBonesEditor == null || controller._dynamicBonesEditor._dynamicBones == null || controller.target == null)
+                            continue;
+
                         int total = controller._dynamicBonesEditor._dynamicBones.Where(d => d != null && d.m_Root != null && d.m_Root.name.IndexOf(_ignoredDynamicBonesFilter, StringComparison.OrdinalIgnoreCase) != -1).Count();
                         CharaPoseController charaPoseController = null;
                         if (CharaPoseController._charaPoseControllers.Contains(controller))
@@ -701,8 +715,8 @@ namespace HSPE.AMModules
                         if (total == 0)
                             continue;
 
-                        if (cd == null || cd.ignoredDynamicBones.TryGetValue(controller, out HashSet<object> ignored) == false)
-                            ignored = null;
+                        if (cd == null || cd.allDynamicBones.TryGetValue(controller, out Dictionary<object, bool> dbDic) == false)
+                            dbDic = null;
 
                         GUILayout.BeginVertical(GUI.skin.box);
                         GUILayout.BeginHorizontal();
@@ -716,7 +730,7 @@ namespace HSPE.AMModules
 
                             if (
 #if AISHOUJO || HONEYSELECT2
-                                this._isTargetNormalCollider && 
+                                this._isTargetNormalCollider &&
 #endif
                                 charaPoseController != null &&
                                 charaPoseController._boobsEditor != null
@@ -734,7 +748,7 @@ namespace HSPE.AMModules
 
                             if (
 #if AISHOUJO || HONEYSELECT2
-                                this._isTargetNormalCollider && 
+                                this._isTargetNormalCollider &&
 #endif
                                 charaPoseController != null &&
                                 charaPoseController._boobsEditor != null
@@ -753,7 +767,18 @@ namespace HSPE.AMModules
                         {
                             if (dynamicBone == null || dynamicBone.m_Root == null || dynamicBone.m_Root.name.IndexOf(_ignoredDynamicBonesFilter, StringComparison.OrdinalIgnoreCase) == -1)
                                 continue;
-                            bool e = ignored == null || ignored.Contains(dynamicBone) == false;
+
+                            bool e;
+                            if (dbDic == null)
+                                e = true;
+                            else
+                            {
+                                if (dbDic.TryGetValue(dynamicBone, out e) == false)
+                                    dbDic.Add(dynamicBone, _addNewDynamicBonesAsDefault);
+
+                                e = dbDic[dynamicBone];
+                            }
+
                             bool newE = GUILayout.Toggle(e, dynamicBone.m_Root.name);
                             if (e != newE)
                                 SetIgnoreDynamicBone(_colliderTarget, controller, dynamicBone, !newE);
@@ -767,7 +792,7 @@ namespace HSPE.AMModules
 
                         if (
 #if AISHOUJO || HONEYSELECT2
-                                this._isTargetNormalCollider && 
+                                this._isTargetNormalCollider &&
 #endif
                                 charaPoseController != null &&
                                 charaPoseController._boobsEditor != null
@@ -777,7 +802,18 @@ namespace HSPE.AMModules
                             {
                                 if (dynamicBone == null || dynamicBone.Root == null || dynamicBone.Root.name.IndexOf(_ignoredDynamicBonesFilter, StringComparison.OrdinalIgnoreCase) == -1)
                                     continue;
-                                bool e = ignored == null || ignored.Contains(dynamicBone) == false;
+
+                                bool e;
+                                if (dbDic == null)
+                                    e = true;
+                                else
+                                {
+                                    if (dbDic.TryGetValue(dynamicBone, out e) == false)
+                                        dbDic.Add(dynamicBone, _addNewDynamicBonesAsDefault);
+
+                                    e = dbDic[dynamicBone];
+                                }
+
                                 bool newE = GUILayout.Toggle(e, dynamicBone.Root.name);
                                 if (e != newE)
                                     SetIgnoreDynamicBone(_colliderTarget, controller, dynamicBone, !newE);
@@ -832,7 +868,7 @@ namespace HSPE.AMModules
                             DynamicBoneCollider collider = (DynamicBoneCollider)col;
                             DynamicBoneCollider otherCollider = (DynamicBoneCollider)kvp.Key;
                             ColliderData otherData = (ColliderData)kvp.Value;
-                            newData = new ColliderData();
+                            newData = new ColliderData(otherData);
 
                             if (otherData.originalHeight.hasValue)
                                 collider.m_Height = otherCollider.m_Height;
@@ -849,10 +885,16 @@ namespace HSPE.AMModules
                             col.m_Bound = kvp.Key.m_Bound;
                         if (kvp.Value.originalDirection.hasValue)
                             col.m_Direction = kvp.Key.m_Direction;
-                        _dirtyColliders.Add(col, newData);
+
+                        foreach (KeyValuePair<PoseController, Dictionary<object, bool>> pair in kvp.Value.allDynamicBones)
+                            foreach (var pair2 in pair.Value)
+                                SetIgnoreDynamicBone(col, pair.Key, pair2.Key, !pair2.Value);
+
+                        _dirtyColliders[col] = newData;
                     }
                 }
                 _collidersEditionScroll = other._collidersEditionScroll;
+                _addNewDynamicBonesAsDefault = other._addNewDynamicBonesAsDefault;
             }, 2);
         }
 
@@ -890,30 +932,32 @@ namespace HSPE.AMModules
                     if (kvp.Value.originalBound.hasValue)
                         xmlWriter.WriteAttributeString("bound", XmlConvert.ToString((int)kvp.Key.m_Bound));
 
-                    foreach (KeyValuePair<PoseController, HashSet<object>> ignoredPair in kvp.Value.ignoredDynamicBones)
+                    foreach (KeyValuePair<PoseController, Dictionary<object, bool>> pair in kvp.Value.allDynamicBones)
                     {
-                        CharaPoseController charaPoseController = ignoredPair.Key as CharaPoseController;
-                        foreach (object o in ignoredPair.Value)
+                        CharaPoseController charaPoseController = pair.Key as CharaPoseController;
+                        foreach (KeyValuePair<object, bool> pair2 in pair.Value)
                         {
-                            DynamicBone db = o as DynamicBone;
+                            DynamicBone db = pair2.Key as DynamicBone;
                             if (db != null)
                             {
-                                xmlWriter.WriteStartElement("ignoredDynamicBone");
+                                xmlWriter.WriteStartElement("dynamicBoneData");
 
-                                xmlWriter.WriteAttributeString("poseControllerId", XmlConvert.ToString(ignoredPair.Key.GetInstanceID()));
-                                xmlWriter.WriteAttributeString("root", ignoredPair.Key._dynamicBonesEditor.CalculateRoot(db));
+                                xmlWriter.WriteAttributeString("poseControllerId", XmlConvert.ToString(pair.Key.GetInstanceID()));
+                                xmlWriter.WriteAttributeString("root", pair.Key._dynamicBonesEditor.CalculateRoot(db));
+                                xmlWriter.WriteAttributeString("enabled", XmlConvert.ToString(pair2.Value));
 
                                 xmlWriter.WriteEndElement();
                             }
                             else if (charaPoseController != null && charaPoseController._boobsEditor != null)
                             {
-                                DynamicBone_Ver02 db2 = o as DynamicBone_Ver02;
+                                DynamicBone_Ver02 db2 = pair2.Key as DynamicBone_Ver02;
                                 if (db2 != null)
                                 {
-                                    xmlWriter.WriteStartElement("ignoredDynamicBone2");
+                                    xmlWriter.WriteStartElement("dynamicBoneData2");
 
-                                    xmlWriter.WriteAttributeString("poseControllerId", XmlConvert.ToString(ignoredPair.Key.GetInstanceID()));
+                                    xmlWriter.WriteAttributeString("poseControllerId", XmlConvert.ToString(pair.Key.GetInstanceID()));
                                     xmlWriter.WriteAttributeString("id", charaPoseController._boobsEditor.GetID(db2));
+                                    xmlWriter.WriteAttributeString("enabled", XmlConvert.ToString(pair2.Value));
 
                                     xmlWriter.WriteEndElement();
                                 }
@@ -1009,10 +1053,12 @@ namespace HSPE.AMModules
                                 foreach (XmlNode childNode in node.ChildNodes)
                                 {
                                     int id = XmlConvert.ToInt32(childNode.Attributes["poseControllerId"].Value);
+                                    int lastLoadId = MainWindow._lastLoadId;
                                     switch (childNode.Name)
                                     {
+                                        // OLD DATA FOR COMPATIBILITY
                                         case "ignoredDynamicBone":
-                                            PoseController controller = PoseController._poseControllers.FirstOrDefault(e => e._oldInstanceId == id);
+                                            PoseController controller = PoseController._poseControllers.FirstOrDefault(e => e._oldInstanceId == id && e._loadId == lastLoadId);
                                             if (controller == null)
                                                 break;
                                             DynamicBone db = controller._dynamicBonesEditor.SearchDynamicBone(childNode.Attributes["root"].Value);
@@ -1021,11 +1067,29 @@ namespace HSPE.AMModules
                                             SetIgnoreDynamicBone(collider, controller, db, true);
                                             break;
                                         case "ignoredDynamicBone2":
-                                            CharaPoseController controller2 = CharaPoseController._charaPoseControllers.FirstOrDefault(e => e._oldInstanceId == id) as CharaPoseController;
+                                            CharaPoseController controller2 = CharaPoseController._charaPoseControllers.FirstOrDefault(e => e._oldInstanceId == id && e._loadId == lastLoadId) as CharaPoseController;
                                             if (controller2 == null || controller2._boobsEditor == null)
                                                 break;
                                             DynamicBone_Ver02 db2 = controller2._boobsEditor.GetDynamicBone(childNode.Attributes["id"].Value);
                                             SetIgnoreDynamicBone(collider, controller2, db2, true);
+                                            break;
+
+                                        // NEW DATA
+                                        case "dynamicBoneData":
+                                            PoseController newController = PoseController._poseControllers.FirstOrDefault(e => e._oldInstanceId == id && e._loadId == lastLoadId);
+                                            if (newController == null)
+                                                break;
+                                            DynamicBone newDB = newController._dynamicBonesEditor.SearchDynamicBone(childNode.Attributes["root"].Value);
+                                            if (newDB == null)
+                                                break;
+                                            SetIgnoreDynamicBone(collider, newController, newDB, !XmlConvert.ToBoolean(childNode.Attributes["enabled"].Value));
+                                            break;
+                                        case "dynamicBoneData2":
+                                            CharaPoseController newController2 = CharaPoseController._charaPoseControllers.FirstOrDefault(e => e._oldInstanceId == id && e._loadId == lastLoadId) as CharaPoseController;
+                                            if (newController2 == null || newController2._boobsEditor == null)
+                                                break;
+                                            DynamicBone_Ver02 newDB2 = newController2._boobsEditor.GetDynamicBone(childNode.Attributes["id"].Value);
+                                            SetIgnoreDynamicBone(collider, newController2, newDB2, !XmlConvert.ToBoolean(childNode.Attributes["enabled"].Value));
                                             break;
                                     }
                                 }
@@ -1043,10 +1107,19 @@ namespace HSPE.AMModules
                     }
                 }
             }
-            XmlNode collidersEdtior = xmlNode.FindChildNode("collidersEditor");
-            if (collidersEdtior != null)
+            XmlNode collidersEditor = xmlNode.FindChildNode("collidersEditor");
+            if (collidersEditor != null)
             {
-                _addNewDynamicBonesAsDefaultSaved = collidersEdtior.Attributes["addNewDynamicBonesAsDefault"] == null || XmlConvert.ToBoolean(collidersEdtior.Attributes["addNewDynamicBonesAsDefault"].Value);
+                _addNewDynamicBonesAsDefault = collidersEditor.Attributes["addNewDynamicBonesAsDefault"] == null || XmlConvert.ToBoolean(collidersEditor.Attributes["addNewDynamicBonesAsDefault"].Value);
+                // Register all DynamicBones that where loaded before the import
+                if (MainWindow._lastLoadType == MainWindow.LoadType.Import && _isLoneCollider)
+                {
+                    _parent.ExecuteDelayed2(() =>
+                    {
+                        DynamicBoneColliderBase collider = _parent.transform.GetChild(0).GetComponent<DynamicBoneColliderBase>();
+                        SetNewDefaultAllDynamicBones(collider);
+                    }, 5);
+                }
             }
             return changed;
         }
@@ -1155,6 +1228,7 @@ namespace HSPE.AMModules
 
         private void ResetAll()
         {
+            _addNewDynamicBonesAsDefault = true;
             foreach (KeyValuePair<DynamicBoneColliderBase, ColliderDataBase> pair in new Dictionary<DynamicBoneColliderBase, ColliderDataBase>(_dirtyColliders))
                 SetColliderNotDirty(pair.Key);
             _dirtyColliders.Clear();
@@ -1189,56 +1263,49 @@ namespace HSPE.AMModules
                 data.ResetWithParent(collider);
                 _dirtyColliders.Remove(collider);
             }
+            _addNewDynamicBonesAsDefault = true;
         }
 
         public void SetIgnoreDynamicBone(DynamicBoneColliderBase collider, PoseController dynamicBoneParent, object dynamicBone, bool ignore)
         {
             ColliderDataBase colliderData = SetColliderDirty(collider);
             DynamicBoneCollider normalCollider = collider as DynamicBoneCollider;
-            if (ignore)
-            {
-                HashSet<object> ignoredList;
-                if (colliderData.ignoredDynamicBones.TryGetValue(dynamicBoneParent, out ignoredList) == false)
-                {
-                    ignoredList = new HashSet<object>();
-                    colliderData.ignoredDynamicBones.Add(dynamicBoneParent, ignoredList);
-                }
-                if (ignoredList.Contains(dynamicBone) == false)
-                    ignoredList.Add(dynamicBone);
 
-                if (dynamicBone is DynamicBone db)
+            Dictionary<object, bool> dynamicBonesDic;
+            if (colliderData.allDynamicBones.TryGetValue(dynamicBoneParent, out dynamicBonesDic) == false)
+            {
+                dynamicBonesDic = new Dictionary<object, bool>();
+                colliderData.allDynamicBones.Add(dynamicBoneParent, dynamicBonesDic);
+            }
+
+            dynamicBonesDic[dynamicBone] = !ignore;
+
+            if (dynamicBone is DynamicBone db)
+            {
+                List<DynamicBoneColliderBase> colliders = db.m_Colliders;
+                if (ignore)
                 {
-                    List<DynamicBoneColliderBase> colliders = db.m_Colliders;
                     int index = colliders.IndexOf(collider);
                     if (index != -1)
                         colliders.RemoveAt(index);
                 }
-                else if (normalCollider != null)
+                else
                 {
-                    List<DynamicBoneCollider> colliders = ((DynamicBone_Ver02)dynamicBone).Colliders;
+                    if (colliders.Contains(collider) == false)
+                        colliders.Add(collider);
+                }
+            }
+            else if (normalCollider != null)
+            {
+                List<DynamicBoneCollider> colliders = ((DynamicBone_Ver02)dynamicBone).Colliders;
+                if (ignore)
+                {
                     int index = colliders.IndexOf(normalCollider);
                     if (index != -1)
                         colliders.RemoveAt(index);
                 }
-            }
-            else
-            {
-                HashSet<object> ignoredList;
-                if (colliderData.ignoredDynamicBones.TryGetValue(dynamicBoneParent, out ignoredList))
+                else
                 {
-                    if (ignoredList.Contains(dynamicBone))
-                        ignoredList.Remove(dynamicBone);
-                }
-
-                if (dynamicBone is DynamicBone db)
-                {
-                    List<DynamicBoneColliderBase> colliders = db.m_Colliders;
-                    if (colliders.Contains(collider) == false)
-                        colliders.Add(collider);
-                }
-                else if (normalCollider != null)
-                {
-                    List<DynamicBoneCollider> colliders = ((DynamicBone_Ver02)dynamicBone).Colliders;
                     if (colliders.Contains(normalCollider) == false)
                         colliders.Add(normalCollider);
                 }
@@ -1253,22 +1320,27 @@ namespace HSPE.AMModules
 
             foreach (PoseController controller in PoseController._poseControllers)
             {
+                if (controller == null) continue;
+
+                if (controller._dynamicBonesEditor != null && controller._dynamicBonesEditor._dynamicBones != null)
+                {
+                    foreach (DynamicBone dynamicBone in controller._dynamicBonesEditor._dynamicBones)
+                    {
+                        if (dynamicBone.m_Root == null)
+                            continue;
+                        SetIgnoreDynamicBone(collider, controller, dynamicBone, ignore);
+                    }
+                }
+
                 CharaPoseController charaPoseController = null;
                 if (CharaPoseController._charaPoseControllers.Contains(controller))
                     charaPoseController = (CharaPoseController)controller;
-
-                foreach (DynamicBone dynamicBone in controller._dynamicBonesEditor._dynamicBones)
-                {
-                    if (dynamicBone.m_Root == null)
-                        continue;
-                    SetIgnoreDynamicBone(collider, controller, dynamicBone, ignore);
-                }
 
                 if (
 #if AISHOUJO || HONEYSELECT2
                         isColliderNormalCollider &&
 #endif
-                        charaPoseController != null && charaPoseController._boobsEditor != null
+                        charaPoseController != null && charaPoseController._boobsEditor != null && charaPoseController._boobsEditor._dynamicBones != null
                         )
                 {
                     foreach (DynamicBone_Ver02 dynamicBone in charaPoseController._boobsEditor._dynamicBones)
@@ -1276,6 +1348,95 @@ namespace HSPE.AMModules
                 }
             }
 
+        }
+
+
+        private void SetNewDefaultAllDynamicBones(DynamicBoneColliderBase collider)
+        {
+
+#if AISHOUJO || HONEYSELECT2
+            bool isColliderNormalCollider = collider is DynamicBoneCollider;
+#endif
+
+            foreach (PoseController controller in PoseController._poseControllers)
+            {
+                if (controller == null) continue;
+
+                if (controller._dynamicBonesEditor != null && controller._dynamicBonesEditor._dynamicBones != null)
+                {
+                    foreach (DynamicBone dynamicBone in controller._dynamicBonesEditor._dynamicBones)
+                    {
+                        if (dynamicBone.m_Root == null)
+                            continue;
+                        SetNewDefaultDynamicBone(collider, controller, dynamicBone);
+                    }
+                }
+
+                CharaPoseController charaPoseController = null;
+                if (CharaPoseController._charaPoseControllers.Contains(controller))
+                    charaPoseController = (CharaPoseController)controller;
+
+                if (
+#if AISHOUJO || HONEYSELECT2
+                        isColliderNormalCollider &&
+#endif
+                        charaPoseController != null && charaPoseController._boobsEditor != null && charaPoseController._boobsEditor._dynamicBones != null
+                        )
+                {
+                    foreach (DynamicBone_Ver02 dynamicBone in charaPoseController._boobsEditor._dynamicBones)
+                        SetNewDefaultDynamicBone(collider, controller, dynamicBone);
+                }
+            }
+
+        }
+
+        public void SetNewDefaultDynamicBone(DynamicBoneColliderBase collider, PoseController dynamicBoneParent, object dynamicBone)
+        {
+            ColliderDataBase colliderData = SetColliderDirty(collider);
+            DynamicBoneCollider normalCollider = collider as DynamicBoneCollider;
+
+            Dictionary<object, bool> dynamicBonesDic;
+            if (colliderData.allDynamicBones.TryGetValue(dynamicBoneParent, out dynamicBonesDic) == false)
+            {
+                dynamicBonesDic = new Dictionary<object, bool>();
+                colliderData.allDynamicBones.Add(dynamicBoneParent, dynamicBonesDic);
+            }
+
+            if (dynamicBonesDic.ContainsKey(dynamicBone) == false)
+                dynamicBonesDic.Add(dynamicBone, _addNewDynamicBonesAsDefault);
+            else
+                return;
+
+            if (dynamicBone is DynamicBone db)
+            {
+                List<DynamicBoneColliderBase> colliders = db.m_Colliders;
+                if (!_addNewDynamicBonesAsDefault)
+                {
+                    int index = colliders.IndexOf(collider);
+                    if (index != -1)
+                        colliders.RemoveAt(index);
+                }
+                else
+                {
+                    if (colliders.Contains(collider) == false)
+                        colliders.Add(collider);
+                }
+            }
+            else if (normalCollider != null)
+            {
+                List<DynamicBoneCollider> colliders = ((DynamicBone_Ver02)dynamicBone).Colliders;
+                if (!_addNewDynamicBonesAsDefault)
+                {
+                    int index = colliders.IndexOf(normalCollider);
+                    if (index != -1)
+                        colliders.RemoveAt(index);
+                }
+                else
+                {
+                    if (colliders.Contains(normalCollider) == false)
+                        colliders.Add(normalCollider);
+                }
+            }
         }
 
         public override void UpdateGizmos()

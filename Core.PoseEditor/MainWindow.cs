@@ -40,6 +40,8 @@ namespace HSPE
     {
         #region Public Static Variables
         internal static MainWindow _self;
+        internal static int _lastLoadId = 0;
+        internal static LoadType _lastLoadType = LoadType.None;
         #endregion
 
         #region Private Types
@@ -142,6 +144,14 @@ namespace HSPE
         public bool crotchCorrectionByDefault { get { return _crotchCorrectionByDefaultToggle.isOn; } }
         public bool anklesCorrectionByDefault { get { return _anklesCorrectionByDefaultToggle.isOn; } }
         #endregion
+
+        public enum LoadType
+        {
+            None,
+            Load,
+            Import,
+            External
+        }
 
         #region Unity Methods
         protected virtual void Awake()
@@ -1618,6 +1628,7 @@ namespace HSPE
                 return;
             this.ExecuteDelayed2(() =>
             {
+                _lastLoadType = LoadType.Load;
                 LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl);
             }, 3);
         }
@@ -1632,7 +1643,6 @@ namespace HSPE
             XmlNode node = doc.FirstChild;
             if (node == null)
                 return;
-
             this.ExecuteDelayed2(() =>
             {
                 var changedKeys = Studio.Studio.Instance.sceneInfo.dicChangeKey;
@@ -1641,6 +1651,7 @@ namespace HSPE
                     .Where(d => changedKeys.ContainsKey(d.Key) && Studio.Studio.Instance.dicObjectCtrl.ContainsKey(d.Key))
                     .ToDictionary(m => changedKeys[m.Key], f => Studio.Studio.Instance.dicObjectCtrl[f.Key]);
 
+                _lastLoadType = LoadType.Import;
                 LoadSceneGeneric(node, newItems);
             }, 3);
         }
@@ -1651,6 +1662,7 @@ namespace HSPE
         /// <param name="node"></param>
         public void ExternalLoadScene(XmlNode node)
         {
+            _lastLoadType = LoadType.External;
             LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl);
         }
 
@@ -1658,6 +1670,9 @@ namespace HSPE
         {
             if (node == null || node.Name != "root")
                 return;
+
+            // Unique identifier for this load session.
+            _lastLoadId = UnityEngine.Random.Range(1, 1000000);
 
             foreach (XmlNode childNode in node.ChildNodes)
             {
@@ -1748,8 +1763,6 @@ namespace HSPE
             controller.ScheduleLoad(node, e =>
             {
                 controller.enabled = controllerEnabled;
-                if (controller._collidersEditor != null) //applying here the saved value so that it is only loaded after the loading/importing of an scene is finished!
-                    controller._collidersEditor._addNewDynamicBonesAsDefault = controller._collidersEditor._addNewDynamicBonesAsDefaultSaved;
             });
 
         }
@@ -1765,8 +1778,6 @@ namespace HSPE
             controller.ScheduleLoad(node, e =>
             {
                 controller.enabled = controllerEnabled;
-                if (controller._collidersEditor != null) //applying here the saved value so that it is only loaded after the loading/importing of an scene is finished!
-                    controller._collidersEditor._addNewDynamicBonesAsDefault = controller._collidersEditor._addNewDynamicBonesAsDefaultSaved;
             });
 
         }
