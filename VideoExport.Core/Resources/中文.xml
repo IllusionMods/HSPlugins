@@ -27,10 +27,12 @@
   <string key="ExampleResult" value="比如" />
   <string key="EmptyScene" value="比如" />
   <string key="CloseStudio" value="完成后退出工作室" />
+  <string key="ParallelScreenshotEncoding" value="并行编码（测试版" />
   <string key="StartRecordingOnNextClick" value="下次点击时录制" />
   <string key="StartRecording" value="开始录制" />
   <string key="StopRecording" value="停止录制" />
   <string key="PrewarmingAnimation" value="动画速率" />
+  <string key="RealignTimeline" value="将时间线重新对齐至 00:00.00" />
   <string key="TakingScreenshot" value="获取截图中" />
   <string key="ETA" value="预计还需" />
   <string key="Elapsed" value="已用时间" />
@@ -40,11 +42,11 @@
   <string key="VideosFolderDesc" value="视频存储目录" />
   <string key="FramesFolderDesc" value="单帧存储目录" />
   <string key="BuiltInCaptureTool" value="内置" />
+  <string key="Win32CaptureTool" value="Win32" />
   <string key="SizeMultiplier" value="截图倍率" />
   <string key="CaptureMode" value="截图模式" />
   <string key="CaptureModeNormal" value="标准" />
   <string key="CaptureModeImmediate" value="高速" />
-  <string key="CaptureModeWin32" value="普通" />
   <string key="ImageFormat" value="图像格式" />
   <string key="Transparent" value="Alpha透明通道" />
   <string key="ScreencapCaptureType" value="截图类型" />
