@@ -2728,7 +2728,7 @@ namespace Timeline
                 else
                     _selectedKeyframes.Add(keyframe);
             }
-            _keyframeSelectionSize = _selectedKeyframes.Count() < 2 ? 0 : _selectedKeyframes.Max(k => k.Key) - _selectedKeyframes.Min(k => k.Key);
+            _keyframeSelectionSize = _selectedKeyframes.Count < 2 ? 0 : _selectedKeyframes.Max(k => k.Key) - _selectedKeyframes.Min(k => k.Key);
             UpdateKeyframeSelection();
             UpdateKeyframeWindow();
         }
