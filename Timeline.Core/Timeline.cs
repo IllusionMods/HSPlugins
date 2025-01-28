@@ -2728,7 +2728,7 @@ namespace Timeline
                 else
                     _selectedKeyframes.Add(keyframe);
             }
-            _keyframeSelectionSize = _selectedKeyframes.Max(k => k.Key) - _selectedKeyframes.Min(k => k.Key);
+            _keyframeSelectionSize = _selectedKeyframes.Count < 2 ? 0 : _selectedKeyframes.Max(k => k.Key) - _selectedKeyframes.Min(k => k.Key);
             UpdateKeyframeSelection();
             UpdateKeyframeWindow();
         }
@@ -2743,6 +2743,8 @@ namespace Timeline
             _selectedKeyframes.Clear();
             if (keyframes.Count() != 0)
                 SelectAddKeyframes(keyframes);
+            else
+                CloseKeyframeWindow();
         }
 
         private void UpdateKeyframeSelection()
@@ -3195,6 +3197,9 @@ namespace Timeline
 
         private void DragAtCurrentTime()
         {
+            if (_selectedKeyframes.Count == 0)
+                return;
+
             float currentTime = _playbackTime % _duration;
             if (currentTime == 0f && _playbackTime == _duration)
                 currentTime = _duration;
