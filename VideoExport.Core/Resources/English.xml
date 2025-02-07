@@ -66,6 +66,8 @@
   <string key="GIFError" value="GIF is only compatible with PNG images." />
   <string key="MP4Codec" value="Codec" />
   <string key="H265Warning" value="The H.265 codec will give you smaller file sizes for the same visual quality as H.264 but it will not embed correctly in most browsers/Discord." />
+  <string key="HwAccelCodec" value="Use GPU-accelerated codec" />
+  <string key="HwAccelWarning" value="The GPU-accelerated codec produces larger file sizes." />
   <string key="MP4Quality" value="Quality (lower is better but 18 is visually lossless)" />
   <string key="MP4Preset" value="Encoding Preset (slower = better quality/filesize, &quot;Medium&quot; is a good compromise)" />
   <string key="MP4PresetVerySlow" value="Very Slow" />

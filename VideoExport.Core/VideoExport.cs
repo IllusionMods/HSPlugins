@@ -146,6 +146,8 @@ namespace VideoExport
             GIFError,
             MP4Codec,
             H265Warning,
+            HwAccelCodec,
+            HwAccelWarning,
             MP4Quality,
             MP4Preset,
             MP4PresetVerySlow,
