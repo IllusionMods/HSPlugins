@@ -27,10 +27,12 @@
   <string key="ExampleResult" value="Example Result" />
   <string key="EmptyScene" value="Empty Scene Before Encoding" />
   <string key="CloseStudio" value="Close Studio When Done" />
+  <string key="ParallelScreenshotEncoding" value="Parallel Encoding (BETA)" />
   <string key="StartRecordingOnNextClick" value="Start Recording On Next Click" />
   <string key="StartRecording" value="Start Recording" />
   <string key="StopRecording" value="Stop Recording" />
   <string key="PrewarmingAnimation" value="Prewarming animation" />
+  <string key="RealignTimeline" value="Realign timeline to 00:00.00" />
   <string key="TakingScreenshot" value="Taking screenshot" />
   <string key="ETA" value="ETA" />
   <string key="Elapsed" value="Elapsed" />
@@ -40,6 +42,7 @@
   <string key="VideosFolderDesc" value="The folder where videos are stored" />
   <string key="FramesFolderDesc" value="The folder where frames are stored" />
   <string key="BuiltInCaptureTool" value="Built-in" />
+  <string key="Win32CaptureTool" value="Win32" />
   <string key="SizeMultiplier" value="Size Multiplier" />
   <string key="CaptureMode" value="Capture Mode" />
   <string key="CaptureModeNormal" value="Normal" />

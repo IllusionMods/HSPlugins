@@ -49,6 +49,7 @@ namespace HSPE
         protected bool _lockDrag = false;
         internal DragType _currentDragType;
         internal int _oldInstanceId = 0;
+        internal int _loadId = 0;
         #endregion
 
         #region Private Variables
@@ -403,6 +404,7 @@ namespace HSPE
         {
             bool changed = false;
             _oldInstanceId = xmlNode.Attributes["uniqueId"] == null ? 0 : XmlConvert.ToInt32(xmlNode.Attributes["uniqueId"].Value);
+            _loadId = MainWindow._lastLoadId;
             foreach (AdvancedModeModule module in _modules)
                 changed = module.LoadXml(xmlNode) || changed;
             return changed;

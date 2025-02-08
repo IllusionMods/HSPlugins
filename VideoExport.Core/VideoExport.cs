@@ -14,6 +14,8 @@ using UnityEngine;
 using VideoExport.Extensions;
 using VideoExport.ScreenshotPlugins;
 using Resources = UnityEngine.Resources;
+using VideoExport.Core;
+
 #if IPA
 using IllusionPlugin;
 using Harmony;
@@ -60,6 +62,15 @@ namespace VideoExport
 #endif
 
         #region Types
+        public enum ImgFormat
+        {
+            BMP,
+            PNG,
+#if !HONEYSELECT //Someday I hope...
+            EXR
+#endif
+        }
+
         private enum Language
         {
             English,
@@ -96,10 +107,12 @@ namespace VideoExport
             ExampleResult,
             EmptyScene,
             CloseStudio,
+            ParallelScreenshotEncoding,
             StartRecordingOnNextClick,
             StartRecording,
             StopRecording,
             PrewarmingAnimation,
+            RealignTimeline,
             TakingScreenshot,
             ETA,
             Elapsed,
@@ -109,6 +122,7 @@ namespace VideoExport
             VideosFolderDesc,
             FramesFolderDesc,
             BuiltInCaptureTool,
+            Win32CaptureTool,
             SizeMultiplier,
             CaptureMode,
             ImageFormat,
@@ -219,11 +233,13 @@ namespace VideoExport
         private int _resizeX;
         private int _resizeY;
         private UpdateDynamicBonesType _selectedUpdateDynamicBones;
+        private bool _realignTimeline = true;
         private int _prewarmLoopCount = 3;
         private string _imagesPrefix = "";
         private string _imagesPostfix = "";
         private bool _clearSceneBeforeEncoding;
         private bool _closeWhenDone;
+        private bool _parallelScreenshotEncoding;
         private ConfigEntry<Language> _language;
         #endregion
 
@@ -264,6 +280,7 @@ namespace VideoExport
             _resizeX = _configFile.AddInt("resizeX", Screen.width, true);
             _resizeY = _configFile.AddInt("resizeY", Screen.height, true);
             _selectedUpdateDynamicBones = (UpdateDynamicBonesType)_configFile.AddInt("selectedUpdateDynamicBonesMode", (int)UpdateDynamicBonesType.Default, true);
+            _realignTimeline = _configFile.AddBool("realignTimeline", true, true);
             _prewarmLoopCount = _configFile.AddInt("prewarmLoopCount", 3, true);
             _imagesPrefix = _configFile.AddString("imagesPrefix", "", true);
             _imagesPostfix = _configFile.AddString("imagesPostfix", "", true);
@@ -296,11 +313,10 @@ namespace VideoExport
                 this.AddScreenshotPlugin(new PlayShot24ZHNeo(), harmony);
 #endif
                 AddScreenshotPlugin(new ScreencapPlugin(), harmony);
-                if (Type.GetType("System.Drawing.Graphics, System.Drawing", false) != null)
-                {
-                    // Need to do it this way because KK blows up with a type load exception if it sees the Bitmap type anywhere in the method body
-                    new Action(() => AddScreenshotPlugin(new Bitmap(), harmony))();
-                }
+                AddScreenshotPlugin(new Builtin(), harmony);
+#if !KOIKATSU
+                AddScreenshotPlugin(new Win32Plugin(), harmony);
+#endif
 
                 if (_screenshotPlugins.Count == 0)
                     Logger.LogError("No compatible screenshot plugin found, please install one.");
@@ -396,6 +412,7 @@ namespace VideoExport
             _configFile.SetInt("resizeX", _resizeX);
             _configFile.SetInt("resizeY", _resizeY);
             _configFile.SetInt("selectedUpdateDynamicBonesMode", (int)_selectedUpdateDynamicBones);
+            _configFile.SetBool("realignTimeline", _realignTimeline);
             _configFile.SetInt("prewarmLoopCount", _prewarmLoopCount);
             _configFile.SetString("imagesPrefix", _imagesPrefix);
             _configFile.SetString("imagesPostfix", _imagesPostfix);
@@ -596,6 +613,12 @@ namespace VideoExport
                             {
                                 GUILayout.BeginHorizontal();
                                 {
+                                    _realignTimeline = GUILayout.Toggle(_realignTimeline, _currentDictionary.GetString(TranslationKey.RealignTimeline));
+                                }
+                                GUILayout.EndHorizontal();
+
+                                GUILayout.BeginHorizontal();
+                                {
                                     GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCount), GUILayout.ExpandWidth(false));
                                     string s = GUILayout.TextField(_prewarmLoopCount.ToString());
                                     int res;
@@ -725,6 +748,7 @@ namespace VideoExport
 
                 _clearSceneBeforeEncoding = GUILayout.Toggle(_clearSceneBeforeEncoding, _currentDictionary.GetString(TranslationKey.EmptyScene));
                 _closeWhenDone = GUILayout.Toggle(_closeWhenDone, _currentDictionary.GetString(TranslationKey.CloseStudio));
+                _parallelScreenshotEncoding = GUILayout.Toggle(_parallelScreenshotEncoding, _currentDictionary.GetString(TranslationKey.ParallelScreenshotEncoding));
 
                 GUI.color = c;
                 GUI.enabled = guiEnabled;
@@ -950,11 +974,25 @@ namespace VideoExport
 
             if (_selectedLimitDuration == LimitDurationType.Timeline)
             {
-                // Restart Timeline because warmup might not end at 00:00.00
-                if (TimelineCompatibility.GetIsPlaying() == true)
+                if (_realignTimeline)
+                {
                     TimelineCompatibility.Stop();
-                TimelineCompatibility.Play();
+                    TimelineCompatibility.Play();
+                    yield return new WaitForEndOfFrame();
+                    TimelineCompatibility.Stop();
+
+                    // Wait for dynamic bones and other physics to settle
+                    for (int x = 0; x < _fps; x++)
+                        yield return new WaitForEndOfFrame();
+                }
+
+                if (TimelineCompatibility.GetIsPlaying() == false)
+                    TimelineCompatibility.Play();
             }
+
+            ParallelScreenshotEncoder parallelEncoder = null;
+            if (_parallelScreenshotEncoding)
+                parallelEncoder = new ParallelScreenshotEncoder();
 
             int exportInterval = _fps / _exportFps;
             TimeSpan elapsed = TimeSpan.Zero;
@@ -970,18 +1008,41 @@ namespace VideoExport
                     break;
                 }
 
-                if (i % 5 == 0)
-                {
-                    Resources.UnloadUnusedAssets();
-                    GC.Collect();
-                }
-
                 if(i % exportInterval == 0 )
                 {
                     string savePath = Path.Combine(framesFolder, $"{_imagesPrefix}{i / exportInterval}{_imagesPostfix}.{imageExtension}");
+
+#if !HONEYSELECT
+                    if (screenshotPlugin.IsTextureCaptureAvailable() == true)
+                    {
+                        Texture2D texture = screenshotPlugin.CaptureTexture();
+                        if (texture)
+                        {
+                            if (_parallelScreenshotEncoding)
+                            {
+                                // WARNING: Textures are scheduled for destruction by the encoder threads.
+                                parallelEncoder.QueueScreenshotDestructive(texture, screenshotPlugin.imageFormat, savePath);
+                            }
+                            else
+                            {
+                                TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
+                                Destroy(texture);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        byte[] frame = screenshotPlugin.Capture(savePath);
+                        if (frame != null)
+                            File.WriteAllBytes(savePath, frame);
+                    }
+
+#else
                     byte[] frame = screenshotPlugin.Capture(savePath);
                     if (frame != null)
                         File.WriteAllBytes(savePath, frame);
+#endif
+
                 }
 
                 elapsed = DateTime.Now - startTime;
@@ -999,6 +1060,14 @@ namespace VideoExport
                 _currentRecordingTime = (i + 1) / (double)_fps;
                 yield return new WaitForEndOfFrame();
             }
+
+            if (_parallelScreenshotEncoding)
+            {
+                bool success = parallelEncoder.WaitForAll();
+                if (!success)
+                    Logger.LogWarning("Parallel encoder could not finish in a reasonable time.");
+            }
+
             screenshotPlugin.OnEndRecording();
             Time.captureFramerate = cachedCaptureFramerate;
 
