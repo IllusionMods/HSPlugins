@@ -66,6 +66,8 @@
   <string key="MP4Codec" value="编码器" />
   <string key="H265Warning" value="主流的视频编码器: H.265 拥有更好的压缩比，与H.264视频质量无异，但无法支持浏览器WEB前端嵌入使用
           如果你需要使用浏览器播放此视频，建议不要使用此编码" />
+  <string key="HwAccelCodec" value="使用 GPU 加速编解码器" />
+  <string key="HwAccelWarning" value="GPU 加速编解码器可产生更大的文件大小。" />
   <string key="MP4Quality" value="视频质量 ( 越低越好，当参数值为18的时候，视觉上与无损无异 )" />
   <string key="MP4Preset" value="编码方案 ( 较慢: 更高的视频质量/更理想的文件大小，中: 折中方案 )" />
   <string key="MP4PresetVerySlow" value="最慢" />
@@ -85,4 +87,6 @@
   <string key="WEBMDeadlineBest" value="最好" />
   <string key="WEBMDeadlineGood" value="中等" />
   <string key="WEBMDeadlineRealtime" value="实时" />
+  <string key="MOVCodec" value="编码器" />
+  <string key="MOVProResWarning" value="生成用于视频编辑的非常大的文件。" />
 </root>
