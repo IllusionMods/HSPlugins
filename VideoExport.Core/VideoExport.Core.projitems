@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\AVIExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\GIFExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\MOVExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MP4Extension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBMExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ParallelScreenshotEncoder.cs" />

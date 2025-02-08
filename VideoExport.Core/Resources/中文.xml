@@ -87,4 +87,6 @@
   <string key="WEBMDeadlineBest" value="最好" />
   <string key="WEBMDeadlineGood" value="中等" />
   <string key="WEBMDeadlineRealtime" value="实时" />
+  <string key="MOVCodec" value="编码器" />
+  <string key="MOVProResWarning" value="生成用于视频编辑的非常大的文件。" />
 </root>

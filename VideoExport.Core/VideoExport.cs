@@ -167,6 +167,8 @@ namespace VideoExport
             WEBMDeadlineBest,
             WEBMDeadlineGood,
             WEBMDeadlineRealtime,
+            MOVCodec,
+            MOVProResWarning,
         }
 
         private enum LimitDurationType
@@ -303,6 +305,7 @@ namespace VideoExport
             _extensions.Add(new WEBMExtension());
             _extensions.Add(new GIFExtension());
             _extensions.Add(new AVIExtension());
+            _extensions.Add(new MOVExtension());
 
             _extensionsNames = Enum.GetNames(typeof(ExtensionsType));
 
@@ -798,7 +801,7 @@ namespace VideoExport
 
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                GUILayout.Box("", _customBoxStyle, GUILayout.Width((_windowRect.width - 20) * _progressBarPercentage), GUILayout.Height(10));
+                GUILayout.Box("", _customBoxStyle, GUILayout.Width((_windowRect.width - 20) * Mathf.Clamp(_progressBarPercentage, 0f, 1f)), GUILayout.Height(10));
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
 

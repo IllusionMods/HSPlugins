@@ -87,4 +87,6 @@
   <string key="WEBMDeadlineBest" value="Best" />
   <string key="WEBMDeadlineGood" value="Good" />
   <string key="WEBMDeadlineRealtime" value="Realtime" />
+  <string key="MOVCodec" value="Codec" />
+  <string key="MOVProResWarning" value="Produces very large files meant for video editing." />
 </root>
