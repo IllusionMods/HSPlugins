@@ -269,7 +269,7 @@ namespace HSPE.AMModules
                                 }
                                 else
                                 {
-                                    linkedBlendRenderer.SetBlendShapeWeight(linkIndex, weight);
+                                    linkedBlendRenderer.SetBlendShapeWeight(linkedBlendRenderer._blendNames[linkIndex], weight);
                                 }
                             }
                         }
