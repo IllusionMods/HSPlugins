@@ -27,6 +27,9 @@ namespace VideoExport.Core
                 case VideoExport.ImgFormat.PNG:
                     bytes = texture.EncodeToPNG();
                     break;
+                case VideoExport.ImgFormat.JPG:
+                    bytes = texture.EncodeToJPG();
+                    break;
                 case VideoExport.ImgFormat.EXR:
                     bytes = texture.EncodeToEXR();
                     break;
