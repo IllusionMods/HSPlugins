@@ -66,6 +66,7 @@ namespace VideoExport
         {
             BMP,
             PNG,
+            JPG,
 #if !HONEYSELECT //Someday I hope...
             EXR
 #endif

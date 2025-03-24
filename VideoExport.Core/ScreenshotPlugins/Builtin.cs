@@ -49,6 +49,8 @@ namespace VideoExport.ScreenshotPlugins
                         return "bmp";
                     case VideoExport.ImgFormat.PNG:
                         return "png";
+                    case VideoExport.ImgFormat.JPG:
+                        return "jpg";
 #if !HONEYSELECT
                     case VideoExport.ImgFormat.EXR:
                         return "exr";
