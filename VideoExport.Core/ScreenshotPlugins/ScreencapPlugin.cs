@@ -48,7 +48,7 @@ namespace VideoExport.ScreenshotPlugins
                 return Vector2.zero;
             }
         }
-        public VideoExport.ImgFormat imageFormat { get { return VideoExport.ImgFormat.PNG; } }
+        public VideoExport.ImgFormat imageFormat { get { return this._useJpg.Value ? VideoExport.ImgFormat.JPG : VideoExport.ImgFormat.PNG; } }
 
         public bool transparency { get { return this._captureAlpha.Value; } }
         public string extension { get { return this._useJpg.Value ? "jpg" : "png"; } }

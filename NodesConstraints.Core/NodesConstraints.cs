@@ -49,7 +49,7 @@ namespace NodesConstraints
     {
         public const string Name = "NodesConstraints";
         public const string GUID = "com.joan6694.illusionplugins.nodesconstraints";
-        public const string Version = "1.4";
+        public const string Version = "1.4.1";
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
         private const string _extSaveKey = "nodesConstraints";
         private const int _saveVersion = 0;
@@ -532,7 +532,10 @@ namespace NodesConstraints
             _dispatcher = Camera.main.gameObject.AddComponent<CameraEventsDispatcher>();
             VectorLine.SetCamera3D(Camera.main);
             if (Camera.main.GetComponent<Expression>() == null)
+            {
+                // We need an Expression to call Expression_LateUpdate Postfix when no characters are in the scene
                 Camera.main.gameObject.AddComponent<Expression>();
+            }
 #if KOIKATSU
             _kkAnimationControllerInstalled = BepInEx.Bootstrap.Chainloader.Plugins
                                                           .Select(MetadataHelper.GetMetadata)
@@ -562,6 +565,8 @@ namespace NodesConstraints
             if (_studioLoaded == false)
                 return;
             _totalActiveExpressions = _allExpressions.Count(e => e.enabled && e.gameObject.activeInHierarchy);
+            if (Camera.main.GetComponent<Expression>() != null)
+                _totalActiveExpressions += 1; // Expression is added to MainCamera in Init()
             _currentExpressionIndex = 0;
             if (ConfigMainWindowShortcut.Value.IsDown())
             {
