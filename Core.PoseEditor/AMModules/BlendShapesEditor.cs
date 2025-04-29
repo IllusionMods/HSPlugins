@@ -2421,12 +2421,21 @@ namespace HSPE.AMModules
             {
                 GroupParameter p = (GroupParameter)parameter;
                 SkinnedMeshRenderer renderer = p.blendRenderer._renderer;
+                int count = renderer.sharedMesh.blendShapeCount;
                 float[] value = (float[])o;
                 writer.WriteValue("valueCount", value.Length);
                 for (int i = 0; i < value.Length; i++)
                 {
                     writer.WriteValue($"value{i}", value[i]);
-                    writer.WriteAttributeString($"name{i}", renderer.sharedMesh.GetBlendShapeName(i));
+
+                    if (i < count)
+                    {
+                        writer.WriteAttributeString($"name{i}", renderer.sharedMesh.GetBlendShapeName(i));
+                    }
+                    else
+                    {
+                        writer.WriteAttributeString($"name{i}", null);
+                    }
                 }
             }
             private static object ReadGroupParameterFromXml(ObjectCtrlInfo oci, XmlNode node)
