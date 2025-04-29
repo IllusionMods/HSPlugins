@@ -921,6 +921,11 @@ namespace HSPE.AMModules
 
         private void RefreshClothesRenderers()
         {
+            if(_parent == null || _parent.gameObject == null)
+            {
+                return;
+            }
+
             for (int i = 0; i < (int)ChoiceType.Count; i++)
             {
                 _clothesRenderers[i].Clear();

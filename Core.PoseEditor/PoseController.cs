@@ -172,6 +172,11 @@ namespace HSPE
         #endregion
 
         #region Public Methods
+
+        public bool IsCuurentModule(AdvancedModeModule module)
+        {
+            return _currentModule == module;
+        }
         public virtual void LoadFrom(PoseController other)
         {
             if (other == null)
