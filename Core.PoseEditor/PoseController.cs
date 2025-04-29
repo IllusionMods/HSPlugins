@@ -173,7 +173,7 @@ namespace HSPE
 
         #region Public Methods
 
-        public bool IsCuurentModule(AdvancedModeModule module)
+        public bool IsCurrentModule(AdvancedModeModule module)
         {
             return _currentModule == module;
         }

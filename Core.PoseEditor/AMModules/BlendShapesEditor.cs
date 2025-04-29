@@ -649,7 +649,7 @@ namespace HSPE.AMModules
                 return;
             }
 
-            if(_parent != null && !_parent.IsCuurentModule(this))
+            if(_parent != null && !_parent.IsCurrentModule(this))
             {
                 _imguiBackground.gameObject.SetActive(false);
             }
