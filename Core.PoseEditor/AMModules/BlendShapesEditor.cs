@@ -645,9 +645,14 @@ namespace HSPE.AMModules
         {
             if (_target.type != GenericOCITarget.Type.Item)
             {
+                _imguiBackground.gameObject.SetActive(false);
                 return;
             }
 
+            if(_parent != null && !_parent.IsCurrentModule(this))
+            {
+                _imguiBackground.gameObject.SetActive(false);
+            }
 
             ApplyBlendShapeWeights();
         }
@@ -673,6 +678,9 @@ namespace HSPE.AMModules
             {
                 blendRenderer.Value.ClearDirty();
             }
+
+            _imguiBackground.gameObject.SetActive(false);
+            _showSaveLoadWindow = false;
         }
 
         public override void OnDestroy()
@@ -680,6 +688,8 @@ namespace HSPE.AMModules
             base.OnDestroy();
             _parent.onLateUpdate -= LateUpdate;
             _parent.onDisable -= OnDisable;
+            _imguiBackground.gameObject.SetActive(false);
+            _showSaveLoadWindow = false;
             InstanceDict newInstances = new InstanceDict();
             foreach (InstancePair pair in _instanceByFaceBlendShape)
             {
@@ -1897,9 +1907,9 @@ namespace HSPE.AMModules
                 Transform currTransform = transformStack.Pop();
 
                 SkinnedMeshRenderer skinnedMeshRenderer = currTransform.GetComponent<SkinnedMeshRenderer>();
-                BlendShapesEditor currBlendShapesEditor = currTransform.GetComponent<BlendShapesEditor>();
+                PoseController poseController = currTransform.GetComponent<PoseController>();
 
-                if (currBlendShapesEditor != null && currBlendShapesEditor != this)
+                if (poseController != null && poseController != _parent)
                 {
                     continue;
                 }
@@ -1917,7 +1927,7 @@ namespace HSPE.AMModules
 
             foreach (SkinnedMeshRenderer skin in skinnedMeshRenderers)
             {
-                if (skin.sharedMesh != null && skin.sharedMesh.blendShapeCount > 0 && _parent._childObjects.All((child => !(skin).transform.IsChildOf(child.transform))))
+                if (skin.sharedMesh != null && skin.sharedMesh.blendShapeCount > 0)
                 {
                     string fullpath = FixFullPath(skin.transform.GetPathFrom(_parent.transform));
 
@@ -2411,12 +2421,21 @@ namespace HSPE.AMModules
             {
                 GroupParameter p = (GroupParameter)parameter;
                 SkinnedMeshRenderer renderer = p.blendRenderer._renderer;
+                int count = renderer.sharedMesh.blendShapeCount;
                 float[] value = (float[])o;
                 writer.WriteValue("valueCount", value.Length);
                 for (int i = 0; i < value.Length; i++)
                 {
                     writer.WriteValue($"value{i}", value[i]);
-                    writer.WriteAttributeString($"name{i}", renderer.sharedMesh.GetBlendShapeName(i));
+
+                    if (i < count)
+                    {
+                        writer.WriteAttributeString($"name{i}", renderer.sharedMesh.GetBlendShapeName(i));
+                    }
+                    else
+                    {
+                        writer.WriteAttributeString($"name{i}", null);
+                    }
                 }
             }
             private static object ReadGroupParameterFromXml(ObjectCtrlInfo oci, XmlNode node)
