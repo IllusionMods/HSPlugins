@@ -320,6 +320,7 @@ namespace VideoExport
 #endif
                 AddScreenshotPlugin(new ScreencapPlugin(), harmony);
                 AddScreenshotPlugin(new Builtin(), harmony);
+                AddScreenshotPlugin(new ReshadePlugin(), harmony);
 #if !KOIKATSU
                 AddScreenshotPlugin(new Win32Plugin(), harmony);
 #endif
@@ -328,6 +329,12 @@ namespace VideoExport
                     Logger.LogError("No compatible screenshot plugin found, please install one.");
 
                 SetLanguage(_language.Value);
+
+                if (_selectedPlugin >= _screenshotPlugins.Count)
+                {
+                    // Panic reset: out of bounds if user has Reshade selected and uninstalls Reshade
+                    _selectedPlugin = 0;
+                }
             }, 5);
         }
 
@@ -1004,6 +1011,22 @@ namespace VideoExport
             TimeSpan elapsed = TimeSpan.Zero;
             int i = 0;
             string imageExtension = screenshotPlugin.extension;
+
+            if (screenshotPlugin is ReshadePlugin)
+            {
+                // For the ReshadePlugin, we cannot capture the current frame because Reshade runs after the end of frame.
+                // The Reshade addon stores the frame after reshade finishes effects. That buffer will be one frame behind us.
+                // Because of that, we skip a frame at the start.
+                yield return new WaitForEndOfFrame();
+
+                if (_limitDuration && _selectedLimitDuration != LimitDurationType.Timeline)
+                {
+                    // For branches which did not wait for end of frame before this, the above call only puts them at the end of the current frame.
+                    // We have to do another wait to get to the next frame.
+                    yield return new WaitForEndOfFrame();
+                }
+            }
+
             for (; ; i++)
             {
                 if (_limitDuration && i >= limit)
