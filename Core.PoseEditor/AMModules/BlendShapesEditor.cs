@@ -606,10 +606,12 @@ namespace HSPE.AMModules
 
                 RefreshSkinnedMeshRendererList();
 
+                /*
                 if (_target.type != GenericOCITarget.Type.Character)
                 {
                     return;
                 }
+                */
 
                 Init();
             });
@@ -1743,42 +1745,46 @@ namespace HSPE.AMModules
         private void Init()
         {
             _faceRenderer = null;
-#if HONEYSELECT
-            _instanceByFaceBlendShape.Add(this._target.ociChar.charBody.fbsCtrl, this);
-#elif PLAYHOME
-            _instanceByFaceBlendShape.Add(this._target.ociChar.charInfo.human, this);
-#elif KOIKATSU
-            _instanceByFaceBlendShape.Add(_target.ociChar.charInfo.fbsCtrl, this);
-#elif AISHOUJO || HONEYSELECT2
-            _instanceByFaceBlendShape.Add(this._target.ociChar.charInfo.fbsCtrl, this);
-#endif
-
             List<string> headTags = new List<string>();
             List<string> linkTags = new List<string>();
 
-#if HONEYSELECT || KOIKATSU || PLAYHOME
-            headTags.Add("cf_O_head");
-            headTags.Add("cf_O_face");
+            if (_target.type == GenericOCITarget.Type.Character)
+            {
+#if HONEYSELECT
+                _instanceByFaceBlendShape.Add(this._target.ociChar.charBody.fbsCtrl, this);
+#elif PLAYHOME
+                _instanceByFaceBlendShape.Add(this._target.ociChar.charInfo.human, this);
+#elif KOIKATSU
+                _instanceByFaceBlendShape.Add(_target.ociChar.charInfo.fbsCtrl, this);
 #elif AISHOUJO || HONEYSELECT2
-            headTags.Add("o_head");
+                _instanceByFaceBlendShape.Add(this._target.ociChar.charInfo.fbsCtrl, this);
+#endif
+
+
+#if HONEYSELECT || KOIKATSU || PLAYHOME
+                headTags.Add("cf_O_head");
+                headTags.Add("cf_O_face");
+#elif AISHOUJO || HONEYSELECT2
+                headTags.Add("o_head");
 #endif
 
 #if HONEYSELECT || PLAYHOME
-            linkTags.Add("cf_O_matuge");
-            linkTags.Add("cf_O_namida01");
-            linkTags.Add("cf_O_namida02");
+                linkTags.Add("cf_O_matuge");
+                linkTags.Add("cf_O_namida01");
+                linkTags.Add("cf_O_namida02");
 #elif KOIKATSU
-            linkTags.Add("cf_O_eyeline");
-            linkTags.Add("cf_O_eyeline_low");
-            linkTags.Add("cf_Ohitomi_L");
-            linkTags.Add("cf_Ohitomi_R");
-            linkTags.Add("cf_O_namida_L");
-            linkTags.Add("cf_O_namida_M");
-            linkTags.Add("cf_O_namida_S");
+                linkTags.Add("cf_O_eyeline");
+                linkTags.Add("cf_O_eyeline_low");
+                linkTags.Add("cf_Ohitomi_L");
+                linkTags.Add("cf_Ohitomi_R");
+                linkTags.Add("cf_O_namida_L");
+                linkTags.Add("cf_O_namida_M");
+                linkTags.Add("cf_O_namida_S");
 #elif AISHOUJO || HONEYSELECT2
-            linkTags.Add("o_eyelashes");
-            linkTags.Add("o_namida");
+                linkTags.Add("o_eyelashes");
+                linkTags.Add("o_namida");
 #endif
+            }
 
             Dictionary<string, List<BlendRenderer>> sameLevelblendRenderers = new Dictionary<string, List<BlendRenderer>>();
 
