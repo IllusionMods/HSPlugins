@@ -71,7 +71,6 @@ namespace HSUS
         private readonly AnimationOptionDisplay _animationOptionDisplay = new AnimationOptionDisplay();
         private readonly FKColors _fkColors = new FKColors();
         private readonly AutomaticMemoryClean _automaticMemoryClean = new AutomaticMemoryClean();
-        private readonly HideFKLinesWithAxis _hideFKLinesWithAxis = new HideFKLinesWithAxis();
         internal event Action _onUpdate;
 #if !KOIKATSU && !AISHOUJO && !HONEYSELECT2
         //Handled by CharacterReplacer
@@ -267,7 +266,6 @@ namespace HSUS
             _features.Add(_animationOptionDisplay);
             _features.Add(_fkColors);
             _features.Add(_automaticMemoryClean);
-            _features.Add(_hideFKLinesWithAxis);
 #if !KOIKATSU && !AISHOUJO && !HONEYSELECT2
             _features.Add(_defaultChars);
 #endif

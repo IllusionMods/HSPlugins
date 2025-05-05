@@ -5,16 +5,8 @@ using ToolBox;
 
 namespace HSUS.Features
 {
-    public class HideFKLinesWithAxis : IFeature
+    public class Hooks
     {
-        public void Awake()
-        {
-        }
-
-        public void LevelLoaded()
-        {
-        }
-
         [HarmonyPatch]
         public class HideFKLinesWithAxisPatches
         {
