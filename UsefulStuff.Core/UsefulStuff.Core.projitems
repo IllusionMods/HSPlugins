@@ -26,6 +26,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Features\Forced\ParentCharactersToObjects.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\Forced\Various.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\GenericFK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Features\HideFKLinesWithAxisHooks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\IFeature.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\ImprovedTransformOperations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Features\ImproveNeoUI.cs" />
