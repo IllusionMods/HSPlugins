@@ -5,7 +5,7 @@ using ToolBox;
 
 namespace HSUS.Features
 {
-    public class Hooks
+    public class HideFKLinesWithAxisHooks
     {
         [HarmonyPatch]
         public class HideFKLinesWithAxisPatches
