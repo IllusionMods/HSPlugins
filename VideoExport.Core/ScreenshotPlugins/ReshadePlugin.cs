@@ -180,9 +180,6 @@ namespace VideoExport.ScreenshotPlugins
         private bool _removeAlphaChannel;
         private string[] _imageFormatNames;
 
-        Action _toggleUI = null;
-        bool _initializedToggleUI = false;
-
 #if IPA
         public bool Init(HarmonyInstance harmony)
 #elif BEPINEX
@@ -223,14 +220,8 @@ namespace VideoExport.ScreenshotPlugins
         {
             if (_autoHideUI)
             {
-                if (!_initializedToggleUI)
-                {
-                    _initializedToggleUI = true;
-                    InitializeToggleUI();
-                }
-
                 VideoExport._showUi = false;
-                if (_toggleUI != null) _toggleUI();
+                SetStudioUIVisibility(false);
             }
         }
 
@@ -239,7 +230,7 @@ namespace VideoExport.ScreenshotPlugins
             if (_autoHideUI)
             {
                 VideoExport._showUi = true;
-                if (_toggleUI != null) _toggleUI();
+                SetStudioUIVisibility(true);
             }
         }
 
@@ -267,7 +258,7 @@ namespace VideoExport.ScreenshotPlugins
             VideoExport._configFile.SetBool("removeAlphaChannel", (bool)this._removeAlphaChannel);
         }
 
-        private void InitializeToggleUI()
+        private void SetStudioUIVisibility(bool target_visibility)
         {
 #if KOIKATSU
             Type hideUI = Type.GetType("HideAllUI.HideAllUICore,HideAllUI.Koikatu");
@@ -278,21 +269,26 @@ namespace VideoExport.ScreenshotPlugins
 #elif AISHOUJO
             Type hideUI = Type.GetType("HideAllUI.HideAllUICore,HideAllUI.AISyoujyo");
 #endif
-            if (hideUI!= null)
+
+            if (hideUI == null) return;
+
+            var handlerField = hideUI.GetField("currentUIHandler", BindingFlags.NonPublic | BindingFlags.Static);
+            if (handlerField == null) return;
+
+            object handlerInstance = handlerField.GetValue(null);
+            if (handlerInstance == null) return;
+
+            var visibleField = handlerInstance.GetType().GetField("visible", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (visibleField == null) return;
+
+            bool current_visibility = (bool)visibleField.GetValue(handlerInstance);
+            if (current_visibility != target_visibility)
             {
-                FieldInfo handlerField = hideUI.GetField("currentUIHandler", BindingFlags.NonPublic | BindingFlags.Static);
-                if (handlerField != null)
-                {
-                    object handlerInstance = handlerField.GetValue(null);
-                    if (handlerInstance != null)
-                    {
-                        MethodInfo toggleMethod = handlerInstance.GetType().GetMethod("ToggleUI", BindingFlags.Public | BindingFlags.Instance);
-                        if (toggleMethod != null)
-                        {
-                            _toggleUI = (Action)Delegate.CreateDelegate(typeof(Action), handlerInstance, toggleMethod);
-                        }
-                    }
-                }
+                var toggleMethod = handlerInstance.GetType().GetMethod("ToggleUI", BindingFlags.Public | BindingFlags.Instance);
+                if (toggleMethod == null) return;
+
+                Action _toggleUI = (Action)Delegate.CreateDelegate(typeof(Action), handlerInstance, toggleMethod);
+                _toggleUI();
             }
         }
     }
