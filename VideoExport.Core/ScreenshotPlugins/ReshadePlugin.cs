@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using VideoExport.Core;
 using System.Reflection;
+using System.Linq;
+
 
 #if IPA
 using Harmony;
@@ -167,12 +169,10 @@ namespace VideoExport.ScreenshotPlugins
                         return "png";
                     case VideoExport.ImgFormat.JPG:
                         return "jpg";
-                    case VideoExport.ImgFormat.EXR:
-                        return "exr";
                 }
             }
         }
-        public byte bitDepth { get { return (byte)(this._imageFormat == VideoExport.ImgFormat.EXR ? 10 : 8); } }
+        public byte bitDepth { get { return 8; } }
 
         public VideoExport.ImgFormat imageFormat { get { return _imageFormat; } }
         private VideoExport.ImgFormat _imageFormat;
@@ -190,7 +190,7 @@ namespace VideoExport.ScreenshotPlugins
 #endif
         {
             this._imageFormat = (VideoExport.ImgFormat)VideoExport._configFile.AddInt("reshadeImageFormat", (int)VideoExport.ImgFormat.BMP, true);
-            this._imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat));
+            this._imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat)).Where(x => x != nameof(VideoExport.ImgFormat.EXR)).ToArray();
             this._autoHideUI = VideoExport._configFile.AddBool("autoHideUI", true, true);
             this._removeAlphaChannel = VideoExport._configFile.AddBool("removeAlphaChannel", true, true);
 
