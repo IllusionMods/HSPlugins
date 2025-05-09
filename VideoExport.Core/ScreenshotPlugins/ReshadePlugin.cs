@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using VideoExport.Core;
 using System.Reflection;
+using System.Linq;
+
 
 #if IPA
 using Harmony;
@@ -89,29 +91,48 @@ namespace VideoExport.ScreenshotPlugins
             return _initialized && _shmFile != IntPtr.Zero && _shm != IntPtr.Zero;
         }
 
-        public static Texture2D RequestScreenshot()
+        public static Texture2D RequestScreenshot(bool removeAlpha)
         {
             Screenshot screenshot = (Screenshot)Marshal.PtrToStructure(_shm, typeof(Screenshot));
             uint imageSize = screenshot.width * screenshot.height * screenshot.channels;
             IntPtr imageBytesPtr = new IntPtr(_shm.ToInt64() + Marshal.SizeOf(typeof(Screenshot)));
-            byte[] imageData = new byte[imageSize];
-            Marshal.Copy(imageBytesPtr, imageData, 0, (int) imageSize);
+            byte[] rawImageBytes = new byte[imageSize];
+            Marshal.Copy(imageBytesPtr, rawImageBytes, 0, (int) imageSize);
 
-            // Image comes flipped vertically, so we flip it back to normal
-            byte[] flipped = new byte[imageSize];
+            // Raw image comes flipped vertically, so we flip it back to normal
+            byte[] bytesRGBA = new byte[imageSize];
             uint rowSize = screenshot.width * screenshot.channels;
             for (uint y = 0; y < screenshot.height; y++)
             {
                 uint srcRow = (screenshot.height - 1 - y) * rowSize;
                 uint dstRow = y * rowSize;
-                Buffer.BlockCopy(imageData, (int)srcRow, flipped, (int)dstRow, (int)rowSize);
+                Buffer.BlockCopy(rawImageBytes, (int)srcRow, bytesRGBA, (int)dstRow, (int)rowSize);
             }
 
-            Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGBA32, false);
-            texture.LoadRawTextureData(flipped);
-            texture.Apply();
+            if (removeAlpha)
+            {
+                uint rgbSize = screenshot.width * screenshot.height * 3;
+                byte[] bytesRGB = new byte[rgbSize];
 
-            return texture;
+                for (int src = 0, dst = 0; src < bytesRGBA.Length; src += 4, dst += 3)
+                {
+                    bytesRGB[dst] = bytesRGBA[src];
+                    bytesRGB[dst + 1] = bytesRGBA[src + 1];
+                    bytesRGB[dst + 2] = bytesRGBA[src + 2];
+                }
+
+                Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGB24, false, false);
+                texture.LoadRawTextureData(bytesRGB);
+                texture.Apply();
+                return texture;
+            }
+            else
+            {
+                Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGBA32, false, false);
+                texture.LoadRawTextureData(bytesRGBA);
+                texture.Apply();
+                return texture;
+            }
         }
     }
 
@@ -134,7 +155,7 @@ namespace VideoExport.ScreenshotPlugins
                 return new Vector2(width, height);
             }
         }
-        public bool transparency { get { return false; } }
+        public bool transparency { get { return !_removeAlphaChannel; } }
         public string extension
         {
             get
@@ -148,20 +169,16 @@ namespace VideoExport.ScreenshotPlugins
                         return "png";
                     case VideoExport.ImgFormat.JPG:
                         return "jpg";
-                    case VideoExport.ImgFormat.EXR:
-                        return "exr";
                 }
             }
         }
-        public byte bitDepth { get { return (byte)(this._imageFormat == VideoExport.ImgFormat.EXR ? 10 : 8); } }
+        public byte bitDepth { get { return 8; } }
 
         public VideoExport.ImgFormat imageFormat { get { return _imageFormat; } }
         private VideoExport.ImgFormat _imageFormat;
         private bool _autoHideUI;
+        private bool _removeAlphaChannel;
         private string[] _imageFormatNames;
-
-        Action _toggleUI = null;
-        bool _initializedToggleUI = false;
 
 #if IPA
         public bool Init(HarmonyInstance harmony)
@@ -170,8 +187,9 @@ namespace VideoExport.ScreenshotPlugins
 #endif
         {
             this._imageFormat = (VideoExport.ImgFormat)VideoExport._configFile.AddInt("reshadeImageFormat", (int)VideoExport.ImgFormat.BMP, true);
-            this._imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat));
+            this._imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat)).Where(x => x != nameof(VideoExport.ImgFormat.EXR)).ToArray();
             this._autoHideUI = VideoExport._configFile.AddBool("autoHideUI", true, true);
+            this._removeAlphaChannel = VideoExport._configFile.AddBool("removeAlphaChannel", true, true);
 
             return ReshadeAPI.OpenSharedMemory();
         }
@@ -195,21 +213,15 @@ namespace VideoExport.ScreenshotPlugins
 
         public Texture2D CaptureTexture()
         {
-            return ReshadeAPI.RequestScreenshot();
+            return ReshadeAPI.RequestScreenshot(_removeAlphaChannel);
         }
 
         public void OnStartRecording()
         {
             if (_autoHideUI)
             {
-                if (!_initializedToggleUI)
-                {
-                    _initializedToggleUI = true;
-                    InitializeToggleUI();
-                }
-
                 VideoExport._showUi = false;
-                if (_toggleUI != null) _toggleUI();
+                SetStudioUIVisibility(false);
             }
         }
 
@@ -218,7 +230,7 @@ namespace VideoExport.ScreenshotPlugins
             if (_autoHideUI)
             {
                 VideoExport._showUi = true;
-                if (_toggleUI != null) _toggleUI();
+                SetStudioUIVisibility(true);
             }
         }
 
@@ -234,6 +246,7 @@ namespace VideoExport.ScreenshotPlugins
             GUILayout.BeginHorizontal();
             {
                 this._autoHideUI = GUILayout.Toggle(_autoHideUI, "Auto Hide UI");
+                this._removeAlphaChannel = GUILayout.Toggle(_removeAlphaChannel, "Remove Alpha Channel");
             }
             GUILayout.EndHorizontal();
         }
@@ -242,9 +255,10 @@ namespace VideoExport.ScreenshotPlugins
         {
             VideoExport._configFile.SetInt("reshadeImageFormat", (int)this._imageFormat);
             VideoExport._configFile.SetBool("autoHideUI", (bool)this._autoHideUI);
+            VideoExport._configFile.SetBool("removeAlphaChannel", (bool)this._removeAlphaChannel);
         }
 
-        private void InitializeToggleUI()
+        private void SetStudioUIVisibility(bool target_visibility)
         {
 #if KOIKATSU
             Type hideUI = Type.GetType("HideAllUI.HideAllUICore,HideAllUI.Koikatu");
@@ -255,21 +269,26 @@ namespace VideoExport.ScreenshotPlugins
 #elif AISHOUJO
             Type hideUI = Type.GetType("HideAllUI.HideAllUICore,HideAllUI.AISyoujyo");
 #endif
-            if (hideUI!= null)
+
+            if (hideUI == null) return;
+
+            var handlerField = hideUI.GetField("currentUIHandler", BindingFlags.NonPublic | BindingFlags.Static);
+            if (handlerField == null) return;
+
+            object handlerInstance = handlerField.GetValue(null);
+            if (handlerInstance == null) return;
+
+            var visibleField = handlerInstance.GetType().GetField("visible", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (visibleField == null) return;
+
+            bool current_visibility = (bool)visibleField.GetValue(handlerInstance);
+            if (current_visibility != target_visibility)
             {
-                FieldInfo handlerField = hideUI.GetField("currentUIHandler", BindingFlags.NonPublic | BindingFlags.Static);
-                if (handlerField != null)
-                {
-                    object handlerInstance = handlerField.GetValue(null);
-                    if (handlerInstance != null)
-                    {
-                        MethodInfo toggleMethod = handlerInstance.GetType().GetMethod("ToggleUI", BindingFlags.Public | BindingFlags.Instance);
-                        if (toggleMethod != null)
-                        {
-                            _toggleUI = (Action)Delegate.CreateDelegate(typeof(Action), handlerInstance, toggleMethod);
-                        }
-                    }
-                }
+                var toggleMethod = handlerInstance.GetType().GetMethod("ToggleUI", BindingFlags.Public | BindingFlags.Instance);
+                if (toggleMethod == null) return;
+
+                Action _toggleUI = (Action)Delegate.CreateDelegate(typeof(Action), handlerInstance, toggleMethod);
+                _toggleUI();
             }
         }
     }
