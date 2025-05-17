@@ -645,7 +645,6 @@ namespace HSPE.AMModules
             }
             GUILayout.EndScrollView();
 
-            // Force refresh list button
             if (GUILayout.Button("Force refresh list"))
             {
                 RefreshColliderList();
