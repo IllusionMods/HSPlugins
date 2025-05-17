@@ -1496,7 +1496,8 @@ namespace HSPE.AMModules
         {
             return _isEnabled && PoseController._drawAdvancedMode && _colliderTarget != null;
         }
-        private void RefreshColliderList() // Force Refresh Colliders method
+
+        private void RefreshColliderList()
         {
             _colliders.Clear();
 
