@@ -20,7 +20,7 @@ namespace VideoExport.Extensions
             this._codec = (Codec)VideoExport._configFile.AddInt("movCodec", (int)Codec.ProRes4444, true);
         }
 
-        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public override string GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
             this._progress = 1;
             int coreCount = _coreCount;
@@ -32,7 +32,7 @@ namespace VideoExport.Extensions
             string codecExtraArgs = "-profile 4 -alpha_bits 8 -bits_per_mb 250 -mbs_per_slice 4";
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
+            string inputArgs = $"-i \"{framesFolder}\\%d.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
             string codecArgs = $"-c:v {codec} {codecExtraArgs}";
             string outputArgs = $"\"{fileName}.mov\"";
 

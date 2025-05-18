@@ -25,10 +25,10 @@ namespace VideoExport.Extensions
             return true;
         }
 
-        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public override string GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
             this._progress = 1;
-            return $"-loglevel error -r {fps} -f image2 -i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {this.CompileFilters(resize, resizeX, resizeY)} -pix_fmt yuv420p -c:v libxvid -qscale:v {this._quality} -threads {_coreCount} -progress pipe:1 \"{fileName}.avi\"";
+            return $"-loglevel error -r {fps} -f image2 -i \"{framesFolder}\\%d.{inputExtension}\" {this.CompileFilters(resize, resizeX, resizeY)} -pix_fmt yuv420p -c:v libxvid -qscale:v {this._quality} -threads {_coreCount} -progress pipe:1 \"{fileName}.avi\"";
         }
 
         public override void DisplayParams()
