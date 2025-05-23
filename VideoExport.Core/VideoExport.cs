@@ -80,11 +80,9 @@ namespace VideoExport
 
         internal enum TranslationKey
         {
-            ScreenshotPlugin,
             CurrentSize,
             Framerate,
             ExportFramerate,
-            AutoGenerateVideo,
             AutoDeleteImages,
             LimitBy,
             LimitByFrames,
@@ -94,7 +92,6 @@ namespace VideoExport
             LimitByPrewarmLoopCount,
             LimitByLoopsToRecord,
             LimitByLimitCount,
-            Estimated,
             Seconds,
             Frames,
             Resize,
@@ -102,9 +99,6 @@ namespace VideoExport
             DBUpdateMode,
             DBDefault,
             DBEveryFrame,
-            Prefix,
-            Suffix,
-            ExampleResult,
             EmptyScene,
             CloseStudio,
             ParallelScreenshotEncoding,
@@ -129,7 +123,6 @@ namespace VideoExport
             CaptureModeNormal,
             CaptureModeImmediate,
             CaptureModeWin32,
-            Transparent,
             ScreencapCaptureType,
             ScreencapCaptureTypeNormal,
             ScreencapCaptureType360,
@@ -140,21 +133,14 @@ namespace VideoExport
             Rotation180,
             Rotation270,
             BitDepthError,
-            AVIQuality,
             GIFError,
             MP4Codec,
             HwAccelCodec,
             MP4Quality,
             MP4Preset,
-            MP4PresetVerySlow,
             MP4PresetSlower,
-            MP4PresetSlow,
             MP4PresetMedium,
-            MP4PresetFast,
             MP4PresetFaster,
-            MP4PresetVeryFast,
-            MP4PresetSuperFast,
-            MP4PresetUltraFast,
             WEBMCodec,
             VP8Quality,
             VP9Quality,
@@ -163,7 +149,6 @@ namespace VideoExport
             WEBMDeadlineGood,
             WEBMDeadlineRealtime,
             MOVCodec,
-
             ShowTooltips,
             CaptureSettingsHeading,
             VideoSettingsHeading,
@@ -173,7 +158,6 @@ namespace VideoExport
             CreateVideo,
             AutoHideUI,
             RemoveAlphaChannel,
-
             FramerateTooltip,
             ExportFramerateTooltip,
             DBUpdateModeTooltip,
@@ -189,7 +173,6 @@ namespace VideoExport
             ExtensionTooltip,
             RemoveAlphaChannelTooltip,
             HwAccelCodecTooltip,
-
             MP4CodecTooltip,
             WEBMCodecTooltip,
             MOVCodecTooltip,
@@ -336,19 +319,16 @@ namespace VideoExport
             _extensions.Add(new MP4Extension());
             _extensions.Add(new WEBMExtension());
             _extensions.Add(new GIFExtension());
-            _extensions.Add(new AVIExtension());
             _extensions.Add(new MOVExtension());
 
             _extensionsNames = Enum.GetNames(typeof(ExtensionsType));
+            if ((int)_selectedExtension >= _extensionsNames.Length)
+                _selectedExtension = ExtensionsType.MP4;
 
             _timelinePresent = TimelineCompatibility.Init();
 
             this.ExecuteDelayed(() =>
             {
-#if HONEYSELECT
-                this.AddScreenshotPlugin(new HoneyShot(), harmony);
-                this.AddScreenshotPlugin(new PlayShot24ZHNeo(), harmony);
-#endif
                 AddScreenshotPlugin(new ScreencapPlugin(), harmony);
                 AddScreenshotPlugin(new Builtin(), harmony);
                 AddScreenshotPlugin(new ReshadePlugin(), harmony);
@@ -769,50 +749,48 @@ namespace VideoExport
                     return;
                 }
 
-                _autoGenerateVideo = GUILayout.Toggle(_autoGenerateVideo, new GUIContent(_currentDictionary.GetString(TranslationKey.CreateVideo)));
-                if (!_autoGenerateVideo)
-                {
-                    GUILayout.EndVertical();
-                    return;
-                }
-
                 GUILayout.BeginHorizontal();
                 {
-                    GUILayout.BeginVertical("Box");
+                    _autoGenerateVideo = GUILayout.Toggle(_autoGenerateVideo, new GUIContent(_currentDictionary.GetString(TranslationKey.CreateVideo)));
+                    if (!_autoGenerateVideo)
                     {
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.Resize)));
-                            _resize = GUILayout.Toggle(_resize, "Resize", GUILayout.ExpandWidth(false));
-                            prevGuiEnabled = GUI.enabled;
-                            GUI.enabled = _resize && prevGuiEnabled;
-
-                            string s = GUILayout.TextField(_resizeX.ToString(), GUILayout.Width(50));
-                            int res;
-                            if (int.TryParse(s, out res) == false || res < 1)
-                                res = 1;
-                            _resizeX = res;
-
-                            s = GUILayout.TextField(_resizeY.ToString(), GUILayout.Width(50));
-                            if (int.TryParse(s, out res) == false || res < 1)
-                                res = 1;
-                            _resizeY = res;
-
-                            if (GUILayout.Button("Default", GUILayout.ExpandWidth(false)))
-                            {
-                                _resizeX = Screen.width;
-                                _resizeY = Screen.height;
-                            }
-                            if (_resizeX > currentSize.x)
-                                _resizeX = (int)currentSize.x;
-                            if (_resizeY > currentSize.y)
-                                _resizeY = (int)currentSize.y;
-
-                            GUI.enabled = prevGuiEnabled;
-                        }
                         GUILayout.EndHorizontal();
+                        GUILayout.EndVertical();
+                        return;
                     }
-                    GUILayout.EndVertical();
+
+                    GUILayout.FlexibleSpace();
+
+                    GUILayout.BeginHorizontal();
+                    {
+                        _resize = GUILayout.Toggle(_resize, _currentDictionary.GetString(TranslationKey.Resize), GUILayout.ExpandWidth(false));
+                        prevGuiEnabled = GUI.enabled;
+                        GUI.enabled = _resize && prevGuiEnabled;
+
+                        string s = GUILayout.TextField(_resizeX.ToString(), GUILayout.Width(50));
+                        int res;
+                        if (int.TryParse(s, out res) == false || res < 1)
+                            res = 1;
+                        _resizeX = res;
+
+                        s = GUILayout.TextField(_resizeY.ToString(), GUILayout.Width(50));
+                        if (int.TryParse(s, out res) == false || res < 1)
+                            res = 1;
+                        _resizeY = res;
+
+                        if (GUILayout.Button("Default", GUILayout.ExpandWidth(false)))
+                        {
+                            _resizeX = Screen.width;
+                            _resizeY = Screen.height;
+                        }
+                        if (_resizeX > currentSize.x)
+                            _resizeX = (int)currentSize.x;
+                        if (_resizeY > currentSize.y)
+                            _resizeY = (int)currentSize.y;
+
+                        GUI.enabled = prevGuiEnabled;
+                    }
+                    GUILayout.EndHorizontal();
                 }
                 GUILayout.EndHorizontal();
 

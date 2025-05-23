@@ -1,9 +1,7 @@
 <root>
-  <string key="ScreenshotPlugin" value="屏幕截图插件" />
   <string key="CurrentSize" value="当前尺寸" />
   <string key="Framerate" value="帧率" />
   <string key="ExportFramerate" value="导出帧率" />
-  <string key="AutoGenerateVideo" value="自动生成视频" />
   <string key="AutoDeleteImages" value="自动删除图片" />
   <string key="LimitBy" value="限制" />
   <string key="LimitByFrames" value="帧率" />
@@ -13,7 +11,6 @@
   <string key="LimitByPrewarmLoopCount" value="预热循环计数" />
   <string key="LimitByLoopsToRecord" value="循环记录" />
   <string key="LimitByLimitCount" value="循环次数" />
-  <string key="Estimated" value="预测" />
   <string key="Seconds" value="秒" />
   <string key="Frames" value="帧" />
   <string key="Resize" value="调整尺寸" />
@@ -22,9 +19,6 @@
   <string key="DBUpdateMode" value="动态骨骼更新模式" />
   <string key="DBDefault" value="默认" />
   <string key="DBEveryFrame" value="每帧" />
-  <string key="Prefix" value="前缀" />
-  <string key="Suffix" value="后缀" />
-  <string key="ExampleResult" value="比如" />
   <string key="EmptyScene" value="比如" />
   <string key="CloseStudio" value="完成后退出工作室" />
   <string key="ParallelScreenshotEncoding" value="并行编码（测试版" />
@@ -59,7 +53,6 @@
   <string key="Rotation180" value="旋转180°" />
   <string key="Rotation270" value="旋转-90°" />
   <string key="BitDepthError" value="当前视频格式无法支持此位深效果" />
-  <string key="AVIQuality" value="清晰度 ( 越低越好 ) " />
   <string key="GIFError" value="GIF与PNG只能二选其一" />
   <string key="MP4Codec" value="编码器" />
   <string key="HwAccelCodec" value="使用 GPU 加速编解码器" />

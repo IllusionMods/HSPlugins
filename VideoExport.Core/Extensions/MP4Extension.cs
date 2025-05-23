@@ -36,8 +36,9 @@ namespace VideoExport.Extensions
             this._quality = VideoExport._configFile.AddInt("mp4Quality", 18, true);
             this._hwAccel = VideoExport._configFile.AddBool("mp4HwAccel", false, true);
             this._preset = (Preset)VideoExport._configFile.AddInt("mp4Preset", (int)Preset.Slower, true);
-            if (this._preset > Preset.Faster)
-                this._preset = Preset.Faster;
+            if ((int)this._preset >= Enum.GetValues(typeof(Preset)).Length)
+                this._preset = Preset.Slower;
+
             this._presetCLIOptions = Enum.GetNames(typeof(Preset)).Select(n => n.ToLowerInvariant()).ToArray();
         }
 
