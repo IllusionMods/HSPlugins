@@ -14,6 +14,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using BepInEx.Logging;
+
 #endif
 #if PLAYHOME || KOIKATSU || AISHOUJO || HONEYSELECT2
 using UnityEngine.SceneManagement;
@@ -138,6 +139,7 @@ namespace HSUS
         internal static ConfigEntry<bool> AlternativeCenterToObjects { get; private set; }
         internal static ConfigEntry<bool> AutomaticMemoryClean { get; private set; }
         internal static ConfigEntry<int> AutomaticMemoryCleanInterval { get; private set; }
+        internal static ConfigEntry<bool> HideFKLinesWithAxis { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> CopyTransformHotkey { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> PasteTransformHotkey { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> PasteTransformPositionOnlyHotkey { get; private set; }
@@ -199,6 +201,7 @@ namespace HSUS
             AlternativeCenterToObjects = Config.Bind("Studio controls", "Alternative Center To Objects", true, "Change how pressing F centers the camera.");
             AutomaticMemoryClean = Config.Bind("Performance", "Automatic Memory Cleaning", false, "Periodically clean memory from unused objects in case the game doesn't do it for whatever reason. When cleanup is performed the game/studio may stutter/lag for a moment.");
             AutomaticMemoryCleanInterval = Config.Bind("Performance", "Automatic Memory Cleaning Interval", 300, "How often to clean memory.");
+            HideFKLinesWithAxis = Config.Bind("Interface", "Hide FK Lines With Axis", true, "When hiding axis using the axis button in the bottom left/pressing Q, also hide FK lines if they're enabled");
 
             CopyTransformHotkey = Config.Bind("Improved Transform Operations", "Copy Transform", new KeyboardShortcut(KeyCode.C, KeyCode.LeftControl));
             PasteTransformHotkey = Config.Bind("Improved Transform Operations", "Paste Transform", new KeyboardShortcut(KeyCode.V, KeyCode.LeftControl));

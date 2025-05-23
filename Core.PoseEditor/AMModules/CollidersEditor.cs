@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -644,6 +644,11 @@ namespace HSPE.AMModules
                 GUI.color = c;
             }
             GUILayout.EndScrollView();
+
+            if (GUILayout.Button("Force refresh list"))
+            {
+                RefreshColliderList();
+            }
 
             {
                 c = GUI.color;
@@ -1489,6 +1494,34 @@ namespace HSPE.AMModules
         private bool GizmosEnabled()
         {
             return _isEnabled && PoseController._drawAdvancedMode && _colliderTarget != null;
+        }
+
+        private void RefreshColliderList()
+        {
+            _colliders.Clear();
+
+            foreach (var c in _parent.GetComponentsInChildren<DynamicBoneColliderBase>(true))
+            {
+                if (!_colliders.ContainsKey(c.transform))
+                {
+                    _colliders.Add(c.transform, c);
+                    // UnityEngine.Debug.Log($"[Pose Editor] CollidersEditor: Found collider '{c.name}' on '{c.transform.GetPathFrom(_parent.transform)}'");
+                }
+            }
+
+#if AISHOUJO || HONEYSELECT2
+
+            foreach (var c in _parent.GetComponentsInChildren<DynamicBonePlaneCollider>(true))
+            {
+                if (!_colliders.ContainsKey(c.transform))
+                {
+                    _colliders.Add(c.transform, c);
+                    // UnityEngine.Debug.Log($"[Pose Editor] CollidersEditor: Found plane collider '{c.name}' on '{c.transform.GetPathFrom(_parent.transform)}'");
+                }
+            }
+#endif
+
+            _colliderTarget = _colliders.Values.FirstOrDefault();
         }
         #endregion
 
