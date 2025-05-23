@@ -99,7 +99,6 @@ namespace VideoExport
             Frames,
             Resize,
             ResizeDefault,
-            Format,
             DBUpdateMode,
             DBDefault,
             DBEveryFrame,
@@ -141,14 +140,10 @@ namespace VideoExport
             Rotation180,
             Rotation270,
             BitDepthError,
-            AVIWarning,
             AVIQuality,
-            GIFWarning,
             GIFError,
             MP4Codec,
-            H265Warning,
             HwAccelCodec,
-            HwAccelWarning,
             MP4Quality,
             MP4Preset,
             MP4PresetVerySlow,
@@ -161,7 +156,6 @@ namespace VideoExport
             MP4PresetSuperFast,
             MP4PresetUltraFast,
             WEBMCodec,
-            VP9Warning,
             VP8Quality,
             VP9Quality,
             WEBMDeadline,
@@ -169,7 +163,36 @@ namespace VideoExport
             WEBMDeadlineGood,
             WEBMDeadlineRealtime,
             MOVCodec,
-            MOVProResWarning,
+
+            ShowTooltips,
+            CaptureSettingsHeading,
+            VideoSettingsHeading,
+            OtherSettingsHeading,
+            ScreenshotTool,
+            Extension,
+            CreateVideo,
+            AutoHideUI,
+            RemoveAlphaChannel,
+
+            FramerateTooltip,
+            ExportFramerateTooltip,
+            DBUpdateModeTooltip,
+            ScreenshotToolTooltip,
+            LimitByTooltip,
+            LimitByPrewarmLoopCountTooltip,
+            LimitByLoopsToRecordTooltip,
+            LimitByLimitCountTooltip,
+            RealignTimelineTooltip,
+            ParallelEncodingTooltip,
+            CaptureModeTooltip,
+            ImageFormatTooltip,
+            ExtensionTooltip,
+            RemoveAlphaChannelTooltip,
+            HwAccelCodecTooltip,
+
+            MP4CodecTooltip,
+            WEBMCodecTooltip,
+            MOVCodecTooltip,
         }
 
         private enum LimitDurationType
@@ -248,7 +271,7 @@ namespace VideoExport
 
         private Vector2 _extensionScrollPos;
         private Vector2 _pluginScrollPos;
-        private bool _tooltipsEnabled = true;
+        private bool _showTooltips = true;
         private bool _showCaptureSection;
         private bool _showVideoSection;
         private bool _showOtherSection;
@@ -296,6 +319,7 @@ namespace VideoExport
             _showCaptureSection = _configFile.AddBool("showCaptureSection", true, true);
             _showVideoSection = _configFile.AddBool("showVideoSection", true, true);
             _showOtherSection = _configFile.AddBool("showOtherSection", true, true);
+            _showTooltips = _configFile.AddBool("showTooltips", true, true);
             _language = Config.Bind(Name, "Language", Language.English, "Interface language");
             _language.SettingChanged += (sender, args) => SetLanguage(_language.Value);
             SetLanguage(_language.Value);
@@ -437,6 +461,7 @@ namespace VideoExport
             _configFile.SetBool("showCaptureSection", _showCaptureSection);
             _configFile.SetBool("showVideoSection", _showVideoSection);
             _configFile.SetBool("showOtherSection", _showOtherSection);
+            _configFile.SetBool("showTooltips", _showTooltips);
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.SaveParams();
             foreach (IExtension extension in _extensions)
@@ -485,7 +510,7 @@ namespace VideoExport
                     {
                         GUILayout.BeginHorizontal();
                         {
-                            GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByLimitCount), GUILayout.ExpandWidth(false));
+                            GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.LimitByLimitCount), _currentDictionary.GetString(TranslationKey.LimitByLimitCountTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                             string s = GUILayout.TextField(_limitDurationNumber.ToString("0"));
                             int res;
                             if (int.TryParse(s, out res) == false || res < 1)
@@ -503,7 +528,7 @@ namespace VideoExport
                     {
                         GUILayout.BeginHorizontal();
                         {
-                            GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByLimitCount), GUILayout.ExpandWidth(false));
+                            GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.LimitByLimitCount), _currentDictionary.GetString(TranslationKey.LimitByLimitCountTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                             string s = GUILayout.TextField(_limitDurationNumber.ToString("0.000"));
                             float res;
                             if (float.TryParse(s, out res) == false || res <= 0f)
@@ -521,7 +546,7 @@ namespace VideoExport
                     {
                         GUILayout.BeginHorizontal();
                         {
-                            GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCount), GUILayout.ExpandWidth(false));
+                            GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCount), _currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCountTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                             string s = GUILayout.TextField(_prewarmLoopCount.ToString());
                             int res;
                             if (int.TryParse(s, out res) == false || res < 0)
@@ -532,7 +557,7 @@ namespace VideoExport
 
                         GUILayout.BeginHorizontal();
                         {
-                            GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByLoopsToRecord), GUILayout.ExpandWidth(false));
+                            GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.LimitByLoopsToRecord), _currentDictionary.GetString(TranslationKey.LimitByLoopsToRecordTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                             string s = GUILayout.TextField(_limitDurationNumber.ToString("0.000"));
                             float res;
                             if (float.TryParse(s, out res) == false || res <= 0)
@@ -554,20 +579,21 @@ namespace VideoExport
                     {
                         GUILayout.BeginHorizontal();
                         {
-                            _realignTimeline = GUILayout.Toggle(_realignTimeline, _currentDictionary.GetString(TranslationKey.RealignTimeline));
+                            _realignTimeline = GUILayout.Toggle(_realignTimeline, new GUIContent(_currentDictionary.GetString(TranslationKey.RealignTimeline), _currentDictionary.GetString(TranslationKey.RealignTimelineTooltip).Replace("\\n", "\n")));
                         }
                         GUILayout.EndHorizontal();
 
                         GUILayout.BeginHorizontal();
                         {
-                            GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCount), GUILayout.ExpandWidth(false));
+
+                            GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCount), _currentDictionary.GetString(TranslationKey.LimitByPrewarmLoopCountTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                             int.TryParse(GUILayout.TextField(_prewarmLoopCount.ToString()), out _prewarmLoopCount);
                         }
                         GUILayout.EndHorizontal();
 
                         GUILayout.BeginHorizontal();
                         {
-                            GUILayout.Label(_currentDictionary.GetString(TranslationKey.LimitByLoopsToRecord), GUILayout.ExpandWidth(false));
+                            GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.LimitByLoopsToRecord), _currentDictionary.GetString(TranslationKey.LimitByLoopsToRecordTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                             string s = GUILayout.TextField(_limitDurationNumber.ToString("0.000"));
                             float res;
                             if (float.TryParse(s, out res) == false || res <= 0)
@@ -598,7 +624,7 @@ namespace VideoExport
             {
                 GUILayout.BeginHorizontal();
                 {
-                    GUILayout.Label("Capture Settings", Styles.SectionLabelStyle);
+                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.CaptureSettingsHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showCaptureSection ? "-" : "+", GUILayout.Width(30)))
                     {
                         _showCaptureSection = !_showCaptureSection;
@@ -612,13 +638,19 @@ namespace VideoExport
                 }
 
                 Vector2 currentSize = plugin.currentSize;
-                GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.CurrentSize)}: {currentSize.x:#}x{currentSize.y:#}");
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.CurrentSize)}: {currentSize.x:#}x{currentSize.y:#}");
+                    GUILayout.FlexibleSpace();
+                    _showTooltips = GUILayout.Toggle(_showTooltips, _currentDictionary.GetString(TranslationKey.ShowTooltips));
+                }
+                GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal("Box");
                 {
                     GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 3));
                     {
-                        GUILayout.Label("Screenshot Tool", new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter });
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.ScreenshotTool), _currentDictionary.GetString(TranslationKey.ScreenshotToolTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
                         _pluginScrollPos = GUILayout.BeginScrollView(_pluginScrollPos, GUILayout.Height(120));
                         {
                             _selectedPlugin = GUILayout.SelectionGrid(_selectedPlugin, _screenshotPlugins.Select(p => p.name).ToArray(), 1);
@@ -638,7 +670,7 @@ namespace VideoExport
                 {
                     GUILayout.BeginHorizontal();
                     {
-                        GUILayout.Label("Frame Rate");
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.Framerate), _currentDictionary.GetString(TranslationKey.FramerateTooltip).Replace("\\n", "\n")));
 
                         if (GUILayout.Button("-", GUILayout.Width(30)))
                         {
@@ -663,7 +695,7 @@ namespace VideoExport
 
                     GUILayout.BeginHorizontal();
                     {
-                        GUILayout.Label("Video Frame Rate");
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.ExportFramerate), _currentDictionary.GetString(TranslationKey.ExportFramerateTooltip).Replace("\\n", "\n")));
 
                         if (GUILayout.Button("-", GUILayout.Width(30)))
                         {
@@ -687,7 +719,7 @@ namespace VideoExport
 
                     GUILayout.BeginHorizontal();
                     {
-                        GUILayout.Label("DynamicBone Update Rate");
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.DBUpdateMode), _currentDictionary.GetString(TranslationKey.DBUpdateModeTooltip).Replace("\\n", "\n")));
                         _selectedUpdateDynamicBones = (UpdateDynamicBonesType)GUILayout.SelectionGrid((int)_selectedUpdateDynamicBones, _updateDynamicBonesTypeNames, 2);
                     }
                     GUILayout.EndHorizontal();
@@ -699,7 +731,7 @@ namespace VideoExport
                 {
                     GUILayout.BeginVertical();
                     {
-                        _limitDuration = GUILayout.Toggle(_limitDuration, _currentDictionary.GetString(TranslationKey.LimitBy));
+                        _limitDuration = GUILayout.Toggle(_limitDuration, new GUIContent(_currentDictionary.GetString(TranslationKey.LimitBy), _currentDictionary.GetString(TranslationKey.LimitByTooltip).Replace("\\n", "\n")));
                         if (_limitDuration)
                         {
                             _selectedLimitDuration = (LimitDurationType)GUILayout.SelectionGrid((int)_selectedLimitDuration, _limitDurationNames, 4);
@@ -724,7 +756,7 @@ namespace VideoExport
             {
                 GUILayout.BeginHorizontal();
                 {
-                    GUILayout.Label("Video Settings", Styles.SectionLabelStyle);
+                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.VideoSettingsHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showVideoSection ? "-" : "+", GUILayout.Width(30)))
                     {
                         _showVideoSection = !_showVideoSection;
@@ -737,7 +769,7 @@ namespace VideoExport
                     return;
                 }
 
-                _autoGenerateVideo = GUILayout.Toggle(_autoGenerateVideo, "Create Video");
+                _autoGenerateVideo = GUILayout.Toggle(_autoGenerateVideo, new GUIContent(_currentDictionary.GetString(TranslationKey.CreateVideo)));
                 if (!_autoGenerateVideo)
                 {
                     GUILayout.EndVertical();
@@ -750,6 +782,7 @@ namespace VideoExport
                     {
                         GUILayout.BeginHorizontal();
                         {
+                            GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.Resize)));
                             _resize = GUILayout.Toggle(_resize, "Resize", GUILayout.ExpandWidth(false));
                             prevGuiEnabled = GUI.enabled;
                             GUI.enabled = _resize && prevGuiEnabled;
@@ -785,9 +818,9 @@ namespace VideoExport
 
                 GUILayout.BeginHorizontal("Box");
                 {
-                    GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 4));
+                    GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 5));
                     {
-                        GUILayout.Label("Extension", new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter });
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.Extension), _currentDictionary.GetString(TranslationKey.ExtensionTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
                         _extensionScrollPos = GUILayout.BeginScrollView(_extensionScrollPos, GUILayout.Height(150));
                         {
                             _selectedExtension = (ExtensionsType)GUILayout.SelectionGrid((int)_selectedExtension, _extensionsNames, 1);
@@ -819,7 +852,7 @@ namespace VideoExport
             {
                 GUILayout.BeginHorizontal();
                 {
-                    GUILayout.Label("Other Settings", Styles.SectionLabelStyle);
+                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.OtherSettingsHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showOtherSection ? "-" : "+", GUILayout.Width(30)))
                     {
                         _showOtherSection = !_showOtherSection;
@@ -841,7 +874,7 @@ namespace VideoExport
                     GUILayout.BeginVertical();
                     _clearSceneBeforeEncoding = GUILayout.Toggle(_clearSceneBeforeEncoding, _currentDictionary.GetString(TranslationKey.EmptyScene), Styles.DangerToggleStyle);
                     _closeWhenDone = GUILayout.Toggle(_closeWhenDone, _currentDictionary.GetString(TranslationKey.CloseStudio), Styles.DangerToggleStyle);
-                    _parallelScreenshotEncoding = GUILayout.Toggle(_parallelScreenshotEncoding, _currentDictionary.GetString(TranslationKey.ParallelScreenshotEncoding), Styles.DangerToggleStyle);
+                    _parallelScreenshotEncoding = GUILayout.Toggle(_parallelScreenshotEncoding, new GUIContent(_currentDictionary.GetString(TranslationKey.ParallelScreenshotEncoding), _currentDictionary.GetString(TranslationKey.ParallelEncodingTooltip)), Styles.DangerToggleStyle);
                     GUILayout.EndVertical();
 
                 }
@@ -927,11 +960,13 @@ namespace VideoExport
 
         void ShowTooltip()
         {
-            if (_tooltipsEnabled && Event.current.type == EventType.Repaint && !string.IsNullOrEmpty(GUI.tooltip))
+            if (_showTooltips && Event.current.type == EventType.Repaint && !string.IsNullOrEmpty(GUI.tooltip))
             {
                 Vector2 mousePos = Event.current.mousePosition;
                 Vector2 size = GUI.skin.label.CalcSize(new GUIContent(GUI.tooltip));
-                Rect tooltipRect = new Rect(mousePos.x, mousePos.y + 15, size.x + 12, size.y + 12);
+                Rect tooltipRect = new Rect(mousePos.x, mousePos.y + 18, size.x + 12, size.y + 12);
+
+                tooltipRect.x = Mathf.Clamp(tooltipRect.x, 0, _windowRect.width - tooltipRect.width);
 
                 GUI.Box(tooltipRect, GUI.tooltip, Styles.TooltipStyle);
             }

@@ -23,6 +23,7 @@ namespace VideoExport
         public static GUIStyle SliderStyle;
         public static GUIStyle TextFieldStyle;
         public static GUIStyle LabelStyle;
+        public static GUIStyle CenteredLabelStyle;
         public static GUIStyle ButtonStyle;
         public static GUIStyle SectionLabelStyle;
         public static GUIStyle DangerToggleStyle;
@@ -77,6 +78,11 @@ namespace VideoExport
                 padding = new RectOffset(5, 5, 3, 3),
             };
 
+            CenteredLabelStyle = new GUIStyle(LabelStyle)
+            {
+                alignment = TextAnchor.MiddleCenter,
+            };
+
             ButtonStyle = new GUIStyle(_originalSkin.button)
             {
                 fontSize = CommonFontSize,
@@ -107,7 +113,7 @@ namespace VideoExport
             TooltipStyle = new GUIStyle(_originalSkin.box)
             {
                 fontSize = CommonFontSize,
-                alignment = TextAnchor.MiddleCenter,
+                alignment = TextAnchor.MiddleLeft,
                 padding = new RectOffset(5, 5, 5, 5),
             };
             TooltipStyle.normal.background = CreateBlackTexture();

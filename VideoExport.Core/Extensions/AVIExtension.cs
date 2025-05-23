@@ -33,12 +33,6 @@ namespace VideoExport.Extensions
 
         public override void DisplayParams()
         {
-            Color c = GUI.color;
-            GUI.color = Color.yellow;
-            GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.AVIWarning));
-            GUI.color = c;
-
-
             GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.AVIQuality));
             GUILayout.BeginHorizontal();
             {

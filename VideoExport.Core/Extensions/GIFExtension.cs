@@ -70,10 +70,6 @@ namespace VideoExport.Extensions
 
         public void DisplayParams()
         {
-            Color c = GUI.color;
-            GUI.color = Color.yellow;
-            GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFWarning));
-            GUI.color = c;
         }
 
         public void SaveParams() { }
