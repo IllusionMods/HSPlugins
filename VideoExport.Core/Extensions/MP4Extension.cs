@@ -42,7 +42,7 @@ namespace VideoExport.Extensions
             this._presetCLIOptions = Enum.GetNames(typeof(Preset)).Select(n => n.ToLowerInvariant()).ToArray();
         }
 
-        public override string GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
             this._progress = 1;
             string pixFmt;
@@ -104,7 +104,7 @@ namespace VideoExport.Extensions
             string codec = codecOptions[(int)this._codec];
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-i \"{framesFolder}\\%d.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
+            string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
             string codecArgs = $"-vcodec {codec} {tuneArgument} {rateControlArgument} {presetArgument}";
             string outputArgs = $"\"{fileName}.mp4\"";
 
