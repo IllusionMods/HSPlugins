@@ -10,7 +10,7 @@ namespace VideoExport.Extensions
             ProRes4444
         }
 
-        private readonly string[] _codecNames = { "Apple ProRes 4444" };
+        private readonly string[] _codecNames = { "ProRes4444" };
         private readonly string[] _codecCLIOptions = { "prores_ks" };
 
         private Codec _codec;
@@ -49,15 +49,10 @@ namespace VideoExport.Extensions
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MOVCodec), GUILayout.ExpandWidth(false));
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MOVCodec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MOVCodecTooltip)), GUILayout.ExpandWidth(false));
                 this._codec = (Codec)GUILayout.SelectionGrid((int)this._codec, this._codecNames, this._codecNames.Length);
             }
             GUILayout.EndHorizontal();
-
-            Color c = GUI.color;
-            GUI.color = Color.yellow;
-            GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MOVProResWarning));
-            GUI.color = c;
 
             base.DisplayParams();
         }

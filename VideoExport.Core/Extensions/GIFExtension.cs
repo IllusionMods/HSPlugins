@@ -52,6 +52,11 @@ namespace VideoExport.Extensions
             return $"{(resize ? $"-W {resizeX} -H {resizeY}" : "")} --fps {fps} -o \"{fileName}.gif\" \"{framesFolder}\"\\{prefix}*{postfix}.{inputExtension} --quiet";
         }
 
+        public string GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        {
+            return GetArguments(framesFolder, "", "", inputExtension, bitDepth, fps, transparency, resize, resizeX, resizeY, fileName);
+        }
+
         public void ProcessStandardOutput(char c)
         {
         }
@@ -70,10 +75,6 @@ namespace VideoExport.Extensions
 
         public void DisplayParams()
         {
-            Color c = GUI.color;
-            GUI.color = Color.yellow;
-            GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFWarning));
-            GUI.color = c;
         }
 
         public void SaveParams() { }

@@ -71,6 +71,11 @@ namespace VideoExport.Extensions
 
         public abstract string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName);
 
+        public string GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        {
+            return GetArguments(framesFolder, "", "", inputExtension, bitDepth, fps, transparency, resize, resizeX, resizeY, fileName);
+        }
+
         public virtual void ProcessStandardOutput(char c)
         {
             if (c == '\n')
