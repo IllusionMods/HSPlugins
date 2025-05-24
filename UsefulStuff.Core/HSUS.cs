@@ -30,7 +30,7 @@ namespace HSUS
     , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.14.2";
+        public const string Version = "1.15";
 #if HONEYSELECT
         public const string Name = "HSUS";
         public const string GUID = "com.joan6694.illusionplugins.hsus";
