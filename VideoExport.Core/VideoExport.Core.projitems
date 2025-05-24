@@ -11,11 +11,13 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\AFFMPEGBasedExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\AVIFExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\GIFExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MOVExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MP4Extension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBMExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBPExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ParallelScreenshotEncoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ReshadePlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Styles.cs" />

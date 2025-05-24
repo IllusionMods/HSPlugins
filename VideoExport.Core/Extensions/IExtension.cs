@@ -28,7 +28,9 @@ namespace VideoExport.Extensions
         MP4,
         WEBM,
         GIF,
-        MOV
+        MOV,
+        WEBP,
+        AVIF,
     }
 
 }

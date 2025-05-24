@@ -81,7 +81,7 @@ namespace VideoExport.Extensions
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.WEBMCodec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.WEBMCodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.Codec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.WEBMCodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                 this._codec = (Codec)GUILayout.SelectionGrid((int)this._codec, this._codecNames, 2);
             }
             GUILayout.EndHorizontal();
