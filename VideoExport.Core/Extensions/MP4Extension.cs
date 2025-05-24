@@ -44,7 +44,6 @@ namespace VideoExport.Extensions
 
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
-            this._progress = 1;
             string pixFmt;
             switch (bitDepth)
             {

@@ -1256,6 +1256,7 @@ namespace VideoExport
                 IExtension extension = _extensions[(int)_selectedExtension];
 
                 string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder, tempName)));
+                extension.ResetProgress();
                 startTime = DateTime.Now;
                 Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
                 while (proc.HasExited == false)

@@ -57,6 +57,10 @@ namespace VideoExport.Extensions
             return GetArguments(framesFolder, "", "", inputExtension, bitDepth, fps, transparency, resize, resizeX, resizeY, fileName);
         }
 
+        public void ResetProgress()
+        {
+        }
+
         public void ProcessStandardOutput(char c)
         {
         }
