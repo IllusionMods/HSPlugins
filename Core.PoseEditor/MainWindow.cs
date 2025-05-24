@@ -292,7 +292,7 @@ namespace HSPE
             else
                 AdvancedModeModule._repeatTimer = 0f;
             AdvancedModeModule._repeatCalled = false;
-
+            
             BoneReorganizer.Update();
         }
 
@@ -1628,8 +1628,7 @@ namespace HSPE
                 return;
             this.ExecuteDelayed2(() =>
             {
-                _lastLoadType = LoadType.Load;
-                LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl);
+                LoadSceneGeneric(node, new SortedDictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl).ToList());
             }, 3);
         }
 
@@ -1643,16 +1642,10 @@ namespace HSPE
             XmlNode node = doc.FirstChild;
             if (node == null)
                 return;
+            Dictionary<int, ObjectCtrlInfo> toIgnore = new Dictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl);
             this.ExecuteDelayed2(() =>
             {
-                var changedKeys = Studio.Studio.Instance.sceneInfo.dicChangeKey;
-
-                var newItems = Studio.Studio.Instance.sceneInfo.dicImport
-                    .Where(d => changedKeys.ContainsKey(d.Key) && Studio.Studio.Instance.dicObjectCtrl.ContainsKey(d.Key))
-                    .ToDictionary(m => changedKeys[m.Key], f => Studio.Studio.Instance.dicObjectCtrl[f.Key]);
-
-                _lastLoadType = LoadType.Import;
-                LoadSceneGeneric(node, newItems);
+                LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl.Where(e => toIgnore.ContainsKey(e.Key) == false).OrderBy(e => SceneInfo_Import_Patches._newToOldKeys[e.Key]).ToList());
             }, 3);
         }
 
@@ -1662,46 +1655,17 @@ namespace HSPE
         /// <param name="node"></param>
         public void ExternalLoadScene(XmlNode node)
         {
-            _lastLoadType = LoadType.External;
-            LoadSceneGeneric(node, Studio.Studio.Instance.dicObjectCtrl);
+            LoadSceneGeneric(node, new SortedDictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl).ToList());
         }
 
-        private void LoadSceneGeneric(XmlNode node, Dictionary<int, ObjectCtrlInfo> dic)
+        private void LoadSceneGeneric(XmlNode node, List<KeyValuePair<int, ObjectCtrlInfo>> dic)
         {
             if (node == null || node.Name != "root")
                 return;
-
-            // Unique identifier for this load session.
-            _lastLoadId = UnityEngine.Random.Range(1, 1000000);
-
+            string v = node.Attributes["version"].Value;
+            int i = 0;
             foreach (XmlNode childNode in node.ChildNodes)
             {
-                if (childNode.Name.Equals("itemInfo") == false)
-                {
-                    continue;
-                }
-
-                var attribute = childNode.Attributes?["index"];
-
-                if (attribute == null)
-                {
-                    continue;
-                }
-
-                if (int.TryParse(attribute.Value, out var index) == false)
-                {
-                    continue;
-                }
-
-                if (dic.TryGetValue(index, out var objectCtrlInfo) && objectCtrlInfo is OCIItem ociItem)
-                {
-                    LoadElement(ociItem, childNode);
-                }
-                else
-                {
-                    HSPE.Logger.LogWarning($"[HSPE] Failed to find item of index {index}! It will be skipped.");
-                }
-                /*
                 switch (childNode.Name)
                 {
                     case "itemInfo":
@@ -1710,12 +1674,10 @@ namespace HSPE
                             ++i;
                         if (i == dic.Count)
                             break;
-                        HSPE.Logger.LogMessage($"{i} matched {dic[i].Value.objectInfo.dicKey}, if this isn't right, kys.");
                         LoadElement(ociItem, childNode);
                         ++i;
                         break;
                 }
-                */
             }
         }
 
