@@ -3,37 +3,39 @@ using VideoExport.ScreenshotPlugins;
 
 namespace VideoExport.Extensions
 {
-    public class MOVExtension : AFFMPEGBasedExtension
+    public class WEBPExtension : AFFMPEGBasedExtension
     {
         private enum Codec
         {
-            ProRes4444
+            LibWebP
         }
 
-        private readonly string[] _codecNames = { "ProRes4444" };
-        private readonly string[] _codecCLIOptions = { "prores_ks" };
+        private readonly string[] _codecNames = { "LibWEBP" };
+        private readonly string[] _codecCLIOptions = { "libwebp" };
 
         private Codec _codec;
+        private int _quality;
 
-        public MOVExtension() : base()
+        public WEBPExtension() : base()
         {
-            this._codec = (Codec)VideoExport._configFile.AddInt("movCodec", (int)Codec.ProRes4444, true);
+            this._codec = (Codec)VideoExport._configFile.AddInt("webpCodec", (int)Codec.LibWebP, true);
+            this._quality = VideoExport._configFile.AddInt("webpQuality", 75, true);
         }
 
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
             int coreCount = _coreCount;
-            string pixFmt = transparency ? "yuva444p10le" : "yuv444p10le";
+            string pixFmt = transparency ? "yuva420p" : "yuv420p";
 
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
             string codec = _codecCLIOptions[(int)this._codec];
-            string codecExtraArgs = "-profile 4 -alpha_bits 8 -bits_per_mb 250 -mbs_per_slice 4";
+            string codecExtraArgs = $"-qscale {this._quality}";
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
             string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
             string codecArgs = $"-c:v {codec} {codecExtraArgs}";
-            string outputArgs = $"\"{fileName}.mov\"";
+            string outputArgs = $"\"{fileName}.webp\"";
 
             return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
         }
@@ -48,8 +50,16 @@ namespace VideoExport.Extensions
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.Codec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MOVCodecTooltip)), GUILayout.ExpandWidth(false));
+                GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.Codec), GUILayout.ExpandWidth(false));
                 this._codec = (Codec)GUILayout.SelectionGrid((int)this._codec, this._codecNames, this._codecNames.Length);
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.WEBPQuality));
+            GUILayout.BeginHorizontal();
+            {
+                this._quality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._quality, 0, 100));
+                GUILayout.Label(this._quality.ToString("00"), GUILayout.ExpandWidth(false));
             }
             GUILayout.EndHorizontal();
 
@@ -58,7 +68,7 @@ namespace VideoExport.Extensions
 
         public override void SaveParams()
         {
-            VideoExport._configFile.SetInt("movCodec", (int)this._codec);
+            VideoExport._configFile.SetInt("webpCodec", (int)this._codec);
             base.SaveParams();
         }
     }

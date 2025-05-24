@@ -134,21 +134,21 @@ namespace VideoExport
             Rotation270,
             BitDepthError,
             GIFError,
-            MP4Codec,
+            Codec,
             HwAccelCodec,
             MP4Quality,
             MP4Preset,
             MP4PresetSlower,
             MP4PresetMedium,
             MP4PresetFaster,
-            WEBMCodec,
             VP8Quality,
             VP9Quality,
             WEBMDeadline,
             WEBMDeadlineBest,
             WEBMDeadlineGood,
             WEBMDeadlineRealtime,
-            MOVCodec,
+            WEBPQuality,
+            AVIFQuality,
             ShowTooltips,
             CaptureSettingsHeading,
             VideoSettingsHeading,
@@ -175,6 +175,7 @@ namespace VideoExport
             HwAccelCodecTooltip,
             MP4CodecTooltip,
             WEBMCodecTooltip,
+            AVIFCodecTooltip,
             MOVCodecTooltip,
         }
 
@@ -320,6 +321,8 @@ namespace VideoExport
             _extensions.Add(new WEBMExtension());
             _extensions.Add(new GIFExtension());
             _extensions.Add(new MOVExtension());
+            _extensions.Add(new WEBPExtension());
+            _extensions.Add(new AVIFExtension());
 
             _extensionsNames = Enum.GetNames(typeof(ExtensionsType));
             if ((int)_selectedExtension >= _extensionsNames.Length)
@@ -799,7 +802,7 @@ namespace VideoExport
                     GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 5));
                     {
                         GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.Extension), _currentDictionary.GetString(TranslationKey.ExtensionTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
-                        _extensionScrollPos = GUILayout.BeginScrollView(_extensionScrollPos, GUILayout.Height(150));
+                        _extensionScrollPos = GUILayout.BeginScrollView(_extensionScrollPos, GUILayout.Height(160));
                         {
                             _selectedExtension = (ExtensionsType)GUILayout.SelectionGrid((int)_selectedExtension, _extensionsNames, 1);
                         }
@@ -1253,6 +1256,7 @@ namespace VideoExport
                 IExtension extension = _extensions[(int)_selectedExtension];
 
                 string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder, tempName)));
+                extension.ResetProgress();
                 startTime = DateTime.Now;
                 Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
                 while (proc.HasExited == false)

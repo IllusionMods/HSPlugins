@@ -16,6 +16,7 @@ namespace VideoExport.Extensions
         string GetExecutable();
         string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName);
         string GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName);
+        void ResetProgress();
         void ProcessStandardOutput(char c);
         void ProcessStandardError(char c);
         void UpdateLanguage();
@@ -28,7 +29,9 @@ namespace VideoExport.Extensions
         MP4,
         WEBM,
         GIF,
-        MOV
+        MOV,
+        WEBP,
+        AVIF,
     }
 
 }

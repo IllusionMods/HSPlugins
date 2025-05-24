@@ -44,7 +44,6 @@ namespace VideoExport.Extensions
 
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
-            this._progress = 1;
             string pixFmt;
             switch (bitDepth)
             {
@@ -132,7 +131,7 @@ namespace VideoExport.Extensions
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4Codec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4CodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.Codec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4CodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                 this._codec = (Codec)GUILayout.SelectionGrid((int)this._codec, this._codecNames, 2);
             }
             GUILayout.EndHorizontal();
