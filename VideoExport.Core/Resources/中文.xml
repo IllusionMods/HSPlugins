@@ -76,6 +76,7 @@
   <string key="ScreenshotTool" value="截图工具" />
   <string key="Extension" value="扩展名" />
   <string key="GIFTool" value="GIF 工具" />
+  <string key="GIFMaxColors" value="最大颜色数" />
   <string key="GIFDithering" value="抖动" />
   <string key="CreateVideo" value="创建视频" />
   <string key="AutoHideUI" value="自动隐藏界面" />

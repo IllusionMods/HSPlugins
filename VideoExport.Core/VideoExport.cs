@@ -150,6 +150,7 @@ namespace VideoExport
             WEBPQuality,
             AVIFQuality,
             GIFTool,
+            GIFMaxColors,
             GIFDithering,
             ShowTooltips,
             CaptureSettingsHeading,

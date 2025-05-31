@@ -77,6 +77,7 @@
   <string key="ScreenshotTool" value="Screenshot Tool" />
   <string key="Extension" value="Extension" />
   <string key="GIFTool" value="GIF Tool" />
+  <string key="GIFMaxColors" value="Max Colors" />
   <string key="GIFDithering" value="Dithering" />
   <string key="CreateVideo" value="Create Video" />
   <string key="AutoHideUI" value="Auto Hide UI"/>

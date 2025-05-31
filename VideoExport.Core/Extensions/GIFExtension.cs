@@ -33,12 +33,15 @@ namespace VideoExport.Extensions
         private Dithering _ffmpegDithering;
         private readonly string[] _gifToolNames = Enum.GetValues(typeof(GifTool)).Cast<GifTool>().Select(x => GetGifToolString(x)).ToArray();
         private readonly string[] _ffmpegDitheringNames = Enum.GetValues(typeof(Dithering)).Cast<Dithering>().Select(x => GetDitheringString(x)).ToArray();
+        private int[] _presetMaxColors = new[] { 8, 16, 32, 64, 128, 256 };
+        private int _maxColors;
 
         public GIFExtension()
         {
             this._gifskiFolder = Path.Combine(VideoExport._pluginFolder, "gifski");
             this._gifskiExe = Path.GetFullPath(Path.Combine(this._gifskiFolder, "gifski.exe"));
             this._gifTool = (GifTool)VideoExport._configFile.AddInt("gifTool", (int)GifTool.FFmpeg, true);
+            this._maxColors = VideoExport._configFile.AddInt("gifMaxColors", 256, true);
             this._ffmpegDithering = (Dithering)VideoExport._configFile.AddInt("gifDithering", (int)Dithering.None, true);
         }
 
@@ -80,7 +83,7 @@ namespace VideoExport.Extensions
         public string GetArgumentsPaletteGen(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
             int coreCount = _coreCount;
-            string videoFilterArgument = $"-vf \"palettegen=stats_mode=diff\"";
+            string videoFilterArgument = $"-vf \"palettegen=stats_mode=diff:max_colors={_maxColors}\"";
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
             string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {videoFilterArgument}";
@@ -146,6 +149,28 @@ namespace VideoExport.Extensions
 
             if (this._gifTool == GifTool.FFmpeg)
             {
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFMaxColors));
+
+                    if (GUILayout.Button("-", GUILayout.Width(30)))
+                    {
+                        int index = Array.BinarySearch(_presetMaxColors, _maxColors);
+                        if (index < 0)
+                            index = ~index;
+                        _maxColors = _presetMaxColors[Math.Max(0, index - 1)];
+                    }
+                    GUILayout.Label(_maxColors.ToString(), GUILayout.Width(40));
+                    if (GUILayout.Button("+", GUILayout.Width(30)))
+                    {
+                        int index = Array.BinarySearch(_presetMaxColors, _maxColors);
+                        if (index < 0)
+                            index = ~index;
+                        _maxColors = _presetMaxColors[Math.Min(_presetMaxColors.Length - 1, index + 1)];
+                    }
+                }
+                GUILayout.EndHorizontal();
+
                 GUILayout.BeginVertical();
                 {
                     GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFDithering), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFDitheringTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
@@ -160,6 +185,7 @@ namespace VideoExport.Extensions
         public override void SaveParams()
         {
             VideoExport._configFile.SetInt("gifTool", (int)this._gifTool);
+            VideoExport._configFile.SetInt("gifMaxColors", _maxColors);
             VideoExport._configFile.SetInt("gifDithering", (int)this._ffmpegDithering);
             base.SaveParams();
         }
