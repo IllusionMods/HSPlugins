@@ -53,7 +53,7 @@
   <string key="Rotation180" value="旋转180°" />
   <string key="Rotation270" value="旋转-90°" />
   <string key="BitDepthError" value="当前视频格式无法支持此位深效果" />
-  <string key="GIFError" value="GIF与PNG只能二选其一" />
+  <string key="GIFError" value="Gifski 工具仅兼容 PNG 图像。" />
   <string key="Codec" value="编码器" />
   <string key="HwAccelCodec" value="使用 GPU 加速编解码器" />
   <string key="MP4Preset" value="编码预设" />

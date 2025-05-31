@@ -308,6 +308,7 @@ namespace VideoExport
             _showVideoSection = _configFile.AddBool("showVideoSection", true, true);
             _showOtherSection = _configFile.AddBool("showOtherSection", true, true);
             _showTooltips = _configFile.AddBool("showTooltips", true, true);
+            _parallelScreenshotEncoding = _configFile.AddBool("parallelScreenshotEncoding", false, true);
             _language = Config.Bind(Name, "Language", Language.English, "Interface language");
             _language.SettingChanged += (sender, args) => SetLanguage(_language.Value);
             SetLanguage(_language.Value);
@@ -449,6 +450,7 @@ namespace VideoExport
             _configFile.SetBool("showVideoSection", _showVideoSection);
             _configFile.SetBool("showOtherSection", _showOtherSection);
             _configFile.SetBool("showTooltips", _showTooltips);
+            _configFile.SetBool("parallelScreenshotEncoding", _parallelScreenshotEncoding);
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.SaveParams();
             foreach (IExtension extension in _extensions)
@@ -853,7 +855,7 @@ namespace VideoExport
                 GUILayout.BeginHorizontal("Box");
                 {
                     GUILayout.BeginVertical();
-                    _autoDeleteImages = GUILayout.Toggle(_autoDeleteImages, "Auto Delete Screenshots");
+                    _autoDeleteImages = GUILayout.Toggle(_autoDeleteImages, _currentDictionary.GetString(TranslationKey.AutoDeleteImages));
                     GUILayout.EndVertical();
 
                     GUILayout.BeginVertical();
@@ -1266,7 +1268,6 @@ namespace VideoExport
                 if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
                 {
                     string arguments_palettegen = (extension as GIFExtension).GetArgumentsPaletteGen(SimplifyPath(framesFolder), "", "", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
-                    extension.ResetProgress();
                     Process proc_palettegen = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, false, extension.canProcessStandardError);
                     yield return StartCoroutine(HandleProcessOutput(proc_palettegen, totalFrames, false, val => error = val));
                 }

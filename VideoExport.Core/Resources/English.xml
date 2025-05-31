@@ -53,7 +53,7 @@
   <string key="Rotation180" value="180°" />
   <string key="Rotation270" value="90° CCW" />
   <string key="BitDepthError" value="The current video format does not support this bit depth." />
-  <string key="GIFError" value="GIF is only compatible with PNG images." />
+  <string key="GIFError" value="Gifski tool is only compatible with PNG images." />
   <string key="Codec" value="Codec" />
   <string key="HwAccelCodec" value="Use GPU-accelerated codec" />
   <string key="MP4Preset" value="Encoding Preset" />

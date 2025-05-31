@@ -20,7 +20,6 @@ namespace VideoExport
 
 
         public static GUIStyle ToggleStyle;
-        public static GUIStyle SliderStyle;
         public static GUIStyle TextFieldStyle;
         public static GUIStyle LabelStyle;
         public static GUIStyle CenteredLabelStyle;
@@ -42,7 +41,6 @@ namespace VideoExport
             _veSkin.label = LabelStyle;
             _veSkin.button = ButtonStyle;
             _veSkin.textField = TextFieldStyle;
-            _veSkin.horizontalSlider = SliderStyle;
         }
 
         private static void InitializeStyles()
@@ -55,13 +53,6 @@ namespace VideoExport
                 onHover = { textColor = Color.yellow },
                 onNormal = { textColor = NormalColorOn },
                 padding = new RectOffset(20, 5, 3, 3),
-            };
-
-            SliderStyle = new GUIStyle(_originalSkin.horizontalSlider)
-            {
-                fontSize = CommonFontSize,
-                alignment = TextAnchor.MiddleLeft,
-                padding = new RectOffset(5, 5, 3, 3),
             };
 
             TextFieldStyle = new GUIStyle(_originalSkin.textField)
