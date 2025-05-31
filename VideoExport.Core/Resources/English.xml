@@ -76,6 +76,8 @@
   <string key="OtherSettingsHeading" value="Other Settings" />
   <string key="ScreenshotTool" value="Screenshot Tool" />
   <string key="Extension" value="Extension" />
+  <string key="GIFTool" value="GIF Tool" />
+  <string key="GIFDithering" value="Dithering" />
   <string key="CreateVideo" value="Create Video" />
   <string key="AutoHideUI" value="Auto Hide UI"/>
   <string key="RemoveAlphaChannel" value="Remove Alpha Channel"/>
@@ -98,4 +100,6 @@
   <string key="MOVCodecTooltip" value="[ProRes4444] Produces very large files meant for professional video editing." />
   <string key="AVIFCodecTooltip" value="[Libaom-av1] Widely supported, lossless quality, slow encoding.\n[Libsvt-av1] Good quality, fast encoding." />
   <string key="HwAccelCodecTooltip" value="Fast encoding using GPU accelerated codecs.\nLess efficient, produces larger files for the same quality."/>
+  <string key="GIFToolTooltip" value="[FFmpeg] Good quality, widely supported. Slightly larger.\n         Global palette, 256 colors total. Dithering optional.\n[Gifsky] Highest quality, smoother, but may cause flickering.\n         Local palette, 256 colors per frame. Dithering mandatory." />
+  <string key="GIFDitheringTooltip" value="Fakes colors outside of the limited palette:\n[none] No dithering. Recommended until visually necessary.\n[bayer] Creates visible dither patterns/aesthetic.\n[floyd_steinberg] Creates smooth gradients and relatively low noise." />
 </root>

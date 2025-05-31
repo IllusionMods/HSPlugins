@@ -149,6 +149,8 @@ namespace VideoExport
             WEBMDeadlineRealtime,
             WEBPQuality,
             AVIFQuality,
+            GIFTool,
+            GIFDithering,
             ShowTooltips,
             CaptureSettingsHeading,
             VideoSettingsHeading,
@@ -177,6 +179,8 @@ namespace VideoExport
             WEBMCodecTooltip,
             AVIFCodecTooltip,
             MOVCodecTooltip,
+            GIFToolTooltip,
+            GIFDitheringTooltip,
         }
 
         private enum LimitDurationType
@@ -1255,56 +1259,30 @@ namespace VideoExport
                 yield return null;
                 IExtension extension = _extensions[(int)_selectedExtension];
 
-                string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder, tempName)));
-                extension.ResetProgress();
-                startTime = DateTime.Now;
-                Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
-                while (proc.HasExited == false)
+                string fileName = SimplifyPath(Path.Combine(_outputFolder, tempName));
+                string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+
+                if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
                 {
-                    if (extension.canProcessStandardOutput)
+                    string arguments_palettegen = (extension as GIFExtension).GetArgumentsPaletteGen(SimplifyPath(framesFolder), "", "", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+                    extension.ResetProgress();
+                    Process proc_palettegen = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, extension.canProcessStandardOutput, extension.canProcessStandardError);
+                    yield return StartCoroutine(HandleProcessOutput(proc_palettegen, i, val => error = val));
+                }
+
+                if (error == false)
+                {
+                    Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
+                    yield return StartCoroutine(HandleProcessOutput(proc, i, val => error = val));
+
+                    if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
                     {
-                        int outputPeek = proc.StandardOutput.Peek();
-                        for (int j = 0; j < outputPeek; j++)
-                            extension.ProcessStandardOutput((char)proc.StandardOutput.Read());
-                        yield return null;
+                        string palettePath = $"{fileName}.palette.png";
+                        if (File.Exists(palettePath))
+                            File.Delete(palettePath);
                     }
-
-                    elapsed = DateTime.Now - startTime;
-
-                    if (extension.progress != 0)
-                    {
-                        TimeSpan eta = TimeSpan.FromSeconds((i - extension.progress) * elapsed.TotalSeconds / extension.progress);
-                        _progressBarPercentage = extension.progress / (float)i;
-                        _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {extension.progress}/{i} {_progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {eta.Hours:0}:{eta.Minutes:00}:{eta.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
-                    }
-                    else
-                        _progressBarPercentage = (float)((elapsed.TotalSeconds % 6) / 6);
-
-                    Resources.UnloadUnusedAssets();
-                    GC.Collect();
-                    yield return null;
-                    proc.Refresh();
                 }
 
-                proc.WaitForExit();
-
-                var errorOut = proc.StandardError.ReadToEnd()?.Trim();
-                if (!string.IsNullOrEmpty(errorOut))
-                    Logger.LogError(errorOut);
-
-                yield return null;
-                if (proc.ExitCode == 0)
-                {
-                    _messageColor = Color.green;
-                    _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
-                }
-                else
-                {
-                    _messageColor = Color.red;
-                    _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
-                    error = true;
-                }
-                proc.Close();
                 _generatingVideo = false;
                 Logger.LogInfo($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
             }
@@ -1371,6 +1349,60 @@ namespace VideoExport
             proc.Start();
 
             return proc;
+        }
+
+        private IEnumerator HandleProcessOutput(Process proc, int totalFrames, Action<bool> setError)
+        {
+            IExtension extension = _extensions[(int)_selectedExtension];
+            extension.ResetProgress();
+
+            DateTime startTime = DateTime.Now;
+            TimeSpan elapsed = TimeSpan.Zero;
+
+            while (proc.HasExited == false)
+            {
+                if (extension.canProcessStandardOutput)
+                {
+                    int outputPeek = proc.StandardOutput.Peek();
+                    for (int j = 0; j < outputPeek; j++)
+                        extension.ProcessStandardOutput((char)proc.StandardOutput.Read());
+                    yield return null;
+                }
+
+                elapsed = DateTime.Now - startTime;
+
+                if (extension.progress != 0)
+                {
+                    TimeSpan eta = TimeSpan.FromSeconds((totalFrames - extension.progress) * elapsed.TotalSeconds / extension.progress);
+                    _progressBarPercentage = extension.progress / (float)totalFrames;
+                    _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {extension.progress}/{totalFrames} {_progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {eta.Hours:0}:{eta.Minutes:00}:{eta.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
+                }
+                else
+                    _progressBarPercentage = (float)((elapsed.TotalSeconds % 6) / 6);
+
+                yield return null;
+                proc.Refresh();
+            }
+
+            proc.WaitForExit();
+
+            var errorOut = proc.StandardError.ReadToEnd()?.Trim();
+            if (!string.IsNullOrEmpty(errorOut))
+                Logger.LogError(errorOut);
+
+            yield return null;
+            if (proc.ExitCode == 0)
+            {
+                _messageColor = Color.green;
+                _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
+            }
+            else
+            {
+                _messageColor = Color.red;
+                _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
+                setError(true);
+            }
+            proc.Close();
         }
 
         private string SimplifyPath(string path)
