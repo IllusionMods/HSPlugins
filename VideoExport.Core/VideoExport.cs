@@ -1261,19 +1261,20 @@ namespace VideoExport
 
                 string fileName = SimplifyPath(Path.Combine(_outputFolder, tempName));
                 string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+                int totalFrames = i * _exportFps / _fps;
 
                 if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
                 {
                     string arguments_palettegen = (extension as GIFExtension).GetArgumentsPaletteGen(SimplifyPath(framesFolder), "", "", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
                     extension.ResetProgress();
-                    Process proc_palettegen = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, extension.canProcessStandardOutput, extension.canProcessStandardError);
-                    yield return StartCoroutine(HandleProcessOutput(proc_palettegen, i, val => error = val));
+                    Process proc_palettegen = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, false, extension.canProcessStandardError);
+                    yield return StartCoroutine(HandleProcessOutput(proc_palettegen, totalFrames, false, val => error = val));
                 }
 
                 if (error == false)
                 {
                     Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
-                    yield return StartCoroutine(HandleProcessOutput(proc, i, val => error = val));
+                    yield return StartCoroutine(HandleProcessOutput(proc, totalFrames, extension.canProcessStandardOutput, val => error = val));
 
                     if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
                     {
@@ -1332,6 +1333,8 @@ namespace VideoExport
 
         private Process StartExternalProcess(string exe, string arguments, bool redirectStandardOutput, bool redirectStandardError)
         {
+            IExtension extension = _extensions[(int)_selectedExtension];
+
             Logger.LogInfo($"Starting process: {exe} {arguments}");
             Process proc = new Process
             {
@@ -1346,12 +1349,28 @@ namespace VideoExport
                     RedirectStandardError = redirectStandardError
                 }
             };
+
+            if (redirectStandardOutput)
+            {
+                proc.OutputDataReceived += (sender, e) => {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        foreach (char c in e.Data)
+                            extension.ProcessStandardOutput(c);
+                        extension.ProcessStandardOutput('\n');
+                    }
+                };
+            }
             proc.Start();
+            if (redirectStandardOutput)
+            {
+                proc.BeginOutputReadLine();
+            }
 
             return proc;
         }
 
-        private IEnumerator HandleProcessOutput(Process proc, int totalFrames, Action<bool> setError)
+        private IEnumerator HandleProcessOutput(Process proc, int totalFrames, bool hasProgressOutput, Action<bool> setError)
         {
             IExtension extension = _extensions[(int)_selectedExtension];
             extension.ResetProgress();
@@ -1361,24 +1380,19 @@ namespace VideoExport
 
             while (proc.HasExited == false)
             {
-                if (extension.canProcessStandardOutput)
-                {
-                    int outputPeek = proc.StandardOutput.Peek();
-                    for (int j = 0; j < outputPeek; j++)
-                        extension.ProcessStandardOutput((char)proc.StandardOutput.Read());
-                    yield return null;
-                }
-
                 elapsed = DateTime.Now - startTime;
 
-                if (extension.progress != 0)
+                if (hasProgressOutput)
                 {
                     TimeSpan eta = TimeSpan.FromSeconds((totalFrames - extension.progress) * elapsed.TotalSeconds / extension.progress);
                     _progressBarPercentage = extension.progress / (float)totalFrames;
                     _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {extension.progress}/{totalFrames} {_progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {eta.Hours:0}:{eta.Minutes:00}:{eta.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
                 }
                 else
+                {
                     _progressBarPercentage = (float)((elapsed.TotalSeconds % 6) / 6);
+                    _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
+                }
 
                 yield return null;
                 proc.Refresh();
