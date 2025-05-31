@@ -149,6 +149,9 @@ namespace VideoExport
             WEBMDeadlineRealtime,
             WEBPQuality,
             AVIFQuality,
+            GIFTool,
+            GIFMaxColors,
+            GIFDithering,
             ShowTooltips,
             CaptureSettingsHeading,
             VideoSettingsHeading,
@@ -177,6 +180,8 @@ namespace VideoExport
             WEBMCodecTooltip,
             AVIFCodecTooltip,
             MOVCodecTooltip,
+            GIFToolTooltip,
+            GIFDitheringTooltip,
         }
 
         private enum LimitDurationType
@@ -304,6 +309,7 @@ namespace VideoExport
             _showVideoSection = _configFile.AddBool("showVideoSection", true, true);
             _showOtherSection = _configFile.AddBool("showOtherSection", true, true);
             _showTooltips = _configFile.AddBool("showTooltips", true, true);
+            _parallelScreenshotEncoding = _configFile.AddBool("parallelScreenshotEncoding", false, true);
             _language = Config.Bind(Name, "Language", Language.English, "Interface language");
             _language.SettingChanged += (sender, args) => SetLanguage(_language.Value);
             SetLanguage(_language.Value);
@@ -445,6 +451,7 @@ namespace VideoExport
             _configFile.SetBool("showVideoSection", _showVideoSection);
             _configFile.SetBool("showOtherSection", _showOtherSection);
             _configFile.SetBool("showTooltips", _showTooltips);
+            _configFile.SetBool("parallelScreenshotEncoding", _parallelScreenshotEncoding);
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.SaveParams();
             foreach (IExtension extension in _extensions)
@@ -849,7 +856,7 @@ namespace VideoExport
                 GUILayout.BeginHorizontal("Box");
                 {
                     GUILayout.BeginVertical();
-                    _autoDeleteImages = GUILayout.Toggle(_autoDeleteImages, "Auto Delete Screenshots");
+                    _autoDeleteImages = GUILayout.Toggle(_autoDeleteImages, _currentDictionary.GetString(TranslationKey.AutoDeleteImages));
                     GUILayout.EndVertical();
 
                     GUILayout.BeginVertical();
@@ -1255,56 +1262,30 @@ namespace VideoExport
                 yield return null;
                 IExtension extension = _extensions[(int)_selectedExtension];
 
-                string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder, tempName)));
-                extension.ResetProgress();
-                startTime = DateTime.Now;
-                Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
-                while (proc.HasExited == false)
+                string fileName = SimplifyPath(Path.Combine(_outputFolder, tempName));
+                string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+                int totalFrames = i * _exportFps / _fps;
+
+                if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
                 {
-                    if (extension.canProcessStandardOutput)
+                    string arguments_palettegen = (extension as GIFExtension).GetArgumentsPaletteGen(SimplifyPath(framesFolder), "", "", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+                    Process proc_palettegen = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, false, extension.canProcessStandardError);
+                    yield return StartCoroutine(HandleProcessOutput(proc_palettegen, totalFrames, false, val => error = val));
+                }
+
+                if (error == false)
+                {
+                    Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
+                    yield return StartCoroutine(HandleProcessOutput(proc, totalFrames, extension.canProcessStandardOutput, val => error = val));
+
+                    if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
                     {
-                        int outputPeek = proc.StandardOutput.Peek();
-                        for (int j = 0; j < outputPeek; j++)
-                            extension.ProcessStandardOutput((char)proc.StandardOutput.Read());
-                        yield return null;
+                        string palettePath = $"{fileName}.palette.png";
+                        if (File.Exists(palettePath))
+                            File.Delete(palettePath);
                     }
-
-                    elapsed = DateTime.Now - startTime;
-
-                    if (extension.progress != 0)
-                    {
-                        TimeSpan eta = TimeSpan.FromSeconds((i - extension.progress) * elapsed.TotalSeconds / extension.progress);
-                        _progressBarPercentage = extension.progress / (float)i;
-                        _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {extension.progress}/{i} {_progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {eta.Hours:0}:{eta.Minutes:00}:{eta.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
-                    }
-                    else
-                        _progressBarPercentage = (float)((elapsed.TotalSeconds % 6) / 6);
-
-                    Resources.UnloadUnusedAssets();
-                    GC.Collect();
-                    yield return null;
-                    proc.Refresh();
                 }
 
-                proc.WaitForExit();
-
-                var errorOut = proc.StandardError.ReadToEnd()?.Trim();
-                if (!string.IsNullOrEmpty(errorOut))
-                    Logger.LogError(errorOut);
-
-                yield return null;
-                if (proc.ExitCode == 0)
-                {
-                    _messageColor = Color.green;
-                    _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
-                }
-                else
-                {
-                    _messageColor = Color.red;
-                    _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
-                    error = true;
-                }
-                proc.Close();
                 _generatingVideo = false;
                 Logger.LogInfo($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
             }
@@ -1354,6 +1335,8 @@ namespace VideoExport
 
         private Process StartExternalProcess(string exe, string arguments, bool redirectStandardOutput, bool redirectStandardError)
         {
+            IExtension extension = _extensions[(int)_selectedExtension];
+
             Logger.LogInfo($"Starting process: {exe} {arguments}");
             Process proc = new Process
             {
@@ -1368,9 +1351,74 @@ namespace VideoExport
                     RedirectStandardError = redirectStandardError
                 }
             };
+
+            if (redirectStandardOutput)
+            {
+                proc.OutputDataReceived += (sender, e) => {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        foreach (char c in e.Data)
+                            extension.ProcessStandardOutput(c);
+                        extension.ProcessStandardOutput('\n');
+                    }
+                };
+            }
             proc.Start();
+            if (redirectStandardOutput)
+            {
+                proc.BeginOutputReadLine();
+            }
 
             return proc;
+        }
+
+        private IEnumerator HandleProcessOutput(Process proc, int totalFrames, bool hasProgressOutput, Action<bool> setError)
+        {
+            IExtension extension = _extensions[(int)_selectedExtension];
+            extension.ResetProgress();
+
+            DateTime startTime = DateTime.Now;
+            TimeSpan elapsed = TimeSpan.Zero;
+
+            while (proc.HasExited == false)
+            {
+                elapsed = DateTime.Now - startTime;
+
+                if (hasProgressOutput)
+                {
+                    TimeSpan eta = TimeSpan.FromSeconds((totalFrames - extension.progress) * elapsed.TotalSeconds / extension.progress);
+                    _progressBarPercentage = extension.progress / (float)totalFrames;
+                    _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {extension.progress}/{totalFrames} {_progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {eta.Hours:0}:{eta.Minutes:00}:{eta.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
+                }
+                else
+                {
+                    _progressBarPercentage = (float)((elapsed.TotalSeconds % 6) / 6);
+                    _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
+                }
+
+                yield return null;
+                proc.Refresh();
+            }
+
+            proc.WaitForExit();
+
+            var errorOut = proc.StandardError.ReadToEnd()?.Trim();
+            if (!string.IsNullOrEmpty(errorOut))
+                Logger.LogError(errorOut);
+
+            yield return null;
+            if (proc.ExitCode == 0)
+            {
+                _messageColor = Color.green;
+                _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
+            }
+            else
+            {
+                _messageColor = Color.red;
+                _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
+                setError(true);
+            }
+            proc.Close();
         }
 
         private string SimplifyPath(string path)
