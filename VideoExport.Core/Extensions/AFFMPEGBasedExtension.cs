@@ -29,7 +29,7 @@ namespace VideoExport.Extensions
         private StringBuilder _errorBuilder = new StringBuilder();
 
         public virtual int progress { get { return this._progress; } }
-        public bool canProcessStandardOutput { get { return true; } }
+        public virtual bool canProcessStandardOutput { get { return true; } }
         public bool canProcessStandardError { get { return true; } }
 
         static AFFMPEGBasedExtension()

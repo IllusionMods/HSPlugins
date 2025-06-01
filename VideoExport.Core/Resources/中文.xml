@@ -53,7 +53,7 @@
   <string key="Rotation180" value="旋转180°" />
   <string key="Rotation270" value="旋转-90°" />
   <string key="BitDepthError" value="当前视频格式无法支持此位深效果" />
-  <string key="GIFError" value="GIF与PNG只能二选其一" />
+  <string key="GIFError" value="Gifski 工具仅兼容 PNG 图像。" />
   <string key="Codec" value="编码器" />
   <string key="HwAccelCodec" value="使用 GPU 加速编解码器" />
   <string key="MP4Preset" value="编码预设" />
@@ -75,6 +75,9 @@
   <string key="OtherSettingsHeading" value="其他设置" />
   <string key="ScreenshotTool" value="截图工具" />
   <string key="Extension" value="扩展名" />
+  <string key="GIFTool" value="GIF 工具" />
+  <string key="GIFMaxColors" value="最大颜色数" />
+  <string key="GIFDithering" value="抖动" />
   <string key="CreateVideo" value="创建视频" />
   <string key="AutoHideUI" value="自动隐藏界面" />
   <string key="RemoveAlphaChannel" value="移除透明通道" />
@@ -97,4 +100,6 @@
   <string key="MOVCodecTooltip" value="[ProRes4444] 生成用于专业视频编辑的超大文件。" />
   <string key="AVIFCodecTooltip" value="[Libaom-av1] 广泛支持，无损画质，编码较慢。\n[Libsvt-av1] 良好画质（有损），编码快速。" />
   <string key="HwAccelCodecTooltip" value="使用 GPU 加速编码快速生成视频。\n压缩效率较低，同质量下文件更大。" />
+  <string key="GIFToolTooltip" value="[FFmpeg] 质量好，支持广泛。文件稍大。\n         全局调色板，总共256色。抖动可选。\n[Gifsky] 最高质量，更平滑，但可能闪烁。\n         局部调色板，每帧256色。抖动必需。" />
+  <string key="GIFDitheringTooltip" value="模拟有限调色板外的颜色：\n[none] 无抖动。推荐默认使用，直到视觉需要。\n[bayer] 产生明显的抖动图案/美感。\n[floyd_steinberg] 产生平滑渐变且噪点较低。" />
 </root>
