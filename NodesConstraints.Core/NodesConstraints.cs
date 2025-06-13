@@ -35,7 +35,7 @@ namespace NodesConstraints
 {
 #if BEPINEX
     [BepInPlugin(GUID, Name, Version)]
-    [BepInDependency("com.bepis.bepinex.extendedsave")]
+    [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #if KOIKATSU
     [BepInProcess("CharaStudio")]
 #elif AISHOUJO || HONEYSELECT2
