@@ -203,8 +203,8 @@ namespace VideoExport
         internal static new ManualLogSource Logger;
 
         internal static string _pluginFolder;
-        private static string _outputFolder;
-        private static string _globalFramesFolder;
+        private ConfigEntry<string> _outputFolder;
+        private ConfigEntry<string> _globalFramesFolder;
         internal static GenericConfig _configFile;
         private static readonly TranslationDictionary<TranslationKey> _englishDictionary = new TranslationDictionary<TranslationKey>("VideoExport.Resources.English.xml");
         private static readonly TranslationDictionary<TranslationKey> _chineseDictionary = new TranslationDictionary<TranslationKey>("VideoExport.Resources.中文.xml");
@@ -317,11 +317,11 @@ namespace VideoExport
             // If old directories exist, keep using them by default, otherwise use the new defaults
             var outputFolderDefault = Path.Combine(_pluginFolder, "Output");
             if (!Directory.Exists(outputFolderDefault)) outputFolderDefault = Path.Combine(Paths.GameRootPath, "UserData\\VideoExport\\Output");
-            _outputFolder = _configFile.AddString("outputFolder", outputFolderDefault, true, _currentDictionary.GetString(TranslationKey.VideosFolderDesc));
+            _outputFolder = Config.Bind("VideoExport", "outputFolder", outputFolderDefault, new ConfigDescription(_currentDictionary.GetString(TranslationKey.VideosFolderDesc)));
 
             var framesFolderDefault = Path.Combine(_pluginFolder, "Frames");
             if (!Directory.Exists(framesFolderDefault)) framesFolderDefault = Path.Combine(Paths.GameRootPath, "UserData\\VideoExport\\Frames");
-            _globalFramesFolder = _configFile.AddString("framesFolder", framesFolderDefault, true, _currentDictionary.GetString(TranslationKey.FramesFolderDesc));
+            _globalFramesFolder = Config.Bind("VideoExport", "framesFolder", framesFolderDefault, new ConfigDescription(_currentDictionary.GetString(TranslationKey.FramesFolderDesc)));
 
             _extensions.Add(new MP4Extension());
             _extensions.Add(new WEBMExtension());
@@ -445,8 +445,6 @@ namespace VideoExport
             _configFile.SetInt("selectedUpdateDynamicBonesMode", (int)_selectedUpdateDynamicBones);
             _configFile.SetBool("realignTimeline", _realignTimeline);
             _configFile.SetInt("prewarmLoopCount", _prewarmLoopCount);
-            _configFile.SetString("outputFolder", _outputFolder);
-            _configFile.SetString("framesFolder", _globalFramesFolder);
             _configFile.SetBool("showCaptureSection", _showCaptureSection);
             _configFile.SetBool("showVideoSection", _showVideoSection);
             _configFile.SetBool("showOtherSection", _showOtherSection);
@@ -831,10 +829,10 @@ namespace VideoExport
             IScreenshotPlugin screenshotPlugin = _screenshotPlugins[_selectedPlugin];
             string imageExtension = screenshotPlugin.extension;
             string tempName = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
-            string framesFolder = Path.Combine(_globalFramesFolder, tempName);
+            string framesFolder = Path.Combine(_globalFramesFolder.Value, tempName);
 
             IExtension extension = _extensions[(int)_selectedExtension];
-            string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder, tempName)));
+            string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder.Value, tempName)));
 
             GUILayout.BeginVertical("Box");
             {
@@ -1023,7 +1021,7 @@ namespace VideoExport
             IScreenshotPlugin screenshotPlugin = _screenshotPlugins[_selectedPlugin];
 
             string tempName = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
-            string framesFolder = Path.Combine(_globalFramesFolder, tempName);
+            string framesFolder = Path.Combine(_globalFramesFolder.Value, tempName);
 
             if (Directory.Exists(framesFolder) == false)
                 Directory.CreateDirectory(framesFolder);
@@ -1256,13 +1254,13 @@ namespace VideoExport
                     Studio.Studio.Instance.InitScene(false);
 
                 _messageColor = Color.yellow;
-                if (Directory.Exists(_outputFolder) == false)
-                    Directory.CreateDirectory(_outputFolder);
+                if (Directory.Exists(_outputFolder.Value) == false)
+                    Directory.CreateDirectory(_outputFolder.Value);
                 _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
                 yield return null;
                 IExtension extension = _extensions[(int)_selectedExtension];
 
-                string fileName = SimplifyPath(Path.Combine(_outputFolder, tempName));
+                string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, tempName));
                 string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
                 int totalFrames = i * _exportFps / _fps;
 
