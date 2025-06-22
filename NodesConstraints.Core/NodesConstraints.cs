@@ -134,19 +134,27 @@ namespace NodesConstraints
             public int? uniqueLoadId;
             public bool destroyed = false;
             private VectorLine _debugLine;
+            private VectorLine DebugLine
+            {
+                get
+                {
+                    if (_debugLine == null)
+                    {
+                        _debugLine = VectorLine.SetLine(Color.white, Vector3.zero, Vector3.one);
+                        _debugLine.lineWidth = 3f;
+                        _debugLine.active = false;
+                    }
+                    return _debugLine;
+                }
+            }
 
             public Vector3 originalParentPosition;
             public Quaternion originalParentRotation;
             public Vector3 originalParentScale;
 
-            public Constraint()
-            {
-                _debugLine = VectorLine.SetLine(Color.white, Vector3.zero, Vector3.one);
-                _debugLine.lineWidth = 3f;
-                _debugLine.active = false;
-            }
+            public Constraint() { }
 
-            public Constraint(Constraint other) : this()
+            public Constraint(Constraint other)
             {
                 enabled = other.enabled;
                 parent = other.parent;
@@ -171,15 +179,15 @@ namespace NodesConstraints
 
             public void SetActiveDebugLines(bool active)
             {
-                _debugLine.active = active;
+                DebugLine.active = active;
             }
 
             public void UpdateDebugLines()
             {
-                _debugLine.points3[0] = parentTransform.position;
-                _debugLine.points3[1] = childTransform.position;
-                _debugLine.SetColor((position && rotation ? Color.magenta : (position ? Color.cyan : Color.green)));
-                _debugLine.Draw();
+                DebugLine.points3[0] = parentTransform.position;
+                DebugLine.points3[1] = childTransform.position;
+                DebugLine.SetColor((position && rotation ? Color.magenta : (position ? Color.cyan : Color.green)));
+                DebugLine.Draw();
             }
 
             public float GetInterpolationFactor(float damp)
@@ -286,7 +294,7 @@ namespace NodesConstraints
                 destroyed = true;
             }
 
-            public void CopyTo(Constraint constraint, bool onlyAttributes=true)
+            public void CopyTo(Constraint constraint, bool onlyAttributes = true)
             {
                 constraint.parentTransform = parentTransform;
                 constraint.childTransform = childTransform;
@@ -798,7 +806,7 @@ namespace NodesConstraints
                                                 constraint.resetOriginalScale
                                                );
 
-                            if( newConstraint != null )
+                            if (newConstraint != null)
                             {
                                 newConstraint.fixDynamicBone = constraint.fixDynamicBone;
                             }
