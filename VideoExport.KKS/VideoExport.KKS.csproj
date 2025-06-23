@@ -52,7 +52,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="KKS_Screencap, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ScreenshotManager.KoikatsuSunshine.18.2.0\lib\net46\KKS_Screencap.dll</HintPath>
+      <HintPath>..\packages\ScreenshotManager.KoikatsuSunshine.21.0.0\lib\net46\KKS_Screencap.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Sirenix.Serialization, Version=2.1.13.0, Culture=neutral, processorArchitecture=MSIL">

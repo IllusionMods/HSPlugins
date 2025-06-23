@@ -48,7 +48,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Screencap, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ScreenshotManager.Koikatu.18.2.0\lib\net35\Screencap.dll</HintPath>
+      <HintPath>..\packages\ScreenshotManager.Koikatu.21.0.0\lib\net35\Screencap.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />

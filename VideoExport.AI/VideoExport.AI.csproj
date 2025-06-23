@@ -40,7 +40,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="AI_Screencap, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ScreenshotManager.AIGirl.18.2.0\lib\net46\AI_Screencap.dll</HintPath>
+      <HintPath>..\packages\ScreenshotManager.AIGirl.21.0.0\lib\net46\AI_Screencap.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
