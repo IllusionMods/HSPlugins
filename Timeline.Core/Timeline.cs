@@ -3955,6 +3955,8 @@ namespace Timeline
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
         private void OnSceneLoad(string path)
         {
+            SceneInit();
+            
             PluginData data = ExtendedSave.GetSceneExtendedDataById(_extSaveKey);
             if (data == null)
                 return;
@@ -3995,6 +3997,15 @@ namespace Timeline
                 ExtendedSave.SetSceneExtendedDataById(_extSaveKey, data);
             }
         }
+
+        private void SceneInit() {
+            Stop(); 
+            _selectedKeyframes.Clear();
+            _interpolablesTree.Clear();            
+            _interpolables.Clear();            
+            _selectedOCI = null;
+            UpdateGrid();                               
+        }
 #endif
 
         private void SceneLoad(string path, XmlNode node)
@@ -4003,10 +4014,10 @@ namespace Timeline
                 return;
             this.ExecuteDelayed2(() =>
             {
-                _interpolables.Clear();
-                _interpolablesTree.Clear();
-                _selectedOCI = null;
-                _selectedKeyframes.Clear();
+                // _interpolables.Clear();
+                // _interpolablesTree.Clear();
+                // _selectedOCI = null;
+                // _selectedKeyframes.Clear();
 
                 List<KeyValuePair<int, ObjectCtrlInfo>> dic = new SortedDictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl).ToList();
                 SceneLoad(node, dic);
@@ -4470,6 +4481,17 @@ namespace Timeline
                 _newToOldKeys.Clear();
             }
         }
+        
+        [HarmonyPatch(typeof(Studio.Studio), "InitScene", typeof(bool))]
+        private static class Studio_InitScene_Patches
+        {
+            private static bool Prefix(object __instance, bool _close)
+            {
+                _self.SceneInit();
+                _self._ui.gameObject.SetActive(false);
+                return true;
+            }
+        }
 
         private static void OnGuideClick()
         {
@@ -4479,19 +4501,19 @@ namespace Timeline
             if (go == null || !Input.GetKey(KeyCode.LeftAlt))
                 return;
 
-            var interpolables = _self._interpolables.Where(i => i.Value.parameter is GuideObject g && g == go).Select( pair => pair.Value ).ToArray();
+            var interpolables = _self._interpolables.Where(i => i.Value.parameter is GuideObject g && g == go).Select(pair => pair.Value).ToArray();
 
             if (interpolables.Length <= 0)
                 return;
 
             int select = 0;
 
-            if(interpolables.Length > 1)
+            if (interpolables.Length > 1)
             {
                 //If there is a mode selected in the studio, select that interpolation.
                 string keyword = null;
 
-                switch(manager.mode)
+                switch (manager.mode)
                 {
                     case 0:
                         keyword = "Position";
@@ -4506,10 +4528,10 @@ namespace Timeline
                         break;
                 }
 
-                if( keyword != null )
+                if (keyword != null)
                 {
-                    for( int i = 0; i < interpolables.Length; ++i )
-                        if( interpolables[i].name.Contains(keyword) )
+                    for (int i = 0; i < interpolables.Length; ++i)
+                        if (interpolables[i].name.Contains(keyword))
                         {
                             select = i;
                             break;
