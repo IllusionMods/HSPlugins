@@ -4501,7 +4501,7 @@ namespace Timeline
             if (go == null || !Input.GetKey(KeyCode.LeftAlt))
                 return;
 
-            var interpolables = _self._interpolables.Where(i => i.Value.parameter is GuideObject g && g == go).Select(pair => pair.Value).ToArray();
+            var interpolables = _self._interpolables.Where(i => i.Value.parameter is GuideObject g && g == go).Select( pair => pair.Value ).ToArray();
 
             if (interpolables.Length <= 0)
                 return;
@@ -4528,10 +4528,10 @@ namespace Timeline
                         break;
                 }
 
-                if(keyword != null)
+                if( keyword != null )
                 {
-                    for(int i = 0; i < interpolables.Length; ++i)
-                        if(interpolables[i].name.Contains(keyword))
+                    for( int i = 0; i < interpolables.Length; ++i )
+                        if( interpolables[i].name.Contains(keyword) )
                         {
                             select = i;
                             break;
