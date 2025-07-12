@@ -4508,12 +4508,12 @@ namespace Timeline
 
             int select = 0;
 
-            if (interpolables.Length > 1)
+            if(interpolables.Length > 1)
             {
                 //If there is a mode selected in the studio, select that interpolation.
                 string keyword = null;
 
-                switch (manager.mode)
+                switch(manager.mode)
                 {
                     case 0:
                         keyword = "Position";
@@ -4528,10 +4528,10 @@ namespace Timeline
                         break;
                 }
 
-                if (keyword != null)
+                if(keyword != null)
                 {
-                    for (int i = 0; i < interpolables.Length; ++i)
-                        if (interpolables[i].name.Contains(keyword))
+                    for(int i = 0; i < interpolables.Length; ++i)
+                        if(interpolables[i].name.Contains(keyword))
                         {
                             select = i;
                             break;
