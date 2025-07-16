@@ -367,8 +367,11 @@ namespace HSPE
 
         protected override void OnDestroy()
         {
-            _body.solver.spineStiffness = _cachedSpineStiffness;
-            _body.solver.pullBodyVertical = _cachedPullBodyVertical;
+            if (_body != null && _body.solver != null)
+            {
+                _body.solver.spineStiffness = _cachedSpineStiffness;
+                _body.solver.pullBodyVertical = _cachedPullBodyVertical;
+            }
             IKSolver_Patches.onPostUpdate -= IKSolverOnPostUpdate;
             IKExecutionOrder_Patches.onPostLateUpdate -= IKExecutionOrderOnPostLateUpdate;
             FKCtrl_Patches.onPreLateUpdate -= FKCtrlOnPreLateUpdate;
