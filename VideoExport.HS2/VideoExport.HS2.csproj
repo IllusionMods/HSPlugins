@@ -48,7 +48,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="HS2_Screencap, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ScreenshotManager.HoneySelect2.18.2.0\lib\net46\HS2_Screencap.dll</HintPath>
+      <HintPath>..\packages\ScreenshotManager.HoneySelect2.21.0.0\lib\net46\HS2_Screencap.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="IL, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">

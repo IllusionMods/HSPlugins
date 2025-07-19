@@ -135,7 +135,7 @@ namespace VideoExport.ScreenshotPlugins
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.ImageFormat), GUILayout.ExpandWidth(false));
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.ImageFormat), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.ImageFormatTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                 this._imageFormat = (VideoExport.ImgFormat)GUILayout.SelectionGrid((int)this._imageFormat, this._imageFormatNames, this._imageFormatNames.Length);
             }
             GUILayout.EndHorizontal();

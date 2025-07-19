@@ -15,15 +15,9 @@ namespace VideoExport.Extensions
 
         private enum Preset
         {
-            VerySlow,
             Slower,
-            Slow,
             Medium,
-            Fast,
             Faster,
-            VeryFast,
-            SuperFast,
-            UltraFast
         }
 
         private readonly string[] _codecNames = {"H.264", "H.265"};
@@ -42,12 +36,14 @@ namespace VideoExport.Extensions
             this._quality = VideoExport._configFile.AddInt("mp4Quality", 18, true);
             this._hwAccel = VideoExport._configFile.AddBool("mp4HwAccel", false, true);
             this._preset = (Preset)VideoExport._configFile.AddInt("mp4Preset", (int)Preset.Slower, true);
+            if ((int)this._preset >= Enum.GetValues(typeof(Preset)).Length)
+                this._preset = Preset.Slower;
+
             this._presetCLIOptions = Enum.GetNames(typeof(Preset)).Select(n => n.ToLowerInvariant()).ToArray();
         }
 
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
-            this._progress = 1;
             string pixFmt;
             switch (bitDepth)
             {
@@ -119,15 +115,9 @@ namespace VideoExport.Extensions
             base.UpdateLanguage();
             this._presetNames = new[]
             {
-                VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4PresetVerySlow),
                 VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4PresetSlower),
-                VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4PresetSlow),
                 VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4PresetMedium),
-                VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4PresetFast),
                 VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4PresetFaster),
-                VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4PresetVeryFast),
-                VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4PresetSuperFast),
-                VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4PresetUltraFast)
             };
         }
 
@@ -141,27 +131,11 @@ namespace VideoExport.Extensions
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4Codec), GUILayout.ExpandWidth(false));
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.Codec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4CodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                 this._codec = (Codec)GUILayout.SelectionGrid((int)this._codec, this._codecNames, 2);
             }
             GUILayout.EndHorizontal();
-            this._hwAccel = GUILayout.Toggle(this._hwAccel, VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelCodec), GUILayout.ExpandWidth(false));
-
-            if (this._codec == Codec.H265)
-            {
-                Color c = GUI.color;
-                GUI.color = Color.yellow;
-                GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.H265Warning));
-                GUI.color = c;
-            }
-
-            if (this._hwAccel)
-            {
-                Color c = GUI.color;
-                GUI.color = Color.yellow;
-                GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelWarning));
-                GUI.color = c;
-            }
+            this._hwAccel = GUILayout.Toggle(this._hwAccel, new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelCodec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelCodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
 
             GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4Quality));
             GUILayout.BeginHorizontal();

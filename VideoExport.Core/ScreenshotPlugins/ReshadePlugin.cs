@@ -238,15 +238,15 @@ namespace VideoExport.ScreenshotPlugins
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.ImageFormat), GUILayout.ExpandWidth(false));
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.ImageFormat), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.ImageFormatTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                 this._imageFormat = (VideoExport.ImgFormat)GUILayout.SelectionGrid((int)this._imageFormat, this._imageFormatNames, this._imageFormatNames.Length);
             }
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             {
-                this._autoHideUI = GUILayout.Toggle(_autoHideUI, "Auto Hide UI");
-                this._removeAlphaChannel = GUILayout.Toggle(_removeAlphaChannel, "Remove Alpha Channel");
+                this._autoHideUI = GUILayout.Toggle(_autoHideUI, VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.AutoHideUI));
+                this._removeAlphaChannel = GUILayout.Toggle(_removeAlphaChannel, new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.RemoveAlphaChannel), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.RemoveAlphaChannelTooltip).Replace("\\n", "\n")));
             }
             GUILayout.EndHorizontal();
         }

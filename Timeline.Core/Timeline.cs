@@ -44,10 +44,11 @@ namespace Timeline
     [BepInPlugin(GUID, Name, Version)]
 #if KOIKATSU || SUNSHINE
     [BepInProcess("CharaStudio")]
+    [BepInDependency(Sideloader.Sideloader.GUID, Sideloader.Sideloader.Version)]
 #elif AISHOUJO || HONEYSELECT2
     [BepInProcess("StudioNEOV2")]
 #endif
-    [BepInDependency("com.bepis.bepinex.extendedsave")]
+    [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #endif
     public class Timeline : GenericPlugin
 #if IPA

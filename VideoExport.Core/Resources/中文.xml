@@ -1,9 +1,7 @@
 <root>
-  <string key="ScreenshotPlugin" value="屏幕截图插件" />
   <string key="CurrentSize" value="当前尺寸" />
   <string key="Framerate" value="帧率" />
   <string key="ExportFramerate" value="导出帧率" />
-  <string key="AutoGenerateVideo" value="自动生成视频" />
   <string key="AutoDeleteImages" value="自动删除图片" />
   <string key="LimitBy" value="限制" />
   <string key="LimitByFrames" value="帧率" />
@@ -13,7 +11,6 @@
   <string key="LimitByPrewarmLoopCount" value="预热循环计数" />
   <string key="LimitByLoopsToRecord" value="循环记录" />
   <string key="LimitByLimitCount" value="循环次数" />
-  <string key="Estimated" value="预测" />
   <string key="Seconds" value="秒" />
   <string key="Frames" value="帧" />
   <string key="Resize" value="调整尺寸" />
@@ -22,9 +19,6 @@
   <string key="DBUpdateMode" value="动态骨骼更新模式" />
   <string key="DBDefault" value="默认" />
   <string key="DBEveryFrame" value="每帧" />
-  <string key="Prefix" value="前缀" />
-  <string key="Suffix" value="后缀" />
-  <string key="ExampleResult" value="比如" />
   <string key="EmptyScene" value="比如" />
   <string key="CloseStudio" value="完成后退出工作室" />
   <string key="ParallelScreenshotEncoding" value="并行编码（测试版" />
@@ -59,34 +53,53 @@
   <string key="Rotation180" value="旋转180°" />
   <string key="Rotation270" value="旋转-90°" />
   <string key="BitDepthError" value="当前视频格式无法支持此位深效果" />
-  <string key="AVIWarning" value="仅在希望在老电脑上播放此视频时使用本选项，否则优先使用MP4/WEBM视频格式..." />
-  <string key="AVIQuality" value="清晰度 ( 越低越好 ) " />
-  <string key="GIFWarning" value="由于仅支持PNG编码方案，建议在使用GIF格式时缩小图像尺寸，由于GIF图片会有失真，建议使用MP4/WEBM视频格式..." />
-  <string key="GIFError" value="GIF与PNG只能二选其一" />
-  <string key="MP4Codec" value="编码器" />
-  <string key="H265Warning" value="主流的视频编码器: H.265 拥有更好的压缩比，与H.264视频质量无异，但无法支持浏览器WEB前端嵌入使用
-          如果你需要使用浏览器播放此视频，建议不要使用此编码" />
+  <string key="GIFError" value="Gifski 工具仅兼容 PNG 图像。" />
+  <string key="Codec" value="编码器" />
   <string key="HwAccelCodec" value="使用 GPU 加速编解码器" />
-  <string key="HwAccelWarning" value="GPU 加速编解码器可产生更大的文件大小。" />
-  <string key="MP4Quality" value="视频质量 ( 越低越好，当参数值为18的时候，视觉上与无损无异 )" />
-  <string key="MP4Preset" value="编码方案 ( 较慢: 更高的视频质量/更理想的文件大小，中: 折中方案 )" />
-  <string key="MP4PresetVerySlow" value="最慢" />
-  <string key="MP4PresetSlower" value="较慢" />
-  <string key="MP4PresetSlow" value="慢" />
-  <string key="MP4PresetMedium" value="中" />
-  <string key="MP4PresetFast" value="快" />
-  <string key="MP4PresetFaster" value="快" />
-  <string key="MP4PresetVeryFast" value="较快" />
-  <string key="MP4PresetSuperFast" value="极快" />
-  <string key="MP4PresetUltraFast" value="最快" />
+  <string key="MP4Preset" value="编码预设" />
+  <string key="MP4PresetSlower" value="质量" />
+  <string key="MP4PresetMedium" value="平衡" />
+  <string key="MP4PresetFaster" value="速度" />
   <string key="WEBMCodec" value="编码器" />
-  <string key="VP9Warning" value="编码器: VP9 比VP8提供更高压缩比与更好饿的视频质量，但是部分手机可能无法支持" />
-  <string key="VP8Quality" value="质量 ( 越低越好，建议值: 10 使用VP8编码器 )" />
-  <string key="VP9Quality" value="质量 ( 越低越好，建议值: 15-35 使用VP9编码器 )" />
-  <string key="WEBMDeadline" value="编码时间戳 ( 最好: 时间最长，中等: 比较理想的编码时间，实时: 时间最快 )" />
-  <string key="WEBMDeadlineBest" value="最好" />
-  <string key="WEBMDeadlineGood" value="中等" />
-  <string key="WEBMDeadlineRealtime" value="实时" />
-  <string key="MOVCodec" value="编码器" />
-  <string key="MOVProResWarning" value="生成用于视频编辑的非常大的文件。" />
+  <string key="MP4Quality" value="质量（数值越低越好，推荐使用 18）" />
+  <string key="VP8Quality" value="质量（数值越低越好，推荐使用 10）" />
+  <string key="VP9Quality" value="质量（数值越低越好，推荐使用 30）" />
+  <string key="WEBPQuality" value="质量（数值越高越好，推荐使用 75）" />
+  <string key="WEBMDeadline" value="编码预设" />
+  <string key="WEBMDeadlineBest" value="质量" />
+  <string key="WEBMDeadlineGood" value="平衡" />
+  <string key="WEBMDeadlineRealtime" value="速度" />
+  <string key="ShowTooltips" value="显示工具提示" />
+  <string key="CaptureSettingsHeading" value="捕捉设置" />
+  <string key="VideoSettingsHeading" value="视频设置" />
+  <string key="OtherSettingsHeading" value="其他设置" />
+  <string key="ScreenshotTool" value="截图工具" />
+  <string key="Extension" value="扩展名" />
+  <string key="GIFTool" value="GIF 工具" />
+  <string key="GIFMaxColors" value="最大颜色数" />
+  <string key="GIFDithering" value="抖动" />
+  <string key="CreateVideo" value="创建视频" />
+  <string key="AutoHideUI" value="自动隐藏界面" />
+  <string key="RemoveAlphaChannel" value="移除透明通道" />
+  <string key="FramerateTooltip" value="游戏捕捉的帧率。" />
+  <string key="ExportFramerateTooltip" value="导出视频的帧率。" />
+  <string key="DBUpdateModeTooltip" value="DynamicBone 物理更新的频率。默认是 60 次/秒。" />
+  <string key="ScreenshotToolTooltip" value="用于截图的工具：\n[截图管理器] 使用 Screencap 插件（遵循其设置）\n[内置] 使用 VideoExport 内部截图实现\n[Reshade] 使用 KKReshade 插件捕捉 Reshade 效果" />
+  <string key="LimitByTooltip" value="录制限制方式：\n[帧数] 按帧数录制\n[秒数] 按时间录制\n[动画] 按选定角色的内置动画时长录制\n[时间轴] 按时间轴的长度录制" />
+  <string key="LimitByPrewarmLoopCountTooltip" value="录制前进行预热循环。\n用于对齐物理并录制循环动画。" />
+  <string key="LimitByLoopsToRecordTooltip" value="录制时间轴/动画的循环次数。" />
+  <string key="LimitByLimitCountTooltip" value="按所选帧数/秒数录制。" />
+  <string key="RealignTimelineTooltip" value="将时间轴设为 00:00 并在录制前等待物理对齐。" />
+  <string key="ParallelEncodingTooltip" value="性能设置。如果录制失败，请禁用此选项。" />
+  <string key="CaptureModeTooltip" value="[正常] 推荐。渲染相机以保证帧是最新的。\n[即时] 更快，假设相机已被渲染。" />
+  <string key="ImageFormatTooltip" value="[BMP] 无损，编码速度快，占用空间大\n[PNG] 无损，编码较慢，占用空间中等\n[JPG] 有损，编码快，占用空间小\n[EXR] 无损，编码非常慢，占用空间大，支持 HDR" />
+  <string key="ExtensionTooltip" value="[MP4] 通用且广泛支持的视频格式\n[WEBM] 针对网页优化的视频格式\n[GIF] 旧的短动画图像格式\n[MOV] 专业剪辑使用的视频格式（占用空间较大）\n[WEBP] 针对网页优化的图像格式（支持动画）\n[AVIF] 基于AV1编码的现代图像格式（支持动画）" />
+  <string key="RemoveAlphaChannelTooltip" value="某些 Reshade 效果与透明通道不兼容。\n如果 PNG 截图是全透明的，请启用此选项。\n还能减小 PNG 文件大小。" />
+  <string key="MP4CodecTooltip" value="[H.264] 广泛使用和支持。推荐使用。\n[H.265] 更高效，但兼容性略差。" />
+  <string key="WEBMCodecTooltip" value="[VP8] 广泛使用和支持。推荐使用。\n[VP9] 更高效，但兼容性较差。" />
+  <string key="MOVCodecTooltip" value="[ProRes4444] 生成用于专业视频编辑的超大文件。" />
+  <string key="AVIFCodecTooltip" value="[Libaom-av1] 广泛支持，无损画质，编码较慢。\n[Libsvt-av1] 良好画质（有损），编码快速。" />
+  <string key="HwAccelCodecTooltip" value="使用 GPU 加速编码快速生成视频。\n压缩效率较低，同质量下文件更大。" />
+  <string key="GIFToolTooltip" value="[FFmpeg] 质量好，支持广泛。文件稍大。\n         全局调色板，总共256色。抖动可选。\n[Gifsky] 最高质量，更平滑，但可能闪烁。\n         局部调色板，每帧256色。抖动必需。" />
+  <string key="GIFDitheringTooltip" value="模拟有限调色板外的颜色：\n[none] 无抖动。推荐默认使用，直到视觉需要。\n[bayer] 产生明显的抖动图案/美感。\n[floyd_steinberg] 产生平滑渐变且噪点较低。" />
 </root>

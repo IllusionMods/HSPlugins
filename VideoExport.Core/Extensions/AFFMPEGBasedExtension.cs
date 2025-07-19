@@ -29,7 +29,7 @@ namespace VideoExport.Extensions
         private StringBuilder _errorBuilder = new StringBuilder();
 
         public virtual int progress { get { return this._progress; } }
-        public bool canProcessStandardOutput { get { return true; } }
+        public virtual bool canProcessStandardOutput { get { return true; } }
         public bool canProcessStandardError { get { return true; } }
 
         static AFFMPEGBasedExtension()
@@ -70,6 +70,16 @@ namespace VideoExport.Extensions
         }
 
         public abstract string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName);
+
+        public string GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        {
+            return GetArguments(framesFolder, "", "", inputExtension, bitDepth, fps, transparency, resize, resizeX, resizeY, fileName);
+        }
+
+        public virtual void ResetProgress()
+        {
+            this._progress = 1;
+        }
 
         public virtual void ProcessStandardOutput(char c)
         {

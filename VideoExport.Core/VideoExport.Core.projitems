@@ -11,20 +11,20 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\AFFMPEGBasedExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\AVIExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\AVIFExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\GIFExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MOVExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MP4Extension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBMExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBPExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ParallelScreenshotEncoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ReshadePlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Styles.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TextureEncoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\Win32Plugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\Builtin.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\HoneyShot.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\IScreenshotPlugin.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\PlayShot24ZHNeo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ScreencapPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VideoExport.cs" />
   </ItemGroup>

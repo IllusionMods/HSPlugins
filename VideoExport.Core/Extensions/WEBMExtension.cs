@@ -40,7 +40,6 @@ namespace VideoExport.Extensions
 
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
-            this._progress = 1;
             string pixFmt;
             switch (bitDepth)
             {
@@ -81,18 +80,10 @@ namespace VideoExport.Extensions
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.WEBMCodec), GUILayout.ExpandWidth(false));
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.Codec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.WEBMCodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                 this._codec = (Codec)GUILayout.SelectionGrid((int)this._codec, this._codecNames, 2);
             }
             GUILayout.EndHorizontal();
-
-            if (this._codec == Codec.VP9)
-            {
-                Color c = GUI.color;
-                GUI.color = Color.yellow;
-                GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.VP9Warning));
-                GUI.color = c;
-            }
 
             switch (this._codec)
             {
@@ -118,7 +109,7 @@ namespace VideoExport.Extensions
 
         public override void SaveParams()
         {
-            //_configFile.SetInt("webmCodec", (int)this._codec);
+            VideoExport._configFile.SetInt("webmCodec", (int)this._codec);
             VideoExport._configFile.SetInt("webmQuality", this._quality);
             VideoExport._configFile.SetInt("webmDeadline", (int)this._deadline);
             base.SaveParams();
