@@ -3955,30 +3955,26 @@ namespace Timeline
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
         private void OnSceneLoad(string path)
         {
-            SceneInit();
-            
-            PluginData data = ExtendedSave.GetSceneExtendedDataById(_extSaveKey);
-            if (data == null)
-                return;
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml((string)data.data["sceneInfo"]);
-            XmlNode node = doc.FirstChild;
-            if (node == null)
-                return;
+            var node = GetSceneInfo() ?? new XmlDocument().CreateElement("root");
             SceneLoad(path, node);
         }
-
+            
         private void OnSceneImport(string path)
         {
-            PluginData data = ExtendedSave.GetSceneExtendedDataById(_extSaveKey);
-            if (data == null)
-                return;
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml((string)data.data["sceneInfo"]);
-            XmlNode node = doc.FirstChild;
+            var node = GetSceneInfo();
             if (node == null)
                 return;
             SceneImport(path, node);
+        }
+
+        private static XmlNode GetSceneInfo()
+        {
+            PluginData data = ExtendedSave.GetSceneExtendedDataById(_extSaveKey);
+            if (data == null)
+                return null;
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml((string)data.data["sceneInfo"]);
+            return doc.FirstChild;
         }
 
         private void OnSceneSave(string path)
@@ -3997,15 +3993,6 @@ namespace Timeline
                 ExtendedSave.SetSceneExtendedDataById(_extSaveKey, data);
             }
         }
-
-        private void SceneInit() {
-            Stop(); 
-            _selectedKeyframes.Clear();
-            _interpolablesTree.Clear();            
-            _interpolables.Clear();            
-            _selectedOCI = null;
-            UpdateGrid();                               
-        }
 #endif
 
         private void SceneLoad(string path, XmlNode node)
@@ -4014,10 +4001,10 @@ namespace Timeline
                 return;
             this.ExecuteDelayed2(() =>
             {
-                // _interpolables.Clear();
-                // _interpolablesTree.Clear();
-                // _selectedOCI = null;
-                // _selectedKeyframes.Clear();
+                _interpolables.Clear();
+                _interpolablesTree.Clear();
+                _selectedOCI = null;
+                _selectedKeyframes.Clear();
 
                 List<KeyValuePair<int, ObjectCtrlInfo>> dic = new SortedDictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl).ToList();
                 SceneLoad(node, dic);
@@ -4485,11 +4472,9 @@ namespace Timeline
         [HarmonyPatch(typeof(Studio.Studio), "InitScene", typeof(bool))]
         private static class Studio_InitScene_Patches
         {
-            private static bool Prefix(object __instance, bool _close)
+            private static void Postfix()
             {
-                _self.SceneInit();
-                _self._ui.gameObject.SetActive(false);
-                return true;
+                _self.SceneLoad(null, new XmlDocument().CreateElement("root"));
             }
         }
 
