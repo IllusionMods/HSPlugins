@@ -645,7 +645,6 @@ namespace HSPE.AMModules
         {
             if (_target.type != GenericOCITarget.Type.Item)
             {
-                _imguiBackground.gameObject.SetActive(false);
                 return;
             }
 
