@@ -371,7 +371,7 @@ namespace HSPE
             {
                 _body.solver.spineStiffness = _cachedSpineStiffness;
                 _body.solver.pullBodyVertical = _cachedPullBodyVertical;
-            }                        
+            }
             IKSolver_Patches.onPostUpdate -= IKSolverOnPostUpdate;
             IKExecutionOrder_Patches.onPostLateUpdate -= IKExecutionOrderOnPostLateUpdate;
             FKCtrl_Patches.onPreLateUpdate -= FKCtrlOnPreLateUpdate;
