@@ -3955,28 +3955,26 @@ namespace Timeline
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
         private void OnSceneLoad(string path)
         {
-            PluginData data = ExtendedSave.GetSceneExtendedDataById(_extSaveKey);
-            if (data == null)
-                return;
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml((string)data.data["sceneInfo"]);
-            XmlNode node = doc.FirstChild;
-            if (node == null)
-                return;
+            var node = GetSceneInfo() ?? new XmlDocument().CreateElement("root");
             SceneLoad(path, node);
         }
-
+            
         private void OnSceneImport(string path)
         {
-            PluginData data = ExtendedSave.GetSceneExtendedDataById(_extSaveKey);
-            if (data == null)
-                return;
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml((string)data.data["sceneInfo"]);
-            XmlNode node = doc.FirstChild;
+            var node = GetSceneInfo();
             if (node == null)
                 return;
             SceneImport(path, node);
+        }
+
+        private static XmlNode GetSceneInfo()
+        {
+            PluginData data = ExtendedSave.GetSceneExtendedDataById(_extSaveKey);
+            if (data == null)
+                return null;
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml((string)data.data["sceneInfo"]);
+            return doc.FirstChild;
         }
 
         private void OnSceneSave(string path)
@@ -4468,6 +4466,15 @@ namespace Timeline
             private static void Prefix()
             {
                 _newToOldKeys.Clear();
+            }
+        }
+        
+        [HarmonyPatch(typeof(Studio.Studio), "InitScene", typeof(bool))]
+        private static class Studio_InitScene_Patches
+        {
+            private static void Postfix()
+            {
+                _self.SceneLoad(null, new XmlDocument().CreateElement("root"));
             }
         }
 
