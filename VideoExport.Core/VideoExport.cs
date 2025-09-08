@@ -338,11 +338,11 @@ namespace VideoExport
 
             this.ExecuteDelayed(() =>
             {
-                AddScreenshotPlugin(new ScreencapPlugin(), harmony);
-                AddScreenshotPlugin(new Builtin(), harmony);
-                AddScreenshotPlugin(new ReshadePlugin(), harmony);
+                AddScreenshotPlugin<ScreencapPlugin>(harmony);
+                AddScreenshotPlugin<Builtin>(harmony);
+                AddScreenshotPlugin<ReshadePlugin>(harmony);
 #if !KOIKATSU
-                AddScreenshotPlugin(new Win32Plugin(), harmony);
+                AddScreenshotPlugin<Win32Plugin>(harmony);
 #endif
 
                 if (_screenshotPlugins.Count == 0)
@@ -350,7 +350,7 @@ namespace VideoExport
 
                 SetLanguage(_language.Value);
 
-                if (_selectedPlugin >= _screenshotPlugins.Count)
+                if (_selectedPlugin < 0 || _selectedPlugin >= _screenshotPlugins.Count)
                 {
                     // Panic reset: out of bounds if user has Reshade selected and uninstalls Reshade
                     _selectedPlugin = 0;
@@ -473,19 +473,20 @@ namespace VideoExport
 
         #region Private Methods
 #if IPA
-        private void AddScreenshotPlugin(IScreenshotPlugin plugin, HarmonyInstance harmony)
+        private void AddScreenshotPlugin<T>(Harmony harmony) where T : IScreenshotPlugin, new()
 #elif BEPINEX
-        private void AddScreenshotPlugin(IScreenshotPlugin plugin, Harmony harmony)
+        private void AddScreenshotPlugin<T>(Harmony harmony) where T : IScreenshotPlugin, new()
 #endif
         {
             try
             {
+                var plugin = new T();
                 if (plugin.Init(harmony))
                     _screenshotPlugins.Add(plugin);
             }
             catch (Exception e)
             {
-                Logger.LogError("Couldn't add screenshot plugin " + plugin + ".\n" + e);
+                Logger.LogError("Couldn't add screenshot plugin " + typeof(T).FullName + ".\n" + e);
             }
 
         }
@@ -926,7 +927,15 @@ namespace VideoExport
             Styles.BeginVESkin();
 
             GUILayout.BeginVertical();
+            if (_screenshotPlugins.Count == 0)
             {
+                GUILayout.Label("No screenshot plugins available. Update BepisPlugins and check log for related errors.");
+            }
+            else
+            {
+                if (_selectedPlugin < 0 || _selectedPlugin >= _screenshotPlugins.Count)
+                    _selectedPlugin = 0;
+
                 WindowCaptureSection();
                 GUILayout.Space(Styles.SectionSpacing);
                 WindowVideoSection();
@@ -1175,7 +1184,7 @@ namespace VideoExport
                     break;
                 }
 
-                if(i % exportInterval == 0 )
+                if (i % exportInterval == 0)
                 {
                     string savePath = Path.Combine(framesFolder, $"{i / exportInterval}.{imageExtension}");
 
@@ -1352,7 +1361,8 @@ namespace VideoExport
 
             if (redirectStandardOutput)
             {
-                proc.OutputDataReceived += (sender, e) => {
+                proc.OutputDataReceived += (sender, e) =>
+                {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
                         foreach (char c in e.Data)
