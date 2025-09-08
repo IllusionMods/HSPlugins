@@ -87,6 +87,25 @@ namespace NodesConstraints
             FK
         }
 
+
+        private struct SmoothNodeConData<T>
+        {
+            public float connectionTime;
+            public float disConnectionTime;
+            public float connectionCurrentTime;
+            public float disConnectionCurrentTime;
+            public T smoothStartValue;
+
+            public SmoothNodeConData(float _connectionsTime, float _disconnectionsTime)
+            {
+                connectionTime = _connectionsTime;
+                disConnectionTime = _disconnectionsTime;
+                connectionCurrentTime = 0;
+                disConnectionCurrentTime = 0;
+                smoothStartValue = default(T);
+            }
+        }
+
         private class Constraint
         {
             public bool enabled = true;
@@ -120,6 +139,10 @@ namespace NodesConstraints
             public bool resetOriginalPosition = true;
             public bool resetOriginalRotation = true;
             public bool resetOriginalScale = true;
+
+            public SmoothNodeConData<Vector3> smoothPos = new SmoothNodeConData<Vector3>(0.0f, 0.0f);
+            public SmoothNodeConData<Quaternion> smoothRot = new SmoothNodeConData<Quaternion>(0.0f, 0.0f);
+            public SmoothNodeConData<Vector3> smoothScale = new SmoothNodeConData<Vector3>(0.0f, 0.0f);
 
             public Vector3 positionOffset = Vector3.zero;
             public Quaternion rotationOffset = Quaternion.identity;
@@ -167,6 +190,9 @@ namespace NodesConstraints
                 originalParentPosition = other.parentTransform.position;
                 originalParentRotation = other.parentTransform.rotation;
                 originalParentScale = other.parentTransform.lossyScale;
+                smoothPos = other.smoothPos;
+                smoothRot = other.smoothRot;
+                smoothScale = other.smoothScale;
             }
 
             public void SetActiveDebugLines(bool active)
@@ -192,6 +218,181 @@ namespace NodesConstraints
                 return (parentTransform.position - originalParentPosition);
             }
 
+            public void SmoothDisconnectUpdate()
+            {
+                if (position && smoothPos.disConnectionTime > 0.0f && smoothPos.disConnectionCurrentTime > 0.0f)
+                {
+                    Vector3 targetPos;
+                    if (mirrorPosition)
+                        targetPos = -GetPositionMovement() * (positionChangeFactor + 1);
+                    else
+                        targetPos = GetPositionMovement() * (positionChangeFactor - 1);
+                    targetPos += positionOffset;
+
+                    targetPos = parentTransform.TransformPoint(targetPos);
+
+                    if (!positionLocks.x)
+                        targetPos.x = childTransform.position.x;
+                    if (!positionLocks.y)
+                        targetPos.y = childTransform.position.y;
+                    if (!positionLocks.z)
+                        targetPos.z = childTransform.position.z;
+
+                    smoothPos.disConnectionCurrentTime -= _deltaTime;
+
+                    if (smoothPos.disConnectionCurrentTime < 0)
+                    {
+                        smoothPos.disConnectionCurrentTime = 0;
+                    }
+
+                    if (smoothPos.disConnectionCurrentTime > smoothPos.disConnectionTime)
+                    {
+                        smoothPos.disConnectionCurrentTime = smoothPos.disConnectionTime;
+                    }
+
+                    float t = Mathf.Clamp01(1.0f - smoothPos.disConnectionCurrentTime / smoothPos.disConnectionTime);
+                    targetPos = Vector3.Lerp(targetPos, childTransform.position, t);
+
+                    childTransform.position = targetPos;
+
+                    if (child != null)
+                        child.changeAmount.pos = child.transformTarget.localPosition;
+                }
+
+                if (rotation && smoothRot.disConnectionTime > 0.0f && smoothRot.disConnectionCurrentTime > 0.0f)
+                {
+                    Quaternion targetRot;
+
+                    if (lookAt)
+                    {
+                        if (mirrorRotation)
+                        {
+                            var lookAt = Quaternion.LookRotation(parentTransform.position - childTransform.position);
+                            targetRot = new Quaternion(lookAt.x * -1f, lookAt.y * -1f, lookAt.z, lookAt.w);
+                        }
+                        else
+                            targetRot = Quaternion.LookRotation(parentTransform.position - childTransform.position);
+                    }
+                    else if (mirrorRotation)
+                        targetRot = originalParentRotation * Quaternion.Inverse(GetRotationChange());
+                    else
+                        targetRot = originalParentRotation * GetRotationChange();
+                    targetRot *= rotationOffset;
+                    targetRot = Quaternion.SlerpUnclamped(Quaternion.identity, targetRot, rotationChangeFactor);
+
+                    smoothRot.disConnectionCurrentTime -= _deltaTime;
+
+                    if (smoothRot.disConnectionCurrentTime < 0)
+                    {
+                        smoothRot.disConnectionCurrentTime = 0;
+                    }
+
+                    if (smoothRot.disConnectionCurrentTime > smoothRot.disConnectionTime)
+                    {
+                        smoothRot.disConnectionCurrentTime = smoothRot.disConnectionTime;
+                    }
+
+                    float t = Mathf.Clamp01(1.0f - smoothRot.disConnectionCurrentTime / smoothRot.disConnectionTime);
+                    targetRot = Quaternion.Slerp(targetRot, childTransform.rotation, t);
+
+                    targetRot = Quaternion.Euler(
+                            rotationLocks.x ? targetRot.eulerAngles.x : childTransform.rotation.eulerAngles.x,
+                            rotationLocks.y ? targetRot.eulerAngles.y : childTransform.rotation.eulerAngles.y,
+                            rotationLocks.z ? targetRot.eulerAngles.z : childTransform.rotation.eulerAngles.z
+                        );
+
+                    childTransform.rotation = targetRot;
+
+                    if (child != null)
+                        child.changeAmount.rot = child.transformTarget.localEulerAngles;
+                }
+
+                if (scale && smoothScale.disConnectionTime > 0.0f && smoothScale.disConnectionCurrentTime > 0.0f)
+                {
+                    Vector3 targetScale = new Vector3(
+                    (originalParentScale.x * scaleOffset.x / childTransform.parent.lossyScale.x) * Mathf.Pow(parentTransform.lossyScale.x / originalParentScale.x, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
+                    (originalParentScale.y * scaleOffset.y / childTransform.parent.lossyScale.y) * Mathf.Pow(parentTransform.lossyScale.y / originalParentScale.y, mirrorScale ? -scaleChangeFactor : scaleChangeFactor),
+                    (originalParentScale.z * scaleOffset.z / childTransform.parent.lossyScale.z) * Mathf.Pow(parentTransform.lossyScale.z / originalParentScale.z, mirrorScale ? -scaleChangeFactor : scaleChangeFactor));
+
+                    if (!scaleLocks.x)
+                        targetScale.x = childTransform.localScale.x;
+                    if (!scaleLocks.y)
+                        targetScale.y = childTransform.localScale.y;
+                    if (!scaleLocks.z)
+                        targetScale.z = childTransform.localScale.z;
+
+                    smoothScale.disConnectionCurrentTime -= _deltaTime;
+
+                    if (smoothScale.disConnectionCurrentTime < 0)
+                    {
+                        smoothScale.disConnectionCurrentTime = 0;
+                    }
+
+                    if (smoothScale.disConnectionCurrentTime > smoothScale.disConnectionTime)
+                    {
+                        smoothScale.disConnectionCurrentTime = smoothScale.disConnectionTime;
+                    }
+
+                    float t = Mathf.Clamp01(1.0f - smoothScale.disConnectionCurrentTime / smoothScale.disConnectionTime);
+                    targetScale = Vector3.Lerp(targetScale, childTransform.localScale, t);
+
+                    if (scaleDamp > 0)
+                        targetScale = Vector3.Lerp(childTransform.localScale, targetScale, GetInterpolationFactor(scaleDamp));
+                    childTransform.localScale = targetScale;
+
+                    if (child != null)
+                        child.changeAmount.scale = child.transformTarget.localScale;
+                }
+            }
+
+            public void UpdateSmoothConnectTimes()
+            {
+                if (smoothPos.connectionTime > 0.0f && smoothPos.connectionCurrentTime > 0.0f)
+                {
+                    if (smoothPos.connectionCurrentTime > smoothPos.connectionTime)
+                    {
+                        smoothPos.connectionCurrentTime = smoothPos.connectionTime;
+                    }
+
+                    smoothPos.connectionCurrentTime -= _deltaTime;
+
+                    if (smoothPos.connectionCurrentTime < 0)
+                    {
+                        smoothPos.connectionCurrentTime = 0;
+                    }
+                }
+
+                if (smoothRot.connectionTime > 0.0f && smoothRot.connectionCurrentTime > 0.0f)
+                {
+                    if (smoothRot.connectionCurrentTime > smoothRot.connectionTime)
+                    {
+                        smoothRot.connectionCurrentTime = smoothRot.connectionTime;
+                    }
+                    
+                    smoothRot.connectionCurrentTime -= _deltaTime;
+                    
+                    if (smoothRot.connectionCurrentTime < 0)
+                    {
+                        smoothRot.connectionCurrentTime = 0;
+                    }
+                }
+
+                if (smoothScale.connectionTime > 0.0f && smoothScale.connectionCurrentTime > 0.0f)
+                {
+                    if (smoothScale.connectionCurrentTime > smoothScale.connectionTime)
+                    {
+                        smoothScale.connectionCurrentTime = smoothScale.connectionTime;
+                    }
+                    
+                    smoothScale.connectionCurrentTime -= _deltaTime;
+                    
+                    if (smoothScale.connectionCurrentTime < 0)
+                    {
+                        smoothScale.connectionCurrentTime = 0;
+                    }
+                }
+            }
+
             public void UpdatePosition()
             {
                 Vector3 targetPos;
@@ -210,8 +411,15 @@ namespace NodesConstraints
                 if (!positionLocks.z)
                     targetPos.z = childTransform.position.z;
 
+                if (smoothPos.connectionTime > 0.0f && smoothPos.connectionCurrentTime > 0.0f)
+                {
+                    float t = Mathf.Clamp01(1.0f - smoothPos.connectionCurrentTime / smoothPos.connectionTime);
+                    targetPos = Vector3.Lerp(smoothPos.smoothStartValue, targetPos, t);
+                }
+
                 if (positionDamp > 0)
                     targetPos = Vector3.Lerp(childTransform.position, targetPos, GetInterpolationFactor(positionDamp));
+
                 childTransform.position = targetPos;
 
                 if (child != null)
@@ -243,6 +451,12 @@ namespace NodesConstraints
                 targetRot *= rotationOffset;
                 targetRot = Quaternion.SlerpUnclamped(Quaternion.identity, targetRot, rotationChangeFactor);
 
+                if (smoothRot.connectionTime > 0.0f && smoothRot.connectionCurrentTime > 0.0f)
+                {
+                    float t = Mathf.Clamp01(1.0f - smoothRot.connectionCurrentTime / smoothRot.connectionTime);
+                    targetRot = Quaternion.Slerp(smoothRot.smoothStartValue, targetRot, t);
+                }
+
                 targetRot = Quaternion.Euler(
                         rotationLocks.x ? targetRot.eulerAngles.x : childTransform.rotation.eulerAngles.x,
                         rotationLocks.y ? targetRot.eulerAngles.y : childTransform.rotation.eulerAngles.y,
@@ -272,6 +486,12 @@ namespace NodesConstraints
                 if (!scaleLocks.z)
                     targetScale.z = childTransform.localScale.z;
 
+                if (smoothScale.connectionTime > 0 && smoothScale.connectionCurrentTime > 0.0f)
+                {
+                    float t = Mathf.Clamp01(1.0f - smoothScale.connectionCurrentTime / smoothScale.connectionTime);
+                    targetScale = Vector3.Lerp(smoothScale.smoothStartValue, targetScale, t);
+                }
+
                 if (scaleDamp > 0)
                     targetScale = Vector3.Lerp(childTransform.localScale, targetScale, GetInterpolationFactor(scaleDamp));
                 childTransform.localScale = targetScale;
@@ -286,7 +506,7 @@ namespace NodesConstraints
                 destroyed = true;
             }
 
-            public void CopyTo(Constraint constraint, bool onlyAttributes=true)
+            public void CopyTo(Constraint constraint, bool onlyAttributes = true)
             {
                 constraint.parentTransform = parentTransform;
                 constraint.childTransform = childTransform;
@@ -315,6 +535,9 @@ namespace NodesConstraints
                 constraint.positionLocks = positionLocks.Copy();
                 constraint.rotationLocks = rotationLocks.Copy();
                 constraint.scaleLocks = scaleLocks.Copy();
+                constraint.smoothPos = smoothPos;
+                constraint.smoothRot = smoothRot;
+                constraint.smoothScale = smoothScale;
 
                 if (onlyAttributes)
                     return;
@@ -444,6 +667,13 @@ namespace NodesConstraints
         private string _scaleZStr = "1.0000";
         private string _scaleFactorStr = "1.0000";
         private string _scaleDampStr = "0.000";
+
+        private string _smoothPosConnectionTimeStr = "0.000";
+        private string _smoothPosDisconnectionTimeStr = "0.000";
+        private string _smoothRotConnectionTimeStr = "0.000";
+        private string _smoothRotDisconnectionTimeStr = "0.000";
+        private string _smoothScaleConnectionTimeStr = "0.000";
+        private string _smoothScaleDisconnectionTimeStr = "0.000";
 
         private bool showExtraMov = false;
         private bool showExtraRot = false;
@@ -798,7 +1028,7 @@ namespace NodesConstraints
                                                 constraint.resetOriginalScale
                                                );
 
-                            if( newConstraint != null )
+                            if (newConstraint != null)
                             {
                                 newConstraint.fixDynamicBone = constraint.fixDynamicBone;
                             }
@@ -882,14 +1112,24 @@ namespace NodesConstraints
                     }
                     continue;
                 }
-                if (constraint.enabled && (constraint.child != null || constraint.parent != null))
+
+                if (constraint.child != null || constraint.parent != null)
                 {
-                    if (constraint.position && (constraint.child == null || constraint.child.enablePos))
-                        constraint.UpdatePosition();
-                    if (constraint.rotation && (constraint.child == null || constraint.child.enableRot))
-                        constraint.UpdateRotation();
-                    if (constraint.scale && (constraint.child == null || constraint.child.enableScale))
-                        constraint.UpdateScale();
+                    if (constraint.enabled)
+                    {
+                        constraint.UpdateSmoothConnectTimes();
+
+                        if (constraint.position && (constraint.child == null || constraint.child.enablePos))
+                            constraint.UpdatePosition();
+                        if (constraint.rotation && (constraint.child == null || constraint.child.enableRot))
+                            constraint.UpdateRotation();
+                        if (constraint.scale && (constraint.child == null || constraint.child.enableScale))
+                            constraint.UpdateScale();
+                    }
+                    else
+                    {
+                        constraint.SmoothDisconnectUpdate();
+                    }
                 }
             }
             if (toDelete != null)
@@ -916,6 +1156,7 @@ namespace NodesConstraints
                     }
                     continue;
                 }
+
                 if (constraint.enabled == false)
                     continue;
 
@@ -999,7 +1240,7 @@ namespace NodesConstraints
 
         private void WindowFunction(int id)
         {
-            void DrawLinkRow(string transform, ref bool enabled, ref TransformLock locks, ref bool mirror, ref string xStr, ref string yStr, ref string zStr, ref string factorStr, ref string dampStr, ref bool resetOriginal, ref bool showExtra, Action onUseCurrent, Action onReset)
+            void DrawLinkRow(string transform, ref bool enabled, ref TransformLock locks, ref bool mirror, ref string xStr, ref string yStr, ref string zStr, ref string factorStr, ref string dampStr, ref bool resetOriginal, ref bool showExtra, ref string smoothconnectionTimeStr, ref string smoothDisconnectionTimeStr, Action onUseCurrent, Action onReset)
             {
                 GUI.enabled = _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null;
                 GUILayout.BeginVertical(GUI.skin.box);
@@ -1039,14 +1280,22 @@ namespace NodesConstraints
                             dampStr = GUILayout.TextField(dampStr, GUILayout.Width(50));
                         }
                         GUILayout.EndHorizontal();
-                        if (transform == "rotation")
+
+                        GUILayout.BeginHorizontal();
                         {
-                            GUILayout.BeginHorizontal();
-                            GUILayout.Label("  ");
-                            _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, new GUIContent("Look at parent", "Make the front of the child always look at the position of the parent. Use offset to adjust what is considered the front (you can use 'Use Current' with this enabled to get the right offset)"));
-                            GUILayout.FlexibleSpace();
-                            GUILayout.EndHorizontal();
+                            GUILayout.Label(new GUIContent("InSmooth", "Time in seconds to reach the target position/rotation/scale. 0 is no smoothing"));
+                            smoothconnectionTimeStr = GUILayout.TextField(smoothconnectionTimeStr, GUILayout.Width(50));
+                            GUILayout.Label(new GUIContent("OutSmooth", "Time in seconds to reach the target position/rotation/scale when the constraint is removed or disabled. 0 is no smoothing"));
+                            smoothDisconnectionTimeStr = GUILayout.TextField(smoothDisconnectionTimeStr, GUILayout.Width(50));
+
+                            if (transform == "rotation")
+                            {
+                                GUILayout.Label(" | ");
+                                _displayedConstraint.lookAt = GUILayout.Toggle(_displayedConstraint.lookAt, new GUIContent("Look at parent", "Make the front of the child always look at the position of the parent. Use offset to adjust what is considered the front (you can use 'Use Current' with this enabled to get the right offset)"));
+                            }
                         }
+                        GUILayout.FlexibleSpace();
+                        GUILayout.EndHorizontal();
                     }
                 }
                 GUILayout.EndVertical();
@@ -1077,7 +1326,9 @@ namespace NodesConstraints
                         }
                         GUILayout.EndHorizontal();
 
-                        DrawLinkRow("position", ref _displayedConstraint.position, ref _displayedConstraint.positionLocks, ref _displayedConstraint.mirrorPosition, ref _positionXStr, ref _positionYStr, ref _positionZStr, ref _positionFactorStr, ref _positionDampStr, ref _displayedConstraint.resetOriginalPosition, ref showExtraMov,
+                        DrawLinkRow("position", ref _displayedConstraint.position, ref _displayedConstraint.positionLocks, ref _displayedConstraint.mirrorPosition,
+                            ref _positionXStr, ref _positionYStr, ref _positionZStr, ref _positionFactorStr, ref _positionDampStr, ref _displayedConstraint.resetOriginalPosition,
+                            ref showExtraMov, ref _smoothPosConnectionTimeStr, ref _smoothPosDisconnectionTimeStr,
                             () =>
                             {
                                 _onPreCullAction = () =>
@@ -1089,10 +1340,14 @@ namespace NodesConstraints
                             () =>
                             {
                                 _displayedConstraint.positionOffset = Vector3.zero;
+                                _smoothPosConnectionTimeStr = "0";
+                                _smoothPosDisconnectionTimeStr = "0";
                                 UpdateDisplayedPositionOffset();
                             });
 
-                        DrawLinkRow("rotation", ref _displayedConstraint.rotation, ref _displayedConstraint.rotationLocks, ref _displayedConstraint.mirrorRotation, ref _rotationXStr, ref _rotationYStr, ref _rotationZStr, ref _rotationFactorStr, ref _rotationDampStr, ref _displayedConstraint.resetOriginalRotation, ref showExtraRot,
+                        DrawLinkRow("rotation", ref _displayedConstraint.rotation, ref _displayedConstraint.rotationLocks, ref _displayedConstraint.mirrorRotation,
+                            ref _rotationXStr, ref _rotationYStr, ref _rotationZStr, ref _rotationFactorStr, ref _rotationDampStr, ref _displayedConstraint.resetOriginalRotation,
+                            ref showExtraRot, ref _smoothRotConnectionTimeStr, ref _smoothRotDisconnectionTimeStr,
                             () =>
                             {
                                 _onPreCullAction = () =>
@@ -1115,10 +1370,14 @@ namespace NodesConstraints
                             () =>
                             {
                                 _displayedConstraint.rotationOffset = Quaternion.identity;
+                                _smoothRotConnectionTimeStr = "0";
+                                _smoothRotDisconnectionTimeStr = "0";
                                 UpdateDisplayedRotationOffset();
                             });
 
-                        DrawLinkRow("scale", ref _displayedConstraint.scale, ref _displayedConstraint.scaleLocks, ref _displayedConstraint.mirrorScale, ref _scaleXStr, ref _scaleYStr, ref _scaleZStr, ref _scaleFactorStr, ref _scaleDampStr, ref _displayedConstraint.resetOriginalScale, ref showExtraScale,
+                        DrawLinkRow("scale", ref _displayedConstraint.scale, ref _displayedConstraint.scaleLocks, ref _displayedConstraint.mirrorScale,
+                            ref _scaleXStr, ref _scaleYStr, ref _scaleZStr, ref _scaleFactorStr, ref _scaleDampStr, ref _displayedConstraint.resetOriginalScale,
+                            ref showExtraScale, ref _smoothScaleConnectionTimeStr, ref _smoothScaleDisconnectionTimeStr,
                             () =>
                             {
                                 _onPreCullAction = () =>
@@ -1134,6 +1393,8 @@ namespace NodesConstraints
                             () =>
                             {
                                 _displayedConstraint.scaleOffset = Vector3.one;
+                                _smoothScaleConnectionTimeStr = "0";
+                                _smoothScaleDisconnectionTimeStr = "0";
                                 UpdateDisplayedScaleOffset();
                             });
 
@@ -1429,29 +1690,71 @@ namespace NodesConstraints
         {
             if (constraint.enabled && newEnabled == false)
             {
-                if (constraint.position && constraint.resetOriginalPosition)
+                if (constraint.position)
                 {
-                    constraint.childTransform.localPosition = constraint.originalChildPosition;
-                    if (constraint.child != null)
-                        constraint.child.changeAmount.pos = constraint.originalChildPosition;
+                    constraint.smoothPos.disConnectionCurrentTime = constraint.smoothPos.disConnectionTime;
+                    constraint.smoothPos.connectionCurrentTime = 0.0f;
+
+                    if (constraint.resetOriginalPosition)
+                    {
+                        constraint.childTransform.localPosition = constraint.originalChildPosition;
+                        if (constraint.child != null)
+                            constraint.child.changeAmount.pos = constraint.originalChildPosition;
+                    }
                 }
-                if (constraint.rotation && constraint.resetOriginalRotation)
+
+                if (constraint.rotation)
                 {
-                    constraint.childTransform.localRotation = constraint.originalChildRotation;
-                    if (constraint.child != null)
-                        constraint.child.changeAmount.rot = constraint.originalChildRotation.eulerAngles;
+                    constraint.smoothRot.disConnectionCurrentTime = constraint.smoothRot.disConnectionTime;
+                    constraint.smoothRot.connectionCurrentTime = 0.0f;
+
+                    if (constraint.resetOriginalRotation)
+                    {
+                        constraint.childTransform.localRotation = constraint.originalChildRotation;
+                        if (constraint.child != null)
+                            constraint.child.changeAmount.rot = constraint.originalChildRotation.eulerAngles;
+                    }
                 }
-                if (constraint.scale && constraint.resetOriginalScale)
+
+                if (constraint.scale)
                 {
-                    constraint.childTransform.localScale = constraint.originalChildScale;
-                    if (constraint.child != null)
-                        constraint.child.changeAmount.scale = constraint.originalChildScale;
+                    constraint.smoothScale.disConnectionCurrentTime = constraint.smoothScale.disConnectionTime;
+                    constraint.smoothScale.connectionCurrentTime = 0.0f;
+
+                    if (constraint.resetOriginalScale)
+                    {
+                        constraint.childTransform.localScale = constraint.originalChildScale;
+                        if (constraint.child != null)
+                            constraint.child.changeAmount.scale = constraint.originalChildScale;
+                    }
                 }
             }
+
             if (constraint.enabled == false && newEnabled)
             {
                 constraint.originalChildPosition = constraint.childTransform.localPosition;
                 constraint.originalChildRotation = constraint.childTransform.localRotation;
+
+                if (constraint.position)
+                {
+                    constraint.smoothPos.connectionCurrentTime = constraint.smoothPos.connectionTime;
+                    constraint.smoothPos.smoothStartValue = constraint.childTransform.position;
+                    constraint.smoothPos.disConnectionCurrentTime = 0.0f;
+                }
+
+                if (constraint.rotation)
+                {
+                    constraint.smoothRot.connectionCurrentTime = constraint.smoothRot.connectionTime;
+                    constraint.smoothRot.smoothStartValue = constraint.childTransform.rotation;
+                    constraint.smoothRot.disConnectionCurrentTime = 0.0f;
+                }
+
+                if (constraint.scale)
+                {
+                    constraint.smoothScale.connectionCurrentTime = constraint.smoothScale.connectionTime;
+                    constraint.smoothScale.smoothStartValue = constraint.childTransform.localScale;
+                    constraint.smoothScale.disConnectionCurrentTime = 0.0f;
+                }
             }
             constraint.enabled = newEnabled;
         }
@@ -1463,6 +1766,8 @@ namespace NodesConstraints
             _positionZStr = _displayedConstraint.positionOffset.z.ToString("0.0000");
             _positionFactorStr = _displayedConstraint.positionChangeFactor.ToString("0.0000");
             _positionDampStr = _displayedConstraint.positionDamp.ToString("0.0000");
+            _smoothPosConnectionTimeStr = _displayedConstraint.smoothPos.connectionTime.ToString("0.000");
+            _smoothPosDisconnectionTimeStr = _displayedConstraint.smoothPos.disConnectionTime.ToString("0.000");
         }
 
         private void ValidateDisplayedPositionOffset()
@@ -1478,6 +1783,12 @@ namespace NodesConstraints
                 _displayedConstraint.positionChangeFactor = res;
             if (float.TryParse(_positionDampStr, out res))
                 _displayedConstraint.positionDamp = res;
+
+            if (float.TryParse(_smoothPosConnectionTimeStr, out res))
+                _displayedConstraint.smoothPos.connectionTime = res;
+            if (float.TryParse(_smoothPosDisconnectionTimeStr, out res))
+                _displayedConstraint.smoothPos.disConnectionTime = res;
+
             UpdateDisplayedPositionOffset();
         }
 
@@ -1489,6 +1800,8 @@ namespace NodesConstraints
             _rotationZStr = euler.z.ToString("0.000");
             _rotationFactorStr = _displayedConstraint.rotationChangeFactor.ToString("0.0000");
             _rotationDampStr = _displayedConstraint.rotationDamp.ToString("0.0000");
+            _smoothRotConnectionTimeStr = _displayedConstraint.smoothRot.connectionTime.ToString("0.000");
+            _smoothRotDisconnectionTimeStr = _displayedConstraint.smoothRot.disConnectionTime.ToString("0.000");
         }
 
         private void ValidateDisplayedRotationOffset()
@@ -1507,6 +1820,12 @@ namespace NodesConstraints
             if (float.TryParse(_rotationDampStr, out float resDamp))
                 _displayedConstraint.rotationDamp = resDamp;
 
+            float res;
+            if (float.TryParse(_smoothRotConnectionTimeStr, out res))
+                _displayedConstraint.smoothRot.connectionTime = res;
+            if (float.TryParse(_smoothRotDisconnectionTimeStr, out res))
+                _displayedConstraint.smoothRot.disConnectionTime = res;
+
             _displayedConstraint.rotationOffset = Quaternion.Euler(resX, resY, resZ);
             UpdateDisplayedRotationOffset();
         }
@@ -1519,6 +1838,8 @@ namespace NodesConstraints
             _scaleZStr = _displayedConstraint.scaleOffset.z.ToString("0.0000");
             _scaleFactorStr = _displayedConstraint.scaleChangeFactor.ToString("0.0000");
             _scaleDampStr = _displayedConstraint.scaleDamp.ToString("0.0000");
+            _smoothScaleConnectionTimeStr = _displayedConstraint.smoothScale.connectionTime.ToString("0.000");
+            _smoothScaleDisconnectionTimeStr = _displayedConstraint.smoothScale.disConnectionTime.ToString("0.000");
         }
 
         private void ValidateDisplayedScaleOffset()
@@ -1534,6 +1855,12 @@ namespace NodesConstraints
                 _displayedConstraint.scaleChangeFactor = res;
             if (float.TryParse(_scaleDampStr, out res))
                 _displayedConstraint.scaleDamp = res;
+
+            if (float.TryParse(_smoothScaleConnectionTimeStr, out res))
+                _displayedConstraint.smoothScale.connectionTime = res;
+            if (float.TryParse(_smoothScaleDisconnectionTimeStr, out res))
+                _displayedConstraint.smoothScale.disConnectionTime = res;
+
             UpdateDisplayedScaleOffset();
         }
 
@@ -1929,6 +2256,17 @@ namespace NodesConstraints
                             XmlConvert.ToBoolean(childNode.Attributes["scaleLocksZ"].Value)
                         );
                     }
+
+                    if (childNode.Attributes["posSmoothConnectionTime"] != null)
+                    {
+                        c.smoothPos.connectionTime = XmlConvert.ToSingle(childNode.Attributes["posSmoothConnectionTime"].Value);
+                        c.smoothPos.disConnectionTime = XmlConvert.ToSingle(childNode.Attributes["posSmoothDisConnectionTime"].Value);
+                        c.smoothRot.connectionTime = XmlConvert.ToSingle(childNode.Attributes["rotSmoothConnectionTime"].Value);
+                        c.smoothRot.disConnectionTime = XmlConvert.ToSingle(childNode.Attributes["rotSmoothDisConnectionTime"].Value);
+                        c.smoothScale.connectionTime = XmlConvert.ToSingle(childNode.Attributes["scaleSmoothConnectionTime"].Value);
+                        c.smoothScale.disConnectionTime = XmlConvert.ToSingle(childNode.Attributes["scaleSmoothDisConnectionTime"].Value);
+                    }
+
                     if (childNode.Attributes["resetOriginalPosition"] != null)
                     {
                         c.resetOriginalPosition = XmlConvert.ToBoolean(childNode.Attributes["resetOriginalPosition"].Value);
@@ -2153,6 +2491,13 @@ namespace NodesConstraints
                 xmlWriter.WriteAttributeString("scaleLocksX", XmlConvert.ToString(constraint.scaleLocks.x));
                 xmlWriter.WriteAttributeString("scaleLocksY", XmlConvert.ToString(constraint.scaleLocks.y));
                 xmlWriter.WriteAttributeString("scaleLocksZ", XmlConvert.ToString(constraint.scaleLocks.z));
+
+                xmlWriter.WriteAttributeString("posSmoothConnectionTime", XmlConvert.ToString(constraint.smoothPos.connectionTime));
+                xmlWriter.WriteAttributeString("posSmoothDisConnectionTime", XmlConvert.ToString(constraint.smoothPos.disConnectionTime));
+                xmlWriter.WriteAttributeString("rotSmoothConnectionTime", XmlConvert.ToString(constraint.smoothRot.connectionTime));
+                xmlWriter.WriteAttributeString("rotSmoothDisConnectionTime", XmlConvert.ToString(constraint.smoothRot.disConnectionTime));
+                xmlWriter.WriteAttributeString("scaleSmoothConnectionTime", XmlConvert.ToString(constraint.smoothScale.connectionTime));
+                xmlWriter.WriteAttributeString("scaleSmoothDisConnectionTime", XmlConvert.ToString(constraint.smoothScale.disConnectionTime));
 
                 xmlWriter.WriteAttributeString("resetOriginalPosition", XmlConvert.ToString(constraint.resetOriginalPosition));
                 xmlWriter.WriteAttributeString("resetOriginalRotation", XmlConvert.ToString(constraint.resetOriginalRotation));
