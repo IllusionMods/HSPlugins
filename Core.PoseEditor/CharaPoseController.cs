@@ -388,7 +388,7 @@ namespace HSPE
             OCIChar_SetCoordinateInfo_Patches.onSetCoordinateInfo -= OnCoordinateReplaced;
 #endif
             base.OnDestroy();
-            _charaPoseControllers.Remove(this);
+            _charaPoseControllers?.Remove(this);
         }
         #endregion
 
