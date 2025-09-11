@@ -580,32 +580,35 @@ namespace HSPE.AMModules
             base.OnDestroy();
             if (!_isLoneCollider) return;
 
-            if (_parent != null && _parent.transform != null)
+            if (_parent != null)
             {
-                DynamicBoneColliderBase collider = _parent.transform.GetChild(0).GetComponent<DynamicBoneColliderBase>();
-                if (collider != null)
+                _parent.onUpdate -= Update;
+
+                if (_parent.transform != null)
                 {
-                    _loneColliders.Remove(collider);
-                    foreach (DynamicBone bone in Resources.FindObjectsOfTypeAll<DynamicBone>())
+                    DynamicBoneColliderBase collider = _parent.transform.GetChild(0).GetComponent<DynamicBoneColliderBase>();
+                    if (collider != null)
                     {
-                        if (bone.m_Colliders.Contains(collider))
-                            bone.m_Colliders.Remove(collider);
-                    }
+                        _loneColliders.Remove(collider);
+                        foreach (DynamicBone bone in Resources.FindObjectsOfTypeAll<DynamicBone>())
+                        {
+                            if (bone.m_Colliders.Contains(collider))
+                                bone.m_Colliders.Remove(collider);
+                        }
 #if AISHOUJO || HONEYSELECT2
                     if (collider is DynamicBoneCollider)
 #endif
-                    {
-                        DynamicBoneCollider normalCollider = (DynamicBoneCollider)collider;
-                        foreach (DynamicBone_Ver02 bone in Resources.FindObjectsOfTypeAll<DynamicBone_Ver02>())
                         {
-                            if (bone.Colliders.Contains(normalCollider))
-                                bone.Colliders.Remove(normalCollider);
+                            DynamicBoneCollider normalCollider = (DynamicBoneCollider)collider;
+                            foreach (DynamicBone_Ver02 bone in Resources.FindObjectsOfTypeAll<DynamicBone_Ver02>())
+                            {
+                                if (bone.Colliders.Contains(normalCollider))
+                                    bone.Colliders.Remove(normalCollider);
+                            }
                         }
                     }
                 }
             }
-
-            _parent.onUpdate -= Update;
         }
 
         #endregion
