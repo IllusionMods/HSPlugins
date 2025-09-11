@@ -596,7 +596,7 @@ namespace HSPE.AMModules
                                 bone.m_Colliders.Remove(collider);
                         }
 #if AISHOUJO || HONEYSELECT2
-                    if (collider is DynamicBoneCollider)
+                        if (collider is DynamicBoneCollider)
 #endif
                         {
                             DynamicBoneCollider normalCollider = (DynamicBoneCollider)collider;
