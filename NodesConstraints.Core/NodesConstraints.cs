@@ -154,7 +154,7 @@ namespace NodesConstraints
 
             public Constraint() { }
 
-            public Constraint(Constraint other)
+            public Constraint(Constraint other) : this()
             {
                 enabled = other.enabled;
                 parent = other.parent;
