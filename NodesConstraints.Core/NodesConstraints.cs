@@ -368,9 +368,9 @@ namespace NodesConstraints
                     {
                         smoothRot.connectionCurrentTime = smoothRot.connectionTime;
                     }
-                    
+
                     smoothRot.connectionCurrentTime -= _deltaTime;
-                    
+
                     if (smoothRot.connectionCurrentTime < 0)
                     {
                         smoothRot.connectionCurrentTime = 0;
@@ -383,9 +383,9 @@ namespace NodesConstraints
                     {
                         smoothScale.connectionCurrentTime = smoothScale.connectionTime;
                     }
-                    
+
                     smoothScale.connectionCurrentTime -= _deltaTime;
-                    
+
                     if (smoothScale.connectionCurrentTime < 0)
                     {
                         smoothScale.connectionCurrentTime = 0;
@@ -2564,7 +2564,9 @@ namespace NodesConstraints
                     getFinalName: (currentName, oci, parameter) =>
                     {
                         if (parameter is Constraint c)
-                            return string.IsNullOrEmpty(c.alias) == false ? $"NC: {c.alias}" : $"NC: {c.parentTransform?.name}/{c.childTransform?.name}";
+                            return !string.IsNullOrEmpty(c.alias)
+                                ? $"NC: {c.alias}"
+                                : $"NC: {(c.parentTransform != null ? c.parentTransform.name : "<NULL>")}/{(c.childTransform != null ? c.childTransform.name : "<NULL>")}";
                         return currentName;
                     });
         }
