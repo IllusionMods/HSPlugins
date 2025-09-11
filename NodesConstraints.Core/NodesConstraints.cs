@@ -6,6 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml;
+using KKAPI.Studio.UI;
+using KKAPI.Utilities;
+using TimelineCompatibility = ToolBox.TimelineCompatibility;
 using ToolBox;
 using ToolBox.Extensions;
 using UnityEngine;
@@ -624,6 +627,7 @@ namespace NodesConstraints
 
         private bool _studioLoaded;
         private bool _showUI = false;
+        private ToolbarToggle _toolbarButton;
         private RectTransform _imguiBackground;
         private const int _uniqueId = ('N' << 24) | ('O' << 16) | ('D' << 8) | 'E';
         private Rect _windowRect = new Rect(Screen.width / 2f - 200, Screen.height / 2f - 300, 400, 600);
@@ -703,6 +707,17 @@ namespace NodesConstraints
         internal static ConfigEntry<int> ConstraintsAreaHeight { get; private set; }
         internal static ConfigEntry<int> NodesAreaHeight { get; private set; }
 
+        public bool ShowUI
+        {
+            get => _showUI;
+            set
+            {
+                _showUI = value;
+                _selectedConstraint?.SetActiveDebugLines(_showUI);
+                _toolbarButton.Value = value;
+            }
+        }
+
         #region Unity Methods
         protected override void Awake()
         {
@@ -736,6 +751,9 @@ namespace NodesConstraints
                     _hasTimeline = true;
                 }
             }, 10);
+
+            var toolbarTex = ResourceUtils.GetEmbeddedResource("nc_toolbar_icon.png", typeof(NodesConstraints).Assembly).LoadTexture();
+            _toolbarButton = CustomToolbarButtons.AddLeftToolbarToggle(toolbarTex, false, val => ShowUI = val);
         }
 
 #if AISHOUJO || HONEYSELECT2
@@ -807,11 +825,7 @@ namespace NodesConstraints
                 _totalActiveExpressions += 1; // Expression is added to MainCamera in Init()
             _currentExpressionIndex = 0;
             if (ConfigMainWindowShortcut.Value.IsDown())
-            {
-                _showUI = !_showUI;
-                if (_selectedConstraint != null)
-                    _selectedConstraint.SetActiveDebugLines(_showUI);
-            }
+                ShowUI = !ShowUI;
             if (_onPreCullAction != null)
             {
                 _onPreCullAction();
@@ -831,7 +845,7 @@ namespace NodesConstraints
             if (_hasTimeline == false)
                 ApplyNodesConstraints();
 
-            if (_showUI)
+            if (ShowUI)
             {
                 _imguiBackground.gameObject.SetActive(true);
                 IMGUIExtensions.FitRectTransformToRect(_imguiBackground, _windowRect);
@@ -839,7 +853,7 @@ namespace NodesConstraints
             else if (_imguiBackground != null)
                 _imguiBackground.gameObject.SetActive(false);
 
-            if (_showUI)
+            if (ShowUI)
                 _windowRect.height = 200f + ConstraintsAreaHeight.Value + NodesAreaHeight.Value;
         }
 
@@ -869,7 +883,7 @@ namespace NodesConstraints
             var skin = GUI.skin;
             GUI.skin = KKAPI.Utilities.IMGUIUtils.SolidBackgroundGuiSkin;
 
-            if (_showUI == false)
+            if (ShowUI == false)
                 return;
             if (_initUI == false)
             {
@@ -1202,7 +1216,7 @@ namespace NodesConstraints
         {
             if (_parentCircle != null)
             {
-                _parentCircle.active = _displayedConstraint.parentTransform != null && _showUI;
+                _parentCircle.active = _displayedConstraint.parentTransform != null && ShowUI;
                 if (_parentCircle.active)
                 {
                     _parentCircle.MakeCircle(_displayedConstraint.parentTransform.position, Camera.main.transform.forward, _circleRadius);
@@ -1211,7 +1225,7 @@ namespace NodesConstraints
             }
             if (_childCircle != null)
             {
-                _childCircle.active = _displayedConstraint.childTransform != null && _showUI;
+                _childCircle.active = _displayedConstraint.childTransform != null && ShowUI;
                 if (_childCircle.active)
                 {
                     _childCircle.MakeCircle(_displayedConstraint.childTransform.position, Camera.main.transform.forward, _circleRadius);
@@ -1223,7 +1237,7 @@ namespace NodesConstraints
             {
                 if (_advancedList)
                 {
-                    _selectedCircle.active = _selectedBone != null && _showUI;
+                    _selectedCircle.active = _selectedBone != null && ShowUI;
                     if (_selectedCircle.active)
                     {
                         _selectedCircle.MakeCircle(_selectedBone.position, Camera.main.transform.forward, _circleRadius);
@@ -1233,7 +1247,7 @@ namespace NodesConstraints
                 else
                 {
                     GuideObject selectedGuideObject = _selectedGuideObjects.FirstOrDefault();
-                    _selectedCircle.active = selectedGuideObject != null && _showUI;
+                    _selectedCircle.active = selectedGuideObject != null && ShowUI;
                     if (_selectedCircle.active)
                     {
                         _selectedCircle.MakeCircle(selectedGuideObject.transformTarget.position, Camera.main.transform.forward, _circleRadius);
@@ -1242,7 +1256,7 @@ namespace NodesConstraints
                 }
             }
 
-            if (_selectedConstraint != null && _showUI)
+            if (_selectedConstraint != null && ShowUI)
                 _selectedConstraint.UpdateDebugLines();
         }
 
@@ -1313,8 +1327,7 @@ namespace NodesConstraints
             int visibleAreaSize = GUI.skin.window.border.top - 4;
             if (GUI.Button(new Rect(_windowRect.width - visibleAreaSize - 2, 2, visibleAreaSize, visibleAreaSize), "X"))
             {
-                _showUI = false;
-                _selectedConstraint?.SetActiveDebugLines(false);
+                ShowUI = false;
                 return;
             }
 
