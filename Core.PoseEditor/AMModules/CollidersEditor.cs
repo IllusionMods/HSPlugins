@@ -578,28 +578,34 @@ namespace HSPE.AMModules
         public override void OnDestroy()
         {
             base.OnDestroy();
-            if (_isLoneCollider)
+            if (!_isLoneCollider) return;
+
+            if (_parent != null && _parent.transform != null)
             {
                 DynamicBoneColliderBase collider = _parent.transform.GetChild(0).GetComponent<DynamicBoneColliderBase>();
-                _loneColliders.Remove(collider);
-                foreach (DynamicBone bone in Resources.FindObjectsOfTypeAll<DynamicBone>())
+                if (collider != null)
                 {
-                    if (bone.m_Colliders.Contains(collider))
-                        bone.m_Colliders.Remove(collider);
-                }
-#if AISHOUJO || HONEYSELECT2
-                if (collider is DynamicBoneCollider)
-#endif
-                {
-                    DynamicBoneCollider normalCollider = (DynamicBoneCollider)collider;
-                    foreach (DynamicBone_Ver02 bone in Resources.FindObjectsOfTypeAll<DynamicBone_Ver02>())
+                    _loneColliders.Remove(collider);
+                    foreach (DynamicBone bone in Resources.FindObjectsOfTypeAll<DynamicBone>())
                     {
-                        if (bone.Colliders.Contains(normalCollider))
-                            bone.Colliders.Remove(normalCollider);
+                        if (bone.m_Colliders.Contains(collider))
+                            bone.m_Colliders.Remove(collider);
+                    }
+#if AISHOUJO || HONEYSELECT2
+                    if (collider is DynamicBoneCollider)
+#endif
+                    {
+                        DynamicBoneCollider normalCollider = (DynamicBoneCollider)collider;
+                        foreach (DynamicBone_Ver02 bone in Resources.FindObjectsOfTypeAll<DynamicBone_Ver02>())
+                        {
+                            if (bone.Colliders.Contains(normalCollider))
+                                bone.Colliders.Remove(normalCollider);
+                        }
                     }
                 }
-                _parent.onUpdate -= Update;
             }
+
+            _parent.onUpdate -= Update;
         }
 
         #endregion
