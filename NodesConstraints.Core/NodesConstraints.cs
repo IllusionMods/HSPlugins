@@ -52,7 +52,7 @@ namespace NodesConstraints
     {
         public const string Name = "NodesConstraints";
         public const string GUID = "com.joan6694.illusionplugins.nodesconstraints";
-        public const string Version = "1.5";
+        public const string Version = "1.6";
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
         private const string _extSaveKey = "nodesConstraints";
         private const int _saveVersion = 0;
