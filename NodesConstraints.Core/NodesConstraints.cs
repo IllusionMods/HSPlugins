@@ -38,12 +38,12 @@ namespace NodesConstraints
 {
 #if BEPINEX
     [BepInPlugin(GUID, Name, Version)]
-    [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #if KOIKATSU
     [BepInProcess("CharaStudio")]
 #elif AISHOUJO || HONEYSELECT2
     [BepInProcess("StudioNEOV2")]
 #endif
+    [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #endif
     public class NodesConstraints : GenericPlugin
 #if IPA
