@@ -358,7 +358,7 @@ namespace HSPE.AMModules
         public override void OnDestroy()
         {
             base.OnDestroy();
-            _parent.onLateUpdate -= LateUpdate;
+            if (_parent != null) _parent.onLateUpdate -= LateUpdate;
             DynamicBone_Ver02_LateUpdate_Patches.shouldExecuteLateUpdate -= ShouldExecuteDynamicBoneLateUpdate;
         }
         #endregion

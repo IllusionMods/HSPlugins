@@ -227,8 +227,11 @@ namespace HSPE.AMModules
         public override void OnDestroy()
         {
             base.OnDestroy();
-            _parent.onLateUpdate -= LateUpdate;
-            _parent.onDisable -= OnDisable;
+            if (_parent != null)
+            {
+                _parent.onLateUpdate -= LateUpdate;
+                _parent.onDisable -= OnDisable;
+            }
         }
 
         #endregion

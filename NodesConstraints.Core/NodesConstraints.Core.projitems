@@ -13,4 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CameraEventsDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NodesConstraints.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)nc_toolbar_icon.png" />
+  </ItemGroup>
 </Project>

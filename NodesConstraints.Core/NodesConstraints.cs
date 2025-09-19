@@ -6,6 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml;
+using KKAPI.Studio.UI;
+using KKAPI.Utilities;
+using TimelineCompatibility = ToolBox.TimelineCompatibility;
 using ToolBox;
 using ToolBox.Extensions;
 using UnityEngine;
@@ -35,12 +38,12 @@ namespace NodesConstraints
 {
 #if BEPINEX
     [BepInPlugin(GUID, Name, Version)]
-    [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #if KOIKATSU
     [BepInProcess("CharaStudio")]
 #elif AISHOUJO || HONEYSELECT2
     [BepInProcess("StudioNEOV2")]
 #endif
+    [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #endif
     public class NodesConstraints : GenericPlugin
 #if IPA
@@ -49,7 +52,7 @@ namespace NodesConstraints
     {
         public const string Name = "NodesConstraints";
         public const string GUID = "com.joan6694.illusionplugins.nodesconstraints";
-        public const string Version = "1.4.1";
+        public const string Version = "1.6";
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
         private const string _extSaveKey = "nodesConstraints";
         private const int _saveVersion = 0;
@@ -157,17 +160,25 @@ namespace NodesConstraints
             public int? uniqueLoadId;
             public bool destroyed = false;
             private VectorLine _debugLine;
+            private VectorLine DebugLine
+            {
+                get
+                {
+                    if (_debugLine == null)
+                    {
+                        _debugLine = VectorLine.SetLine(Color.white, Vector3.zero, Vector3.one);
+                        _debugLine.lineWidth = 3f;
+                        _debugLine.active = false;
+                    }
+                    return _debugLine;
+                }
+            }
 
             public Vector3 originalParentPosition;
             public Quaternion originalParentRotation;
             public Vector3 originalParentScale;
 
-            public Constraint()
-            {
-                _debugLine = VectorLine.SetLine(Color.white, Vector3.zero, Vector3.one);
-                _debugLine.lineWidth = 3f;
-                _debugLine.active = false;
-            }
+            public Constraint() { }
 
             public Constraint(Constraint other) : this()
             {
@@ -197,15 +208,15 @@ namespace NodesConstraints
 
             public void SetActiveDebugLines(bool active)
             {
-                _debugLine.active = active;
+                DebugLine.active = active;
             }
 
             public void UpdateDebugLines()
             {
-                _debugLine.points3[0] = parentTransform.position;
-                _debugLine.points3[1] = childTransform.position;
-                _debugLine.SetColor((position && rotation ? Color.magenta : (position ? Color.cyan : Color.green)));
-                _debugLine.Draw();
+                DebugLine.points3[0] = parentTransform.position;
+                DebugLine.points3[1] = childTransform.position;
+                DebugLine.SetColor((position && rotation ? Color.magenta : (position ? Color.cyan : Color.green)));
+                DebugLine.Draw();
             }
 
             public float GetInterpolationFactor(float damp)
@@ -368,9 +379,9 @@ namespace NodesConstraints
                     {
                         smoothRot.connectionCurrentTime = smoothRot.connectionTime;
                     }
-                    
+
                     smoothRot.connectionCurrentTime -= _deltaTime;
-                    
+
                     if (smoothRot.connectionCurrentTime < 0)
                     {
                         smoothRot.connectionCurrentTime = 0;
@@ -383,9 +394,9 @@ namespace NodesConstraints
                     {
                         smoothScale.connectionCurrentTime = smoothScale.connectionTime;
                     }
-                    
+
                     smoothScale.connectionCurrentTime -= _deltaTime;
-                    
+
                     if (smoothScale.connectionCurrentTime < 0)
                     {
                         smoothScale.connectionCurrentTime = 0;
@@ -616,6 +627,7 @@ namespace NodesConstraints
 
         private bool _studioLoaded;
         private bool _showUI = false;
+        private ToolbarToggle _toolbarButton;
         private RectTransform _imguiBackground;
         private const int _uniqueId = ('N' << 24) | ('O' << 16) | ('D' << 8) | 'E';
         private Rect _windowRect = new Rect(Screen.width / 2f - 200, Screen.height / 2f - 300, 400, 600);
@@ -695,6 +707,17 @@ namespace NodesConstraints
         internal static ConfigEntry<int> ConstraintsAreaHeight { get; private set; }
         internal static ConfigEntry<int> NodesAreaHeight { get; private set; }
 
+        public bool ShowUI
+        {
+            get => _showUI;
+            set
+            {
+                _showUI = value;
+                _selectedConstraint?.SetActiveDebugLines(_showUI);
+                _toolbarButton.Value = value;
+            }
+        }
+
         #region Unity Methods
         protected override void Awake()
         {
@@ -728,6 +751,9 @@ namespace NodesConstraints
                     _hasTimeline = true;
                 }
             }, 10);
+
+            var toolbarTex = ResourceUtils.GetEmbeddedResource("nc_toolbar_icon.png", typeof(NodesConstraints).Assembly).LoadTexture();
+            _toolbarButton = CustomToolbarButtons.AddLeftToolbarToggle(toolbarTex, false, val => ShowUI = val);
         }
 
 #if AISHOUJO || HONEYSELECT2
@@ -799,11 +825,7 @@ namespace NodesConstraints
                 _totalActiveExpressions += 1; // Expression is added to MainCamera in Init()
             _currentExpressionIndex = 0;
             if (ConfigMainWindowShortcut.Value.IsDown())
-            {
-                _showUI = !_showUI;
-                if (_selectedConstraint != null)
-                    _selectedConstraint.SetActiveDebugLines(_showUI);
-            }
+                ShowUI = !ShowUI;
             if (_onPreCullAction != null)
             {
                 _onPreCullAction();
@@ -823,7 +845,7 @@ namespace NodesConstraints
             if (_hasTimeline == false)
                 ApplyNodesConstraints();
 
-            if (_showUI)
+            if (ShowUI)
             {
                 _imguiBackground.gameObject.SetActive(true);
                 IMGUIExtensions.FitRectTransformToRect(_imguiBackground, _windowRect);
@@ -831,7 +853,7 @@ namespace NodesConstraints
             else if (_imguiBackground != null)
                 _imguiBackground.gameObject.SetActive(false);
 
-            if (_showUI)
+            if (ShowUI)
                 _windowRect.height = 200f + ConstraintsAreaHeight.Value + NodesAreaHeight.Value;
         }
 
@@ -861,7 +883,7 @@ namespace NodesConstraints
             var skin = GUI.skin;
             GUI.skin = KKAPI.Utilities.IMGUIUtils.SolidBackgroundGuiSkin;
 
-            if (_showUI == false)
+            if (ShowUI == false)
                 return;
             if (_initUI == false)
             {
@@ -1194,7 +1216,7 @@ namespace NodesConstraints
         {
             if (_parentCircle != null)
             {
-                _parentCircle.active = _displayedConstraint.parentTransform != null && _showUI;
+                _parentCircle.active = _displayedConstraint.parentTransform != null && ShowUI;
                 if (_parentCircle.active)
                 {
                     _parentCircle.MakeCircle(_displayedConstraint.parentTransform.position, Camera.main.transform.forward, _circleRadius);
@@ -1203,7 +1225,7 @@ namespace NodesConstraints
             }
             if (_childCircle != null)
             {
-                _childCircle.active = _displayedConstraint.childTransform != null && _showUI;
+                _childCircle.active = _displayedConstraint.childTransform != null && ShowUI;
                 if (_childCircle.active)
                 {
                     _childCircle.MakeCircle(_displayedConstraint.childTransform.position, Camera.main.transform.forward, _circleRadius);
@@ -1215,7 +1237,7 @@ namespace NodesConstraints
             {
                 if (_advancedList)
                 {
-                    _selectedCircle.active = _selectedBone != null && _showUI;
+                    _selectedCircle.active = _selectedBone != null && ShowUI;
                     if (_selectedCircle.active)
                     {
                         _selectedCircle.MakeCircle(_selectedBone.position, Camera.main.transform.forward, _circleRadius);
@@ -1225,7 +1247,7 @@ namespace NodesConstraints
                 else
                 {
                     GuideObject selectedGuideObject = _selectedGuideObjects.FirstOrDefault();
-                    _selectedCircle.active = selectedGuideObject != null && _showUI;
+                    _selectedCircle.active = selectedGuideObject != null && ShowUI;
                     if (_selectedCircle.active)
                     {
                         _selectedCircle.MakeCircle(selectedGuideObject.transformTarget.position, Camera.main.transform.forward, _circleRadius);
@@ -1234,7 +1256,7 @@ namespace NodesConstraints
                 }
             }
 
-            if (_selectedConstraint != null && _showUI)
+            if (_selectedConstraint != null && ShowUI)
                 _selectedConstraint.UpdateDebugLines();
         }
 
@@ -1305,8 +1327,7 @@ namespace NodesConstraints
             int visibleAreaSize = GUI.skin.window.border.top - 4;
             if (GUI.Button(new Rect(_windowRect.width - visibleAreaSize - 2, 2, visibleAreaSize, visibleAreaSize), "X"))
             {
-                _showUI = false;
-                _selectedConstraint?.SetActiveDebugLines(false);
+                ShowUI = false;
                 return;
             }
 
@@ -2564,7 +2585,9 @@ namespace NodesConstraints
                     getFinalName: (currentName, oci, parameter) =>
                     {
                         if (parameter is Constraint c)
-                            return string.IsNullOrEmpty(c.alias) == false ? $"NC: {c.alias}" : $"NC: {c.parentTransform?.name}/{c.childTransform?.name}";
+                            return !string.IsNullOrEmpty(c.alias)
+                                ? $"NC: {c.alias}"
+                                : $"NC: {(c.parentTransform != null ? c.parentTransform.name : "<NULL>")}/{(c.childTransform != null ? c.childTransform.name : "<NULL>")}";
                         return currentName;
                     });
         }

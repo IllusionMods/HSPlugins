@@ -166,8 +166,8 @@ namespace HSPE
         protected virtual void OnDestroy()
         {
             onParentage -= OnParentage;
-            onDestroy();
-            _poseControllers.Remove(this);
+            onDestroy?.Invoke();
+            _poseControllers?.Remove(this);
         }
         #endregion
 
