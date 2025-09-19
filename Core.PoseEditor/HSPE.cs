@@ -22,6 +22,7 @@ namespace HSPE
 #elif AISHOUJO || HONEYSELECT2
     [BepInProcess("StudioNEOV2")]
 #endif
+    [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #endif
     internal class HSPE : GenericPlugin
 #if HONEYSELECT || PLAYHOME
