@@ -50,4 +50,7 @@
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\English.xml" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\中文.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ve_toolbar_icon.png" />
+  </ItemGroup>
 </Project>
