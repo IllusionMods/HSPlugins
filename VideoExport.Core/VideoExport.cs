@@ -44,7 +44,7 @@ namespace VideoExport
                                , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.7.1";
+        public const string Version = "1.8";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
 
