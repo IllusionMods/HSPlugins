@@ -48,7 +48,7 @@ namespace HSPE
         public const string GUID = "com.joan6694.illusionplugins.poseeditor";
         internal const int saveVersion = 0;
 #endif
-        public const string Version = "2.21.3";
+        public const string Version = "2.21.4";
 
 #if IPA
         public override string Name { get { return _name; } }
@@ -60,6 +60,7 @@ namespace HSPE
 #endif
 #endif
         internal static new ManualLogSource Logger;
+        internal static BaseUnityPlugin Instance;
 
         internal static ConfigEntry<float> ConfigMainWindowSize { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
@@ -73,6 +74,7 @@ namespace HSPE
         {
             base.Awake();
             Logger = base.Logger;
+            Instance = this;
 
             ConfigMainWindowSize = Config.Bind("Config", "Main Window Size", 1f);
             ConfigMainWindowShortcut = Config.Bind("Config", "Main Window Shortcut", new KeyboardShortcut(KeyCode.H));

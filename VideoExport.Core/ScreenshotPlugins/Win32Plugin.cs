@@ -106,7 +106,7 @@ namespace VideoExport.ScreenshotPlugins
             int height = rect.bottom - rect.top;
             this._bitmap = new System.Drawing.Bitmap(width, height, PixelFormat.Format32bppArgb);
             this._graphics = Graphics.FromImage(this._bitmap);
-            VideoExport._showUi = false;
+            VideoExport.ShowUI = false;
         }
 
         public byte[] Capture(string saveTo)
@@ -128,7 +128,7 @@ namespace VideoExport.ScreenshotPlugins
         {
             this._graphics.Dispose();
             this._graphics = null;
-            VideoExport._showUi = true;
+            VideoExport.ShowUI = true;
         }
 
         public void DisplayParams()

@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using BepInEx.Logging;
 using ToolBox;
 using ToolBox.Extensions;
@@ -15,6 +14,9 @@ using VideoExport.Extensions;
 using VideoExport.ScreenshotPlugins;
 using Resources = UnityEngine.Resources;
 using VideoExport.Core;
+using KKAPI.Studio.UI.Toolbars;
+using KKAPI.Utilities;
+using TimelineCompatibility = ToolBox.TimelineCompatibility;
 
 #if IPA
 using IllusionPlugin;
@@ -42,7 +44,7 @@ namespace VideoExport
                                , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.7.1";
+        public const string Version = "1.8";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
 
@@ -216,14 +218,15 @@ namespace VideoExport
         private string[] _extensionsNames;
         private string[] _updateDynamicBonesTypeNames;
 
-        internal static bool _showUi = false;
+        private static bool _showUI = false;
+        private static SimpleToolbarToggle _toolbarButton;
         private bool _isRecording = false;
         private bool _breakRecording = false;
         private bool _generatingVideo = false;
         private readonly List<IScreenshotPlugin> _screenshotPlugins = new List<IScreenshotPlugin>();
         private const int _uniqueId = ('V' << 24) | ('I' << 16) | ('D' << 8) | 'E';
         private Rect _windowRect = new Rect(Screen.width / 2 - 320, 100, Styles.WindowWidth, 10);
-        private RectTransform _imguiBackground;
+        private static RectTransform _imguiBackground;
         private string _currentMessage;
         private readonly List<IExtension> _extensions = new List<IExtension>();
         private Color _messageColor = Color.white;
@@ -276,6 +279,23 @@ namespace VideoExport
 
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigStartStopShortcut { get; private set; }
+
+        public static bool ShowUI
+        {
+            get => _showUI;
+            set
+            {
+                if (_showUI != value)
+                {
+                    _showUI = value;
+                    _toolbarButton.Toggled.OnNext(value);
+                    
+                    if (_imguiBackground == null)
+                        _imguiBackground = IMGUIExtensions.CreateUGUIPanelForIMGUI();
+                }
+            }
+        }
+
         #region Unity Methods
         protected override void Awake()
         {
@@ -357,6 +377,13 @@ namespace VideoExport
                     _selectedPlugin = 0;
                 }
             }, 5);
+            
+            _toolbarButton = new SimpleToolbarToggle(
+                "Open window",
+                "Open VideoExport window. It can be used\nto record at high resolution and stable FPS.\nHotkey: " + ConfigMainWindowShortcut.Value,
+                () => ResourceUtils.GetEmbeddedResource("ve_toolbar_icon.png", typeof(VideoExport).Assembly).LoadTexture(),
+                false, this, val => ShowUI = val);
+            ToolbarManager.AddLeftToolbarControl(_toolbarButton);
         }
 
         protected override void Update()
@@ -370,9 +397,7 @@ namespace VideoExport
             }
             else if (ConfigMainWindowShortcut.Value.IsDown())
             {
-                _showUi = !_showUi;
-                if (_imguiBackground == null)
-                    _imguiBackground = IMGUIExtensions.CreateUGUIPanelForIMGUI();
+                ShowUI = !ShowUI;
             }
             if (_startOnNextClick && Input.GetMouseButtonDown(0))
             {
@@ -406,7 +431,7 @@ namespace VideoExport
             }
             if (_imguiBackground != null)
             {
-                if (_showUi)
+                if (ShowUI)
                 {
                     _imguiBackground.gameObject.SetActive(true);
                     IMGUIExtensions.FitRectTransformToRect(_imguiBackground, _windowRect);
@@ -414,7 +439,7 @@ namespace VideoExport
                 else if (_imguiBackground != null)
                     _imguiBackground.gameObject.SetActive(false);
             }
-            if (_showUi)
+            if (ShowUI)
             {
                 _windowRect.height = 10f;
             }
@@ -422,7 +447,7 @@ namespace VideoExport
 
         protected override void OnGUI()
         {
-            if (_showUi == false)
+            if (ShowUI == false)
                 return;
             _windowRect = GUILayout.Window(_uniqueId + 1, _windowRect, Window, "Video Export " + Version);
             IMGUIExtensions.DrawBackground(_windowRect);

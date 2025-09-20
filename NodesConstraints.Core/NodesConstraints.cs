@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml;
-using KKAPI.Studio.UI;
+using KKAPI.Studio.UI.Toolbars;
 using KKAPI.Utilities;
 using TimelineCompatibility = ToolBox.TimelineCompatibility;
 using ToolBox;
@@ -52,7 +52,7 @@ namespace NodesConstraints
     {
         public const string Name = "NodesConstraints";
         public const string GUID = "com.joan6694.illusionplugins.nodesconstraints";
-        public const string Version = "1.6";
+        public const string Version = "1.6.1";
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
         private const string _extSaveKey = "nodesConstraints";
         private const int _saveVersion = 0;
@@ -627,7 +627,7 @@ namespace NodesConstraints
 
         private bool _studioLoaded;
         private bool _showUI = false;
-        private ToolbarToggle _toolbarButton;
+        private SimpleToolbarToggle _toolbarButton;
         private RectTransform _imguiBackground;
         private const int _uniqueId = ('N' << 24) | ('O' << 16) | ('D' << 8) | 'E';
         private Rect _windowRect = new Rect(Screen.width / 2f - 200, Screen.height / 2f - 300, 400, 600);
@@ -712,9 +712,12 @@ namespace NodesConstraints
             get => _showUI;
             set
             {
-                _showUI = value;
-                _selectedConstraint?.SetActiveDebugLines(_showUI);
-                _toolbarButton.Value = value;
+                if (_showUI != value)
+                {
+                    _showUI = value;
+                    _selectedConstraint?.SetActiveDebugLines(value);
+                    _toolbarButton.Toggled.OnNext(value);
+                }
             }
         }
 
@@ -752,8 +755,12 @@ namespace NodesConstraints
                 }
             }, 10);
 
-            var toolbarTex = ResourceUtils.GetEmbeddedResource("nc_toolbar_icon.png", typeof(NodesConstraints).Assembly).LoadTexture();
-            _toolbarButton = CustomToolbarButtons.AddLeftToolbarToggle(toolbarTex, false, val => ShowUI = val);
+            _toolbarButton = new SimpleToolbarToggle(
+                "Open window",
+                "Open NodesConstraints window. It can be used\nto attach various things to each other.\nHotkey: " + ConfigMainWindowShortcut.Value,
+                () => ResourceUtils.GetEmbeddedResource("nc_toolbar_icon.png", typeof(NodesConstraints).Assembly).LoadTexture(), 
+                false, this, val => ShowUI = val);
+            ToolbarManager.AddLeftToolbarControl(_toolbarButton);
         }
 
 #if AISHOUJO || HONEYSELECT2
