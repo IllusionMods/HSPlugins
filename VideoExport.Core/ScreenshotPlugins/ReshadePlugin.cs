@@ -14,7 +14,7 @@ using HarmonyLib;
 
 namespace VideoExport.ScreenshotPlugins
 {
-    class ReshadeAPI
+    internal class ReshadeAPI
     {
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public unsafe struct Screenshot
@@ -53,14 +53,14 @@ namespace VideoExport.ScreenshotPlugins
             _shmFile = OpenFileMapping(GENERIC_READ, false, sharedMemoryName);
             if (_shmFile == IntPtr.Zero)
             {
-                VideoExport.Logger.LogError($"Could not open file mapping for shared memory.");
+                VideoExport.Logger.LogWarning("Failed to set up KKReshade, make sure it is properly installed and functioning.");
                 return false;
             }
 
             _shm = MapViewOfFile(_shmFile, FILE_MAP_READ, 0, 0, (uint)(Marshal.SizeOf(typeof(Screenshot)) + MAX_IMAGE_SIZE));
             if (_shm == IntPtr.Zero)
             {
-                VideoExport.Logger.LogError($"Could not map view of the shared memory.");
+                VideoExport.Logger.LogError("Failed to set up KKReshade - Could not map view of the shared memory.");
                 CloseHandle(_shmFile);
                 return false;
             }
@@ -220,7 +220,7 @@ namespace VideoExport.ScreenshotPlugins
         {
             if (_autoHideUI)
             {
-                VideoExport._showUi = false;
+                VideoExport.ShowUI = false;
                 SetStudioUIVisibility(false);
             }
         }
@@ -229,7 +229,7 @@ namespace VideoExport.ScreenshotPlugins
         {
             if (_autoHideUI)
             {
-                VideoExport._showUi = true;
+                VideoExport.ShowUI = true;
                 SetStudioUIVisibility(true);
             }
         }
