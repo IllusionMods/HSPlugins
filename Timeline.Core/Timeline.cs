@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using BepInEx.Logging;
+using KKAPI.Studio.UI.Toolbars;
 using ToolBox;
 using ToolBox.Extensions;
 using UILib;
@@ -33,6 +34,7 @@ using HarmonyLib;
 using Expression = ExpressionBone;
 using ExtensibleSaveFormat;
 using Sideloader.AutoResolver;
+using KKAPI.Studio.UI;
 #elif AISHOUJO || HONEYSELECT2
 using CharaUtils;
 using ExtensibleSaveFormat;
@@ -150,6 +152,8 @@ namespace Timeline
         private static string _singleFilesFolder;
         private static bool _refreshInterpolablesListScheduled = false;
         private bool _loaded = false;
+        private static TimelineButton _toolbarButton;
+
         private int _totalActiveExpressions = 0;
         private int _currentExpressionIndex = 0;
         private readonly HashSet<Expression> _allExpressions = new HashSet<Expression>();
@@ -278,6 +282,7 @@ namespace Timeline
         private bool _isAreaSelecting;
         private Vector2 _areaSelectFirstPoint;
         private RectTransform _selectionArea;
+
         #endregion
 
         #region Accessors
@@ -291,7 +296,7 @@ namespace Timeline
                 if (_self._isPlaying != value)
                 {
                     _self._isPlaying = value;
-                    TimelineButton.UpdateButton();
+                    _toolbarButton?.UpdateButton();
                 }
             }
         }
@@ -443,8 +448,6 @@ namespace Timeline
             }
 
             InterpolateBefore();
-
-            TimelineButton.OnUpdate();
         }
 
         private void ToggleUiVisible()
@@ -465,7 +468,7 @@ namespace Timeline
             else
             {
                 UIUtility.HideContextMenu();
-                TimelineButton.UpdateButton();
+                _toolbarButton?.UpdateButton();
             }
         }
 
@@ -474,7 +477,7 @@ namespace Timeline
             if (_ui.gameObject.activeSelf && (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(2)) && UIUtility.IsContextMenuDisplayed() && UIUtility.WasClickInContextMenu() == false)
             {
                 UIUtility.HideContextMenu();
-                TimelineButton.UpdateButton();
+                _toolbarButton?.UpdateButton();
             }
 
             InterpolateAfter();
@@ -1095,9 +1098,8 @@ namespace Timeline
 
             _loaded = true;
 
-            // Wrap in a try since it will crash if KKAPI is not installed
-            try { StartCoroutine(TimelineButton.Init()); }
-            catch (Exception ex) { Logger.LogError(ex); }
+            _toolbarButton = new TimelineButton(this);
+            ToolbarManager.AddLeftToolbarControl(_toolbarButton);
         }
 
         private void ScrollKeyframes(Vector2 arg0)
@@ -1495,7 +1497,7 @@ namespace Timeline
 
             this.ExecuteDelayed2(UpdateSeparators, 2);
 
-            TimelineButton.UpdateButton();
+            _toolbarButton?.UpdateButton();
         }
 
         private void UpdateInterpolablesViewTree(List<INode> nodes, bool showAll, ref int interpolableDisplayIndex, ref int headerDisplayIndex, ref float height, int indent = 0)

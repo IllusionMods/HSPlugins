@@ -1613,7 +1613,7 @@ namespace HSPE.AMModules
 
         private bool GizmosEnabled()
         {
-            return _isEnabled && PoseController._drawAdvancedMode;
+            return _isEnabled && PoseController.DrawAdvancedMode;
         }
         #endregion
 

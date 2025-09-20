@@ -8,10 +8,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
+using KKAPI.Studio.UI.Toolbars;
 using ToolBox;
 using ToolBox.Extensions;
 using UILib;
 using UILib.EventHandlers;
+using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -110,8 +112,8 @@ namespace HSPE
         private Button _shortcutKeyButton;
         private bool _shortcutRegisterMode = false;
         private bool _positionOperationWorld = false;
+        private SimpleToolbarButton _toolbarButton;
         private Toggle _optimizeIKToggle;
-        private Image _hspeButtonImage;
         private Toggle _crotchCorrectionToggle;
         private Toggle _leftFootCorrectionToggle;
         private Toggle _rightFootCorrectionToggle;
@@ -143,6 +145,19 @@ namespace HSPE
         public Texture2D vectorMiddle { get; private set; }
         public bool crotchCorrectionByDefault { get { return _crotchCorrectionByDefaultToggle.isOn; } }
         public bool anklesCorrectionByDefault { get { return _anklesCorrectionByDefaultToggle.isOn; } }
+        private bool ShowUI
+        {
+            get => _ui.gameObject.activeSelf;
+            set
+            {
+                if (_ui.gameObject.activeSelf != value)
+                {
+                    _ui.gameObject.SetActive(value);
+                    UpdateToolbarColor();
+                }
+            }
+        }
+
         #endregion
 
         public enum LoadType
@@ -292,13 +307,13 @@ namespace HSPE
             else
                 AdvancedModeModule._repeatTimer = 0f;
             AdvancedModeModule._repeatCalled = false;
-            
+
             BoneReorganizer.Update();
         }
 
         protected virtual void OnGUI()
         {
-            if (_poseTarget != null && PoseController._drawAdvancedMode)
+            if (_poseTarget != null && PoseController.DrawAdvancedMode)
             {
                 _imguiBackground.gameObject.SetActive(true);
                 IMGUIExtensions.DrawBackground(_advancedModeRect);
@@ -402,7 +417,6 @@ namespace HSPE
 #elif HONEYSELECT2
             AssetBundle bundle = AssetBundle.LoadFromMemory(Assembly.GetExecutingAssembly().GetResource("HSPE.Resources.HS2PEResources.unity3d"));
 #endif
-            Texture2D texture = bundle.LoadAsset<Texture2D>("Icon");
             vectorEndCap = bundle.LoadAsset<Texture2D>("VectorEndCap");
             vectorMiddle = bundle.LoadAsset<Texture2D>("VectorMiddle");
             VectorLine.SetEndCap("vector", EndCap.Back, 0f, -1f, 1f, 4f, vectorMiddle, vectorEndCap);
@@ -421,27 +435,23 @@ namespace HSPE
                 while (children.FirstOrDefault(c => (((RectTransform)c).anchoredPosition - anchoredPosition).sqrMagnitude < 4f) != null)
                     anchoredPosition.y += 40f;
 
-                RectTransform original = (RectTransform)children.First();
-                Button hspeButton = Instantiate(original.gameObject).GetComponent<Button>();
-                hspeButton.name = "Button HSPE";
-                hspeButton.interactable = true;
-                hspeButton.transform.SetParent(original.parent, true);
-                hspeButton.transform.localScale = original.localScale;
-                ((RectTransform)hspeButton.transform).anchoredPosition = anchoredPosition;
-                hspeButton.onClick = new Button.ButtonClickedEvent();
-                hspeButton.onClick.AddListener(() =>
-                {
-                    _ui.gameObject.SetActive(!_ui.gameObject.activeSelf);
-                    _hspeButtonImage.color = _ui.gameObject.activeSelf ? Color.green : Color.white;
-                });
-                hspeButton.gameObject.AddComponent<PointerDownHandler>().onPointerDown += eventData =>
-                {
-                    if (eventData.button == PointerEventData.InputButton.Right && _poseTarget != null)
-                        _poseTarget.ToggleAdvancedMode();
-                };
-                _hspeButtonImage = hspeButton.targetGraphic as Image;
-                _hspeButtonImage.sprite = Sprite.Create(texture, new Rect(0f, 0f, 32, 32), new Vector2(16, 16));
-                _hspeButtonImage.color = Color.white;
+                Texture2D toolbarTexture = bundle.LoadAsset<Texture2D>("Icon");
+                DontDestroyOnLoad(toolbarTexture);
+                toolbarTexture.hideFlags = HideFlags.HideAndDontSave;
+
+                _toolbarButton = new SimpleToolbarButton(
+                    "Open window",
+                    "Left click to open PoseEditor window.\nRight click to open advanced mode (an object must be selected).\nIt can be used to freely modify character poses, expressions and much more.\nHotkey: " + HSPE.ConfigMainWindowShortcut.Value,
+                    () => toolbarTexture,
+                    HSPE.Instance, butt =>
+                    {
+                        if (butt == PointerEventData.InputButton.Left)
+                            ShowUI = !ShowUI;
+                        else if (butt == PointerEventData.InputButton.Right && _poseTarget != null)
+                            _poseTarget.ToggleAdvancedMode();
+                        UpdateToolbarColor();
+                    });
+                ToolbarManager.AddLeftToolbarControl(_toolbarButton);
             }
 
             GameObject uiPrefab;
@@ -968,6 +978,12 @@ namespace HSPE
             _imguiBackground = IMGUIExtensions.CreateUGUIPanelForIMGUI();
         }
 
+        internal static void UpdateToolbarColor()
+        {
+            if (_self != null && _self._toolbarButton != null && _self._toolbarButton.ButtonObject != null && _self._toolbarButton.ButtonObject.image != null)
+                _self._toolbarButton.ButtonObject.image.color = PoseController.DrawAdvancedMode ? Color.yellow : _self.ShowUI ? Color.green : Color.white;
+        }
+
         private void OnWindowResize()
         {
             if (_advancedModeRect.xMax > Screen.width)
@@ -1081,8 +1097,7 @@ namespace HSPE
             }
             else if (HSPE.ConfigMainWindowShortcut.Value.IsDown())
             {
-                _ui.gameObject.SetActive(!_ui.gameObject.activeSelf);
-                _hspeButtonImage.color = _ui.gameObject.activeSelf ? Color.green : Color.white;
+                ShowUI = !_ui.gameObject.activeSelf;
             }
 
             if (Input.GetMouseButtonUp(0))
@@ -1241,6 +1256,7 @@ namespace HSPE
             for (int i = 0; i < _rotationButtons.Length; i++)
                 _rotationButtons[i].interactable = interactableRotation;
         }
+
         #endregion
 
         #region Public Methods

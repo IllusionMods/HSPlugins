@@ -61,6 +61,11 @@ namespace HSPE
         #region Public Accessors
         public virtual bool isDraggingDynamicBone { get { return _dynamicBonesEditor.isDraggingDynamicBone; } }
         public GenericOCITarget target { get { return _target; } }
+        public static bool DrawAdvancedMode
+        {
+            get => _drawAdvancedMode;
+        }
+
         #endregion
 
         #region Unity Methods
@@ -138,7 +143,7 @@ namespace HSPE
 
         private void OnGUI()
         {
-            if (_drawAdvancedMode && MainWindow._self._poseTarget == this)
+            if (DrawAdvancedMode && MainWindow._self._poseTarget == this)
             {
                 if (_blendShapesEditor._isEnabled)
                     _blendShapesEditor.OnGUI();
@@ -250,6 +255,8 @@ namespace HSPE
             _drawAdvancedMode = !_drawAdvancedMode;
             foreach (AdvancedModeModule module in _modules)
                 module.DrawAdvancedModeChanged();
+
+            MainWindow.UpdateToolbarColor();
         }
 
         public void EnableModule(AdvancedModeModule module)

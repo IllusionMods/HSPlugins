@@ -1502,7 +1502,7 @@ namespace HSPE.AMModules
 
         private bool GizmosEnabled()
         {
-            return _isEnabled && PoseController._drawAdvancedMode && _colliderTarget != null;
+            return _isEnabled && PoseController.DrawAdvancedMode && _colliderTarget != null;
         }
 
         private void RefreshColliderList()
