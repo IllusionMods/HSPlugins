@@ -1,33 +1,63 @@
 ﻿using System.Collections;
 using System.ComponentModel;
 using System.Linq;
+using BepInEx;
 using BepInEx.Configuration;
-using KKAPI.Studio.UI;
+using KKAPI.Studio.UI.Toolbars;
 using KKAPI.Utilities;
 using UniRx;
-using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace Timeline
 {
-    internal static class TimelineButton
+    internal class TimelineButton : SimpleToolbarButton
     {
         private const float BlinkTime = 0.7f;
-        private static float _blinkTime;
-
         private static ConfigEntry<bool> _nagShown;
+        private Coroutine _currentlyIsPlaying;
+        private bool _currentlyShown;
 
-        private static ToolbarButton _button;
-        private static Image _buttImage;
-        private static bool _currentIsPlaying;
-        private static bool _currentShown;
-
-        private static ToolbarButton AddButton()
+        public TimelineButton(BaseUnityPlugin owner) :
+            base(buttonID: "Timeline",
+                 hoverText: "Left click to play/pause Timeline.\nRight click to open Timeline window.\nThe button is yellow if there is Timeline data present in the scene.",
+                 iconGetter: () => ResourceUtils.GetEmbeddedResource("timeline_button.png").LoadTexture(),
+                 owner: owner)
         {
-            var buttTex = ResourceUtils.GetEmbeddedResource("timeline_button.png").LoadTexture();
-            _button = CustomToolbarButtons.AddLeftToolbarButton(buttTex, () =>
+            _nagShown = owner.Config.Bind("Misc", "Right click nag was shown", false, new ConfigDescription("Nag message shown when first clicking the toolbar button.", null, BrowsableAttribute.No));
+
+            OnClicked.Subscribe(DoClick);
+        }
+
+        public bool CurrentlyIsPlaying
+        {
+            get => _currentlyIsPlaying != null;
+            set
+            {
+                var isPlaying = _currentlyIsPlaying != null;
+                if (isPlaying != value)
+                {
+                    if (isPlaying)
+                    {
+                        ButtonObject.StopCoroutine(_currentlyIsPlaying);
+                        _currentlyIsPlaying = null;
+                    }
+
+                    if (value)
+                        _currentlyIsPlaying = ButtonObject.StartCoroutine(BlinkerCo());
+                }
+            }
+        }
+
+        protected override void CreateControl()
+        {
+            base.CreateControl();
+            UpdateButton();
+        }
+
+        private static void DoClick(PointerEventData.InputButton btn)
+        {
+            if (btn == PointerEventData.InputButton.Left)
             {
                 if (!AnyInterpolables())
                 {
@@ -42,14 +72,12 @@ namespace Timeline
                     _nagShown.Value = true;
                 }
 
-                TogglePlaying();
-            });
-            return _button;
-        }
-
-        private static void TogglePlaying()
-        {
-            Timeline.Play();
+                Timeline.Play();
+            }
+            else
+            {
+                Timeline.InterfaceVisible = !Timeline.InterfaceVisible;
+            }
         }
 
         private static bool AnyInterpolables()
@@ -57,60 +85,36 @@ namespace Timeline
             return Timeline.GetAllInterpolables(false).Any();
         }
 
-        internal static void OnUpdate()
+        private IEnumerator BlinkerCo()
         {
-            if (_currentIsPlaying)
+            var isBlink = true;
+            while (true)
             {
-                _blinkTime += Time.deltaTime;
+                yield return new WaitForSecondsRealtime(BlinkTime);
 
-                if (_blinkTime > BlinkTime)
-                {
-                    UpdateButtonColor();
-                    _blinkTime = 0;
-                }
+                UpdateButtonColor(isBlink);
+                isBlink = !isBlink;
             }
         }
 
-        private static void UpdateButtonColor()
+        private void UpdateButtonColor(bool isBlink)
         {
-            if (!_buttImage) return;
+            if (ButtonObject == null || ButtonObject.image == null) return;
+            var buttImage = ButtonObject.image;
 
-            if (_currentIsPlaying && _blinkTime > BlinkTime && _buttImage.color != Color.yellow)
-                _buttImage.color = Color.yellow;
-            else if (_currentShown)
-                _buttImage.color = Color.green;
+            if (isBlink)
+                buttImage.color = Color.yellow;
+            else if (_currentlyShown)
+                buttImage.color = Color.green;
             else
-                _buttImage.color = !_currentIsPlaying && AnyInterpolables() ? Color.yellow : Color.white;
+                buttImage.color = !CurrentlyIsPlaying && AnyInterpolables() ? Color.yellow : Color.white;
         }
 
-        internal static void UpdateButton()
+        public void UpdateButton()
         {
-            _currentShown = Timeline.InterfaceVisible;
-
-            var isPlaying = Timeline.isPlaying;
-            if (_currentIsPlaying != isPlaying)
-            {
-                _currentIsPlaying = isPlaying;
-                _blinkTime = 0;
-            }
-
-            UpdateButtonColor();
-        }
-
-        internal static IEnumerator Init()
-        {
-            var butt = AddButton();
-
-            yield return new WaitUntil(() => butt.ControlObject != null);
-
-            _buttImage = _button.ControlObject.GetComponent<Button>().image;
-            _buttImage.OnPointerClickAsObservable().Subscribe(data =>
-            {
-                if (data.button != PointerEventData.InputButton.Left)
-                    Timeline.InterfaceVisible = !Timeline.InterfaceVisible;
-            });
-
-            _nagShown = Timeline._self.Config.Bind("Misc", "Right click nag was shown", false, new ConfigDescription("Nag message shown when first clicking the toolbar button.", null, BrowsableAttribute.No));
+            _currentlyShown = Timeline.InterfaceVisible;
+            CurrentlyIsPlaying = Timeline.isPlaying;
+            UpdateButtonColor(false);
         }
     }
 }
