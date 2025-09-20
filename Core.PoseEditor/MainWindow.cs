@@ -455,6 +455,7 @@ namespace HSPE
             uiPrefab = bundle.LoadAsset<GameObject>("HS2PECanvas");
 #endif
             _ui = Instantiate(uiPrefab).GetComponent<Canvas>();
+            _ui.sortingOrder = 3; // Above toolbars but below the add/anim/system submenus
             uiPrefab.hideFlags |= HideFlags.HideInHierarchy;
             _fkBoneTogglePrefab = bundle.LoadAsset<GameObject>("FKBoneTogglePrefab");
             _fkBoneTogglePrefab.hideFlags = HideFlags.HideInHierarchy;
