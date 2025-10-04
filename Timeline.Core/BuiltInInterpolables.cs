@@ -689,7 +689,7 @@ namespace Timeline
                     writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (byte)o)));
 #endif
 
-#if HONEYSELECT2
+#if AISHOUJO || HONEYSELECT2
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,
                     id: "skinWetness",
