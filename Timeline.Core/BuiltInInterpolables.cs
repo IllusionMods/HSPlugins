@@ -689,6 +689,32 @@ namespace Timeline
                     writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (byte)o)));
 #endif
 
+#if HONEYSELECT2
+            Timeline.AddInterpolableModel(new InterpolableModel(
+                    owner: Timeline._ownerId,
+                    id: "skinWetness",
+                    parameter: null,
+                    name: "Skin Wet",
+                    interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((OCIChar)oci).SetWetRate(Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)),
+                    interpolateAfter: null,
+                    isCompatibleWithTarget: (oci) => oci is OCIChar,
+                    getValue: (oci, parameter) => ((OCIChar)oci).charInfo.wetRate,
+                    readValueFromXml: (parameter, node) => node.ReadFloat("value"),
+                    writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o)));
+
+            Timeline.AddInterpolableModel(new InterpolableModel(
+                   owner: Timeline._ownerId,
+                   id: "skinGloss",
+                   parameter: null,
+                   name: "Skin Gloss",
+                   interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((OCIChar)oci).charInfo.skinGlossRate = Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor),
+                   interpolateAfter: null,
+                   isCompatibleWithTarget: (oci) => oci is OCIChar,
+                   getValue: (oci, parameter) => ((OCIChar)oci).charInfo.skinGlossRate,
+                   readValueFromXml: (parameter, node) => node.ReadFloat("value"),
+                   writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o)));
+
+#endif
             Timeline.AddInterpolableModel(new InterpolableModel(
                     owner: Timeline._ownerId,
                     id: "blush",
