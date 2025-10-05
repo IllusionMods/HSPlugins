@@ -1449,6 +1449,12 @@ namespace NodesConstraints
                                 if (newConstraint != null)
                                 {
                                     newConstraint.fixDynamicBone = _displayedConstraint.fixDynamicBone;
+                                    newConstraint.smoothPos.connectionTime = _displayedConstraint.smoothPos.connectionTime;
+                                    newConstraint.smoothPos.disConnectionTime = _displayedConstraint.smoothPos.disConnectionTime;
+                                    newConstraint.smoothRot.connectionTime = _displayedConstraint.smoothRot.connectionTime;
+                                    newConstraint.smoothRot.disConnectionTime = _displayedConstraint.smoothRot.disConnectionTime;
+                                    newConstraint.smoothScale.connectionTime = _displayedConstraint.smoothScale.connectionTime;
+                                    newConstraint.smoothScale.disConnectionTime = _displayedConstraint.smoothScale.disConnectionTime;
                                 }
                             }
                             GUI.enabled = _selectedConstraint != null && _displayedConstraint.parentTransform != null && _displayedConstraint.childTransform != null && (_displayedConstraint.position || _displayedConstraint.rotation || _displayedConstraint.scale) && _displayedConstraint.parentTransform != _displayedConstraint.childTransform;
