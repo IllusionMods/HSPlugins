@@ -59,7 +59,7 @@ namespace Timeline
     {
         #region Constants
         public const string Name = "Timeline";
-        public const string Version = "1.5.3";
+        public const string Version = "1.5.4";
         public const string GUID = "com.joan6694.illusionplugins.timeline";
         internal const string _ownerId = "Timeline";
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
