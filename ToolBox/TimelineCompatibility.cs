@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,7 +11,7 @@ using UnityEngine;
 namespace ToolBox
 {
     // WARNING: This is meant only for use internally in the HSPlugins repo! If you wish to add Timeline compatibility to your own plugin, use this instead:
-    // https://github.com/IllusionMods/IllusionModdingAPI/blob/a5828a6e12c4f101266805f7fd3e635d42e98428/src/Shared.Core/Utilities/TimelineCompatibility.cs#L15
+    // https://gitgoon.dev/IllusionMods/IllusionModdingAPI/blob/a5828a6e12c4f101266805f7fd3e635d42e98428/src/Shared.Core/Utilities/TimelineCompatibility.cs#L15
     internal class TimelineCompatibility
     {
         private static Func<float> _getPlaybackTime;
