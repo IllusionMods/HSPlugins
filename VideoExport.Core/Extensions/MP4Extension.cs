@@ -20,8 +20,8 @@ namespace VideoExport.Extensions
             Faster,
         }
 
-        private readonly string[] _codecNames = {"H.264", "H.265"};
-        private readonly string[] _codecCLIOptions = {"libx264", "libx265" };
+        private readonly string[] _codecNames = { "H.264", "H.265" };
+        private readonly string[] _codecCLIOptions = { "libx264", "libx265" };
         private string[] _presetNames;
         private readonly string[] _presetCLIOptions;
 
@@ -102,9 +102,12 @@ namespace VideoExport.Extensions
 
             string codec = codecOptions[(int)this._codec];
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
-            string codecArgs = $"-vcodec {codec} {tuneArgument} {rateControlArgument} {presetArgument}";
+            //string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
+            //string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
+            string inputArgs = $"-pix_fmt argb -i {framesFolder} {videoFilterArgument}";
+            //string codecArgs = $"-vcodec {codec} {tuneArgument} {rateControlArgument} {presetArgument}";
+            string codecArgs = $"-vcodec {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt} -vf vflip";
             string outputArgs = $"\"{fileName}.mp4\"";
 
             return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";

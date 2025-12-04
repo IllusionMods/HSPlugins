@@ -185,6 +185,14 @@ namespace VideoExport
             MOVCodecTooltip,
             GIFToolTooltip,
             GIFDitheringTooltip,
+            MOVPreset,
+            MOVPresetTooltip,
+            MOVPresetProRes422Proxy,
+            MOVPresetProRes422LT,
+            MOVPresetProRes422,
+            MOVPresetProRes422HQ,
+            MOVPresetProRes4444,
+            MOVPresetProRes4444XQ
         }
 
         private enum LimitDurationType
@@ -268,6 +276,8 @@ namespace VideoExport
         private bool _showCaptureSection;
         private bool _showVideoSection;
         private bool _showOtherSection;
+
+        private StreamWriter _ffmpegStdin;
         #endregion
 
         #region Public Accessors (for other plugins probably)
@@ -289,7 +299,7 @@ namespace VideoExport
                 {
                     _showUI = value;
                     _toolbarButton.Toggled.OnNext(value);
-                    
+
                     if (_imguiBackground == null)
                         _imguiBackground = IMGUIExtensions.CreateUGUIPanelForIMGUI();
                 }
@@ -377,7 +387,7 @@ namespace VideoExport
                     _selectedPlugin = 0;
                 }
             }, 5);
-            
+
             _toolbarButton = new SimpleToolbarToggle(
                 "Open window",
                 "Open VideoExport window. It can be used\nto record at high resolution and stable FPS.\nHotkey: " + ConfigMainWindowShortcut.Value,
@@ -1200,6 +1210,65 @@ namespace VideoExport
                 }
             }
 
+            bool error = false;
+            //if (_autoGenerateVideo && i != 0)
+            if (_autoGenerateVideo)
+            {
+                //_generatingVideo = true;
+                _generatingVideo = false;
+
+                if (_clearSceneBeforeEncoding)
+                    Studio.Studio.Instance.InitScene(false);
+
+                _messageColor = Color.yellow;
+                if (Directory.Exists(_outputFolder.Value) == false)
+                    Directory.CreateDirectory(_outputFolder.Value);
+                _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
+                yield return null;
+                IExtension extension = _extensions[(int)_selectedExtension];
+
+                string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, tempName));
+                //string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+                string arguments = extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+
+                IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
+                Vector2 currentSize = plugin.currentSize;
+                string targetSize = currentSize.x + "x" + currentSize.y;
+
+                arguments = "-s " + targetSize + " " + arguments;
+                Logger.LogInfo($"ffmpeg arguments: {arguments}");
+
+                int totalFrames = i * _exportFps / _fps;
+
+                if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
+                {
+                    string arguments_palettegen = (extension as GIFExtension).GetArgumentsPaletteGen(SimplifyPath(framesFolder), "", "", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+                    Process proc_palettegen = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, false, extension.canProcessStandardError);
+                    //yield return StartCoroutine(HandleProcessOutput(proc_palettegen, totalFrames, false, val => error = val));
+                    StartCoroutine(HandleProcessOutput(proc_palettegen, totalFrames, false, val => error = val));
+                }
+
+                if (error == false)
+                {
+                    Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
+
+                    //yield return StartCoroutine(HandleProcessOutput(proc, totalFrames, extension.canProcessStandardOutput, val => error = val));
+                    StartCoroutine(HandleProcessOutput(proc, totalFrames, extension.canProcessStandardOutput, val => error = val));
+
+                    if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
+                    {
+                        string palettePath = $"{fileName}.palette.png";
+                        if (File.Exists(palettePath))
+                            File.Delete(palettePath);
+                    }
+                }
+            }
+            else
+            {
+                _messageColor = Color.green;
+                _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
+            }
+
             for (; ; i++)
             {
                 if (_limitDuration && i >= limit)
@@ -1227,7 +1296,10 @@ namespace VideoExport
                             }
                             else
                             {
-                                TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
+                                //TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
+                                byte[] frameData = texture.GetRawTextureData();
+                                _ffmpegStdin.BaseStream.Write(frameData, 0, frameData.Length);
+                                _ffmpegStdin.BaseStream.Flush();
                                 Destroy(texture);
                             }
                         }
@@ -1280,53 +1352,11 @@ namespace VideoExport
             foreach (DynamicBone_Ver02 dynamicBone in Resources.FindObjectsOfTypeAll<DynamicBone_Ver02>())
                 dynamicBone.UpdateRate = 60;
 
-            bool error = false;
-            if (_autoGenerateVideo && i != 0)
-            {
-                _generatingVideo = true;
+            // this part get moved to upper side
+            _ffmpegStdin.Close();
+            _generatingVideo = false;
+            Logger.LogInfo($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
 
-                if (_clearSceneBeforeEncoding)
-                    Studio.Studio.Instance.InitScene(false);
-
-                _messageColor = Color.yellow;
-                if (Directory.Exists(_outputFolder.Value) == false)
-                    Directory.CreateDirectory(_outputFolder.Value);
-                _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
-                yield return null;
-                IExtension extension = _extensions[(int)_selectedExtension];
-
-                string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, tempName));
-                string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
-                int totalFrames = i * _exportFps / _fps;
-
-                if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
-                {
-                    string arguments_palettegen = (extension as GIFExtension).GetArgumentsPaletteGen(SimplifyPath(framesFolder), "", "", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
-                    Process proc_palettegen = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, false, extension.canProcessStandardError);
-                    yield return StartCoroutine(HandleProcessOutput(proc_palettegen, totalFrames, false, val => error = val));
-                }
-
-                if (error == false)
-                {
-                    Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
-                    yield return StartCoroutine(HandleProcessOutput(proc, totalFrames, extension.canProcessStandardOutput, val => error = val));
-
-                    if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
-                    {
-                        string palettePath = $"{fileName}.palette.png";
-                        if (File.Exists(palettePath))
-                            File.Delete(palettePath);
-                    }
-                }
-
-                _generatingVideo = false;
-                Logger.LogInfo($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
-            }
-            else
-            {
-                _messageColor = Color.green;
-                _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
-            }
             _progressBarPercentage = 1;
 
             if (_autoDeleteImages && error == false)
@@ -1381,7 +1411,8 @@ namespace VideoExport
                     CreateNoWindow = true,
                     WorkingDirectory = Directory.GetCurrentDirectory() + "\\",
                     RedirectStandardOutput = redirectStandardOutput,
-                    RedirectStandardError = redirectStandardError
+                    RedirectStandardError = redirectStandardError,
+                    RedirectStandardInput = true
                 }
             };
 
@@ -1398,6 +1429,9 @@ namespace VideoExport
                 };
             }
             proc.Start();
+
+            _ffmpegStdin = new StreamWriter(proc.StandardInput.BaseStream);
+
             if (redirectStandardOutput)
             {
                 proc.BeginOutputReadLine();
