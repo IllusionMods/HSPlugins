@@ -83,11 +83,37 @@ namespace VideoExport.Extensions
         public string GetArgumentsPaletteGen(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
             int coreCount = _coreCount;
-            string videoFilterArgument = $"-vf \"palettegen=stats_mode=diff:max_colors={_maxColors}\"";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {videoFilterArgument}";
-            string outputArgs = $"\"{fileName}.palette.png\"";
+            //string videoFilterArgument = $"-vf \"palettegen=stats_mode=diff:max_colors={_maxColors}\"";
+            string paletteGen = $"palettegen=stats_mode=diff:max_colors={_maxColors}";
+            string dithering = _ffmpegDitheringNames[(int)_ffmpegDithering];
+            string paletteUse = $"paletteuse=dither={dithering}";
+
+            string scale = "";
+            if (resize)
+            {
+                scale = $",scale={resizeX}:-1:flags=lanczos";
+            }
+
+            string filterGraph = $"[0:v] fps={fps}{scale} [x]; [x] split [x0][x1]; [x0] {paletteGen} [p]; [x1][p] {paletteUse}";
+            /*string filterGraph;
+            if (resize)
+            {
+                filterGraph = $"[0:v] fps={fps},scale={resizeX}:-1:flags=lanczos [x]; [x] split [x0][x1]; [x0] {paletteGen} [p]; [x1][p] {paletteUse}";
+            }
+            else
+            {
+                filterGraph = $"[0:v] fps={fps} [x]; [x] split [x0][x1]; [x0] {paletteGen} [p]; [x1][p] {paletteUse}";
+            }*/
+
+            string videoFilterArgument = $"-filter_complex \"{filterGraph}\"";
+
+            //string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
+            string ffmpegArgs = $"-loglevel error -threads {coreCount} -progress pipe:1";
+            //string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {videoFilterArgument}";
+            string inputArgs = $"-i \"{fileName}.mov\" {videoFilterArgument}";
+            //string outputArgs = $"\"{fileName}.palette.png\"";
+            string outputArgs = $"\"{fileName}.gif\"";
 
             return $"{ffmpegArgs} {inputArgs} {outputArgs}";
         }
@@ -102,13 +128,24 @@ namespace VideoExport.Extensions
             {
                 int coreCount = _coreCount;
 
-                string videoFilterArgument = CompileFiltersComplex(resize, resizeX, resizeY);
+                //string videoFilterArgument = CompileFiltersComplex(resize, resizeX, resizeY);
+                string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
-                string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-                string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -i {fileName}.palette.png {videoFilterArgument}";
-                string outputArgs = $"\"{fileName}.gif\"";
+                string codec = "prores";
+                string codecProfileName = "2";
+                string codecExtraArgs = "-profile:v " + codecProfileName;
+                //string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
+                string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
+                //string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -i {fileName}.palette.png {videoFilterArgument}";
+                string inputArgs = $"-pix_fmt argb -i {framesFolder} {videoFilterArgument}";
 
-                return $"{ffmpegArgs} {inputArgs} {outputArgs}";
+                string videoPixelFormatArg = "yuv422p10le";
+                string codecArgs = $"-vf format={videoPixelFormatArg},vflip -c:v {codec} {codecExtraArgs}";
+                //string outputArgs = $"\"{fileName}.gif
+                string outputArgs = $"\"{fileName}.mov\"";
+
+                //return $"{ffmpegArgs} {inputArgs} {outputArgs}";
+                return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
             }
         }
 
