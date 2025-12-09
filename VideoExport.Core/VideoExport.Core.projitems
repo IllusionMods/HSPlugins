@@ -29,9 +29,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)VideoExport.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg-64.exe">
+    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>VideoExport\ffmpeg\ffmpeg-64.exe</TargetPath>
+      <TargetPath>VideoExport\ffmpeg\ffmpeg.exe</TargetPath>
     </ContentWithTargetPath>
     <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)ffmpeg\LICENSE.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

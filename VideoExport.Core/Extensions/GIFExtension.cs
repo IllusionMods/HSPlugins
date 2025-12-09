@@ -96,15 +96,6 @@ namespace VideoExport.Extensions
             }
 
             string filterGraph = $"[0:v] fps={fps}{scale} [x]; [x] split [x0][x1]; [x0] {paletteGen} [p]; [x1][p] {paletteUse}";
-            /*string filterGraph;
-            if (resize)
-            {
-                filterGraph = $"[0:v] fps={fps},scale={resizeX}:-1:flags=lanczos [x]; [x] split [x0][x1]; [x0] {paletteGen} [p]; [x1][p] {paletteUse}";
-            }
-            else
-            {
-                filterGraph = $"[0:v] fps={fps} [x]; [x] split [x0][x1]; [x0] {paletteGen} [p]; [x1][p] {paletteUse}";
-            }*/
 
             string videoFilterArgument = $"-filter_complex \"{filterGraph}\"";
 

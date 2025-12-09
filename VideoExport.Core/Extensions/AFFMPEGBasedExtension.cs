@@ -41,7 +41,8 @@ namespace VideoExport.Extensions
         {
             this._ffmpegFolder = Path.Combine(VideoExport._pluginFolder, "ffmpeg");
             if (IntPtr.Size == 8)
-                this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg-64.exe"));
+                //this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg-64.exe"));
+                this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg.exe"));
             else
             {
                 // Since KK is the oldest supported game now, all games are 64bit
