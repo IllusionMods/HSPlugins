@@ -46,16 +46,15 @@ namespace VideoExport.Extensions
             string codec = _codecCLIOptions[(int)this._codec];
             string codecProfileName = _codecProfiles[(int)this._codecProfile];
             //string codecExtraArgs = "-profile 4 -alpha_bits 8 -bits_per_mb 250 -mbs_per_slice 4";
-            //string codecExtraArgs = "-profile:v 3";
             string codecExtraArgs = "-profile:v " + codecProfileName;
 
             //string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
             //string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
-            string inputArgs = $"-pix_fmt argb -i {framesFolder} {videoFilterArgument}";
+            string inputArgs = $"-pix_fmt argb -i {framesFolder}";
 
             string videoPixelFormatArg = (int)this._codecProfile > 3 ? "yuva444p10le" : "yuv422p10le";
-            string codecArgs = $"-vf format={videoPixelFormatArg},vflip -c:v {codec} {codecExtraArgs}";
+            string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}, format={videoPixelFormatArg}\"";
             string outputArgs = $"\"{fileName}.mov\"";
 
             return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";

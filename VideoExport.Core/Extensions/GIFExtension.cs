@@ -107,7 +107,7 @@ namespace VideoExport.Extensions
                 string lossyQuality;
 
                 //return $"{(resize ? $"-W {resizeX} -H {resizeY}" : "")} --fps {fps} -o \"{fileName}.gif\" \"{framesFolder}\"\\{prefix}*{postfix}.{inputExtension} --quiet";
-                return $"{(resize ? $"-W {resizeX} -H {resizeY}" : "")} --fps {fps} -o \"{fileName}.gif\" \"{fileName}.mov\" --quiet";
+                return $"{(resize ? $"-W {resizeX} -H {resizeY}" : "")} -o \"{fileName}.gif\" \"{fileName}.mov\" --quiet";
             }
             else
             {
@@ -150,10 +150,10 @@ namespace VideoExport.Extensions
             //string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
             //string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -i {fileName}.palette.png {videoFilterArgument}";
-            string inputArgs = $"-pix_fmt argb -i {framesFolder} {videoFilterArgument}";
+            string inputArgs = $"-pix_fmt argb -i {framesFolder}";
 
             string videoPixelFormatArg = "yuv422p10le";
-            string codecArgs = $"-vf format={videoPixelFormatArg},vflip -c:v {codec} {codecExtraArgs}";
+            string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}, format={videoPixelFormatArg}\"";
             //string outputArgs = $"\"{fileName}.gif
             string outputArgs = $"\"{fileName}.mov\"";
 

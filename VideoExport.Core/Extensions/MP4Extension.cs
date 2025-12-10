@@ -105,9 +105,9 @@ namespace VideoExport.Extensions
             //string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
             //string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
-            string inputArgs = $"-pix_fmt argb -i {framesFolder} {videoFilterArgument}";
+            string inputArgs = $"-pix_fmt argb -i {framesFolder}";
             //string codecArgs = $"-vcodec {codec} {tuneArgument} {rateControlArgument} {presetArgument}";
-            string codecArgs = $"-vcodec {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt} -vf vflip";
+            string codecArgs = $"-vcodec {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.mp4\"";
 
             return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";

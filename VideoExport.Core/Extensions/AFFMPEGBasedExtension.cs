@@ -162,10 +162,19 @@ namespace VideoExport.Extensions
                 hasFilters = true;
             }
 
+            /*if (hasFilters)
+                res = "-vf \"" + res + "\"";*/
             if (hasFilters)
-                res = "-vf \"" + res + "\"";
+            {
+                res = res + ", vflip";
+            }
+            else
+            {
+                res = "vflip";
+            }
 
-            return res;
+
+                return res;
         }
     }
 }
