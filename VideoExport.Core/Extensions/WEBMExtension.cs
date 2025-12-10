@@ -40,6 +40,7 @@ namespace VideoExport.Extensions
 
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
+            int coreCount = _coreCount;
             string pixFmt;
             switch (bitDepth)
             {
@@ -51,7 +52,15 @@ namespace VideoExport.Extensions
                     pixFmt = transparency ? "yuva420p10le -metadata:s:v:0 alpha_mode=\"1\"" : "yuv420p10le";
                     break;
             }
-            return $"-loglevel error -r {fps} -f image2 -i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {this.CompileFilters(resize, resizeX, resizeY)} -c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : " -qmin 0")} -pix_fmt {pixFmt} -auto-alt-ref 0 -crf {this._quality} {(this._codec == Codec.VP8 ? "-b:v 10M" : "-b:v 0")} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -threads {_coreCount} -progress pipe:1 \"{fileName}.webm\"";
+            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
+
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
+            string inputArgs = $"-pix_fmt argb -i {framesFolder}";
+            string codecArgs = $"-c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : "")} -pix_fmt {pixFmt} -crf {this._quality} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -cpu-used 5 -vf \"{videoFilterArgument}\"";
+            string outputArgs = $"\"{fileName}.webm\"";
+
+            //return $"-loglevel error -r {fps} -f image2 -i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {this.CompileFilters(resize, resizeX, resizeY)} -c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : " -qmin 0")} -pix_fmt {pixFmt} -auto-alt-ref 0 -crf {this._quality} {(this._codec == Codec.VP8 ? "-b:v 10M" : "-b:v 0")} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -threads {_coreCount} -progress pipe:1 \"{fileName}.webm\"";
+            return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
         }
 
         public override void UpdateLanguage()
