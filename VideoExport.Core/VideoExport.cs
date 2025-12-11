@@ -1225,10 +1225,8 @@ namespace VideoExport
             }
 
             bool error = false;
-            //if (_autoGenerateVideo && i != 0)
             if (_autoGenerateVideo)
             {
-                //_generatingVideo = true;
                 _generatingVideo = false;
 
                 if (_clearSceneBeforeEncoding)
@@ -1242,7 +1240,6 @@ namespace VideoExport
                 IExtension extension = _extensions[(int)_selectedExtension];
 
                 string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, tempName));
-                //string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
                 string arguments = extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
 
                 IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
@@ -1250,24 +1247,14 @@ namespace VideoExport
                 string targetSize = currentSize.x + "x" + currentSize.y;
 
                 arguments = "-s " + targetSize + " " + arguments;
-                //Logger.LogInfo($"ffmpeg master arguments: {arguments}");
 
                 int totalFrames = i * _exportFps / _fps;
 
                 if (error == false)
                 {
-                    //Process proc = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError);
                     _ffmpegProcessMaster = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError, true);
 
-                    //yield return StartCoroutine(HandleProcessOutput(proc, totalFrames, extension.canProcessStandardOutput, val => error = val));
                     StartCoroutine(HandleProcessOutput(_ffmpegProcessMaster, totalFrames, extension.canProcessStandardOutput, val => error = val, true));
-
-                    /*if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
-                    {
-                        string palettePath = $"{fileName}.palette.png";
-                        if (File.Exists(palettePath))
-                            File.Delete(palettePath);
-                    }*/
 
                     InitializeRecoder((int)currentSize.x, (int)currentSize.y);
                 }
@@ -1276,12 +1263,9 @@ namespace VideoExport
                 if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
                 {
                     string arguments_palettegen = (extension as GIFExtension).GetArgumentsPaletteGen(SimplifyPath(framesFolder), "", "", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
-                    //Process proc_palettegen = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, false, extension.canProcessStandardError);
-
-                    //Logger.LogInfo($"ffmpeg slave arguments: {arguments_palettegen}");
 
                     _ffmpegProcessSlave = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, false, extension.canProcessStandardError, false);
-                    //yield return StartCoroutine(HandleProcessOutput(proc_palettegen, totalFrames, false, val => error = val));
+
                     StartCoroutine(HandleProcessOutput(_ffmpegProcessSlave, totalFrames, false, val => error = val, false));
                 }
             }
@@ -1386,7 +1370,6 @@ namespace VideoExport
             foreach (DynamicBone_Ver02 dynamicBone in Resources.FindObjectsOfTypeAll<DynamicBone_Ver02>())
                 dynamicBone.UpdateRate = 60;
 
-            // this part get moved to upper side
             if (_autoGenerateVideo)
             {
                 _ffmpegStdin.Close();
@@ -1511,17 +1494,6 @@ namespace VideoExport
                     }
                 };
             }
-            /*proc.Start();
-
-            if (redirectStandardInput)
-            {
-                _ffmpegStdin = new StreamWriter(proc.StandardInput.BaseStream);
-            }
-
-            if (redirectStandardOutput)
-            {
-                proc.BeginOutputReadLine();
-            }*/
 
             return proc;
         }
@@ -1577,23 +1549,18 @@ namespace VideoExport
 
         private IEnumerator HandleProcessOutput(Process proc, int totalFrames, bool hasProgressOutput, Action<bool> setError, bool isMaster)
         {
-            // wait for FFmpeg master process
             if (!isMaster)
             {
                 yield return StartCoroutine(WaitForFFmpegExit());
             }
 
-            //Logger.LogInfo("HandleProcessOutput() start");
-
             proc.Start();
 
-            //if (redirectStandardInput)
             if (proc.StartInfo.RedirectStandardInput)
             {
                 _ffmpegStdin = new StreamWriter(proc.StandardInput.BaseStream);
             }
 
-            //if (redirectStandardOutput)
             if (proc.StartInfo.RedirectStandardOutput)
             {
                 proc.BeginOutputReadLine();

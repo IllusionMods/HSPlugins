@@ -41,12 +41,10 @@ namespace VideoExport.Extensions
         {
             this._ffmpegFolder = Path.Combine(VideoExport._pluginFolder, "ffmpeg");
             if (IntPtr.Size == 8)
-                //this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg-64.exe"));
                 this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg.exe"));
             else
             {
                 // Since KK is the oldest supported game now, all games are 64bit
-                //this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg.exe"));
                 throw new InvalidOperationException("We're somehow running in a 32bit environment?");
             }
             _rotation = (Rotation)VideoExport._configFile.AddInt("ffmpegRotation", (int)Rotation.None, true);
@@ -154,21 +152,12 @@ namespace VideoExport.Extensions
 
             if (_rotation != Rotation.None)
             {
-                // who made this?
-                /*for (int i = 0; i < (int)_rotation; i++)
-                {
-                    if (hasFilters == false && i == 0)
-                        res += "transpose=1";
-                    else
-                        res += ",transpose=1";
-                }*/
                 if (hasFilters == true)
                     res += ", ";
 
                 switch ((int)_rotation)
                 {
                     case 0:
-                        // impossible routine
                         Debug.Log("something gone wrong with _rotation in CompileFilters()");
                         break;
                     case 1:
@@ -192,9 +181,6 @@ namespace VideoExport.Extensions
                 res += additionalFiltersPost;
                 hasFilters = true;
             }
-
-            /*if (hasFilters)
-                res = "-vf \"" + res + "\"";*/
 
             return res;
         }

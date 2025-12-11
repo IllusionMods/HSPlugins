@@ -59,7 +59,6 @@ namespace VideoExport.Extensions
             string codecArgs = $"-c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : "")} -pix_fmt {pixFmt} -crf {this._quality} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -cpu-used 5 -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.webm\"";
 
-            //return $"-loglevel error -r {fps} -f image2 -i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {this.CompileFilters(resize, resizeX, resizeY)} -c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : " -qmin 0")} -pix_fmt {pixFmt} -auto-alt-ref 0 -crf {this._quality} {(this._codec == Codec.VP8 ? "-b:v 10M" : "-b:v 0")} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -threads {_coreCount} -progress pipe:1 \"{fileName}.webm\"";
             return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
         }
 

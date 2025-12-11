@@ -51,7 +51,6 @@ namespace VideoExport.Extensions
 
         public bool IsPaletteGenRequired()
         {
-            //return this._gifTool == GifTool.FFmpeg;
             return true;
         }
 
@@ -80,9 +79,6 @@ namespace VideoExport.Extensions
 
         public override string GetExecutable()
         {
-            /*if (_gifTool == GifTool.Gifski)
-                return this._gifskiExe;
-            return base.GetExecutable();*/
             if (_gifTool == GifTool.Gifski && _isSlave == false)
             {
                 _isSlave = true;
@@ -106,12 +102,10 @@ namespace VideoExport.Extensions
             if (this._gifTool == GifTool.Gifski)
             {
                 string gifskiArgs = $"--quality {_gifskiQuality} --motion-quality {_gifskiMotionQuality} --lossy-quality {_gifskiLossyQuality}";
-                //return $"{(resize ? $"-W {resizeX} -H {resizeY}" : "")} --fps {fps} -o \"{fileName}.gif\" \"{framesFolder}\"\\{prefix}*{postfix}.{inputExtension} --quiet";
                 return $"{gifskiArgs} {(resize ? $"-W {resizeX} -H {resizeY}" : "")} -o \"{fileName}.gif\" \"{fileName}.mov\" --quiet";
             }
             else
             {
-                //string videoFilterArgument = $"-vf \"palettegen=stats_mode=diff:max_colors={_maxColors}\"";
                 string paletteGen = $"palettegen=stats_mode=diff:max_colors={_maxColors}";
                 string dithering = _ffmpegDitheringNames[(int)_ffmpegDithering];
                 string paletteUse = $"paletteuse=dither={dithering}";
@@ -126,11 +120,8 @@ namespace VideoExport.Extensions
 
                 string videoFilterArgument = $"-filter_complex \"{filterGraph}\"";
 
-                //string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
                 string ffmpegArgs = $"-loglevel error -threads {coreCount} -progress pipe:1";
-                //string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {videoFilterArgument}";
                 string inputArgs = $"-i \"{fileName}.mov\" {videoFilterArgument}";
-                //string outputArgs = $"\"{fileName}.palette.png\"";
                 string outputArgs = $"\"{fileName}.gif\"";
 
                 return $"{ffmpegArgs} {inputArgs} {outputArgs}";
@@ -141,23 +132,18 @@ namespace VideoExport.Extensions
         {
             int coreCount = _coreCount;
 
-            //string videoFilterArgument = CompileFiltersComplex(resize, resizeX, resizeY);
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
             string codec = "prores";
             string codecProfileName = "2";
             string codecExtraArgs = "-profile:v " + codecProfileName;
-            //string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
-            //string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -i {fileName}.palette.png {videoFilterArgument}";
-            string inputArgs = $"-pix_fmt argb -i {framesFolder}";
-
             string videoPixelFormatArg = "yuv422p10le";
+
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
+            string inputArgs = $"-pix_fmt argb -i {framesFolder}";
             string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}, format={videoPixelFormatArg}\"";
-            //string outputArgs = $"\"{fileName}.gif
             string outputArgs = $"\"{fileName}.mov\"";
 
-            //return $"{ffmpegArgs} {inputArgs} {outputArgs}";
             return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
         }
 

@@ -1,120 +1,120 @@
 <root>
-	<string key="CurrentSize" value="Current Size" />
-	<string key="Framerate" value="Framerate" />
-	<string key="ExportFramerate" value="Video Framerate" />
-	<string key="AutoDeleteImages" value="Auto Delete Images" />
-	<string key="LimitBy" value="Limit By" />
-	<string key="LimitByFrames" value="Frames" />
-	<string key="LimitBySeconds" value="Seconds" />
-	<string key="LimitByAnimation" value="Animation" />
-	<string key="LimitByTimeline" value="Timeline" />
-	<string key="LimitByPrewarmLoopCount" value="Prewarm Loop Count" />
-	<string key="LimitByLoopsToRecord" value="Loops To Record" />
-	<string key="LimitByLimitCount" value="Limit Count" />
-	<string key="Seconds" value="seconds" />
-	<string key="Frames" value="frames" />
-	<string key="Resize" value="Resize" />
-	<string key="ResizeDefault" value="Default" />
-	<string key="Format" value="Format" />
-	<string key="DBUpdateMode" value="Dynamic Bones Update Mode" />
-	<string key="DBDefault" value="Default" />
-	<string key="DBEveryFrame" value="Every Frame" />
-	<string key="EmptyScene" value="Empty Scene Before Encoding" />
-	<string key="CloseStudio" value="Close Studio When Done" />
-	<string key="ParallelScreenshotEncoding" value="Parallel Encoding (BETA)" />
-	<string key="StartRecordingOnNextClick" value="Start Recording On Next Click" />
-	<string key="StartRecording" value="Start Recording" />
-	<string key="StopRecording" value="Stop Recording" />
-	<string key="PrewarmingAnimation" value="Prewarming animation" />
-	<string key="RealignTimeline" value="Realign timeline to 00:00.00" />
-	<string key="TakingScreenshot" value="Taking screenshot" />
-	<string key="ETA" value="ETA" />
-	<string key="Elapsed" value="Elapsed" />
-	<string key="GeneratingVideo" value="Generating video" />
-	<string key="Done" value="Done!" />
-	<string key="GeneratingError" value="Error while generating the video, please check your output_log.txt file." />
-	<string key="VideosFolderDesc" value="The folder where videos are stored" />
-	<string key="FramesFolderDesc" value="The folder where frames are stored" />
-	<string key="BuiltInCaptureTool" value="Built-in" />
-	<string key="Win32CaptureTool" value="Win32" />
-	<string key="SizeMultiplier" value="Size Multiplier" />
-	<string key="CaptureMode" value="Capture Mode" />
-	<string key="CaptureModeNormal" value="Normal" />
-	<string key="CaptureModeImmediate" value="Immediate" />
-	<string key="CaptureModeWin32" value="Win32" />
-	<string key="ImageFormat" value="Image Format" />
-	<string key="ScreencapCaptureType" value="Capture Type" />
-	<string key="ScreencapCaptureTypeNormal" value="Normal" />
-	<string key="ScreencapCaptureType360" value="360" />
-	<string key="Screencap3D" value="3D" />
-	<string key="Rotation" value="Rotation" />
-	<string key="RotationNone" value="None" />
-	<string key="Rotation90" value="90° CW" />
-	<string key="Rotation180" value="180°" />
-	<string key="Rotation270" value="90° CCW" />
-	<string key="BitDepthError" value="The current video format does not support this bit depth." />
-	<string key="GIFError" value="Gifski tool is only compatible with PNG images." />
-	<string key="Codec" value="Codec" />
-	<string key="HwAccelCodec" value="Use GPU-accelerated codec" />
-	<string key="MP4Preset" value="Encoding Preset" />
-	<string key="MP4PresetSlower" value="Quality" />
-	<string key="MP4PresetMedium" value="Balanced" />
-	<string key="MP4PresetFaster" value="Speed" />
-	<string key="WEBMCodec" value="Codec" />
-	<string key="MP4Quality" value="Quality (lower is better, 18 is recommended)" />
-	<string key="VP8Quality" value="Quality (lower is better, 10 is recommended)" />
-	<string key="VP9Quality" value="Quality (lower is better, 30 is recommended)" />
-	<string key="WEBPQuality" value="Quality (higher is better, 75 is recommended)" />
-	<string key="AVIFQuality" value="Quality (lower is better, 28 is recommended)" />
-	<string key="WEBMDeadline" value="Encoding Preset" />
-	<string key="WEBMDeadlineBest" value="Quality" />
-	<string key="WEBMDeadlineGood" value="Balanced" />
-	<string key="WEBMDeadlineRealtime" value="Speed" />
-	<string key="ShowTooltips" value="Show Tooltips" />
-	<string key="CaptureSettingsHeading" value="Capture Settings" />
-	<string key="VideoSettingsHeading" value="Video Settings" />
-	<string key="OtherSettingsHeading" value="Other Settings" />
-	<string key="ScreenshotTool" value="Screenshot Tool" />
-	<string key="Extension" value="Extension" />
-	<string key="GIFTool" value="GIF Tool" />
-	<string key="GIFMaxColors" value="Max Colors" />
-	<string key="GIFDithering" value="Dithering" />
-	<string key="CreateVideo" value="Create Video" />
-	<string key="AutoHideUI" value="Auto Hide UI"/>
-	<string key="RemoveAlphaChannel" value="Remove Alpha Channel"/>
-	<string key="FramerateTooltip" value="The frame rate at which the game is captured." />
-	<string key="ExportFramerateTooltip" value="The frame rate of the exported video." />
-	<string key="DBUpdateModeTooltip" value="The rate at which DynamicBone physics update. Default is 60/s." />
-	<string key="ScreenshotToolTooltip" value="The tool used to take screenshots:\n[Screenshot Manager] the Screencap plugin (uses its settings)\n[Builtin] VideoExport's internal screenshot implementation\n[Reshade] uses KKReshade addon to capture Reshade effects" />
-	<string key="LimitByTooltip" value="Limit recording by:\n[Frames] record for a number of frames\n[Seconds] record for a number of seconds\n[Animation] record for the length of a builtin animation (selected character)\n[Timeline] record for the length of the timeline" />
-	<string key="LimitByPrewarmLoopCountTooltip" value="Runs warm-up loops before starting the capture.\nCan be used to align physics and record a loop animation." />
-	<string key="LimitByLoopsToRecordTooltip" value="Reconds a number of loops of timeline / animation." />
-	<string key="LimitByLimitCountTooltip" value="Records for a number of selected frames / seconds." />
-	<string key="RealignTimelineTooltip" value="Set timeline to 00:00 and wait for physics before recording." />
-	<string key="ParallelEncodingTooltip" value="Performance setting. Disable this if recording fails." />
-	<string key="CaptureModeTooltip" value="[Normal] Recommended. Renders the camera to guarantee up-to-date frame. \n[Immediate] Faster, assumes the camera is already rendered." />
-	<string key="ImageFormatTooltip" value="[BMP] Lossless, very fast encoding, large space requirement\n[PNG] Lossless, slow encoding, medium space requirement\n[JPG] Lossy, fast encoding, low space requirement\n[EXR] Lossless, very slow encoding, large space requirement, HDR" />
-	<string key="ExtensionTooltip" value="[MP4] General purpose widely supported video format\n[WEBM] Video format optimized for web\n[GIF] Old image format for short clips and loops\n[MOV] Video format used in professional editing (high space requirement)\n[WEBP] Image format optimized for web (supports animation)\n[AVIF] Modern image format based on the AV1 codec (supports animation)" />
-	<string key="RemoveAlphaChannelTooltip" value="Some Reshade effects do not play well with the alpha channel.\nEnable this if the PNG screenshots are fully transparent.\nAlso makes the PNGs smaller."/>
-	<string key="MP4CodecTooltip" value="[H.264] Widely used and supported. Recommended.\n[H.265] More efficient, but may not be fully supported everywhere."/>
-	<string key="WEBMCodecTooltip" value="[VP8] Widely used and supported. Recommended.\n[VP9] More efficient, but many not be fully supported everywhere."/>
-	<string key="MOVCodecTooltip" value="[ProRes] Produces very large files meant for professional video editing." />
-	<string key="AVIFCodecTooltip" value="[Libaom-av1] Widely supported, lossless quality, slow encoding.\n[Libsvt-av1] Good quality, fast encoding." />
-	<string key="HwAccelCodecTooltip" value="Fast encoding using GPU accelerated codecs.\nLess efficient, produces larger files for the same quality."/>
-	<string key="GIFToolTooltip" value="[FFmpeg] Good quality, widely supported. Slightly larger.\n         Global palette, 256 colors total. Dithering optional.\n[Gifsky] Highest quality, smoother, but may cause flickering.\n         Local palette, 256 colors per frame. Dithering mandatory." />
-	<string key="GIFDitheringTooltip" value="Fakes colors outside of the limited palette:\n[none] No dithering. Recommended until visually necessary.\n[bayer] Creates visible dither patterns/aesthetic.\n[floyd_steinberg] Creates smooth gradients and relatively low noise." />
-	<string key="MOVPreset" value="Encoding Preset" />
-	<string key="MOVPresetTooltip" value="[ProRes422Proxy] Lowest.\n[ProRes422LT] Low.\n[ProRes422] Moderate.\n[ProRes422HQ] Standard.\n[ProRes4444] High.\n[ProRes4444XQ] Highest" />
-	<string key="MOVPresetProRes422Proxy" value="ProRes422Proxy" />
-	<string key="MOVPresetProRes422LT" value="ProRes422LT" />
-	<string key="MOVPresetProRes422" value="ProRes422" />
-	<string key="MOVPresetProRes422HQ" value="ProRes422HQ" />
-	<string key="MOVPresetProRes4444" value="ProRes4444" />
-	<string key="MOVPresetProRes4444XQ" value="ProRes4444XQ" />
-	<string key="GIFSKIQuality" value="Quality" />
-	<string key="GIFSKIMotionQuality" value="MotionQuality" />
-	<string key="GIFSKILossyQuality" value="LossyQuality" />
-	<string key="GIFSKIQualityTooltip" value="Lower quality may give smaller file [default: 90]" />
-	<string key="GIFSKIMotionQualityTooltip" value="Lower values reduce motion" />
-	<string key="GIFSKILossyQualityTooltip" value="Lower values introduce noise and streaks" />
+  <string key="CurrentSize" value="Current Size" />
+  <string key="Framerate" value="Framerate" />
+  <string key="ExportFramerate" value="Video Framerate" />
+  <string key="AutoDeleteImages" value="Auto Delete Images" />
+  <string key="LimitBy" value="Limit By" />
+  <string key="LimitByFrames" value="Frames" />
+  <string key="LimitBySeconds" value="Seconds" />
+  <string key="LimitByAnimation" value="Animation" />
+  <string key="LimitByTimeline" value="Timeline" />
+  <string key="LimitByPrewarmLoopCount" value="Prewarm Loop Count" />
+  <string key="LimitByLoopsToRecord" value="Loops To Record" />
+  <string key="LimitByLimitCount" value="Limit Count" />
+  <string key="Seconds" value="seconds" />
+  <string key="Frames" value="frames" />
+  <string key="Resize" value="Resize" />
+  <string key="ResizeDefault" value="Default" />
+  <string key="Format" value="Format" />
+  <string key="DBUpdateMode" value="Dynamic Bones Update Mode" />
+  <string key="DBDefault" value="Default" />
+  <string key="DBEveryFrame" value="Every Frame" />
+  <string key="EmptyScene" value="Empty Scene Before Encoding" />
+  <string key="CloseStudio" value="Close Studio When Done" />
+  <string key="ParallelScreenshotEncoding" value="Parallel Encoding (BETA)" />
+  <string key="StartRecordingOnNextClick" value="Start Recording On Next Click" />
+  <string key="StartRecording" value="Start Recording" />
+  <string key="StopRecording" value="Stop Recording" />
+  <string key="PrewarmingAnimation" value="Prewarming animation" />
+  <string key="RealignTimeline" value="Realign timeline to 00:00.00" />
+  <string key="TakingScreenshot" value="Taking screenshot" />
+  <string key="ETA" value="ETA" />
+  <string key="Elapsed" value="Elapsed" />
+  <string key="GeneratingVideo" value="Generating video" />
+  <string key="Done" value="Done!" />
+  <string key="GeneratingError" value="Error while generating the video, please check your output_log.txt file." />
+  <string key="VideosFolderDesc" value="The folder where videos are stored" />
+  <string key="FramesFolderDesc" value="The folder where frames are stored" />
+  <string key="BuiltInCaptureTool" value="Built-in" />
+  <string key="Win32CaptureTool" value="Win32" />
+  <string key="SizeMultiplier" value="Size Multiplier" />
+  <string key="CaptureMode" value="Capture Mode" />
+  <string key="CaptureModeNormal" value="Normal" />
+  <string key="CaptureModeImmediate" value="Immediate" />
+  <string key="CaptureModeWin32" value="Win32" />
+  <string key="ImageFormat" value="Image Format" />
+  <string key="ScreencapCaptureType" value="Capture Type" />
+  <string key="ScreencapCaptureTypeNormal" value="Normal" />
+  <string key="ScreencapCaptureType360" value="360" />
+  <string key="Screencap3D" value="3D" />
+  <string key="Rotation" value="Rotation" />
+  <string key="RotationNone" value="None" />
+  <string key="Rotation90" value="90° CW" />
+  <string key="Rotation180" value="180°" />
+  <string key="Rotation270" value="90° CCW" />
+  <string key="BitDepthError" value="The current video format does not support this bit depth." />
+  <string key="GIFError" value="Gifski tool is only compatible with PNG images." />
+  <string key="Codec" value="Codec" />
+  <string key="HwAccelCodec" value="Use GPU-accelerated codec" />
+  <string key="MP4Preset" value="Encoding Preset" />
+  <string key="MP4PresetSlower" value="Quality" />
+  <string key="MP4PresetMedium" value="Balanced" />
+  <string key="MP4PresetFaster" value="Speed" />
+  <string key="WEBMCodec" value="Codec" />
+  <string key="MP4Quality" value="Quality (lower is better, 18 is recommended)" />
+  <string key="VP8Quality" value="Quality (lower is better, 10 is recommended)" />
+  <string key="VP9Quality" value="Quality (lower is better, 30 is recommended)" />
+  <string key="WEBPQuality" value="Quality (higher is better, 75 is recommended)" />
+  <string key="AVIFQuality" value="Quality (lower is better, 28 is recommended)" />
+  <string key="WEBMDeadline" value="Encoding Preset" />
+  <string key="WEBMDeadlineBest" value="Quality" />
+  <string key="WEBMDeadlineGood" value="Balanced" />
+  <string key="WEBMDeadlineRealtime" value="Speed" />
+  <string key="ShowTooltips" value="Show Tooltips" />
+  <string key="CaptureSettingsHeading" value="Capture Settings" />
+  <string key="VideoSettingsHeading" value="Video Settings" />
+  <string key="OtherSettingsHeading" value="Other Settings" />
+  <string key="ScreenshotTool" value="Screenshot Tool" />
+  <string key="Extension" value="Extension" />
+  <string key="GIFTool" value="GIF Tool" />
+  <string key="GIFMaxColors" value="Max Colors" />
+  <string key="GIFDithering" value="Dithering" />
+  <string key="CreateVideo" value="Create Video" />
+  <string key="AutoHideUI" value="Auto Hide UI"/>
+  <string key="RemoveAlphaChannel" value="Remove Alpha Channel"/>
+  <string key="FramerateTooltip" value="The frame rate at which the game is captured." />
+  <string key="ExportFramerateTooltip" value="The frame rate of the exported video." />
+  <string key="DBUpdateModeTooltip" value="The rate at which DynamicBone physics update. Default is 60/s." />
+  <string key="ScreenshotToolTooltip" value="The tool used to take screenshots:\n[Screenshot Manager] the Screencap plugin (uses its settings)\n[Builtin] VideoExport's internal screenshot implementation\n[Reshade] uses KKReshade addon to capture Reshade effects" />
+  <string key="LimitByTooltip" value="Limit recording by:\n[Frames] record for a number of frames\n[Seconds] record for a number of seconds\n[Animation] record for the length of a builtin animation (selected character)\n[Timeline] record for the length of the timeline" />
+  <string key="LimitByPrewarmLoopCountTooltip" value="Runs warm-up loops before starting the capture.\nCan be used to align physics and record a loop animation." />
+  <string key="LimitByLoopsToRecordTooltip" value="Reconds a number of loops of timeline / animation." />
+  <string key="LimitByLimitCountTooltip" value="Records for a number of selected frames / seconds." />
+  <string key="RealignTimelineTooltip" value="Set timeline to 00:00 and wait for physics before recording." />
+  <string key="ParallelEncodingTooltip" value="Performance setting. Disable this if recording fails." />
+  <string key="CaptureModeTooltip" value="[Normal] Recommended. Renders the camera to guarantee up-to-date frame. \n[Immediate] Faster, assumes the camera is already rendered." />
+  <string key="ImageFormatTooltip" value="[BMP] Lossless, very fast encoding, large space requirement\n[PNG] Lossless, slow encoding, medium space requirement\n[JPG] Lossy, fast encoding, low space requirement\n[EXR] Lossless, very slow encoding, large space requirement, HDR" />
+  <string key="ExtensionTooltip" value="[MP4] General purpose widely supported video format\n[WEBM] Video format optimized for web\n[GIF] Old image format for short clips and loops\n[MOV] Video format used in professional editing (high space requirement)\n[WEBP] Image format optimized for web (supports animation)\n[AVIF] Modern image format based on the AV1 codec (supports animation)" />
+  <string key="RemoveAlphaChannelTooltip" value="Some Reshade effects do not play well with the alpha channel.\nEnable this if the PNG screenshots are fully transparent.\nAlso makes the PNGs smaller."/>
+  <string key="MP4CodecTooltip" value="[H.264] Widely used and supported. Recommended.\n[H.265] More efficient, but may not be fully supported everywhere."/>
+  <string key="WEBMCodecTooltip" value="[VP8] Widely used and supported. Recommended.\n[VP9] More efficient, but many not be fully supported everywhere."/>
+  <string key="MOVCodecTooltip" value="[ProRes] Produces very large files meant for professional video editing." />
+  <string key="AVIFCodecTooltip" value="[Libaom-av1] Widely supported, lossless quality, slow encoding.\n[Libsvt-av1] Good quality, fast encoding." />
+  <string key="HwAccelCodecTooltip" value="Fast encoding using GPU accelerated codecs.\nLess efficient, produces larger files for the same quality."/>
+  <string key="GIFToolTooltip" value="[FFmpeg] Good quality, widely supported. Slightly larger.\n         Global palette, 256 colors total. Dithering optional.\n[Gifsky] Highest quality, smoother, but may cause flickering.\n         Local palette, 256 colors per frame. Dithering mandatory." />
+  <string key="GIFDitheringTooltip" value="Fakes colors outside of the limited palette:\n[none] No dithering. Recommended until visually necessary.\n[bayer] Creates visible dither patterns/aesthetic.\n[floyd_steinberg] Creates smooth gradients and relatively low noise." />
+  <string key="MOVPreset" value="Encoding Preset" />
+  <string key="MOVPresetTooltip" value="[ProRes422Proxy] Lowest.\n[ProRes422LT] Low.\n[ProRes422] Moderate.\n[ProRes422HQ] Standard.\n[ProRes4444] High.\n[ProRes4444XQ] Highest" />
+  <string key="MOVPresetProRes422Proxy" value="ProRes422Proxy" />
+  <string key="MOVPresetProRes422LT" value="ProRes422LT" />
+  <string key="MOVPresetProRes422" value="ProRes422" />
+  <string key="MOVPresetProRes422HQ" value="ProRes422HQ" />
+  <string key="MOVPresetProRes4444" value="ProRes4444" />
+  <string key="MOVPresetProRes4444XQ" value="ProRes4444XQ" />
+  <string key="GIFSKIQuality" value="Quality" />
+  <string key="GIFSKIMotionQuality" value="MotionQuality" />
+  <string key="GIFSKILossyQuality" value="LossyQuality" />
+  <string key="GIFSKIQualityTooltip" value="Lower quality may give smaller file [default: 90]" />
+  <string key="GIFSKIMotionQualityTooltip" value="Lower values reduce motion" />
+  <string key="GIFSKILossyQualityTooltip" value="Lower values introduce noise and streaks" />
 </root>
