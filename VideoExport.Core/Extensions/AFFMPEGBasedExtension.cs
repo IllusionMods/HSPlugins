@@ -142,15 +142,46 @@ namespace VideoExport.Extensions
                 hasFilters = true;
             }
 
+            if (hasFilters)
+            {
+                res = res + ", vflip";
+            }
+            else
+            {
+                res = "vflip";
+                hasFilters = true;
+            }
+
             if (_rotation != Rotation.None)
             {
-                for (int i = 0; i < (int)_rotation; i++)
+                // who made this?
+                /*for (int i = 0; i < (int)_rotation; i++)
                 {
                     if (hasFilters == false && i == 0)
                         res += "transpose=1";
                     else
                         res += ",transpose=1";
+                }*/
+                if (hasFilters == true)
+                    res += ", ";
+
+                switch ((int)_rotation)
+                {
+                    case 0:
+                        // impossible routine
+                        Debug.Log("something gone wrong with _rotation in CompileFilters()");
+                        break;
+                    case 1:
+                        res += $"transpose={(int)_rotation}";
+                        break;
+                    case 2:
+                        res += $"rotate=PI";
+                        break;
+                    case 3:
+                        res += $"transpose={(int)_rotation}";
+                        break;
                 }
+
                 hasFilters = true;
             }
 
@@ -164,17 +195,8 @@ namespace VideoExport.Extensions
 
             /*if (hasFilters)
                 res = "-vf \"" + res + "\"";*/
-            if (hasFilters)
-            {
-                res = res + ", vflip";
-            }
-            else
-            {
-                res = "vflip";
-            }
 
-
-                return res;
+            return res;
         }
     }
 }
