@@ -1318,14 +1318,21 @@ namespace VideoExport
                             }
                             else
                             {
-                                //TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
+                                if (_autoGenerateVideo)
+                                {
 #if !KOIKATSU
-                                _frameDataBuffer = GetNativeRawData(texture);
+                                    _frameDataBuffer = GetNativeRawData(texture);
 #else
-                                _frameDataBuffer = texture.GetRawTextureData();
+                                    _frameDataBuffer = texture.GetRawTextureData();
 #endif
-                                _ffmpegStdin.BaseStream.Write(_frameDataBuffer, 0, _frameBufferSize);
-                                _ffmpegStdin.BaseStream.Flush();
+                                    _ffmpegStdin.BaseStream.Write(_frameDataBuffer, 0, _frameBufferSize);
+                                    _ffmpegStdin.BaseStream.Flush();
+                                }
+                                else
+                                {
+                                    TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
+                                }
+
                                 Destroy(texture);
                                 texture = null;
                             }
@@ -1380,8 +1387,12 @@ namespace VideoExport
                 dynamicBone.UpdateRate = 60;
 
             // this part get moved to upper side
-            _ffmpegStdin.Close();
-            _frameDataBuffer = null;
+            if (_autoGenerateVideo)
+            {
+                _ffmpegStdin.Close();
+                _frameDataBuffer = null;
+            }
+            
             _generatingVideo = false;
             Logger.LogInfo($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
 
