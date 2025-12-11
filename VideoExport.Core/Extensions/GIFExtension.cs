@@ -36,6 +36,9 @@ namespace VideoExport.Extensions
         private int[] _presetMaxColors = new[] { 8, 16, 32, 64, 128, 256 };
         private int _maxColors;
         private bool _isSlave = false;
+        private int _gifskiQuality = 90;
+        private int _gifskiMotionQuality = 90;
+        private int _gifskiLossyQuality = 90;
 
         public GIFExtension()
         {
@@ -102,12 +105,9 @@ namespace VideoExport.Extensions
 
             if (this._gifTool == GifTool.Gifski)
             {
-                string quality;
-                string motionQuality;
-                string lossyQuality;
-
+                string gifskiArgs = $"--quality {_gifskiQuality} --motion-quality {_gifskiMotionQuality} --lossy-quality {_gifskiLossyQuality}";
                 //return $"{(resize ? $"-W {resizeX} -H {resizeY}" : "")} --fps {fps} -o \"{fileName}.gif\" \"{framesFolder}\"\\{prefix}*{postfix}.{inputExtension} --quiet";
-                return $"{(resize ? $"-W {resizeX} -H {resizeY}" : "")} -o \"{fileName}.gif\" \"{fileName}.mov\" --quiet";
+                return $"{gifskiArgs} {(resize ? $"-W {resizeX} -H {resizeY}" : "")} -o \"{fileName}.gif\" \"{fileName}.mov\" --quiet";
             }
             else
             {
@@ -226,9 +226,37 @@ namespace VideoExport.Extensions
                     this._ffmpegDithering = (Dithering)GUILayout.SelectionGrid((int)this._ffmpegDithering, this._ffmpegDitheringNames, 3);
                 }
                 GUILayout.EndVertical();
-
-                base.DisplayParams();
             }
+            else if (this._gifTool == GifTool.Gifski)
+            {
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKIQuality), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKIQualityTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+
+                GUILayout.BeginHorizontal();
+                {
+                    this._gifskiQuality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._gifskiQuality, 1, 100));
+                    GUILayout.Label(this._gifskiQuality.ToString("00"), GUILayout.ExpandWidth(false));
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKIMotionQuality), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKIMotionQualityTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+
+                GUILayout.BeginHorizontal();
+                {
+                    this._gifskiMotionQuality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._gifskiMotionQuality, 1, 100));
+                    GUILayout.Label(this._gifskiMotionQuality.ToString("00"), GUILayout.ExpandWidth(false));
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKILossyQuality), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKILossyQualityTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+
+                GUILayout.BeginHorizontal();
+                {
+                    this._gifskiLossyQuality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._gifskiLossyQuality, 1, 100));
+                    GUILayout.Label(this._gifskiLossyQuality.ToString("00"), GUILayout.ExpandWidth(false));
+                }
+                GUILayout.EndHorizontal();
+            }
+                base.DisplayParams();
         }
 
         public override void SaveParams()

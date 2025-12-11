@@ -111,4 +111,10 @@
 	<string key="MOVPresetProRes422HQ" value="ProRes422HQ" />
 	<string key="MOVPresetProRes4444" value="ProRes4444" />
 	<string key="MOVPresetProRes4444XQ" value="ProRes4444XQ" />
+	<string key="GIFSKIQuality" value="Quality" />
+	<string key="GIFSKIMotionQuality" value="MotionQuality" />
+	<string key="GIFSKILossyQuality" value="LossyQuality" />
+	<string key="GIFSKIQualityTooltip" value="Lower quality may give smaller file [default: 90]" />
+	<string key="GIFSKIMotionQualityTooltip" value="Lower values reduce motion" />
+	<string key="GIFSKILossyQualityTooltip" value="Lower values introduce noise and streaks" />
 </root>
