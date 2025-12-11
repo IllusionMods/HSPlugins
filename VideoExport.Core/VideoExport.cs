@@ -17,6 +17,9 @@ using VideoExport.Core;
 using KKAPI.Studio.UI.Toolbars;
 using KKAPI.Utilities;
 using TimelineCompatibility = ToolBox.TimelineCompatibility;
+#if !KOIKATSU
+using Unity.Collections;
+#endif
 
 #if IPA
 using IllusionPlugin;
@@ -192,7 +195,13 @@ namespace VideoExport
             MOVPresetProRes422,
             MOVPresetProRes422HQ,
             MOVPresetProRes4444,
-            MOVPresetProRes4444XQ
+            MOVPresetProRes4444XQ,
+            GIFSKIQuality,
+            GIFSKIMotionQuality,
+            GIFSKILossyQuality,
+            GIFSKIQualityTooltip,
+            GIFSKIMotionQualityTooltip,
+            GIFSKILossyQualityTooltip
         }
 
         private enum LimitDurationType
@@ -280,6 +289,9 @@ namespace VideoExport
         private Process _ffmpegProcessMaster;
         private Process _ffmpegProcessSlave;
         private StreamWriter _ffmpegStdin;
+        private byte[] _frameDataBuffer;
+        private int _frameBufferSize;
+
         #endregion
 
         #region Public Accessors (for other plugins probably)
@@ -1256,6 +1268,8 @@ namespace VideoExport
                         if (File.Exists(palettePath))
                             File.Delete(palettePath);
                     }*/
+
+                    InitializeRecoder((int)currentSize.x, (int)currentSize.y);
                 }
 
                 // The related variable name is palettegen, but its function is closer to all of processing of gif.
@@ -1305,10 +1319,15 @@ namespace VideoExport
                             else
                             {
                                 //TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
-                                byte[] frameData = texture.GetRawTextureData();
-                                _ffmpegStdin.BaseStream.Write(frameData, 0, frameData.Length);
+#if !KOIKATSU
+                                _frameDataBuffer = GetNativeRawData(texture);
+#else
+                                _frameDataBuffer = texture.GetRawTextureData();
+#endif
+                                _ffmpegStdin.BaseStream.Write(_frameDataBuffer, 0, _frameBufferSize);
                                 _ffmpegStdin.BaseStream.Flush();
                                 Destroy(texture);
+                                texture = null;
                             }
                         }
                     }
@@ -1325,7 +1344,7 @@ namespace VideoExport
                         File.WriteAllBytes(savePath, frame);
 #endif
 
-                }
+                            }
 
                 elapsed = DateTime.Now - startTime;
 
@@ -1362,6 +1381,7 @@ namespace VideoExport
 
             // this part get moved to upper side
             _ffmpegStdin.Close();
+            _frameDataBuffer = null;
             _generatingVideo = false;
             Logger.LogInfo($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
 
@@ -1653,5 +1673,27 @@ namespace VideoExport
             }
         }
 
+        private void InitializeRecoder(int width, int height)
+        {
+            int bytesPerPixel = 4; // aspects of ARGB
+
+            _frameBufferSize = width * height * bytesPerPixel;
+
+            if (_frameDataBuffer == null || _frameDataBuffer.Length != _frameBufferSize)
+            {
+                _frameDataBuffer = new byte[_frameBufferSize];
+            }
+        }
+
+#if !KOIKATSU
+        public byte[] GetNativeRawData(Texture2D texture)
+        {
+            NativeArray<byte> nativeData = texture.GetRawTextureData<byte>();
+            nativeData.CopyTo(_frameDataBuffer);
+            nativeData.Dispose();
+
+            return _frameDataBuffer;
+        }
+#endif
     }
 }
