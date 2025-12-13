@@ -693,7 +693,7 @@ namespace Timeline
         {
             float realDuration = 0;
             Interpolable interpolable = _self._interpolables.Values.FirstOrDefault(x => x.id == "timeScale");
-            if (interpolable == null)
+            if (interpolable == null || !interpolable.enabled)
                 return (Time.timeScale == 0) ? duration : duration / Time.timeScale;
 
             List<KeyValuePair<float, Keyframe>> keyframes = interpolable.keyframes.TakeWhile(x => x.Key <= duration).ToList();
