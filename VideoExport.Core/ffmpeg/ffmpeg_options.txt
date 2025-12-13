@@ -3,13 +3,19 @@
 
 # Basic built-in options, can be removed if you delete "--disable-autodetect"
 #--disable-autodetect
-#--disable-everything # Nothing... but everything...!
---enable-static
---disable-debug
+--disable-everything # Nothing... but everything...!
+#--disable-decoders
+#--disable-encoders
 --disable-shared
+--disable-debug
+--disable-logging
 --disable-doc
---enable-gpl
 #--disable-programs
+--disable-ffplay
+--disable-ffprobe
+--enable-gpl
+#--enable-nonfree
+--enable-static
 
 # Hardware Acceleration
 ## AMD
@@ -32,15 +38,44 @@
 --enable-d3d11va
 --enable-dxva2
 
-## OS
+## OS-FREE
 --enable-vulkan
 --enable-opencl
 --enable-opengl
+
+# EXT_LIBS
+
+## IMAGE
+--enable-libwebp
+
+## VIDEO
+#--enable-libxvid # MPEG2
+#--enable-libtheora # THEORA
+--enable-libvpx # VP8, VP9
+#--enable-libsvtvp9 # VP9 ?
+--enable-libx264 # H264
+#--enable-libopenh264 # H264
+--enable-libx265 # HEVC
+#--enable-libsvthevc # HEVC ?
+--enable-libaom # AV1 CODEC
+#--enable-librav1e # AV1
+--enable-libsvtav1 # AV1 ENC
+#--enable-libdav1d # AV1 DEC
+#--enable-libvvenc # VVC ENC
+#--enable-libvvdec # VVC DEC
 
 # PROTOCOL
 --enable-protocol=file
 --enable-protocol=pipe
 --enable-protocol=fd
+
+# PARSER
+--enable-parser=prores
+--enable-parser=h264
+--enable-parser=hevc
+--enable-parser=vp8
+--enable-parser=vp9
+--enable-parser=av1
 
 # DEMUXER
 --enable-demuxer=rawvideo
@@ -73,13 +108,13 @@
 --enable-encoder=libwebp_anim
 
 ## VIDEO
+--enable-encoder=rawvideo
 --enable-encoder=prores_ks
 --enable-encoder=libx264
 --enable-encoder=h264_amf
 --enable-encoder=h264_mf
 --enable-encoder=h264_nvenc
 --enable-encoder=h264_qsv
---enable-encoder=h264_vaapi
 --enable-encoder=h264_vulkan
 --enable-encoder=libx265
 --enable-encoder=hevc_amf
@@ -87,129 +122,21 @@
 --enable-encoder=hevc_mf
 --enable-encoder=hevc_nvenc
 --enable-encoder=hevc_qsv
---enable-encoder=hevc_vaapi
 --enable-encoder=hevc_vulkan
---enable-encoder=libvpx
---enable-encoder=vp8_vaapi
+--enable-encoder=libvpx_vp8
 --enable-encoder=libvpx_vp9
---enable-encoder=vp9_vaapi
 --enable-encoder=vp9_qsv
---enable-encoder=libaom-av1
+--enable-encoder=libaom_av1
 --enable-encoder=libsvtav1
+--enable-encoder=av1_amf
+--enable-encoder=av1_d3d12va
+--enable-encoder=av1_mf
 --enable-encoder=av1_nvenc
 --enable-encoder=av1_qsv
---enable-encoder=av1_amf
---enable-encoder=av1_vaapi
-
-## AUDIO
+--enable-encoder=av1_vulkan
 
 # DECODER
---enable-decoder=rawvideo
---enable-decoder=prores
-
-# EXT_LIBS
-
-## IMAGE
---enable-libwebp
 
 ## VIDEO
-#--enable-libxvid # MPEG2
---enable-libvpx # VP8, VP9
-#--enable-libsvtvp9 # VP9 ?
---enable-libx264 # H264
-#--enable-libopenh264 # H264
---enable-libx265 # HEVC
-#--enable-libsvthevc # HEVC ?
---enable-libaom # AV1 CODEC
-#--enable-librav1e # AV1
---enable-libsvtav1 # AV1 ENC
-#--enable-libdav1d # AV1 DEC
-#--enable-libvvenc # VVC ENC
-#--enable-libvvdec # VVC DEC
-
-## AUDIO
-#--enable-libopus
-
-# Basic built-in options
-#--enable-bzlib
-#--enable-iconv
-#--enable-lzma
-#--enable-schannel
-#--enable-zlib
-#--enable-sdl2
-
-# Common options
-#--enable-gmp
-#--enable-libmp3lame
-#--enable-libopus
-#--enable-libvorbis
-#--enable-libfdk-aac
-
-# Zeranoe
-#--enable-fontconfig
-#--enable-gnutls
-#--enable-libass
-#--enable-libbluray
-#--enable-libfreetype
-#--enable-libharfbuzz
-#--enable-libmysofa
-#--enable-libopencore-amrnb
-#--enable-libopencore-amrwb
-#--enable-libopenjpeg
-#--enable-libsnappy
-#--enable-libsoxr
-#--enable-libspeex
-#--enable-libtheora
-#--enable-libtwolame
-#--enable-libvidstab
-#--enable-libvo-amrwbenc
-#--enable-libxml2
-#--enable-libzimg
-#--enable-libshine
-#--enable-openssl
-#--enable-libtls
-#--enable-avisynth
-#--enable-mbedtls
-#--enable-libopenmpt
-#--enable-version3
-#--enable-libsrt
-#--enable-libgsm
-#--enable-libvmaf
-
-# Full
-#--enable-chromaprint
-#--enable-decklink
-#--enable-frei0r
-#--enable-libaribb24
-#--enable-libbs2b
-#--enable-libcaca
-#--enable-libcdio
-#--enable-libflite
-#--enable-libfribidi
-#--enable-libgme
-#--enable-libilbc
-#--enable-libkvazaar
-#--enable-libmodplug
-#--enable-librist
-#--enable-librtmp
-#--enable-librubberband
-#--enable-libssh
-#--enable-libtesseract
-#--enable-libxavs
-#--enable-libzmq
-#--enable-libzvbi
-#--enable-openal
-#--enable-libcodec2
-#--enable-ladspa
-#--enable-vapoursynth
-#--enable-liblensfun
-#--enable-libglslang
-#--enable-libdavs2
-#--enable-libxavs2
-#--enable-libuavs3d
-#--enable-libplacebo
-#--enable-libjxl
-#--enable-liblc3
-#--enable-audiotoolbox
-
-# Full plus options that add shared dependencies
+--enable-decoder=rawvideo
+--enable-decoder=prores

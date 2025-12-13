@@ -1262,7 +1262,7 @@ namespace VideoExport
                 // The related variable name is palettegen, but its function is closer to all of processing of gif.
                 if (_selectedExtension == ExtensionsType.GIF && (extension as GIFExtension)?.IsPaletteGenRequired() == true)
                 {
-                    string arguments_palettegen = (extension as GIFExtension).GetArgumentsPaletteGen(SimplifyPath(framesFolder), "", "", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+                    string arguments_palettegen = (extension as GIFExtension).GetArgumentsPaletteGen(SimplifyPath(framesFolder), "", "", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, (int)currentSize.x, (int)currentSize.y, fileName);
 
                     _ffmpegProcessSlave = StartExternalProcess(extension.GetExecutable(), arguments_palettegen, false, extension.canProcessStandardError, false);
 

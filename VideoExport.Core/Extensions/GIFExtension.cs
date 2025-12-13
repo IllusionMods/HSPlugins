@@ -95,14 +95,14 @@ namespace VideoExport.Extensions
             }
         }
 
-        public string GetArgumentsPaletteGen(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public string GetArgumentsPaletteGen(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, int originalX, int originalY, string fileName)
         {
             int coreCount = _coreCount;
 
             if (this._gifTool == GifTool.Gifski)
             {
-                string gifskiArgs = $"--quality {_gifskiQuality} --motion-quality {_gifskiMotionQuality} --lossy-quality {_gifskiLossyQuality}";
-                return $"{gifskiArgs} {(resize ? $"-W {resizeX} -H {resizeY}" : "")} -o \"{fileName}.gif\" \"{fileName}.mov\" --quiet";
+                string gifskiArgs = $"--fps {fps} --quality {_gifskiQuality} --motion-quality {_gifskiMotionQuality} --lossy-quality {_gifskiLossyQuality}";
+                return $"{gifskiArgs} {(resize ? $"-W {resizeX} -H {resizeY}" : $"-W {originalX} -H {originalY}")} -o \"{fileName}.gif\" \"{fileName}.mov\" --quiet";
             }
             else
             {
@@ -135,9 +135,9 @@ namespace VideoExport.Extensions
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
             string codec = "prores";
-            string codecProfileName = "2";
+            string codecProfileName = "4";
             string codecExtraArgs = "-profile:v " + codecProfileName;
-            string videoPixelFormatArg = "yuv422p10le";
+            string videoPixelFormatArg = transparency ? "yuva444p10le" : "yuv444p10le";
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
             string inputArgs = $"-pix_fmt argb -i {framesFolder}";
