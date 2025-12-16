@@ -99,40 +99,11 @@ namespace VideoExport.ScreenshotPlugins
             byte[] rawImageBytes = new byte[imageSize];
             Marshal.Copy(imageBytesPtr, rawImageBytes, 0, (int) imageSize);
 
-            // Raw image comes flipped vertically, so we flip it back to normal
-            byte[] bytesRGBA = new byte[imageSize];
-            uint rowSize = screenshot.width * screenshot.channels;
-            for (uint y = 0; y < screenshot.height; y++)
-            {
-                uint srcRow = (screenshot.height - 1 - y) * rowSize;
-                uint dstRow = y * rowSize;
-                Buffer.BlockCopy(rawImageBytes, (int)srcRow, bytesRGBA, (int)dstRow, (int)rowSize);
-            }
+            Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGBA32, false, false);
+            texture.LoadRawTextureData(rawImageBytes);
+            texture.Apply();
 
-            if (removeAlpha)
-            {
-                uint rgbSize = screenshot.width * screenshot.height * 3;
-                byte[] bytesRGB = new byte[rgbSize];
-
-                for (int src = 0, dst = 0; src < bytesRGBA.Length; src += 4, dst += 3)
-                {
-                    bytesRGB[dst] = bytesRGBA[src];
-                    bytesRGB[dst + 1] = bytesRGBA[src + 1];
-                    bytesRGB[dst + 2] = bytesRGBA[src + 2];
-                }
-
-                Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGB24, false, false);
-                texture.LoadRawTextureData(bytesRGB);
-                texture.Apply();
-                return texture;
-            }
-            else
-            {
-                Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGBA32, false, false);
-                texture.LoadRawTextureData(bytesRGBA);
-                texture.Apply();
-                return texture;
-            }
+            return texture;
         }
     }
 

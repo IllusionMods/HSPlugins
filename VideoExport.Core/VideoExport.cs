@@ -47,7 +47,7 @@ namespace VideoExport
                                , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.8";
+        public const string Version = "1.9.2";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
 
@@ -1236,11 +1236,49 @@ namespace VideoExport
                 if (Directory.Exists(_outputFolder.Value) == false)
                     Directory.CreateDirectory(_outputFolder.Value);
                 _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
-                yield return null;
+                // Need to match the timing of the first frame, excluding the timeline.
+                if (_selectedLimitDuration != LimitDurationType.Timeline)
+                {
+                    yield return null;
+                }
+                    
                 IExtension extension = _extensions[(int)_selectedExtension];
 
                 string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, tempName));
                 string arguments = extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+
+                if (screenshotPlugin is ReshadePlugin)
+                {
+                    int index = arguments.IndexOf("-pix_fmt") + 9;
+                    arguments = arguments.Remove(index, 4);
+                    arguments = arguments.Insert(index, "rgba");
+
+                    int indexVflip = arguments.IndexOf(", vflip");
+                    if (indexVflip >= 1)
+                    {
+                        arguments = arguments.Remove(indexVflip, 7);
+                    }
+                    indexVflip = arguments.IndexOf("vflip");
+                    if (indexVflip >= 1)
+                    {
+                        arguments = arguments.Remove(indexVflip, 5);
+                    }
+                    //int indexVF = arguments.IndexOf("vflip");
+                    
+                    index = arguments.IndexOf("-vf");
+                    
+                    //arguments = arguments.Remove(index + 5, 5);
+                    //arguments = arguments.Insert(index, "hflip,");
+
+                    if (arguments.Contains("-vf \"\""))
+                    {
+                        arguments = arguments.Remove(index, 6);
+                    }
+                    else if (arguments[index + 5] == ',') 
+                    {
+                        arguments = arguments.Remove(index + 5, 1);
+                    }
+                }
 
                 IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
                 Vector2 currentSize = plugin.currentSize;
