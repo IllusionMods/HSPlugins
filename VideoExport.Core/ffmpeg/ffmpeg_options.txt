@@ -85,6 +85,7 @@
 --enable-muxer=gif
 --enable-muxer=webp
 --enable-muxer=mov
+--enable-muxer=matroska
 --enable-muxer=mp4
 --enable-muxer=webm
 --enable-muxer=avif
@@ -110,6 +111,8 @@
 ## VIDEO
 --enable-encoder=rawvideo
 --enable-encoder=prores_ks
+--enable-encoder=ffv1
+--enable-encoder=ffv1_vulkan
 --enable-encoder=libx264
 --enable-encoder=h264_amf
 --enable-encoder=h264_mf

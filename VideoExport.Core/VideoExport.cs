@@ -201,7 +201,12 @@ namespace VideoExport
             GIFSKILossyQuality,
             GIFSKIQualityTooltip,
             GIFSKIMotionQualityTooltip,
-            GIFSKILossyQualityTooltip
+            GIFSKILossyQualityTooltip,
+            FFV1CodecTooltip,
+            FFV1GopSize,
+            FFV1Slices,
+            FFV1GopSizeTooltip,
+            FFV1SlicesTooltip
         }
 
         private enum LimitDurationType
@@ -375,6 +380,7 @@ namespace VideoExport
             _extensions.Add(new MOVExtension());
             _extensions.Add(new WEBPExtension());
             _extensions.Add(new AVIFExtension());
+            _extensions.Add(new MKVExtension());
 
             _extensionsNames = Enum.GetNames(typeof(ExtensionsType));
             if ((int)_selectedExtension >= _extensionsNames.Length)
@@ -912,7 +918,9 @@ namespace VideoExport
                     GUILayout.BeginVertical();
                     _clearSceneBeforeEncoding = GUILayout.Toggle(_clearSceneBeforeEncoding, _currentDictionary.GetString(TranslationKey.EmptyScene), Styles.DangerToggleStyle);
                     _closeWhenDone = GUILayout.Toggle(_closeWhenDone, _currentDictionary.GetString(TranslationKey.CloseStudio), Styles.DangerToggleStyle);
+                    GUI.enabled = false;
                     _parallelScreenshotEncoding = GUILayout.Toggle(_parallelScreenshotEncoding, new GUIContent(_currentDictionary.GetString(TranslationKey.ParallelScreenshotEncoding), _currentDictionary.GetString(TranslationKey.ParallelEncodingTooltip)), Styles.DangerToggleStyle);
+                    GUI.enabled = true;
                     GUILayout.EndVertical();
 
                 }

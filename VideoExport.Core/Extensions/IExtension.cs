@@ -32,6 +32,7 @@ namespace VideoExport.Extensions
         MOV,
         WEBP,
         AVIF,
+        MKV
     }
 
 }

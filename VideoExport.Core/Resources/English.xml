@@ -94,7 +94,7 @@
   <string key="ParallelEncodingTooltip" value="Performance setting. Disable this if recording fails." />
   <string key="CaptureModeTooltip" value="[Normal] Recommended. Renders the camera to guarantee up-to-date frame. \n[Immediate] Faster, assumes the camera is already rendered." />
   <string key="ImageFormatTooltip" value="[BMP] Lossless, very fast encoding, large space requirement\n[PNG] Lossless, slow encoding, medium space requirement\n[JPG] Lossy, fast encoding, low space requirement\n[EXR] Lossless, very slow encoding, large space requirement, HDR" />
-  <string key="ExtensionTooltip" value="[MP4] General purpose widely supported video format\n[WEBM] Video format optimized for web\n[GIF] Old image format for short clips and loops\n[MOV] Video format used in professional editing (high space requirement)\n[WEBP] Image format optimized for web (supports animation)\n[AVIF] Modern image format based on the AV1 codec (supports animation)" />
+  <string key="ExtensionTooltip" value="[MP4] General purpose widely supported video format\n[WEBM] Video format optimized for web\n[GIF] Old image format for short clips and loops\n[MOV] Video format used in professional editing (high space requirement)\n[WEBP] Image format optimized for web (supports animation)\n[AVIF] Modern image format based on the AV1 codec (supports animation)\n[MKV] (FFV1) A good choice for ​archiving and preservation." />
   <string key="RemoveAlphaChannelTooltip" value="Some Reshade effects do not play well with the alpha channel.\nEnable this if the PNG screenshots are fully transparent.\nAlso makes the PNGs smaller."/>
   <string key="MP4CodecTooltip" value="[H.264] Widely used and supported. Recommended.\n[H.265] More efficient, but may not be fully supported everywhere."/>
   <string key="WEBMCodecTooltip" value="[VP8] Widely used and supported. Recommended.\n[VP9] More efficient, but many not be fully supported everywhere."/>
@@ -117,4 +117,9 @@
   <string key="GIFSKIQualityTooltip" value="Lower quality may give smaller file [default: 90]" />
   <string key="GIFSKIMotionQualityTooltip" value="Lower values reduce motion" />
   <string key="GIFSKILossyQualityTooltip" value="Lower values introduce noise and streaks" />
+  <string key="FFV1CodecTooltip" value="[FFV1] A Codec for Archives" />
+  <string key="FFV1GopSize" value="GOP size" />
+  <string key="FFV1Slices" value="Slices" />
+  <string key="FFV1GopSizeTooltip" value="Reuse context model within a group of frames to improve compression." />
+  <string key="FFV1SlicesTooltip" value="Each frame is split into this number of slices.\nThis affects multithreading performance,\nas well as filesize:\nIncreasing the number of slices might speed up performance,\nbut also increases the filesize." />
 </root>
