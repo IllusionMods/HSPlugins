@@ -291,6 +291,7 @@ namespace VideoExport
         private StreamWriter _ffmpegStdin;
         private byte[] _frameDataBuffer;
         private int _frameBufferSize;
+        private string _tempDateTime;
 
         #endregion
 
@@ -1079,8 +1080,9 @@ namespace VideoExport
 
             IScreenshotPlugin screenshotPlugin = _screenshotPlugins[_selectedPlugin];
 
-            string tempName = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
-            string framesFolder = Path.Combine(_globalFramesFolder.Value, tempName);
+            //string tempName = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
+            _tempDateTime = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
+            string framesFolder = Path.Combine(_globalFramesFolder.Value, _tempDateTime);
 
             if (Directory.Exists(framesFolder) == false)
                 Directory.CreateDirectory(framesFolder);
@@ -1244,7 +1246,8 @@ namespace VideoExport
                     
                 IExtension extension = _extensions[(int)_selectedExtension];
 
-                string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, tempName));
+                //string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, tempName));
+                string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, _tempDateTime));
                 string arguments = extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
 
                 if (screenshotPlugin is ReshadePlugin)
@@ -1648,6 +1651,14 @@ namespace VideoExport
                 setError(true);
             }
             proc.Close();
+
+            if (!isMaster)
+            {
+                string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, _tempDateTime));
+                string palettePath = $"{fileName}.mov";
+                if (File.Exists(palettePath))
+                    File.Delete(palettePath);
+            }
         }
 
         private string SimplifyPath(string path)
