@@ -47,7 +47,7 @@ namespace VideoExport
                                , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.9.2";
+        public const string Version = "1.9.3";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
 
@@ -1252,24 +1252,22 @@ namespace VideoExport
                     int index = arguments.IndexOf("-pix_fmt") + 9;
                     arguments = arguments.Remove(index, 4);
                     arguments = arguments.Insert(index, "rgba");
-
                     int indexVflip = arguments.IndexOf(", vflip");
+
                     if (indexVflip >= 1)
                     {
                         arguments = arguments.Remove(indexVflip, 7);
                     }
+
                     indexVflip = arguments.IndexOf("vflip");
+
                     if (indexVflip >= 1)
                     {
                         arguments = arguments.Remove(indexVflip, 5);
                     }
-                    //int indexVF = arguments.IndexOf("vflip");
                     
                     index = arguments.IndexOf("-vf");
                     
-                    //arguments = arguments.Remove(index + 5, 5);
-                    //arguments = arguments.Insert(index, "hflip,");
-
                     if (arguments.Contains("-vf \"\""))
                     {
                         arguments = arguments.Remove(index, 6);
@@ -1352,7 +1350,8 @@ namespace VideoExport
                                 }
                                 else
                                 {
-                                    TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
+                                    //TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, savePath);
+                                    TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, screenshotPlugin.transparency, savePath);
                                 }
 
                                 Destroy(texture);

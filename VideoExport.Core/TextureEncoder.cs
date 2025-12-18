@@ -15,6 +15,13 @@ namespace VideoExport.Core
                 File.WriteAllBytes(savePath, bytes);
         }
 
+        public static void EncodeAndWriteTexture(Texture2D texture, VideoExport.ImgFormat format, bool transparency, string savePath)
+        {
+            byte[] bytes = EncodeTexture(texture, format, transparency);
+            if (bytes != null)
+                File.WriteAllBytes(savePath, bytes);
+        }
+
         public static byte[] EncodeTexture(Texture2D texture, VideoExport.ImgFormat format)
         {
             byte[] bytes = null;
@@ -26,6 +33,39 @@ namespace VideoExport.Core
                     break;
                 case VideoExport.ImgFormat.PNG:
                     bytes = texture.EncodeToPNG();
+                    break;
+                case VideoExport.ImgFormat.JPG:
+                    bytes = texture.EncodeToJPG();
+                    break;
+                case VideoExport.ImgFormat.EXR:
+                    bytes = texture.EncodeToEXR();
+                    break;
+            }
+            return bytes;
+        }
+
+        public static byte[] EncodeTexture(Texture2D texture, VideoExport.ImgFormat format, bool transparency)
+        {
+            byte[] bytes = null;
+            switch (format)
+            {
+                default:
+                case VideoExport.ImgFormat.BMP:
+                    bytes = EncodeToBMP(texture, (int)texture.width, (int)texture.height);
+                    break;
+                case VideoExport.ImgFormat.PNG:
+                    if (transparency)
+                    {
+                        bytes = texture.EncodeToPNG();
+                    }
+                    else
+                    {
+                        Texture2D temp = new Texture2D(texture.width, texture.height, TextureFormat.RGB24, false);
+                        temp.SetPixels(texture.GetPixels());
+                        temp.Apply();
+                        bytes = temp.EncodeToPNG();
+                        UnityEngine.Object.Destroy(temp);
+                    }
                     break;
                 case VideoExport.ImgFormat.JPG:
                     bytes = texture.EncodeToJPG();

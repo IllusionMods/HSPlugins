@@ -37,14 +37,17 @@ namespace VideoExport.Extensions
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
             int coreCount = _coreCount;
-            string pixFmt = transparency ? "yuva444p10le" : "yuv444p10le";
-
+            
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
             string codec = _codecCLIOptions[(int)this._codec];
             string codecProfileName = _codecProfiles[(int)this._codecProfile];
             string codecExtraArgs = "-profile:v " + codecProfileName;
             string videoPixelFormatArg = (int)this._codecProfile > 3 ? "yuva444p10le" : "yuv422p10le";
+            if (!transparency && videoPixelFormatArg == "yuva444p10le")
+            {
+                videoPixelFormatArg = "yuv444p10le";
+            }
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
             string inputArgs = $"-pix_fmt argb -i {framesFolder}";
