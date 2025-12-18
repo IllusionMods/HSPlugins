@@ -17,7 +17,7 @@ using VideoExport.Core;
 using KKAPI.Studio.UI.Toolbars;
 using KKAPI.Utilities;
 using TimelineCompatibility = ToolBox.TimelineCompatibility;
-#if !KOIKATSU
+#if (!KOIKATSU || SUNSHINE)
 using Unity.Collections;
 #endif
 
@@ -47,7 +47,7 @@ namespace VideoExport
                                , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.9.3";
+        public const string Version = "1.9.4";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
 
@@ -1267,7 +1267,7 @@ namespace VideoExport
                     }
                     
                     index = arguments.IndexOf("-vf");
-                    
+
                     if (arguments.Contains("-vf \"\""))
                     {
                         arguments = arguments.Remove(index, 6);
@@ -1340,7 +1340,7 @@ namespace VideoExport
                             {
                                 if (_autoGenerateVideo)
                                 {
-#if !KOIKATSU
+#if (!KOIKATSU || SUNSHINE)
                                     _frameDataBuffer = GetNativeRawData(texture);
 #else
                                     _frameDataBuffer = texture.GetRawTextureData();
@@ -1700,7 +1700,7 @@ namespace VideoExport
             }
         }
 
-#if !KOIKATSU
+#if (!KOIKATSU || SUNSHINE)
         public byte[] GetNativeRawData(Texture2D texture)
         {
             NativeArray<byte> nativeData = texture.GetRawTextureData<byte>();
