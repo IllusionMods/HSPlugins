@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MOVExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MP4Extension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBMExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\MKVExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBPExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ParallelScreenshotEncoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ReshadePlugin.cs" />

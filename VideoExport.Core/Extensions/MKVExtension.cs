@@ -29,9 +29,10 @@ namespace VideoExport.Extensions
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
             int coreCount = _coreCount;
-            //string pixFmt = transparency ? "yuva420p" : "yuv420p";
+            string pixFmt = transparency ? "yuva444p" : "yuv444p";
 
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
+            videoFilterArgument = videoFilterArgument + $", format={pixFmt}";
 
             string codec = _codecCLIOptions[(int)this._codec] + " -level 3";
             string codecExtraArgs = $"-g {this._gopSize} -slices {this._slices}";
