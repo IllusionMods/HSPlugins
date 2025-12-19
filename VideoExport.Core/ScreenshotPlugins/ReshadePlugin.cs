@@ -46,6 +46,9 @@ namespace VideoExport.ScreenshotPlugins
 
         private static string sharedMemoryName = "KKReshade_Screenshot_SHM";
 
+        private static byte[] _frameDataBuffer;
+        private static int _frameBufferSize;
+
         public static bool OpenSharedMemory()
         {
             if (_initialized) return true;
@@ -95,15 +98,27 @@ namespace VideoExport.ScreenshotPlugins
         {
             Screenshot screenshot = (Screenshot)Marshal.PtrToStructure(_shm, typeof(Screenshot));
             uint imageSize = screenshot.width * screenshot.height * screenshot.channels;
+
+            InitializeRecoder((int)imageSize);
+
             IntPtr imageBytesPtr = new IntPtr(_shm.ToInt64() + Marshal.SizeOf(typeof(Screenshot)));
-            byte[] rawImageBytes = new byte[imageSize];
-            Marshal.Copy(imageBytesPtr, rawImageBytes, 0, (int) imageSize);
+            Marshal.Copy(imageBytesPtr, _frameDataBuffer, 0, (int)imageSize);
 
             Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGBA32, false, false);
-            texture.LoadRawTextureData(rawImageBytes);
+            texture.LoadRawTextureData(_frameDataBuffer);
             texture.Apply();
 
             return texture;
+        }
+
+        private static void InitializeRecoder(int imageSize)
+        {
+            _frameBufferSize = imageSize;
+
+            if (_frameDataBuffer == null || _frameDataBuffer.Length != _frameBufferSize)
+            {
+                _frameDataBuffer = new byte[_frameBufferSize];
+            }
         }
     }
 
