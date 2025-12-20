@@ -38,7 +38,7 @@ namespace VideoExport.Extensions
             string codecExtraArgs = $"-g {this._gopSize} -slices {this._slices}";
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-pix_fmt argb -i {framesFolder}";
+            string inputArgs = $"-pix_fmt rgba -i {framesFolder}";
             string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.mkv\"";
 

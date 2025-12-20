@@ -31,7 +31,9 @@ namespace VideoExport.ScreenshotPlugins
         byte[] Capture(string saveTo);
 #if !HONEYSELECT
         Texture2D CaptureTexture();
+        RenderTexture CaptureRenderTexture();
         bool IsTextureCaptureAvailable();
+        bool IsRenderTextureCaptureAvailable();
 #endif
         void OnEndRecording();
         void DisplayParams();

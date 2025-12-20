@@ -88,6 +88,11 @@ namespace VideoExport.ScreenshotPlugins
             return true;
         }
 
+        public bool IsRenderTextureCaptureAvailable()
+        {
+            return true;
+        }
+
         public Texture2D CaptureTexture()
         {
             RenderTexture result;
@@ -106,6 +111,25 @@ namespace VideoExport.ScreenshotPlugins
             if (!result) return null;
             var texture = ToTexture2D(result);
             return texture;
+        }
+
+        public RenderTexture CaptureRenderTexture()
+        {
+            RenderTexture result;
+            switch (_captureType)
+            {
+                case CaptureType.Normal:
+                    result = !_in3d ? CaptureRender() : Do3DCapture(() => CaptureRender());
+                    break;
+                case CaptureType.ThreeHundredSixty:
+                    result = !_in3d ? Capture360() : Do3DCapture(() => Capture360(), overlapOffset: 0);
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported capture type: {_captureType}");
+            }
+
+            if (!result) return null;
+            return result;
         }
 
         public void OnEndRecording()

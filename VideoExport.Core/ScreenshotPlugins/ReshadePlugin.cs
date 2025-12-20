@@ -197,9 +197,19 @@ namespace VideoExport.ScreenshotPlugins
             return true;
         }
 
+        public bool IsRenderTextureCaptureAvailable()
+        {
+            return false;
+        }
+
         public Texture2D CaptureTexture()
         {
             return ReshadeAPI.RequestScreenshot(_removeAlphaChannel);
+        }
+
+        public RenderTexture CaptureRenderTexture()
+        {
+            return null;
         }
 
         public void OnStartRecording()

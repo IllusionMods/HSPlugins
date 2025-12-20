@@ -119,7 +119,17 @@ namespace VideoExport.ScreenshotPlugins
             return false;
         }
 
+        public bool IsRenderTextureCaptureAvailable()
+        {
+            return false;
+        }
+
         public Texture2D CaptureTexture()
+        {
+            return null;
+        }
+
+        public RenderTexture CaptureRenderTexture()
         {
             return null;
         }

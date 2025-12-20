@@ -152,6 +152,11 @@ namespace VideoExport.ScreenshotPlugins
             return true;
         }
 
+        public bool IsRenderTextureCaptureAvailable()
+        {
+            return false;
+        }
+
         public Texture2D CaptureTexture()
         {
             Texture2D texture = null;
@@ -165,6 +170,11 @@ namespace VideoExport.ScreenshotPlugins
                     break;
             }
             return texture;
+        }
+
+        public RenderTexture CaptureRenderTexture()
+        {
+            return null;
         }
 
         public void OnEndRecording()
