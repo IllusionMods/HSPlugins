@@ -1,7 +1,7 @@
 <root>
   <string key="CurrentSize" value="Current Size" />
-  <string key="Framerate" value="Framerate" />
-  <string key="ExportFramerate" value="Video Framerate" />
+  <string key="Framerate" value="Capture Framerate" />
+  <string key="ExportFramerate" value="Export Framerate" />
   <string key="AutoDeleteImages" value="Auto Delete Images" />
   <string key="LimitBy" value="Limit By" />
   <string key="LimitByFrames" value="Frames" />
@@ -23,8 +23,8 @@
   <string key="CloseStudio" value="Close Studio When Done" />
   <string key="ParallelScreenshotEncoding" value="Parallel Encoding (BETA)" />
   <string key="StartRecordingOnNextClick" value="Start Recording On Next Click" />
-  <string key="StartRecording" value="Start Recording" />
-  <string key="StopRecording" value="Stop Recording" />
+  <string key="StartRecording" value="START RECORDING" />
+  <string key="StopRecording" value="STOP RECORDING" />
   <string key="PrewarmingAnimation" value="Prewarming animation" />
   <string key="RealignTimeline" value="Realign timeline to 00:00.00" />
   <string key="TakingScreenshot" value="Taking screenshot" />
@@ -71,10 +71,10 @@
   <string key="WEBMDeadlineGood" value="Balanced" />
   <string key="WEBMDeadlineRealtime" value="Speed" />
   <string key="ShowTooltips" value="Show Tooltips" />
-  <string key="CaptureSettingsHeading" value="Capture Settings" />
-  <string key="VideoSettingsHeading" value="Video Settings" />
-  <string key="OtherSettingsHeading" value="Other Settings" />
-  <string key="ScreenshotTool" value="Screenshot Tool" />
+  <string key="CaptureSettingsHeading" value="CAPTURE SETTINGS" />
+  <string key="VideoSettingsHeading" value="VIDEO SETTINGS" />
+  <string key="OtherSettingsHeading" value="OTHER" />
+  <string key="ScreenshotTool" value="Capture Tool" />
   <string key="Extension" value="Extension" />
   <string key="GIFTool" value="GIF Tool" />
   <string key="GIFMaxColors" value="Max Colors" />
@@ -122,4 +122,6 @@
   <string key="FFV1Slices" value="Slices" />
   <string key="FFV1GopSizeTooltip" value="Reuse context model within a group of frames to improve compression." />
   <string key="FFV1SlicesTooltip" value="Each frame is split into this number of slices.\nThis affects multithreading performance,\nas well as filesize:\nIncreasing the number of slices might speed up performance,\nbut also increases the filesize." />
+  <string key="SameAsCapture" value="Same as capture" />
+  <string key="ToggleScreencapUI" value="Open Settings Toolbar" />
 </root>
