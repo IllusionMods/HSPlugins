@@ -18,6 +18,10 @@ namespace VideoExport.ScreenshotPlugins
         private CaptureType _captureType = CaptureType.Normal;
         private string[] _captureTypeNames;
         private bool _in3d;
+        private bool uiShow;
+        private Traverse PluginInstance;
+        private Type _screenshotManagerType;
+        private bool _isPluginInstanceInitialized;
         #endregion
 
         #region Interface
@@ -52,7 +56,29 @@ namespace VideoExport.ScreenshotPlugins
         {
             _captureType = (CaptureType)VideoExport._configFile.AddInt("Screencap_captureType", 0, true);
             _in3d = VideoExport._configFile.AddBool("Screencap_in3d", false, true);
+
+            InitializePluginInstance();
+
             return true;
+        }
+
+        private object _pluginInstanceObject;
+
+        private void InitializePluginInstance()
+        {
+            if (_isPluginInstanceInitialized) return;
+
+            _screenshotManagerType = AccessTools.TypeByName("Screencap.ScreenshotManager");
+            if (_screenshotManagerType != null)
+            {
+                var allObjects = Resources.FindObjectsOfTypeAll(_screenshotManagerType);
+                if (allObjects != null && allObjects.Length > 0)
+                {
+                    _pluginInstanceObject = allObjects[0];
+                    PluginInstance = Traverse.Create(_pluginInstanceObject);
+                    _isPluginInstanceInitialized = true;
+                }
+            }
         }
 
         public void SaveParams()
@@ -153,6 +179,38 @@ namespace VideoExport.ScreenshotPlugins
             GUILayout.BeginHorizontal();
             _in3d = GUILayout.Toggle(_in3d, VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.Screencap3D));
             GUILayout.EndHorizontal();
+
+
+            if (!_isPluginInstanceInitialized)
+            {
+                InitializePluginInstance();
+            }
+
+            if (_isPluginInstanceInitialized && PluginInstance != null)
+            {
+                GUILayout.BeginHorizontal();
+                {
+                    uiShow = PluginInstance.Field("_uiShow").GetValue<bool>();
+
+                    if (GUILayout.Button(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.ToggleScreencapUI)))
+                    {
+                        var keyGuiField = PluginInstance.Field("KeyGui").GetValue();
+
+                        bool currentShow = PluginInstance.Field("_uiShow").GetValue<bool>();
+                        PluginInstance.Field("_uiShow").SetValue(!currentShow);
+
+                        var resolutionX = PluginInstance.Property("ResolutionX").GetValue();
+                        var resolutionY = PluginInstance.Property("ResolutionY").GetValue();
+
+                        PluginInstance.Field("_resolutionXBuffer").SetValue(resolutionX?.ToString() ?? "");
+                        PluginInstance.Field("_resolutionYBuffer").SetValue(resolutionY?.ToString() ?? "");
+                    }
+                }
+                GUILayout.EndHorizontal();
+
+
+            }
+
         }
         #endregion
 
@@ -163,11 +221,11 @@ namespace VideoExport.ScreenshotPlugins
 
             var texture = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false, true);
             texture.ReadPixels(new Rect(0f, 0f, rt.width, rt.height), 0, 0, false);
-            
+
             RenderTexture.active = cached;
-            
+
             RenderTexture.ReleaseTemporary(rt);
-            
+
             texture.Apply();
             return texture;
         }

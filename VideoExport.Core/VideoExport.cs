@@ -207,7 +207,9 @@ namespace VideoExport
             FFV1GopSize,
             FFV1Slices,
             FFV1GopSizeTooltip,
-            FFV1SlicesTooltip
+            FFV1SlicesTooltip,
+            SameAsCapture,
+            ToggleScreencapUI
         }
 
         private enum LimitDurationType
@@ -291,6 +293,7 @@ namespace VideoExport
         private bool _showCaptureSection;
         private bool _showVideoSection;
         private bool _showOtherSection;
+        private bool _exportFpsSameAsCapture = true;
 
         private Process _ffmpegProcessMaster;
         private Process _ffmpegProcessSlave;
@@ -483,7 +486,7 @@ namespace VideoExport
         {
             if (ShowUI == false)
                 return;
-            _windowRect = GUILayout.Window(_uniqueId + 1, _windowRect, Window, "Video Export " + Version);
+            _windowRect = GUILayout.Window(_uniqueId + 1, _windowRect, Window, "Video Export " + Version, Styles.WindowStyle);
             IMGUIExtensions.DrawBackground(_windowRect);
         }
 
@@ -671,13 +674,15 @@ namespace VideoExport
 
             GUILayout.BeginVertical("Box");
             {
-                GUILayout.BeginHorizontal();
+                GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.CaptureSettingsHeading)), Styles.SectionLabelStyle);
-                    if (GUILayout.Button(_showCaptureSection ? "-" : "+", GUILayout.Width(30)))
+                    if (GUILayout.Button(_showCaptureSection ? "▲" : "▼", GUILayout.Width(30)))
                     {
                         _showCaptureSection = !_showCaptureSection;
                     }
+                    GUI.backgroundColor = Color.white;
                 }
                 GUILayout.EndHorizontal();
                 if (!_showCaptureSection)
@@ -691,35 +696,63 @@ namespace VideoExport
                 {
                     GUILayout.Label($"{_currentDictionary.GetString(TranslationKey.CurrentSize)}: {currentSize.x:#}x{currentSize.y:#}");
                     GUILayout.FlexibleSpace();
-                    _showTooltips = GUILayout.Toggle(_showTooltips, _currentDictionary.GetString(TranslationKey.ShowTooltips));
+
                 }
                 GUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal("Box");
+                GUILayout.BeginVertical(Styles.EmptyBoxStyle);
                 {
-                    GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 3));
+                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.ScreenshotTool),
+                        _currentDictionary.GetString(TranslationKey.ScreenshotToolTooltip).Replace("\\n", "\n")));
+
+                    GUILayout.BeginHorizontal();
                     {
-                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.ScreenshotTool), _currentDictionary.GetString(TranslationKey.ScreenshotToolTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
-                        _pluginScrollPos = GUILayout.BeginScrollView(_pluginScrollPos, GUILayout.Height(120));
+                        GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 3));
                         {
-                            _selectedPlugin = GUILayout.SelectionGrid(_selectedPlugin, _screenshotPlugins.Select(p => p.name).ToArray(), 1);
+                            //_pluginScrollPos = GUILayout.BeginScrollView(_pluginScrollPos, GUILayout.Height(120));
+                            //{
+                            _selectedPlugin = GUILayout.SelectionGrid(_selectedPlugin,
+                                _screenshotPlugins.Select(p => p.name).ToArray(), 1);
+                            //}
+                            //GUILayout.EndScrollView();
                         }
-                        GUILayout.EndScrollView();
+                        GUILayout.EndVertical();
 
+                        GUILayout.BeginVertical(Styles.BoxStyle);
+                        {
+                            plugin.DisplayParams();
+                        }
+                        GUILayout.EndVertical();
                     }
-                    GUILayout.EndVertical();
-
-                    GUILayout.BeginVertical("Box");
-                    plugin.DisplayParams();
-                    GUILayout.EndVertical();
+                    GUILayout.EndHorizontal();
                 }
-                GUILayout.EndHorizontal();
+                GUILayout.EndVertical();
 
-                GUILayout.BeginVertical("Box");
+                GUILayout.BeginVertical(Styles.EmptyBoxStyle);
                 {
                     GUILayout.BeginHorizontal();
                     {
                         GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.Framerate), _currentDictionary.GetString(TranslationKey.FramerateTooltip).Replace("\\n", "\n")));
+
+                        if (GUILayout.Button("12", Styles.ButtonStyle, GUILayout.Width(35)))
+                        {
+                            _fps = 12;
+                        }
+                        if (GUILayout.Button("24", Styles.ButtonStyle, GUILayout.Width(35)))
+                        {
+                            _fps = 24;
+                        }
+                        if (GUILayout.Button("30", Styles.ButtonStyle, GUILayout.Width(35)))
+                        {
+                            _fps = 30;
+                        }
+                        if (GUILayout.Button("60", Styles.ButtonStyle, GUILayout.Width(35)))
+                        {
+                            _fps = 60;
+                        }
+                        if (GUILayout.Button("120", Styles.ButtonStyle, GUILayout.Width(35)))
+                        {
+                            _fps = 120;
+                        }
 
                         if (GUILayout.Button("-", GUILayout.Width(30)))
                         {
@@ -728,7 +761,7 @@ namespace VideoExport
                                 index = ~index;
                             _fps = _presetFps[Math.Max(0, index - 1)];
                         }
-                        string fpsString = GUILayout.TextField(_fps.ToString(), GUILayout.Width(50));
+                        string fpsString = GUILayout.TextField(_fps.ToString(), GUILayout.Width(50), GUILayout.Height(30));
                         if (int.TryParse(fpsString, out int res))
                             _fps = Mathf.Clamp(res, 1, 10000);
 
@@ -744,28 +777,60 @@ namespace VideoExport
 
                     GUILayout.BeginHorizontal();
                     {
-                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.ExportFramerate), _currentDictionary.GetString(TranslationKey.ExportFramerateTooltip).Replace("\\n", "\n")));
-
-                        if (GUILayout.Button("-", GUILayout.Width(30)))
-                        {
-                            int index = Array.BinarySearch(_presetFps, _exportFps);
-                            if (index < 0)
-                                index = ~index;
-                            _exportFps = _presetFps[Math.Max(0, index - 1)];
-                        }
-                        string exportFpsString = GUILayout.TextField(_exportFps.ToString(), GUILayout.Width(50));
-                        if (int.TryParse(exportFpsString, out int res))
-                            _exportFps = Mathf.Clamp(res, 1, _fps);
-                        if (GUILayout.Button("+", GUILayout.Width(30)))
-                        {
-                            int index = Array.BinarySearch(_presetFps, _exportFps);
-                            if (index < 0)
-                                index = ~index;
-                            _exportFps = _presetFps[Math.Min(_presetFps.Length - 1, index + 1)];
-                        }
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.ExportFramerate),
+                            _currentDictionary.GetString(TranslationKey.ExportFramerateTooltip).Replace("\\n", "\n")));
+                        GUILayout.FlexibleSpace();
+                        _exportFpsSameAsCapture = GUILayout.Toggle(_exportFpsSameAsCapture,
+                            _currentDictionary.GetString(TranslationKey.SameAsCapture));
                     }
                     GUILayout.EndHorizontal();
 
+                    if (_exportFpsSameAsCapture)
+                    {
+                        _exportFps = _fps;
+                    }
+                    else
+                    {
+                        // Новая строка для кнопок
+                        GUILayout.BeginHorizontal();
+                        {
+                            GUILayout.Label("");
+                            int[] quickPresets = { 12, 24, 30, 60, 120 };
+
+                            foreach (int preset in quickPresets)
+                            {
+                                GUI.enabled = preset <= _fps;
+                                if (GUILayout.Button(preset.ToString(), GUILayout.Width(35)))
+                                {
+                                    _exportFps = preset;
+                                }
+                            }
+
+                            GUI.enabled = true;
+
+                            if (GUILayout.Button("-", GUILayout.Width(30)))
+                            {
+                                int index = Array.BinarySearch(_presetFps, _exportFps);
+                                if (index < 0)
+                                    index = ~index;
+                                _exportFps = _presetFps[Math.Max(0, index - 1)];
+                            }
+
+                            string exportFpsString = GUILayout.TextField(_exportFps.ToString(), GUILayout.Width(50));
+                            if (int.TryParse(exportFpsString, out int res))
+                                _exportFps = Mathf.Clamp(res, 1, _fps);
+
+                            if (GUILayout.Button("+", GUILayout.Width(30)))
+                            {
+                                int index = Array.BinarySearch(_presetFps, _exportFps);
+                                if (index < 0)
+                                    index = ~index;
+                                int newFps = _presetFps[Math.Min(_presetFps.Length - 1, index + 1)];
+                                _exportFps = Mathf.Min(newFps, _fps);
+                            }
+                        }
+                        GUILayout.EndHorizontal();
+                    }
                     GUILayout.BeginHorizontal();
                     {
                         GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.DBUpdateMode), _currentDictionary.GetString(TranslationKey.DBUpdateModeTooltip).Replace("\\n", "\n")));
@@ -776,7 +841,7 @@ namespace VideoExport
                 }
                 GUILayout.EndVertical();
 
-                GUILayout.BeginVertical("Box");
+                GUILayout.BeginVertical(Styles.EmptyBoxStyle);
                 {
                     GUILayout.BeginVertical();
                     {
@@ -784,6 +849,7 @@ namespace VideoExport
                         if (_limitDuration)
                         {
                             _selectedLimitDuration = (LimitDurationType)GUILayout.SelectionGrid((int)_selectedLimitDuration, _limitDurationNames, 4);
+                            GUILayout.Space(5);
                             LimitCount();
                         }
                     }
@@ -803,13 +869,15 @@ namespace VideoExport
 
             GUILayout.BeginVertical("Box");
             {
-                GUILayout.BeginHorizontal();
+                GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.VideoSettingsHeading)), Styles.SectionLabelStyle);
-                    if (GUILayout.Button(_showVideoSection ? "-" : "+", GUILayout.Width(30)))
+                    if (GUILayout.Button(_showVideoSection ? "▲" : "▼", GUILayout.Width(30)))
                     {
                         _showVideoSection = !_showVideoSection;
                     }
+                    GUI.backgroundColor = Color.white;
                 }
                 GUILayout.EndHorizontal();
                 if (!_showVideoSection)
@@ -818,7 +886,7 @@ namespace VideoExport
                     return;
                 }
 
-                GUILayout.BeginHorizontal();
+                GUILayout.BeginHorizontal(Styles.EmptyBoxStyle);
                 {
                     _autoGenerateVideo = GUILayout.Toggle(_autoGenerateVideo, new GUIContent(_currentDictionary.GetString(TranslationKey.CreateVideo)));
                     if (!_autoGenerateVideo)
@@ -847,7 +915,7 @@ namespace VideoExport
                             res = 1;
                         _resizeY = res;
 
-                        if (GUILayout.Button("Default", GUILayout.ExpandWidth(false)))
+                        if (GUILayout.Button("Default", Styles.SmallButtonStyle, GUILayout.ExpandWidth(false), GUILayout.Height(25)))
                         {
                             _resizeX = Screen.width;
                             _resizeY = Screen.height;
@@ -863,20 +931,20 @@ namespace VideoExport
                 }
                 GUILayout.EndHorizontal();
 
-                GUILayout.BeginHorizontal("Box");
+                GUILayout.BeginHorizontal();
                 {
                     GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 5));
                     {
                         GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.Extension), _currentDictionary.GetString(TranslationKey.ExtensionTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
-                        _extensionScrollPos = GUILayout.BeginScrollView(_extensionScrollPos, GUILayout.Height(160));
-                        {
-                            _selectedExtension = (ExtensionsType)GUILayout.SelectionGrid((int)_selectedExtension, _extensionsNames, 1);
-                        }
-                        GUILayout.EndScrollView();
+                        //_extensionScrollPos = GUILayout.BeginScrollView(_extensionScrollPos, GUILayout.Height(160));
+                        //{
+                        _selectedExtension = (ExtensionsType)GUILayout.SelectionGrid((int)_selectedExtension, _extensionsNames, 1);
+                        //}
+                        //GUILayout.EndScrollView();
                     }
                     GUILayout.EndVertical();
 
-                    GUILayout.BeginVertical("Box");
+                    GUILayout.BeginVertical(Styles.BoxStyle);
                     extension.DisplayParams();
                     GUILayout.EndVertical();
                 }
@@ -897,13 +965,15 @@ namespace VideoExport
 
             GUILayout.BeginVertical("Box");
             {
-                GUILayout.BeginHorizontal();
+                GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.OtherSettingsHeading)), Styles.SectionLabelStyle);
-                    if (GUILayout.Button(_showOtherSection ? "-" : "+", GUILayout.Width(30)))
+                    if (GUILayout.Button(_showOtherSection ? "▲" : "▼", GUILayout.Width(30)))
                     {
                         _showOtherSection = !_showOtherSection;
                     }
+                    GUI.backgroundColor = Color.white;
                 }
                 GUILayout.EndHorizontal();
                 if (!_showOtherSection)
@@ -912,20 +982,15 @@ namespace VideoExport
                     return;
                 }
 
-                GUILayout.BeginHorizontal("Box");
+                GUILayout.BeginHorizontal(Styles.EmptyBoxStyle);
                 {
-                    GUILayout.BeginVertical();
-                    _autoDeleteImages = GUILayout.Toggle(_autoDeleteImages, _currentDictionary.GetString(TranslationKey.AutoDeleteImages));
-                    GUILayout.EndVertical();
-
-                    GUILayout.BeginVertical();
-                    _clearSceneBeforeEncoding = GUILayout.Toggle(_clearSceneBeforeEncoding, _currentDictionary.GetString(TranslationKey.EmptyScene), Styles.DangerToggleStyle);
                     _closeWhenDone = GUILayout.Toggle(_closeWhenDone, _currentDictionary.GetString(TranslationKey.CloseStudio), Styles.DangerToggleStyle);
-                    GUI.enabled = false;
-                    _parallelScreenshotEncoding = GUILayout.Toggle(_parallelScreenshotEncoding, new GUIContent(_currentDictionary.GetString(TranslationKey.ParallelScreenshotEncoding), _currentDictionary.GetString(TranslationKey.ParallelEncodingTooltip)), Styles.DangerToggleStyle);
-                    GUI.enabled = true;
-                    GUILayout.EndVertical();
-
+                    GUILayout.Space(25);
+                    _showTooltips = GUILayout.Toggle(_showTooltips, _currentDictionary.GetString(TranslationKey.ShowTooltips));
+                    // Deprecated option
+                    //_clearSceneBeforeEncoding = GUILayout.Toggle(_clearSceneBeforeEncoding, _currentDictionary.GetString(TranslationKey.EmptyScene), Styles.DangerToggleStyle);
+                    //_parallelScreenshotEncoding = GUILayout.Toggle(_parallelScreenshotEncoding, new GUIContent(_currentDictionary.GetString(TranslationKey.ParallelScreenshotEncoding), _currentDictionary.GetString(TranslationKey.ParallelEncodingTooltip)), Styles.DangerToggleStyle);
+                    //_autoDeleteImages = GUILayout.Toggle(_autoDeleteImages, _currentDictionary.GetString(TranslationKey.AutoDeleteImages));
                 }
                 GUILayout.EndHorizontal();
             }
@@ -938,11 +1003,12 @@ namespace VideoExport
             IExtension extension = _extensions[(int)_selectedExtension];
 
             bool prevGuiEnabled = GUI.enabled;
+            GUILayout.BeginHorizontal(Styles.EmptyBoxStyle);
 
             GUI.enabled = _generatingVideo == false && _startOnNextClick == false &&
                           (_limitDuration == false || _selectedLimitDuration != LimitDurationType.Animation || (_currentAnimator && _currentAnimator.speed > 0.001f && _animationIsPlaying));
             _startOnNextClick = GUILayout.Toggle(_startOnNextClick, _currentDictionary.GetString(TranslationKey.StartRecordingOnNextClick));
-
+            GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             {
                 string reason;
@@ -950,14 +1016,19 @@ namespace VideoExport
                 {
                     if (_isRecording == false)
                     {
-                        if (GUILayout.Button(_currentDictionary.GetString(TranslationKey.StartRecording)))
+                        GUI.backgroundColor = Color.gray;
+                        if (GUILayout.Button("● " + _currentDictionary.GetString(TranslationKey.StartRecording), Styles.ControlButton, GUILayout.Height(50)))
                             RecordVideo();
                     }
                     else
                     {
-                        if (GUILayout.Button(_currentDictionary.GetString(TranslationKey.StopRecording)))
+                        GUI.backgroundColor = Color.gray;
+                        if (GUILayout.Button("■ " + _currentDictionary.GetString(TranslationKey.StopRecording), Styles.ControlButton, GUILayout.Height(50)))
                             StopRecording();
                     }
+
+                    // Сброс цвета (опционально, если нужно)
+                    GUI.backgroundColor = Color.white;
                 }
                 else
                 {
@@ -978,9 +1049,16 @@ namespace VideoExport
             customLabel.alignment = cachedAlignment;
 
             GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            GUILayout.Box("", _customBoxStyle, GUILayout.Width((_windowRect.width - 20) * Mathf.Clamp(_progressBarPercentage, 0f, 1f)), GUILayout.Height(10));
-            GUILayout.FlexibleSpace();
+            {
+                Rect progressBarBg = GUILayoutUtility.GetRect(_windowRect.width - 20, 10);
+                Color previousColor = GUI.color;
+                GUI.color = Color.black;
+                GUI.Box(progressBarBg, "", Styles.ProgressBar);
+                Rect progressBarFill = new Rect(progressBarBg.x, progressBarBg.y, progressBarBg.width * Mathf.Clamp(_progressBarPercentage, 0f, 1f), progressBarBg.height);
+                GUI.color = Styles.NormalColorOn;
+                GUI.Box(progressBarFill, "", Styles.ProgressBar);
+                GUI.color = previousColor;
+            }
             GUILayout.EndHorizontal();
         }
 
@@ -998,6 +1076,7 @@ namespace VideoExport
                 if (_selectedPlugin < 0 || _selectedPlugin >= _screenshotPlugins.Count)
                     _selectedPlugin = 0;
 
+                GUILayout.Space(10);
                 WindowCaptureSection();
                 GUILayout.Space(Styles.SectionSpacing);
                 WindowVideoSection();
@@ -1624,7 +1703,8 @@ namespace VideoExport
             if (proc.ExitCode == 0)
             {
                 _messageColor = Color.green;
-                _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
+                _currentMessage = _currentDictionary.GetString(TranslationKey.Done) +
+                  $"\nTime spent:{elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
             }
             else
             {
@@ -1690,7 +1770,8 @@ namespace VideoExport
             if (proc.ExitCode == 0)
             {
                 _messageColor = Color.green;
-                _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
+                _currentMessage = _currentDictionary.GetString(TranslationKey.Done) +
+                  $"\nTime spent:{elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
             }
             else
             {
