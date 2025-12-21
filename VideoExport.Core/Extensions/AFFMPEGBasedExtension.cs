@@ -31,6 +31,7 @@ namespace VideoExport.Extensions
         public virtual int progress { get { return this._progress; } }
         public virtual bool canProcessStandardOutput { get { return true; } }
         public bool canProcessStandardError { get { return true; } }
+        public virtual int channelType { get; set; }
 
         static AFFMPEGBasedExtension()
         {

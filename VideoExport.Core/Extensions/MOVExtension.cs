@@ -37,7 +37,8 @@ namespace VideoExport.Extensions
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
             int coreCount = _coreCount;
-            
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
+
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
             string codec = _codecCLIOptions[(int)this._codec];
@@ -50,7 +51,7 @@ namespace VideoExport.Extensions
             }
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-pix_fmt rgba -i {framesFolder}";
+            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
             string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}, format={videoPixelFormatArg}\"";
             string outputArgs = $"\"{fileName}.mov\"";
 

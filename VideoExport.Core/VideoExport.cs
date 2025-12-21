@@ -48,7 +48,7 @@ namespace VideoExport
                                , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.9.5";
+        public const string Version = "1.9.6";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
 
@@ -1260,6 +1260,19 @@ namespace VideoExport
 
                 //string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, tempName));
                 string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, _tempDateTime));
+                if (screenshotPlugin is ScreencapPlugin && screenshotPlugin.IsRenderTextureCaptureAvailable() == true)
+                {
+                    extension.channelType = 1;
+                }
+                else if (screenshotPlugin is ScreencapPlugin && screenshotPlugin.IsTextureCaptureAvailable() == true)
+                {
+                    extension.channelType = 0;
+                }
+                else
+                {
+                    extension.channelType = 1;
+                }
+
                 string arguments = extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
 
                 if (screenshotPlugin is ReshadePlugin)
@@ -1305,7 +1318,7 @@ namespace VideoExport
 
                 if (error == false)
                 {
-                    _ffmpegProcessMaster = StartExternalProcess(extension.GetExecutable(), arguments, extension.canProcessStandardOutput, extension.canProcessStandardError, true);
+                    _ffmpegProcessMaster = StartExternalProcess(extension.GetExecutable(), arguments, false, extension.canProcessStandardError, true);
 
                     StartCoroutine(HandleProcessOutput(_ffmpegProcessMaster, totalFrames, extension.canProcessStandardOutput, val => error = val, true));
 
@@ -1445,7 +1458,7 @@ namespace VideoExport
             foreach (DynamicBone_Ver02 dynamicBone in Resources.FindObjectsOfTypeAll<DynamicBone_Ver02>())
                 dynamicBone.UpdateRate = 60;
 
-            if (_autoGenerateVideo && !(screenshotPlugin is ScreencapPlugin))
+            if (_autoGenerateVideo && !(screenshotPlugin is ScreencapPlugin && screenshotPlugin.IsRenderTextureCaptureAvailable() == true))
             {
                 _ffmpegStdin.Close();
                 _frameDataBuffer = null;
@@ -1638,7 +1651,7 @@ namespace VideoExport
 
             if (proc.StartInfo.RedirectStandardOutput)
             {
-                proc.BeginOutputReadLine();
+                //proc.BeginOutputReadLine();
             }
 
             IExtension extension = _extensions[(int)_selectedExtension];

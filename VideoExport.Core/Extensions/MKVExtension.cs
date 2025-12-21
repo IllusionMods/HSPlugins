@@ -30,6 +30,7 @@ namespace VideoExport.Extensions
         {
             int coreCount = _coreCount;
             string pixFmt = transparency ? "yuva444p" : "yuv444p";
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
             videoFilterArgument = videoFilterArgument + $", format={pixFmt}";
@@ -38,7 +39,7 @@ namespace VideoExport.Extensions
             string codecExtraArgs = $"-g {this._gopSize} -slices {this._slices}";
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-pix_fmt rgba -i {framesFolder}";
+            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
             string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.mkv\"";
 

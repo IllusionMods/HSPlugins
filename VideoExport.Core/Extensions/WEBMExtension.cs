@@ -52,11 +52,12 @@ namespace VideoExport.Extensions
                     pixFmt = transparency ? "yuva420p10le -metadata:s:v:0 alpha_mode=\"1\"" : "yuv420p10le";
                     break;
             }
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
             string autoAltRef = this._codec == Codec.VP8 ? "-auto-alt-ref 0" : "";
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-pix_fmt rgba -i {framesFolder}";
+            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
             string codecArgs = $"-c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : "")} -pix_fmt {pixFmt} {autoAltRef} -crf {this._quality} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.webm\"";
 

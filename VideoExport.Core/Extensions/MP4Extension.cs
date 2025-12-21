@@ -58,6 +58,7 @@ namespace VideoExport.Extensions
             int coreCount = _coreCount;
             if (this._codec == Codec.H265 && coreCount > 16)
                 coreCount = 16;
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
             string[] codecOptions = _codecCLIOptions;
             string tuneArgument = "-tune animation";
@@ -103,7 +104,7 @@ namespace VideoExport.Extensions
             string codec = codecOptions[(int)this._codec];
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-pix_fmt rgba -i {framesFolder}";
+            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
             string codecArgs = $"-vcodec {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.mp4\"";
 
