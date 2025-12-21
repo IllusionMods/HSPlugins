@@ -90,7 +90,11 @@ namespace VideoExport.ScreenshotPlugins
 
         public bool IsRenderTextureCaptureAvailable()
         {
+#if (!KOIKATSU || SUNSHINE)
             return true;
+#else
+            return false;
+#endif
         }
 
         public Texture2D CaptureTexture()

@@ -1353,8 +1353,6 @@ namespace VideoExport
 #if (!KOIKATSU || SUNSHINE)
                                 _asyncGPURequestCount++;
                                 var req = AsyncGPUReadback.Request(rt, 0, (request) => OnCompleteReadback(request, rt, totalFrames));
-#else
-                                //_frameDataBuffer = texture.GetRawTextureData();
 #endif
                             }
                         }
