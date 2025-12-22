@@ -75,6 +75,8 @@ namespace VideoExport
         {
 #if (!KOIKATSU || SUNSHINE)
             ImageConversion.LoadImage(texture, tex);
+#else
+            texture.LoadImage(tex);
 #endif
             texture.anisoLevel = 1;
             texture.filterMode = FilterMode.Point;
