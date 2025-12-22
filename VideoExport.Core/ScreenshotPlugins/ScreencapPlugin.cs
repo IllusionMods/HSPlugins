@@ -197,18 +197,12 @@ namespace VideoExport.ScreenshotPlugins
                         var keyGuiField = PluginInstance.Field("KeyGui").GetValue();
 
                         bool currentShow = PluginInstance.Field("_uiShow").GetValue<bool>();
+                        Rect currentRect = PluginInstance.Field("_uiRect").GetValue<Rect>();
                         PluginInstance.Field("_uiShow").SetValue(!currentShow);
-
-                        var resolutionX = PluginInstance.Property("ResolutionX").GetValue();
-                        var resolutionY = PluginInstance.Property("ResolutionY").GetValue();
-
-                        PluginInstance.Field("_resolutionXBuffer").SetValue(resolutionX?.ToString() ?? "");
-                        PluginInstance.Field("_resolutionYBuffer").SetValue(resolutionY?.ToString() ?? "");
+                        PluginInstance.Field("_uiRect").SetValue(currentRect);
                     }
                 }
                 GUILayout.EndHorizontal();
-
-
             }
 
         }
