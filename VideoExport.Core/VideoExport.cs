@@ -20,6 +20,8 @@ using TimelineCompatibility = ToolBox.TimelineCompatibility;
 #if (!KOIKATSU || SUNSHINE)
 using Unity.Collections;
 using UnityEngine.Rendering;
+using System.Collections.Concurrent;
+using System.Threading;
 #endif
 
 #if IPA
@@ -48,7 +50,7 @@ namespace VideoExport
                                , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.9.6";
+        public const string Version = "1.9.7";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
 
@@ -303,6 +305,17 @@ namespace VideoExport
         private string _tempDateTime;
         private int _asyncGPURequestCount = 0;
         private int _asyncGPUCompleteCount = 0;
+
+#if (!KOIKATSU || SUNSHINE)
+        private ConcurrentQueue<SimpleFrameData> _ffmpegMasterFrameQueue = new ConcurrentQueue<SimpleFrameData>();
+        private SortedList<long, byte[]> _reorderBuffer = new SortedList<long, byte[]>();
+        private Thread _ffmpegMasterThread;
+        private AutoResetEvent _ffmpegMasterFrameSignal = new AutoResetEvent(false);
+        private SimpleBytePool _simpleBytePool;
+        private int _simpleBytePoolSize = 10;
+        private long _frameCount = 0;
+        private long _nextFrameToProcess = 0;
+#endif
 
         #endregion
 
@@ -1182,7 +1195,12 @@ namespace VideoExport
                 Directory.CreateDirectory(framesFolder);
 
             int cachedCaptureFramerate = Time.captureFramerate;
+            int cachedApplicationTargetFrameRate = Application.targetFrameRate;
+            int cachedQualitySettingsVSyncCount = QualitySettings.vSyncCount;
+            int applicationTargetFrameRateStablizer = 0;
             Time.captureFramerate = _fps;
+            Application.targetFrameRate = _fps;
+            QualitySettings.vSyncCount = 0;
 
             if (_selectedUpdateDynamicBones == UpdateDynamicBonesType.EveryFrame)
             {
@@ -1412,9 +1430,17 @@ namespace VideoExport
                 {
                     _ffmpegProcessMaster = StartExternalProcess(extension.GetExecutable(), arguments, false, extension.canProcessStandardError, true);
 
-                    StartCoroutine(HandleProcessOutput(_ffmpegProcessMaster, totalFrames, extension.canProcessStandardOutput, val => error = val, true));
+                    //StartCoroutine(HandleProcessOutput(_ffmpegProcessMaster, totalFrames, extension.canProcessStandardOutput, val => error = val, true));
+                    StartCoroutine(HandleProcessOutput(_ffmpegProcessMaster, totalFrames, false, val => error = val, true));
 
                     InitializeRecoder((int)currentSize.x, (int)currentSize.y);
+
+#if (!KOIKATSU || SUNSHINE)
+                    _simpleBytePool = new SimpleBytePool(_frameBufferSize, _simpleBytePoolSize);
+                    _ffmpegMasterThread = new Thread(FFmpegMasterWriteLoop);
+                    _ffmpegMasterThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+                    _ffmpegMasterThread.Start();
+#endif
                 }
 
                 // The related variable name is palettegen, but its function is closer to all of processing of gif.
@@ -1443,6 +1469,28 @@ namespace VideoExport
                     break;
                 }
 
+#if (!KOIKATSU || SUNSHINE)
+                if (_ffmpegMasterFrameQueue.Count > 5)
+                {
+                    if (Application.targetFrameRate > 1)
+                    {
+                        Application.targetFrameRate--;
+                    }
+                }
+                else
+                {
+                    if (applicationTargetFrameRateStablizer > Application.targetFrameRate)
+                    {
+                        Application.targetFrameRate++;
+                        applicationTargetFrameRateStablizer = 0;
+                    }
+                    else
+                    {
+                        applicationTargetFrameRateStablizer++;
+                    }
+                }
+#endif
+
                 if (i % exportInterval == 0)
                 {
                     string savePath = Path.Combine(framesFolder, $"{i / exportInterval}.{imageExtension}");
@@ -1457,7 +1505,7 @@ namespace VideoExport
                             {
 #if (!KOIKATSU || SUNSHINE)
                                 _asyncGPURequestCount++;
-                                var req = AsyncGPUReadback.Request(rt, 0, (request) => OnCompleteReadback(request, rt, totalFrames));
+                                var req = AsyncGPUReadback.Request(rt, 0, (request) => OnCompleteReadback(request, rt));
 #endif
                             }
                         }
@@ -1542,6 +1590,8 @@ namespace VideoExport
 
             screenshotPlugin.OnEndRecording();
             Time.captureFramerate = cachedCaptureFramerate;
+            Application.targetFrameRate = cachedApplicationTargetFrameRate;
+            QualitySettings.vSyncCount = cachedQualitySettingsVSyncCount;
 
             Logger.LogInfo($"Time spent taking screenshots: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
 
@@ -1863,21 +1913,17 @@ namespace VideoExport
             return _frameDataBuffer;
         }
 
-        void OnCompleteReadback(AsyncGPUReadbackRequest request, RenderTexture rt, int totalFrame)
+        void OnCompleteReadback(AsyncGPUReadbackRequest request, RenderTexture rt)
         {
             try
             {
                 if (request.hasError) return;
 
                 NativeArray<byte> pixelData = request.GetData<byte>();
-                pixelData.CopyTo(_frameDataBuffer);
-                pixelData.Dispose();
-
-                if (_ffmpegProcessMaster != null && !_ffmpegProcessMaster.HasExited)
-                {
-                    _ffmpegStdin.Write(_frameDataBuffer);
-                    _ffmpegStdin.Flush();
-                }
+                byte[] buffer = _simpleBytePool.Rent();
+                pixelData.CopyTo(buffer);
+                _ffmpegMasterFrameQueue.Enqueue(new SimpleFrameData { index = _frameCount++, data = buffer});
+                _ffmpegMasterFrameSignal.Set();
             }
             finally
             {
@@ -1885,10 +1931,6 @@ namespace VideoExport
                 //rt.Release();
                 //rt = null;
                 _asyncGPUCompleteCount++;
-                if (_asyncGPUCompleteCount >= totalFrame && _asyncGPUCompleteCount >= _asyncGPURequestCount)
-                {
-                    StopProcessByAsync();
-                }
             }
         }
 
@@ -1909,6 +1951,38 @@ namespace VideoExport
 
             _asyncGPURequestCount = 0;
             _asyncGPUCompleteCount = 0;
+
+            if (_simpleBytePool != null)
+            {
+                _simpleBytePool.CleanupPool();
+                _simpleBytePool = null;
+            }
+
+            _frameCount = 0;
+            _nextFrameToProcess = 0;
+        }
+
+        private void FFmpegMasterWriteLoop()
+        {
+            while (_isRecording || !_ffmpegMasterFrameQueue.IsEmpty)
+            {
+                _ffmpegMasterFrameSignal.WaitOne(100);
+
+                while (_ffmpegMasterFrameQueue.TryDequeue(out SimpleFrameData frame))
+                {
+                    _reorderBuffer.Add(frame.index, frame.data);
+                }
+
+                while (_reorderBuffer.Count > 0 && _reorderBuffer.Keys[0] == _nextFrameToProcess)
+                {
+                    byte[] dataToWrite = _reorderBuffer.Values[0];
+                    _ffmpegStdin.Write(dataToWrite);
+                    _simpleBytePool.Return(dataToWrite);
+                    _reorderBuffer.RemoveAt(0);
+                    _nextFrameToProcess++;
+                }
+            }
+            StopProcessByAsync();
         }
 #endif
     }
