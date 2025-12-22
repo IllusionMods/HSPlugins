@@ -55,13 +55,6 @@
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ve_toolbar_icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg.exe" />
-    <None Include="$(MSBuildThisFileDirectory)gifski\gifski.exe" />
-    <None Include="$(MSBuildThisFileDirectory)gifski\LICENSE" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg_options.txt" />
-    <Content Include="$(MSBuildThisFileDirectory)ffmpeg\LICENSE.txt" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\btn.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\btn_on.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\checkbox_norm.png" />

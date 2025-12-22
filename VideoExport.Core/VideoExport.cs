@@ -271,7 +271,7 @@ namespace VideoExport
         private int _exportFps = 60;
         private int[] _presetFps = new[] { 12, 24, 30, 60, 120 };
         private bool _autoGenerateVideo;
-        private bool _autoDeleteImages;
+        //private bool _autoDeleteImages;
         private bool _limitDuration;
         private LimitDurationType _selectedLimitDuration;
         private float _limitDurationNumber = 600;
@@ -351,7 +351,7 @@ namespace VideoExport
             _fps = _configFile.AddInt("framerate", 60, true);
             _exportFps = _configFile.AddInt("exportFramerate", 60, true);
             _autoGenerateVideo = _configFile.AddBool("autoGenerateVideo", true, true);
-            _autoDeleteImages = _configFile.AddBool("autoDeleteImages", true, true);
+            //_autoDeleteImages = _configFile.AddBool("autoDeleteImages", true, true);
             _limitDuration = _configFile.AddBool("limitDuration", false, true);
             _selectedLimitDuration = (LimitDurationType)_configFile.AddInt("selectedLimitDurationType", (int)LimitDurationType.Frames, true);
             _limitDurationNumber = _configFile.AddFloat("limitDurationNumber", 0, true);
@@ -486,7 +486,11 @@ namespace VideoExport
         {
             if (ShowUI == false)
                 return;
-            _windowRect = GUILayout.Window(_uniqueId + 1, _windowRect, Window, "Video Export " + Version, Styles.WindowStyle);
+
+            Styles.BeginVESkin();
+            GUIStyle windowStyle = Styles.WindowStyle ?? GUI.skin.window;
+            _windowRect = GUILayout.Window(_uniqueId + 1, _windowRect, Window, "Video Export " + Version, windowStyle);
+            Styles.EndVESkin();
             IMGUIExtensions.DrawBackground(_windowRect);
         }
 
@@ -497,7 +501,7 @@ namespace VideoExport
             _configFile.SetInt("framerate", _fps);
             _configFile.SetInt("exportFramerate", _exportFps);
             _configFile.SetBool("autoGenerateVideo", _autoGenerateVideo);
-            _configFile.SetBool("autoDeleteImages", _autoDeleteImages);
+            //_configFile.SetBool("autoDeleteImages", _autoDeleteImages);
             _configFile.SetBool("limitDuration", _limitDuration);
             _configFile.SetInt("selectedLimitDurationType", (int)_selectedLimitDuration);
             _configFile.SetFloat("limitDurationNumber", _limitDurationNumber);
@@ -1314,6 +1318,15 @@ namespace VideoExport
                     // We have to do another wait to get to the next frame.
                     yield return new WaitForEndOfFrame();
                 }
+
+                if (_autoGenerateVideo)
+                {
+                    ((ReshadePlugin)screenshotPlugin).vFlip = false;
+                }
+                else
+                {
+                    ((ReshadePlugin)screenshotPlugin).vFlip = true;
+                }
             }
 
             int totalFrames = 0;
@@ -1548,7 +1561,7 @@ namespace VideoExport
 
             _progressBarPercentage = 1;
 
-            if (_autoDeleteImages && error == false)
+            /*if (_autoDeleteImages && error == false)
             {
                 var retry = false;
                 try
@@ -1572,7 +1585,7 @@ namespace VideoExport
                         Logger.LogWarning("Failed to auto delete images: " + e);
                     }
                 }
-            }
+            }*/
             _isRecording = false;
             Resources.UnloadUnusedAssets();
             GC.Collect();

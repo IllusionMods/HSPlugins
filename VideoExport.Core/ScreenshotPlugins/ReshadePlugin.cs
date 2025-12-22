@@ -94,7 +94,7 @@ namespace VideoExport.ScreenshotPlugins
             return _initialized && _shmFile != IntPtr.Zero && _shm != IntPtr.Zero;
         }
 
-        public static Texture2D RequestScreenshot(bool removeAlpha)
+        public static Texture2D RequestScreenshot(bool removeAlpha, bool vFlip)
         {
             Screenshot screenshot = (Screenshot)Marshal.PtrToStructure(_shm, typeof(Screenshot));
             uint imageSize = screenshot.width * screenshot.height * screenshot.channels;
@@ -103,6 +103,24 @@ namespace VideoExport.ScreenshotPlugins
 
             IntPtr imageBytesPtr = new IntPtr(_shm.ToInt64() + Marshal.SizeOf(typeof(Screenshot)));
             Marshal.Copy(imageBytesPtr, _frameDataBuffer, 0, (int)imageSize);
+
+            if (vFlip)
+            {
+                int rowSize = (int)screenshot.width * (int)screenshot.channels; 
+                byte[] rowBuffer = new byte[rowSize];
+                int height = (int)screenshot.height;
+                int halfHeight = height / 2;
+
+                for (int i = 0; i < halfHeight; i++)
+                {
+                    int topRowOffset = i * rowSize;
+                    int bottomRowOffset = (height - i - 1) * rowSize;
+
+                    System.Array.Copy(_frameDataBuffer, topRowOffset, rowBuffer, 0, rowSize);
+                    System.Array.Copy(_frameDataBuffer, bottomRowOffset, _frameDataBuffer, topRowOffset, rowSize);
+                    System.Array.Copy(rowBuffer, 0, _frameDataBuffer, bottomRowOffset, rowSize);
+                }
+            }
 
             Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGBA32, false, false);
             texture.LoadRawTextureData(_frameDataBuffer);
@@ -165,6 +183,7 @@ namespace VideoExport.ScreenshotPlugins
         private bool _autoHideUI;
         private bool _removeAlphaChannel;
         private string[] _imageFormatNames;
+        public bool vFlip;
 
 #if IPA
         public bool Init(HarmonyInstance harmony)
@@ -204,7 +223,7 @@ namespace VideoExport.ScreenshotPlugins
 
         public Texture2D CaptureTexture()
         {
-            return ReshadeAPI.RequestScreenshot(_removeAlphaChannel);
+            return ReshadeAPI.RequestScreenshot(_removeAlphaChannel, vFlip);
         }
 
         public RenderTexture CaptureRenderTexture()

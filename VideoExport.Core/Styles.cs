@@ -73,7 +73,9 @@ namespace VideoExport
         }
         private static void LoadImage(Texture2D texture, byte[] tex)
         {
+#if (!KOIKATSU || SUNSHINE)
             ImageConversion.LoadImage(texture, tex);
+#endif
             texture.anisoLevel = 1;
             texture.filterMode = FilterMode.Point;
             texture.wrapMode = TextureWrapMode.Clamp;
