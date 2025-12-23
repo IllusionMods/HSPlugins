@@ -70,18 +70,28 @@ namespace VideoExport.Extensions
             {
                 const int NVIDIA = 0x10DE;
                 const int AMD = 0x1002;
+                const int INTEL = 0x8086;
 
                 int gpuVendorId = SystemInfo.graphicsDeviceVendorID;
 
                 // Narrow down preset choice because the GPU codecs have their own
                 string preset = this._presetCLIOptions[(int)this._preset];
                 if (this._preset < Preset.Medium)
+                {
+                    preset = (gpuVendorId == INTEL) ? "slow" : "quality";
                     preset = (gpuVendorId == AMD) ? "quality" : "slow";
+                }
                 else if (this._preset > Preset.Medium)
+                {
+                    preset = (gpuVendorId == INTEL) ? "fast" : "speed";
                     preset = (gpuVendorId == AMD) ? "speed" : "fast";
+                }
                 else
+                {
+                    preset = (gpuVendorId == INTEL) ? "medium" : "balanced";
                     preset = (gpuVendorId == AMD) ? "balanced" : "medium";
-
+                }
+                    
                 switch (gpuVendorId)
                 {
                     case NVIDIA:
@@ -95,6 +105,12 @@ namespace VideoExport.Extensions
                         tuneArgument = "";
                         rateControlArgument = $"-rc cqp -qp_i {_quality} -qp_p {_quality} -qp_b {_quality}";
                         presetArgument = $"-quality {preset}";
+                        break;
+                    case INTEL:
+                        codecOptions = new string[] { "h264_qsv", "hevc_qsv" };
+                        tuneArgument = "";
+                        rateControlArgument = $"-global_quality {_quality}";
+                        presetArgument = $"-preset {preset}";
                         break;
                     default:
                         break;
@@ -141,7 +157,7 @@ namespace VideoExport.Extensions
             GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4Quality));
             GUILayout.BeginHorizontal();
             {
-                this._quality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._quality, 0, 51));
+                this._quality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._quality, 1, 51));
                 GUILayout.Label(this._quality.ToString("00"), GUILayout.ExpandWidth(false));
             }
             GUILayout.EndHorizontal();
