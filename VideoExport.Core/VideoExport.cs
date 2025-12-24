@@ -1606,9 +1606,9 @@ namespace VideoExport
             {
                 _ffmpegStdin.Close();
                 _frameDataBuffer = null;
+                _generatingVideo = false;
             }
 
-            _generatingVideo = false;
             Logger.LogInfo($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
 
             _progressBarPercentage = 1;
@@ -1819,6 +1819,7 @@ namespace VideoExport
             {
                 _ffmpegStdin.Close();
                 _ffmpegStdin = null;
+                _frameDataBuffer = null;
             }
 
             /*if (_ffmpegProcessMaster != null)
@@ -1839,6 +1840,7 @@ namespace VideoExport
 
             _frameCount = 0;
             _nextFrameToProcess = 0;
+            _generatingVideo = false;
         }
 
         private void FFmpegMasterWriteLoop()
