@@ -211,7 +211,9 @@ namespace VideoExport
             FFV1GopSizeTooltip,
             FFV1SlicesTooltip,
             SameAsCapture,
-            ToggleScreencapUI
+            ToggleScreencapUI,
+            HwAccelSelector,
+            HwAccelSelectorTooltip
         }
 
         private enum LimitDurationType
@@ -1611,31 +1613,15 @@ namespace VideoExport
 
             _progressBarPercentage = 1;
 
-            /*if (_autoDeleteImages && error == false)
+            try
             {
-                var retry = false;
-                try
-                {
-                    Directory.Delete(framesFolder, true);
-                }
-                catch
-                {
-                    retry = true;
-                }
-                if (retry)
-                {
-                    // Try waiting for any remaining file locks to release
-                    yield return new WaitForSecondsRealtime(1);
-                    try
-                    {
-                        Directory.Delete(framesFolder, true);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogWarning("Failed to auto delete images: " + e);
-                    }
-                }
-            }*/
+                Directory.Delete(framesFolder, false);
+            }
+            catch (Exception e)
+            {
+                Logger.LogWarning("Failed to auto delete images: " + e);
+            }
+
             _isRecording = false;
             Resources.UnloadUnusedAssets();
             GC.Collect();
@@ -1646,50 +1632,6 @@ namespace VideoExport
 #else
                 Manager.Scene.Instance.GameEnd(false);
 #endif
-        }
-
-        private Process StartExternalProcess(string exe, string arguments, bool redirectStandardOutput, bool redirectStandardError)
-        {
-            IExtension extension = _extensions[(int)_selectedExtension];
-
-            Logger.LogInfo($"Starting process: {exe} {arguments}");
-            Process proc = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = exe,
-                    Arguments = arguments,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WorkingDirectory = Directory.GetCurrentDirectory() + "\\",
-                    RedirectStandardOutput = redirectStandardOutput,
-                    RedirectStandardError = redirectStandardError,
-                    RedirectStandardInput = true
-                }
-            };
-
-            if (redirectStandardOutput)
-            {
-                proc.OutputDataReceived += (sender, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                    {
-                        foreach (char c in e.Data)
-                            extension.ProcessStandardOutput(c);
-                        extension.ProcessStandardOutput('\n');
-                    }
-                };
-            }
-            proc.Start();
-
-            _ffmpegStdin = new BinaryWriter(proc.StandardInput.BaseStream);
-
-            if (redirectStandardOutput)
-            {
-                proc.BeginOutputReadLine();
-            }
-
-            return proc;
         }
 
         private Process StartExternalProcess(string exe, string arguments, bool redirectStandardOutput, bool redirectStandardError, bool redirectStandardInput)
@@ -1728,56 +1670,6 @@ namespace VideoExport
             return proc;
         }
 
-        private IEnumerator HandleProcessOutput(Process proc, int totalFrames, bool hasProgressOutput, Action<bool> setError)
-        {
-            IExtension extension = _extensions[(int)_selectedExtension];
-            extension.ResetProgress();
-
-            DateTime startTime = DateTime.Now;
-            TimeSpan elapsed = TimeSpan.Zero;
-
-            while (proc.HasExited == false)
-            {
-                elapsed = DateTime.Now - startTime;
-
-                if (hasProgressOutput)
-                {
-                    TimeSpan eta = TimeSpan.FromSeconds((totalFrames - extension.progress) * elapsed.TotalSeconds / extension.progress);
-                    _progressBarPercentage = extension.progress / (float)totalFrames;
-                    _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {extension.progress}/{totalFrames} {_progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {eta.Hours:0}:{eta.Minutes:00}:{eta.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
-                }
-                else
-                {
-                    _progressBarPercentage = (float)((elapsed.TotalSeconds % 6) / 6);
-                    _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
-                }
-
-                yield return null;
-                proc.Refresh();
-            }
-
-            proc.WaitForExit();
-
-            var errorOut = proc.StandardError.ReadToEnd()?.Trim();
-            if (!string.IsNullOrEmpty(errorOut))
-                Logger.LogError(errorOut);
-
-            yield return null;
-            if (proc.ExitCode == 0)
-            {
-                _messageColor = Color.green;
-                _currentMessage = _currentDictionary.GetString(TranslationKey.Done) +
-                  $"\nTime spent:{elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
-            }
-            else
-            {
-                _messageColor = Color.red;
-                _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
-                setError(true);
-            }
-            proc.Close();
-        }
-
         private IEnumerator HandleProcessOutput(Process proc, int totalFrames, bool hasProgressOutput, Action<bool> setError, bool isMaster)
         {
             if (!isMaster)
@@ -1806,19 +1698,6 @@ namespace VideoExport
             while (proc.HasExited == false)
             {
                 elapsed = DateTime.Now - startTime;
-
-                if (hasProgressOutput)
-                {
-                    TimeSpan eta = TimeSpan.FromSeconds((totalFrames - extension.progress) * elapsed.TotalSeconds / extension.progress);
-                    _progressBarPercentage = extension.progress / (float)totalFrames;
-                    _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {extension.progress}/{totalFrames} {_progressBarPercentage * 100:0.0}%\n{_currentDictionary.GetString(TranslationKey.ETA)}: {eta.Hours:0}:{eta.Minutes:00}:{eta.Seconds:00} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
-                }
-                else
-                {
-                    _progressBarPercentage = (float)((elapsed.TotalSeconds % 6) / 6);
-                    _currentMessage = $"{_currentDictionary.GetString(TranslationKey.GeneratingVideo)} {_currentDictionary.GetString(TranslationKey.Elapsed)}: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
-                }
-
                 yield return null;
                 proc.Refresh();
             }

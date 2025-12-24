@@ -124,4 +124,6 @@
   <string key="FFV1SlicesTooltip" value="Each frame is split into this number of slices.\nThis affects multithreading performance,\nas well as filesize:\nIncreasing the number of slices might speed up performance,\nbut also increases the filesize." />
   <string key="SameAsCapture" value="Same as capture" />
   <string key="ToggleScreencapUI" value="Open Settings Toolbar" />
+  <string key="HwAccelSelector" value="Selector" />
+  <string key="HwAccelSelectorTooltip" value="Select the codec you want to use for encoding." />
 </root>
