@@ -33,7 +33,7 @@ namespace VideoExport.Extensions
             string codec = _codecCLIOptions[(int)this._codec];
             string codecExtraArgs = $"-qscale {this._quality} -loop 0";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
             string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
             string codecArgs = $"-c:v {codec} {codecExtraArgs} -pix_fmt {pixFmt} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.webp\"";

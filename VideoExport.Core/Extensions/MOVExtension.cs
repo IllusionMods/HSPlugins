@@ -50,7 +50,7 @@ namespace VideoExport.Extensions
                 videoPixelFormatArg = "yuv444p10le";
             }
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
             string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
             string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}, format={videoPixelFormatArg}\"";
             string outputArgs = $"\"{fileName}.mov\"";

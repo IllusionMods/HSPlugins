@@ -56,7 +56,7 @@ namespace VideoExport.Extensions
             string autoAltRef = this._codec == Codec.VP8 ? "-auto-alt-ref 0" : "";
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
             string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
             string codecArgs = $"-c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : "")} -pix_fmt {pixFmt} {autoAltRef} -crf {this._quality} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.webm\"";

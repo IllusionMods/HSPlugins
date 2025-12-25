@@ -120,7 +120,7 @@ namespace VideoExport.Extensions
 
                 string videoFilterArgument = $"-filter_complex \"{filterGraph}\"";
 
-                string ffmpegArgs = $"-loglevel error -threads {coreCount} -progress pipe:1";
+                string ffmpegArgs = $"-loglevel error -threads {coreCount}";
                 string inputArgs = $"-i \"{fileName}.mov\" {videoFilterArgument}";
                 string outputArgs = $"\"{fileName}.gif\"";
 
@@ -140,7 +140,7 @@ namespace VideoExport.Extensions
             string codecExtraArgs = "-profile:v " + codecProfileName;
             string videoPixelFormatArg = transparency ? "yuva444p10le" : "yuv444p10le";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount} -progress pipe:1";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
             string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
             string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}, format={videoPixelFormatArg}\"";
             string outputArgs = $"\"{fileName}.mov\"";
