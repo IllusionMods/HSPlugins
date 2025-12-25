@@ -506,7 +506,7 @@ namespace VideoExport
             GUIStyle windowStyle = Styles.WindowStyle ?? GUI.skin.window;
             _windowRect = GUILayout.Window(_uniqueId + 1, _windowRect, Window, "Video Export " + Version, windowStyle);
             Styles.EndVESkin();
-            IMGUIExtensions.DrawBackground(_windowRect);
+            //IMGUIExtensions.DrawBackground(_windowRect);
         }
 
         protected override void OnDestroy()
