@@ -213,7 +213,8 @@ namespace VideoExport
             SameAsCapture,
             ToggleScreencapUI,
             HwAccelSelector,
-            HwAccelSelectorTooltip
+            HwAccelSelectorTooltip,
+            MP4QualityTooltip
         }
 
         private enum LimitDurationType
@@ -1706,7 +1707,8 @@ namespace VideoExport
 
             var errorOut = proc.StandardError.ReadToEnd()?.Trim();
             if (!string.IsNullOrEmpty(errorOut))
-                Logger.LogError(errorOut);
+                //Logger.LogError(errorOut);
+                Logger.LogInfo(errorOut);
 
             yield return null;
             if (proc.ExitCode == 0)

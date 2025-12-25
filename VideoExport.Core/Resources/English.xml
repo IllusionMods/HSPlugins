@@ -61,7 +61,7 @@
   <string key="MP4PresetMedium" value="Balanced" />
   <string key="MP4PresetFaster" value="Speed" />
   <string key="WEBMCodec" value="Codec" />
-  <string key="MP4Quality" value="Quality (lower is better, 18 is recommended)" />
+  <string key="MP4Quality" value="Quality" />
   <string key="VP8Quality" value="Quality (lower is better, 10 is recommended)" />
   <string key="VP9Quality" value="Quality (lower is better, 30 is recommended)" />
   <string key="WEBPQuality" value="Quality (higher is better, 75 is recommended)" />
@@ -96,7 +96,7 @@
   <string key="ImageFormatTooltip" value="[BMP] Lossless, very fast encoding, large space requirement\n[PNG] Lossless, slow encoding, medium space requirement\n[JPG] Lossy, fast encoding, low space requirement\n[EXR] Lossless, very slow encoding, large space requirement, HDR" />
   <string key="ExtensionTooltip" value="[MP4] General purpose widely supported video format\n[WEBM] Video format optimized for web\n[GIF] Old image format for short clips and loops\n[MOV] Video format used in professional editing (high space requirement)\n[WEBP] Image format optimized for web (supports animation)\n[AVIF] Modern image format based on the AV1 codec (supports animation)\n[MKV] (FFV1) A good choice for ​archiving and preservation." />
   <string key="RemoveAlphaChannelTooltip" value="Some Reshade effects do not play well with the alpha channel.\nEnable this if the PNG screenshots are fully transparent.\nAlso makes the PNGs smaller."/>
-  <string key="MP4CodecTooltip" value="[H.264] Widely used and supported. Recommended.\n[H.265] More efficient, but may not be fully supported everywhere."/>
+  <string key="MP4CodecTooltip" value="[H.264] Widely used and supported. Recommended.\n[H.265] More efficient, but may not be fully supported everywhere.\n[AV1] Most efficient, but may not always be supported everywhere."/>
   <string key="WEBMCodecTooltip" value="[VP8] Widely used and supported. Recommended.\n[VP9] More efficient, but many not be fully supported everywhere."/>
   <string key="MOVCodecTooltip" value="[ProRes] Produces very large files meant for professional video editing." />
   <string key="AVIFCodecTooltip" value="[Libaom-av1] Widely supported, lossless quality, slow encoding.\n[Libsvt-av1] Good quality, fast encoding." />
@@ -125,5 +125,6 @@
   <string key="SameAsCapture" value="Same as capture" />
   <string key="ToggleScreencapUI" value="Open Settings Toolbar" />
   <string key="HwAccelSelector" value="Selector" />
-  <string key="HwAccelSelectorTooltip" value="Select the codec you want to use for encoding." />
+  <string key="HwAccelSelectorTooltip" value="Select the HW codec you want to use for encoding." />
+  <string key="MP4QualityTooltip" value="Lower is better,\n16 (H264), 21 (H265), 30 (AV1) is recommended.\nA value of 0 is recommended for use only by those\nwho are familiar with its purpose." />
 </root>
