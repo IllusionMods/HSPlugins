@@ -1798,12 +1798,19 @@ namespace VideoExport
         {
             try
             {
-                if (request.hasError) return;
+                if (request.hasError)
+                {
+                    Logger.LogWarning(
+                        $"AsyncGPUReadback received an error while waiting for frame {_frameCount + 1} " +
+                        "Resulting video will have missing frames."
+                    );
+                    return;
+                }
 
                 NativeArray<byte> pixelData = request.GetData<byte>();
                 byte[] buffer = _simpleBytePool.Rent();
                 pixelData.CopyTo(buffer);
-                _ffmpegMasterFrameQueue.Enqueue(new SimpleFrameData { index = _frameCount++, data = buffer});
+                _ffmpegMasterFrameQueue.Enqueue(new SimpleFrameData { index = _frameCount++, data = buffer });
                 _ffmpegMasterFrameSignal.Set();
             }
             finally
@@ -1847,9 +1854,13 @@ namespace VideoExport
 
         private void FFmpegMasterWriteLoop()
         {
-            while (_isRecording || !_ffmpegMasterFrameQueue.IsEmpty)
+            const int waitTimeoutMs = 100;
+            const int maxExtraWaitMs = 15_000;
+            int waitedAfterStopMs = 0;
+
+            while (true)
             {
-                _ffmpegMasterFrameSignal.WaitOne(100);
+                _ffmpegMasterFrameSignal.WaitOne(waitTimeoutMs);
 
                 while (_ffmpegMasterFrameQueue.TryDequeue(out SimpleFrameData frame))
                 {
@@ -1864,7 +1875,39 @@ namespace VideoExport
                     _reorderBuffer.RemoveAt(0);
                     _nextFrameToProcess++;
                 }
+
+                if (!_isRecording
+                    && _ffmpegMasterFrameQueue.IsEmpty
+                    && _asyncGPUCompleteCount >= _asyncGPURequestCount)
+                {
+                    break;
+                }
+
+                // If recording is already stopped, but we still have pending GPU work,
+                // accumulate wait time and eventually bail out with a warning.
+                if (!_isRecording
+                    && (_asyncGPUCompleteCount < _asyncGPURequestCount
+                        || !_ffmpegMasterFrameQueue.IsEmpty))
+                {
+                    waitedAfterStopMs += waitTimeoutMs;
+
+                    if (waitedAfterStopMs >= maxExtraWaitMs)
+                    {
+                        Logger.LogWarning(
+                            "FFmpeg input stream: timeout waiting for async GPU readbacks to finish. " +
+                            $"Requests={_asyncGPURequestCount}, Completed={_asyncGPUCompleteCount}, " +
+                            $"NextFrame={_nextFrameToProcess}. Exiting FFmpeg with missing frames."
+                        );
+
+                        break;
+                    }
+                }
+                else
+                {
+                    waitedAfterStopMs = 0;
+                }
             }
+
             StopProcessByAsync();
         }
 #endif
