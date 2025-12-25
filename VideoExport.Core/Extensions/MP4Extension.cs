@@ -204,7 +204,17 @@ namespace VideoExport.Extensions
                 }
                 else
                 {
+                    if (_hwAccel)
+                    {
                     this._hwAccelSelect = (Vendor)GUILayout.SelectionGrid((int)this._hwAccelSelect, this._venderNames, 3, GUILayout.ExpandWidth(true));
+                    }
+                    else
+                    {
+                        GUI.enabled = false;
+                        this._hwAccelSelect = (Vendor)GUILayout.SelectionGrid((int)this._hwAccelSelect, this._venderNames, 3, GUILayout.ExpandWidth(true));
+                        GUI.enabled = true;
+                    }
+                        
                     this._isHwAccelSelectorFolded = GUILayout.Button(new GUIContent(">", VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelSelectorTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
                 }
             }
@@ -213,7 +223,7 @@ namespace VideoExport.Extensions
             GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4Quality));
             GUILayout.BeginHorizontal();
             {
-                this._quality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._quality, 1, 51));
+                this._quality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._quality, 0, 51));
                 GUILayout.Label(this._quality.ToString("00"), GUILayout.ExpandWidth(false));
             }
             GUILayout.EndHorizontal();
