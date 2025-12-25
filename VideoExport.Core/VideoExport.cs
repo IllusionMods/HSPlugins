@@ -308,6 +308,7 @@ namespace VideoExport
         private string _tempDateTime;
         private int _asyncGPURequestCount = 0;
         private int _asyncGPUCompleteCount = 0;
+        private TimeSpan _elapsedRenderTime = TimeSpan.Zero;
 
 #if (!KOIKATSU || SUNSHINE)
         private ConcurrentQueue<SimpleFrameData> _ffmpegMasterFrameQueue = new ConcurrentQueue<SimpleFrameData>();
@@ -1349,6 +1350,10 @@ namespace VideoExport
                     ((ReshadePlugin)screenshotPlugin).vFlip = true;
                 }
             }
+            
+            IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
+            Vector2 currentSize = plugin.currentSize;
+            string targetSize = currentSize.x + "x" + currentSize.y;
 
             int totalFrames = 0;
             bool error = false;
@@ -1420,10 +1425,6 @@ namespace VideoExport
                     }
                 }
 
-                IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
-                Vector2 currentSize = plugin.currentSize;
-                string targetSize = currentSize.x + "x" + currentSize.y;
-
                 arguments = "-s " + targetSize + " " + arguments;
 
                 //int totalFrames = i * _exportFps / _fps;
@@ -1439,10 +1440,14 @@ namespace VideoExport
                     InitializeRecoder((int)currentSize.x, (int)currentSize.y);
 
 #if (!KOIKATSU || SUNSHINE)
-                    _simpleBytePool = new SimpleBytePool(_frameBufferSize, _simpleBytePoolSize);
-                    _ffmpegMasterThread = new Thread(FFmpegMasterWriteLoop);
-                    _ffmpegMasterThread.Priority = System.Threading.ThreadPriority.AboveNormal;
-                    _ffmpegMasterThread.Start();
+                    if (screenshotPlugin is ScreencapPlugin &&
+                        screenshotPlugin.IsRenderTextureCaptureAvailable() == true && _autoGenerateVideo)
+                    {
+                        _simpleBytePool = new SimpleBytePool(_frameBufferSize, _simpleBytePoolSize);
+                        _ffmpegMasterThread = new Thread(FFmpegMasterWriteLoop);
+                        _ffmpegMasterThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+                        _ffmpegMasterThread.Start();
+                    }
 #endif
                 }
 
@@ -1462,6 +1467,32 @@ namespace VideoExport
                 _currentMessage = _currentDictionary.GetString(TranslationKey.Done);
             }
 
+            Logger.LogInfo(
+                BuildAlignedLogBlock("Starting frame capture:", 
+                new[]
+                    {
+                        "Total frames",
+                        "Export frames",
+                        "FPS",
+                        "Export FPS",
+                        "Render resolution",
+                        "Export resolution",
+                        "Generate video"
+                    },
+                    new[]
+                    {
+                        limit.ToString(),
+                        (limit / exportInterval).ToString(),
+                        _fps.ToString(),
+                        _exportFps.ToString(),
+                        targetSize,
+                        _resize ? $"{_resizeX}x{_resizeY}" : targetSize,
+                        _autoGenerateVideo ? "Yes" : "No"
+                    }
+                )
+            );
+
+            int generatedFrames = 0;
             for (; ; i++)
             {
                 if (_limitDuration && i >= limit)
@@ -1511,6 +1542,10 @@ namespace VideoExport
                                 var req = AsyncGPUReadback.Request(rt, 0, (request) => OnCompleteReadback(request, rt));
 #endif
                             }
+                            else
+                            {
+                                Logger.LogWarning($"Frame capture for frame {i} didn't return a texture. Frame skipped.");
+                            }
                         }
                         else
                         {
@@ -1520,6 +1555,11 @@ namespace VideoExport
                                 TextureEncoder.EncodeAndWriteTexture(texture, screenshotPlugin.imageFormat, screenshotPlugin.transparency, savePath);
                                 Destroy(texture);
                                 texture = null;
+                                generatedFrames++;
+                            }
+                            else
+                            {
+                                Logger.LogWarning($"Frame capture for frame {i} didn't return a texture. Frame skipped.");
                             }
                         }
                     }
@@ -1553,6 +1593,7 @@ namespace VideoExport
                                 Destroy(texture);
                                 texture = null;
                             }
+                            generatedFrames++;
                         }
                     }
                     else
@@ -1560,15 +1601,20 @@ namespace VideoExport
                         byte[] frame = screenshotPlugin.Capture(savePath);
                         if (frame != null)
                             File.WriteAllBytes(savePath, frame);
+                        generatedFrames++;
                     }
 #else
                     byte[] frame = screenshotPlugin.Capture(savePath);
-                    if (frame != null)
+                    if (frame != null) {
                         File.WriteAllBytes(savePath, frame);
+                        generatedFrames++;
+                    }
 #endif
                 }
 
                 elapsed = DateTime.Now - startTime;
+                
+                _elapsedRenderTime = elapsed;
 
                 TimeSpan remaining = TimeSpan.FromSeconds((limit - i - 1) * elapsed.TotalSeconds / (i + 1));
 
@@ -1596,8 +1642,6 @@ namespace VideoExport
             Application.targetFrameRate = cachedApplicationTargetFrameRate;
             QualitySettings.vSyncCount = cachedQualitySettingsVSyncCount;
 
-            Logger.LogInfo($"Time spent taking screenshots: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
-
             foreach (DynamicBone dynamicBone in Resources.FindObjectsOfTypeAll<DynamicBone>())
                 dynamicBone.m_UpdateRate = 60;
             foreach (DynamicBone_Ver02 dynamicBone in Resources.FindObjectsOfTypeAll<DynamicBone_Ver02>())
@@ -1610,17 +1654,51 @@ namespace VideoExport
                 _generatingVideo = false;
             }
 
-            Logger.LogInfo($"Time spent generating video: {elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}");
+            if (
+                !_autoGenerateVideo || 
+                !(
+                    screenshotPlugin is ScreencapPlugin && 
+                    screenshotPlugin.IsRenderTextureCaptureAvailable() == true && 
+                    _autoGenerateVideo
+                )
+            )
+            {
+                _elapsedRenderTime = TimeSpan.Zero;
+                
+                Logger.LogInfo(
+                    BuildAlignedLogBlock("Completed frame capture:", 
+                        new []
+                        {
+                            "Elapsed time",
+                            "Frame count",
+                            "Generated frame count",
+                            "Missing frames",
+                            "Generated video"
+                        }, 
+                        new []
+                        {
+                            $"{elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}",
+                            _recordingFrameLimit.ToString(),
+                            generatedFrames.ToString(),
+                            (limit / exportInterval - generatedFrames).ToString(),
+                            _autoGenerateVideo ? "Yes" : "No"
+                        }
+                    )
+                );
+            }
 
             _progressBarPercentage = 1;
 
-            try
+            if (_autoGenerateVideo)
             {
-                Directory.Delete(framesFolder, false);
-            }
-            catch (Exception e)
-            {
-                Logger.LogWarning("Failed to auto delete images: " + e);
+                try
+                {
+                    Directory.Delete(framesFolder, false);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarning("Failed to auto delete images: " + e);
+                }
             }
 
             _isRecording = false;
@@ -1783,6 +1861,40 @@ namespace VideoExport
                 _frameDataBuffer = new byte[_frameBufferSize];
             }
         }
+        
+        private static string BuildAlignedLogBlock(string headerTitle, string[] titles, string[] values)
+        {
+            if (titles == null) throw new ArgumentNullException(nameof(titles));
+            if (values == null) throw new ArgumentNullException(nameof(values));
+            if (titles.Length != values.Length)
+                throw new ArgumentException("titles and values must have same length.");
+
+            int cols = titles.Length;
+            int[] widths = new int[cols];
+
+            for (int i = 0; i < cols; i++)
+                widths[i] = Math.Max(titles[i]?.Length ?? 0, values[i]?.Length ?? 0);
+
+            var headerText = new System.Text.StringBuilder();
+            var valuesText = new System.Text.StringBuilder();
+
+            for (int i = 0; i < cols; i++)
+            {
+                if (i > 0)
+                {
+                    headerText.Append(" | ");
+                    valuesText.Append(" | ");
+                }
+
+                string titleString = titles[i] ?? string.Empty;
+                string valueString = values[i] ?? string.Empty;
+
+                headerText.Append(titleString.PadRight(widths[i]));
+                valuesText.Append(valueString.PadRight(widths[i]));
+            }
+
+            return $"{headerTitle}\n{headerText}\n{valuesText}";
+        }
 
 #if (!KOIKATSU || SUNSHINE)
         public byte[] GetNativeRawData(Texture2D texture)
@@ -1830,6 +1942,27 @@ namespace VideoExport
                 _ffmpegStdin = null;
                 _frameDataBuffer = null;
             }
+            
+            Logger.LogInfo(
+                BuildAlignedLogBlock("Completed frame capture:", 
+                    new []
+                    {
+                        "Elapsed time",
+                        "Frame count",
+                        "Handled frame count",
+                        "Missing frame count",
+                        "Generated video"
+                    }, 
+                    new []
+                    {
+                        $"{_elapsedRenderTime.Hours:0}:{_elapsedRenderTime.Minutes:00}:{_elapsedRenderTime.Seconds:00}",
+                        _recordingFrameLimit.ToString(),
+                        _asyncGPUCompleteCount.ToString(),
+                        (_recordingFrameLimit - _asyncGPUCompleteCount).ToString(),
+                        _autoGenerateVideo ? "Yes" : "No"
+                    }
+                )
+            );
 
             /*if (_ffmpegProcessMaster != null)
             {
@@ -1847,6 +1980,7 @@ namespace VideoExport
                 _simpleBytePool = null;
             }
 
+            _elapsedRenderTime = TimeSpan.Zero;
             _frameCount = 0;
             _nextFrameToProcess = 0;
             _generatingVideo = false;
