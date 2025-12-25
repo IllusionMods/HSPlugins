@@ -1481,8 +1481,8 @@ namespace VideoExport
                     },
                     new[]
                     {
-                        limit.ToString(),
-                        (limit / exportInterval).ToString(),
+                        _limitDuration ? limit.ToString() : "Until stopped",
+                        _limitDuration ? (limit / exportInterval).ToString() : "Until stopped",
                         _fps.ToString(),
                         _exportFps.ToString(),
                         targetSize,
@@ -1678,9 +1678,9 @@ namespace VideoExport
                         new []
                         {
                             $"{elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}",
-                            _recordingFrameLimit.ToString(),
+                            _limitDuration ? _recordingFrameLimit.ToString() : generatedFrames.ToString(),
                             generatedFrames.ToString(),
-                            (limit / exportInterval - generatedFrames).ToString(),
+                            _limitDuration ? (limit / exportInterval - generatedFrames).ToString() : "0",
                             _autoGenerateVideo ? "Yes" : "No"
                         }
                     )
@@ -1956,9 +1956,9 @@ namespace VideoExport
                     new []
                     {
                         $"{_elapsedRenderTime.Hours:0}:{_elapsedRenderTime.Minutes:00}:{_elapsedRenderTime.Seconds:00}",
-                        _recordingFrameLimit.ToString(),
+                        _limitDuration ? _recordingFrameLimit.ToString() : _asyncGPURequestCount.ToString(),
                         _asyncGPUCompleteCount.ToString(),
-                        (_recordingFrameLimit - _asyncGPUCompleteCount).ToString(),
+                        _limitDuration ? (_recordingFrameLimit - _asyncGPUCompleteCount).ToString() : (_asyncGPURequestCount - _asyncGPUCompleteCount).ToString(),
                         _autoGenerateVideo ? "Yes" : "No"
                     }
                 )
