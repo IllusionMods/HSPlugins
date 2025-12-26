@@ -50,7 +50,7 @@ namespace VideoExport
                                , IEnhancedPlugin
 #endif
     {
-        public const string Version = "1.9.9";
+        public const string Version = "2.0.0";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
 
@@ -276,7 +276,6 @@ namespace VideoExport
         private int _exportFps = 60;
         private int[] _presetFps = new[] { 12, 24, 30, 60, 120 };
         private bool _autoGenerateVideo;
-        //private bool _autoDeleteImages;
         private bool _limitDuration;
         private LimitDurationType _selectedLimitDuration;
         private float _limitDurationNumber = 600;
@@ -368,7 +367,6 @@ namespace VideoExport
             _fps = _configFile.AddInt("framerate", 60, true);
             _exportFps = _configFile.AddInt("exportFramerate", 60, true);
             _autoGenerateVideo = _configFile.AddBool("autoGenerateVideo", true, true);
-            //_autoDeleteImages = _configFile.AddBool("autoDeleteImages", true, true);
             _limitDuration = _configFile.AddBool("limitDuration", false, true);
             _selectedLimitDuration = (LimitDurationType)_configFile.AddInt("selectedLimitDurationType", (int)LimitDurationType.Frames, true);
             _limitDurationNumber = _configFile.AddFloat("limitDurationNumber", 0, true);
@@ -508,7 +506,6 @@ namespace VideoExport
             GUIStyle windowStyle = Styles.WindowStyle ?? GUI.skin.window;
             _windowRect = GUILayout.Window(_uniqueId + 1, _windowRect, Window, "Video Export " + Version, windowStyle);
             Styles.EndVESkin();
-            //IMGUIExtensions.DrawBackground(_windowRect);
         }
 
         protected override void OnDestroy()
@@ -518,7 +515,6 @@ namespace VideoExport
             _configFile.SetInt("framerate", _fps);
             _configFile.SetInt("exportFramerate", _exportFps);
             _configFile.SetBool("autoGenerateVideo", _autoGenerateVideo);
-            //_configFile.SetBool("autoDeleteImages", _autoDeleteImages);
             _configFile.SetBool("limitDuration", _limitDuration);
             _configFile.SetInt("selectedLimitDurationType", (int)_selectedLimitDuration);
             _configFile.SetFloat("limitDurationNumber", _limitDurationNumber);
@@ -729,12 +725,8 @@ namespace VideoExport
                     {
                         GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 3));
                         {
-                            //_pluginScrollPos = GUILayout.BeginScrollView(_pluginScrollPos, GUILayout.Height(120));
-                            //{
                             _selectedPlugin = GUILayout.SelectionGrid(_selectedPlugin,
                                 _screenshotPlugins.Select(p => p.name).ToArray(), 1);
-                            //}
-                            //GUILayout.EndScrollView();
                         }
                         GUILayout.EndVertical();
 
@@ -812,7 +804,6 @@ namespace VideoExport
                     }
                     else
                     {
-                        // Новая строка для кнопок
                         GUILayout.BeginHorizontal();
                         {
                             GUILayout.Label("");
@@ -957,11 +948,7 @@ namespace VideoExport
                     GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 5));
                     {
                         GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.Extension), _currentDictionary.GetString(TranslationKey.ExtensionTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
-                        //_extensionScrollPos = GUILayout.BeginScrollView(_extensionScrollPos, GUILayout.Height(160));
-                        //{
                         _selectedExtension = (ExtensionsType)GUILayout.SelectionGrid((int)_selectedExtension, _extensionsNames, 1);
-                        //}
-                        //GUILayout.EndScrollView();
                     }
                     GUILayout.EndVertical();
 
@@ -1008,10 +995,6 @@ namespace VideoExport
                     _closeWhenDone = GUILayout.Toggle(_closeWhenDone, _currentDictionary.GetString(TranslationKey.CloseStudio), Styles.DangerToggleStyle);
                     GUILayout.Space(25);
                     _showTooltips = GUILayout.Toggle(_showTooltips, _currentDictionary.GetString(TranslationKey.ShowTooltips));
-                    // Deprecated option
-                    //_clearSceneBeforeEncoding = GUILayout.Toggle(_clearSceneBeforeEncoding, _currentDictionary.GetString(TranslationKey.EmptyScene), Styles.DangerToggleStyle);
-                    //_parallelScreenshotEncoding = GUILayout.Toggle(_parallelScreenshotEncoding, new GUIContent(_currentDictionary.GetString(TranslationKey.ParallelScreenshotEncoding), _currentDictionary.GetString(TranslationKey.ParallelEncodingTooltip)), Styles.DangerToggleStyle);
-                    //_autoDeleteImages = GUILayout.Toggle(_autoDeleteImages, _currentDictionary.GetString(TranslationKey.AutoDeleteImages));
                 }
                 GUILayout.EndHorizontal();
             }
@@ -1047,8 +1030,6 @@ namespace VideoExport
                         if (GUILayout.Button("■ " + _currentDictionary.GetString(TranslationKey.StopRecording), Styles.ControlButton, GUILayout.Height(50)))
                             StopRecording();
                     }
-
-                    // Сброс цвета (опционально, если нужно)
                     GUI.backgroundColor = Color.white;
                 }
                 else
@@ -1191,7 +1172,6 @@ namespace VideoExport
 
             IScreenshotPlugin screenshotPlugin = _screenshotPlugins[_selectedPlugin];
 
-            //string tempName = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
             _tempDateTime = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
             string framesFolder = Path.Combine(_globalFramesFolder.Value, _tempDateTime);
 
@@ -1376,7 +1356,6 @@ namespace VideoExport
                     
                 IExtension extension = _extensions[(int)_selectedExtension];
 
-                //string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, tempName));
                 string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, _tempDateTime));
                 if (screenshotPlugin is ScreencapPlugin && screenshotPlugin.IsRenderTextureCaptureAvailable() == true)
                 {
@@ -1396,9 +1375,6 @@ namespace VideoExport
                 if (screenshotPlugin is ReshadePlugin)
                 {
                     int index;
-                    /*int index = arguments.IndexOf("-pix_fmt") + 9;
-                    arguments = arguments.Remove(index, 4);
-                    arguments = arguments.Insert(index, "rgba");*/
                     int indexVflip = arguments.IndexOf(", vflip");
 
                     if (indexVflip >= 1)
@@ -1426,15 +1402,12 @@ namespace VideoExport
                 }
 
                 arguments = "-s " + targetSize + " " + arguments;
-
-                //int totalFrames = i * _exportFps / _fps;
                 totalFrames = _recordingFrameLimit * _exportFps / _fps;
 
                 if (error == false)
                 {
                     _ffmpegProcessMaster = StartExternalProcess(extension.GetExecutable(), arguments, false, extension.canProcessStandardError, true);
 
-                    //StartCoroutine(HandleProcessOutput(_ffmpegProcessMaster, totalFrames, extension.canProcessStandardOutput, val => error = val, true));
                     StartCoroutine(HandleProcessOutput(_ffmpegProcessMaster, totalFrames, false, val => error = val, true));
 
                     InitializeRecoder((int)currentSize.x, (int)currentSize.y);
@@ -1785,7 +1758,6 @@ namespace VideoExport
 
             var errorOut = proc.StandardError.ReadToEnd()?.Trim();
             if (!string.IsNullOrEmpty(errorOut))
-                //Logger.LogError(errorOut);
                 Logger.LogInfo(errorOut);
 
             yield return null;
@@ -1906,7 +1878,7 @@ namespace VideoExport
             return _frameDataBuffer;
         }
 
-        void OnCompleteReadback(AsyncGPUReadbackRequest request, RenderTexture rt)
+        private void OnCompleteReadback(AsyncGPUReadbackRequest request, RenderTexture rt)
         {
             try
             {
@@ -1928,8 +1900,6 @@ namespace VideoExport
             finally
             {
                 RenderTexture.ReleaseTemporary(rt);
-                //rt.Release();
-                //rt = null;
                 _asyncGPUCompleteCount++;
             }
         }
@@ -1963,13 +1933,6 @@ namespace VideoExport
                     }
                 )
             );
-
-            /*if (_ffmpegProcessMaster != null)
-            {
-                _ffmpegProcessMaster.WaitForExit();
-                _ffmpegProcessMaster.Close();
-                _ffmpegProcessMaster = null;
-            }*/
 
             _asyncGPURequestCount = 0;
             _asyncGPUCompleteCount = 0;

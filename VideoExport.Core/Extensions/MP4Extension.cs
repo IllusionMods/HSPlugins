@@ -89,15 +89,14 @@ namespace VideoExport.Extensions
                     pixFmt = "yuv420p10le";
                     break;
             }
-            int coreCount = _coreCount;
-            /*if (this._codec == Codec.H265 && coreCount > 16)
-                coreCount = 16;*/
-            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
+            int coreCount = _coreCount;
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
             string[] codecOptions = _codecCLIOptions;
             string codec = codecOptions[(int)this._codec];
             string tuneArgument = (codec == "libx264") ? "-tune animation" : "";
             string presetArgument = $"-preset {this._presetCLIOptions[(int)this._preset]}";
+
             if (codec == "libsvtav1")
             {
                 switch (_preset)
@@ -142,7 +141,6 @@ namespace VideoExport.Extensions
                         codecOptions = new string[] { "h264_amf", "hevc_amf", "av1_amf" }; // "amf" is not a typo :)
                         tuneArgument = "";
                         rateControlArgument = $"-rc cqp -qp_i {_quality} -qp_p {_quality} -qp_b {_quality}";
-                        //presetArgument = $"-quality {preset}";
                         if (this._preset < Preset.Medium)
                             preset = "quality";
                         else if (this._preset > Preset.Medium)
