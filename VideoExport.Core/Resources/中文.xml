@@ -102,4 +102,6 @@
   <string key="HwAccelCodecTooltip" value="使用 GPU 加速编码快速生成视频。\n压缩效率较低，同质量下文件更大。" />
   <string key="GIFToolTooltip" value="[FFmpeg] 质量好，支持广泛。文件稍大。\n         全局调色板，总共256色。抖动可选。\n[Gifsky] 最高质量，更平滑，但可能闪烁。\n         局部调色板，每帧256色。抖动必需。" />
   <string key="GIFDitheringTooltip" value="模拟有限调色板外的颜色：\n[none] 无抖动。推荐默认使用，直到视觉需要。\n[bayer] 产生明显的抖动图案/美感。\n[floyd_steinberg] 产生平滑渐变且噪点较低。" />
+  <string key="SameAsCapture" value="与捕获相同" />
+  <string key="ToggleScreencapUI" value="打开设置工具栏" />
 </root>

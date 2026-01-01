@@ -10,7 +10,8 @@ namespace VideoExport.Extensions
         private enum Codec
         {
             H264,
-            H265
+            H265,
+            AV1
         }
 
         private enum Preset
@@ -20,26 +21,59 @@ namespace VideoExport.Extensions
             Faster,
         }
 
-        private readonly string[] _codecNames = {"H.264", "H.265"};
-        private readonly string[] _codecCLIOptions = {"libx264", "libx265" };
+        private enum Vendor
+        {
+            NVIDIA,
+            AMD,
+            INTEL
+        }
+
+        private readonly string[] _codecNames = { "H.264", "H.265", "AV1" };
+        private readonly string[] _codecCLIOptions = { "libx264", "libx265", "libsvtav1" };
         private string[] _presetNames;
         private readonly string[] _presetCLIOptions;
+        private readonly string[] _venderNames = { "NVIDIA", "AMD", "INTEL" };
 
         private Codec _codec;
         private int _quality;
         private bool _hwAccel;
         private Preset _preset;
 
+        private bool _isHwAccelSelectorFolded = true;
+        private Vendor _hwAccelSelect;
+
+        const int NVIDIA = 0x10DE;
+        const int AMD = 0x1002;
+        const int INTEL = 0x8086;
+
         public MP4Extension() : base()
         {
             this._codec = (Codec)VideoExport._configFile.AddInt("mp4Codec", (int)Codec.H264, true);
             this._quality = VideoExport._configFile.AddInt("mp4Quality", 18, true);
             this._hwAccel = VideoExport._configFile.AddBool("mp4HwAccel", false, true);
-            this._preset = (Preset)VideoExport._configFile.AddInt("mp4Preset", (int)Preset.Slower, true);
+            this._preset = (Preset)VideoExport._configFile.AddInt("mp4Preset", (int)Preset.Medium, true);
             if ((int)this._preset >= Enum.GetValues(typeof(Preset)).Length)
                 this._preset = Preset.Slower;
 
             this._presetCLIOptions = Enum.GetNames(typeof(Preset)).Select(n => n.ToLowerInvariant()).ToArray();
+
+            int gpuVendorId = SystemInfo.graphicsDeviceVendorID;
+            if (gpuVendorId == NVIDIA)
+            {
+                _hwAccelSelect = Vendor.NVIDIA;
+            }
+            else if (gpuVendorId == AMD)
+            {
+                _hwAccelSelect = Vendor.AMD;
+            }
+            else if (gpuVendorId == INTEL)
+            {
+                _hwAccelSelect = Vendor.INTEL;
+            }
+            else
+            {
+                _hwAccelSelect = Vendor.NVIDIA;
+            }
         }
 
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
@@ -55,56 +89,87 @@ namespace VideoExport.Extensions
                     pixFmt = "yuv420p10le";
                     break;
             }
+
             int coreCount = _coreCount;
-            if (this._codec == Codec.H265 && coreCount > 16)
-                coreCount = 16;
-
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
             string[] codecOptions = _codecCLIOptions;
-            string tuneArgument = "-tune animation";
+            string codec = codecOptions[(int)this._codec];
+            string tuneArgument = (codec == "libx264") ? "-tune animation" : "";
             string presetArgument = $"-preset {this._presetCLIOptions[(int)this._preset]}";
-            string rateControlArgument = $"-crf {_quality}";
-            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
-            if (_hwAccel)
+            if (codec == "libsvtav1")
             {
-                const int NVIDIA = 0x10DE;
-                const int AMD = 0x1002;
-
-                int gpuVendorId = SystemInfo.graphicsDeviceVendorID;
-
-                // Narrow down preset choice because the GPU codecs have their own
-                string preset = this._presetCLIOptions[(int)this._preset];
-                if (this._preset < Preset.Medium)
-                    preset = (gpuVendorId == AMD) ? "quality" : "slow";
-                else if (this._preset > Preset.Medium)
-                    preset = (gpuVendorId == AMD) ? "speed" : "fast";
-                else
-                    preset = (gpuVendorId == AMD) ? "balanced" : "medium";
-
-                switch (gpuVendorId)
+                switch (_preset)
                 {
-                    case NVIDIA:
-                        codecOptions = new string[] { "h264_nvenc", "hevc_nvenc" };
-                        tuneArgument = "-tune hq";
-                        rateControlArgument = $"-qp {_quality}";
-                        presetArgument = $"-preset {preset}";
+                    case Preset.Slower:
+                        presetArgument = "-preset 3";
                         break;
-                    case AMD:
-                        codecOptions = new string[] { "h264_amf", "hevc_amf" }; // "amf" is not a typo :)
-                        tuneArgument = "";
-                        rateControlArgument = $"-rc cqp -qp_i {_quality} -qp_p {_quality} -qp_b {_quality}";
-                        presetArgument = $"-quality {preset}";
+                    case Preset.Medium:
+                        presetArgument = "-preset 6";
+                        break;
+                    case Preset.Faster:
+                        presetArgument = "-preset 9";
                         break;
                     default:
                         break;
                 }
             }
+            
+            string rateControlArgument = $"-crf {_quality}";
+            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
-            string codec = codecOptions[(int)this._codec];
+            if (_hwAccel)
+            {
+                // Narrow down preset choice because the GPU codecs have their own
+                string preset = this._presetCLIOptions[(int)this._preset];
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
-            string codecArgs = $"-vcodec {codec} {tuneArgument} {rateControlArgument} {presetArgument}";
+                switch (_hwAccelSelect)
+                {
+                    case Vendor.NVIDIA:
+                        codecOptions = new string[] { "h264_nvenc", "hevc_nvenc", "av1_nvenc" };
+                        tuneArgument = "-tune hq";
+                        rateControlArgument = $"-qp {_quality}";
+                        if (this._preset < Preset.Medium)
+                            preset = "slow";
+                        else if (this._preset > Preset.Medium)
+                            preset = "fast";
+                        else
+                            preset = "medium";
+                        presetArgument = $"-preset {preset}";
+                        break;
+                    case Vendor.AMD:
+                        codecOptions = new string[] { "h264_amf", "hevc_amf", "av1_amf" }; // "amf" is not a typo :)
+                        tuneArgument = "";
+                        rateControlArgument = $"-rc cqp -qp_i {_quality} -qp_p {_quality} -qp_b {_quality}";
+                        if (this._preset < Preset.Medium)
+                            preset = "quality";
+                        else if (this._preset > Preset.Medium)
+                            preset = "speed";
+                        else
+                            preset = "balanced";
+                        presetArgument = $"-preset {preset}";
+                        break;
+                    case Vendor.INTEL:
+                        codecOptions = new string[] { "h264_qsv", "hevc_qsv", "av1_qsv" };
+                        tuneArgument = "";
+                        rateControlArgument = $"-global_quality {_quality}";
+                        if (this._preset < Preset.Medium)
+                            preset = "slow";
+                        else if (this._preset > Preset.Medium)
+                            preset = "fast";
+                        else
+                            preset = "medium";
+                        presetArgument = $"-preset {preset}";
+                        break;
+                    default:
+                        break;
+                }
+                codec = codecOptions[(int)this._codec];
+            }
+
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
+            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
+            string codecArgs = $"-vcodec {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.mp4\"";
 
             return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
@@ -132,12 +197,36 @@ namespace VideoExport.Extensions
             GUILayout.BeginHorizontal();
             {
                 GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.Codec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4CodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
-                this._codec = (Codec)GUILayout.SelectionGrid((int)this._codec, this._codecNames, 2);
+                this._codec = (Codec)GUILayout.SelectionGrid((int)this._codec, this._codecNames, 3);
             }
             GUILayout.EndHorizontal();
-            this._hwAccel = GUILayout.Toggle(this._hwAccel, new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelCodec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelCodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
 
-            GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4Quality));
+            GUILayout.BeginHorizontal();
+            {
+                if (_isHwAccelSelectorFolded)
+                {
+                    this._hwAccel = GUILayout.Toggle(this._hwAccel, new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelCodec), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelCodecTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(true));
+                    this._isHwAccelSelectorFolded = !GUILayout.Button(new GUIContent("<", VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelSelectorTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+                }
+                else
+                {
+                    if (_hwAccel)
+                    {
+                        this._hwAccelSelect = (Vendor)GUILayout.SelectionGrid((int)this._hwAccelSelect, this._venderNames, 3, GUILayout.ExpandWidth(true));
+                    }
+                    else
+                    {
+                        GUI.enabled = false;
+                        this._hwAccelSelect = (Vendor)GUILayout.SelectionGrid((int)this._hwAccelSelect, this._venderNames, 3, GUILayout.ExpandWidth(true));
+                        GUI.enabled = true;
+                    }
+                        
+                    this._isHwAccelSelectorFolded = GUILayout.Button(new GUIContent(">", VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.HwAccelSelectorTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+                }
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4Quality), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.MP4QualityTooltip).Replace("\\n", "\n")));
             GUILayout.BeginHorizontal();
             {
                 this._quality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._quality, 0, 51));

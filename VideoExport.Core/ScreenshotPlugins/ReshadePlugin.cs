@@ -46,6 +46,9 @@ namespace VideoExport.ScreenshotPlugins
 
         private static string sharedMemoryName = "KKReshade_Screenshot_SHM";
 
+        private static byte[] _frameDataBuffer;
+        private static int _frameBufferSize;
+
         public static bool OpenSharedMemory()
         {
             if (_initialized) return true;
@@ -91,47 +94,48 @@ namespace VideoExport.ScreenshotPlugins
             return _initialized && _shmFile != IntPtr.Zero && _shm != IntPtr.Zero;
         }
 
-        public static Texture2D RequestScreenshot(bool removeAlpha)
+        public static Texture2D RequestScreenshot(bool removeAlpha, bool vFlip)
         {
             Screenshot screenshot = (Screenshot)Marshal.PtrToStructure(_shm, typeof(Screenshot));
             uint imageSize = screenshot.width * screenshot.height * screenshot.channels;
+
+            InitializeRecoder((int)imageSize);
+
             IntPtr imageBytesPtr = new IntPtr(_shm.ToInt64() + Marshal.SizeOf(typeof(Screenshot)));
-            byte[] rawImageBytes = new byte[imageSize];
-            Marshal.Copy(imageBytesPtr, rawImageBytes, 0, (int) imageSize);
+            Marshal.Copy(imageBytesPtr, _frameDataBuffer, 0, (int)imageSize);
 
-            // Raw image comes flipped vertically, so we flip it back to normal
-            byte[] bytesRGBA = new byte[imageSize];
-            uint rowSize = screenshot.width * screenshot.channels;
-            for (uint y = 0; y < screenshot.height; y++)
+            if (vFlip)
             {
-                uint srcRow = (screenshot.height - 1 - y) * rowSize;
-                uint dstRow = y * rowSize;
-                Buffer.BlockCopy(rawImageBytes, (int)srcRow, bytesRGBA, (int)dstRow, (int)rowSize);
-            }
+                int rowSize = (int)screenshot.width * (int)screenshot.channels; 
+                byte[] rowBuffer = new byte[rowSize];
+                int height = (int)screenshot.height;
+                int halfHeight = height / 2;
 
-            if (removeAlpha)
-            {
-                uint rgbSize = screenshot.width * screenshot.height * 3;
-                byte[] bytesRGB = new byte[rgbSize];
-
-                for (int src = 0, dst = 0; src < bytesRGBA.Length; src += 4, dst += 3)
+                for (int i = 0; i < halfHeight; i++)
                 {
-                    bytesRGB[dst] = bytesRGBA[src];
-                    bytesRGB[dst + 1] = bytesRGBA[src + 1];
-                    bytesRGB[dst + 2] = bytesRGBA[src + 2];
-                }
+                    int topRowOffset = i * rowSize;
+                    int bottomRowOffset = (height - i - 1) * rowSize;
 
-                Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGB24, false, false);
-                texture.LoadRawTextureData(bytesRGB);
-                texture.Apply();
-                return texture;
+                    System.Array.Copy(_frameDataBuffer, topRowOffset, rowBuffer, 0, rowSize);
+                    System.Array.Copy(_frameDataBuffer, bottomRowOffset, _frameDataBuffer, topRowOffset, rowSize);
+                    System.Array.Copy(rowBuffer, 0, _frameDataBuffer, bottomRowOffset, rowSize);
+                }
             }
-            else
+
+            Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGBA32, false, false);
+            texture.LoadRawTextureData(_frameDataBuffer);
+            texture.Apply();
+
+            return texture;
+        }
+
+        private static void InitializeRecoder(int imageSize)
+        {
+            _frameBufferSize = imageSize;
+
+            if (_frameDataBuffer == null || _frameDataBuffer.Length != _frameBufferSize)
             {
-                Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGBA32, false, false);
-                texture.LoadRawTextureData(bytesRGBA);
-                texture.Apply();
-                return texture;
+                _frameDataBuffer = new byte[_frameBufferSize];
             }
         }
     }
@@ -179,6 +183,7 @@ namespace VideoExport.ScreenshotPlugins
         private bool _autoHideUI;
         private bool _removeAlphaChannel;
         private string[] _imageFormatNames;
+        public bool vFlip;
 
 #if IPA
         public bool Init(HarmonyInstance harmony)
@@ -211,9 +216,19 @@ namespace VideoExport.ScreenshotPlugins
             return true;
         }
 
+        public bool IsRenderTextureCaptureAvailable()
+        {
+            return false;
+        }
+
         public Texture2D CaptureTexture()
         {
-            return ReshadeAPI.RequestScreenshot(_removeAlphaChannel);
+            return ReshadeAPI.RequestScreenshot(_removeAlphaChannel, vFlip);
+        }
+
+        public RenderTexture CaptureRenderTexture()
+        {
+            return null;
         }
 
         public void OnStartRecording()

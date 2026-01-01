@@ -11,6 +11,7 @@ namespace VideoExport.Extensions
         int progress { get; }
         bool canProcessStandardOutput { get; }
         bool canProcessStandardError { get; }
+        int channelType { get; set; }
 
         bool IsCompatibleWithPlugin(IScreenshotPlugin plugin, out string reason);
         string GetExecutable();
@@ -32,6 +33,13 @@ namespace VideoExport.Extensions
         MOV,
         WEBP,
         AVIF,
+        MKV
+    }
+
+    public enum ChannelType
+    {
+        ARGB,
+        RGBA
     }
 
 }

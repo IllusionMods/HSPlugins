@@ -27,6 +27,7 @@ namespace VideoExport.Extensions
         {
             int coreCount = _coreCount;
             string pixFmt = transparency ? "yuva420p" : "yuv420p";
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
@@ -38,9 +39,9 @@ namespace VideoExport.Extensions
             }
             string rateControlArgument = $"-crf {_quality} -b:v 0";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
-            string codecArgs = $"-c:v {codec} {codecExtraArgs} {rateControlArgument}";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
+            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
+            string codecArgs = $"-vcodec {codec} {codecExtraArgs} {rateControlArgument} -pix_fmt {pixFmt} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.avif\"";
 
             return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";

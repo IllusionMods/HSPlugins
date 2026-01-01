@@ -1,7 +1,7 @@
 <root>
   <string key="CurrentSize" value="Current Size" />
-  <string key="Framerate" value="Framerate" />
-  <string key="ExportFramerate" value="Video Framerate" />
+  <string key="Framerate" value="Capture Framerate" />
+  <string key="ExportFramerate" value="Export Framerate" />
   <string key="AutoDeleteImages" value="Auto Delete Images" />
   <string key="LimitBy" value="Limit By" />
   <string key="LimitByFrames" value="Frames" />
@@ -23,8 +23,8 @@
   <string key="CloseStudio" value="Close Studio When Done" />
   <string key="ParallelScreenshotEncoding" value="Parallel Encoding (BETA)" />
   <string key="StartRecordingOnNextClick" value="Start Recording On Next Click" />
-  <string key="StartRecording" value="Start Recording" />
-  <string key="StopRecording" value="Stop Recording" />
+  <string key="StartRecording" value="START RECORDING" />
+  <string key="StopRecording" value="STOP RECORDING" />
   <string key="PrewarmingAnimation" value="Prewarming animation" />
   <string key="RealignTimeline" value="Realign timeline to 00:00.00" />
   <string key="TakingScreenshot" value="Taking screenshot" />
@@ -61,7 +61,7 @@
   <string key="MP4PresetMedium" value="Balanced" />
   <string key="MP4PresetFaster" value="Speed" />
   <string key="WEBMCodec" value="Codec" />
-  <string key="MP4Quality" value="Quality (lower is better, 18 is recommended)" />
+  <string key="MP4Quality" value="Quality" />
   <string key="VP8Quality" value="Quality (lower is better, 10 is recommended)" />
   <string key="VP9Quality" value="Quality (lower is better, 30 is recommended)" />
   <string key="WEBPQuality" value="Quality (higher is better, 75 is recommended)" />
@@ -71,10 +71,10 @@
   <string key="WEBMDeadlineGood" value="Balanced" />
   <string key="WEBMDeadlineRealtime" value="Speed" />
   <string key="ShowTooltips" value="Show Tooltips" />
-  <string key="CaptureSettingsHeading" value="Capture Settings" />
-  <string key="VideoSettingsHeading" value="Video Settings" />
-  <string key="OtherSettingsHeading" value="Other Settings" />
-  <string key="ScreenshotTool" value="Screenshot Tool" />
+  <string key="CaptureSettingsHeading" value="CAPTURE SETTINGS" />
+  <string key="VideoSettingsHeading" value="VIDEO SETTINGS" />
+  <string key="OtherSettingsHeading" value="OTHER" />
+  <string key="ScreenshotTool" value="Capture Tool" />
   <string key="Extension" value="Extension" />
   <string key="GIFTool" value="GIF Tool" />
   <string key="GIFMaxColors" value="Max Colors" />
@@ -94,13 +94,37 @@
   <string key="ParallelEncodingTooltip" value="Performance setting. Disable this if recording fails." />
   <string key="CaptureModeTooltip" value="[Normal] Recommended. Renders the camera to guarantee up-to-date frame. \n[Immediate] Faster, assumes the camera is already rendered." />
   <string key="ImageFormatTooltip" value="[BMP] Lossless, very fast encoding, large space requirement\n[PNG] Lossless, slow encoding, medium space requirement\n[JPG] Lossy, fast encoding, low space requirement\n[EXR] Lossless, very slow encoding, large space requirement, HDR" />
-  <string key="ExtensionTooltip" value="[MP4] General purpose widely supported video format\n[WEBM] Video format optimized for web\n[GIF] Old image format for short clips and loops\n[MOV] Video format used in professional editing (high space requirement)\n[WEBP] Image format optimized for web (supports animation)\n[AVIF] Modern image format based on the AV1 codec (supports animation)" />
+  <string key="ExtensionTooltip" value="[MP4] General purpose widely supported video format\n[WEBM] Video format optimized for web\n[GIF] Old image format for short clips and loops\n[MOV] Video format used in professional editing (high space requirement)\n[WEBP] Image format optimized for web (supports animation)\n[AVIF] Modern image format based on the AV1 codec (supports animation)\n[MKV] (FFV1) A good choice for ​archiving and preservation." />
   <string key="RemoveAlphaChannelTooltip" value="Some Reshade effects do not play well with the alpha channel.\nEnable this if the PNG screenshots are fully transparent.\nAlso makes the PNGs smaller."/>
-  <string key="MP4CodecTooltip" value="[H.264] Widely used and supported. Recommended.\n[H.265] More efficient, but may not be fully supported everywhere."/>
+  <string key="MP4CodecTooltip" value="[H.264] Widely used and supported. Recommended.\n[H.265] More efficient, but may not be fully supported everywhere.\n[AV1] Most efficient, but may not always be supported everywhere."/>
   <string key="WEBMCodecTooltip" value="[VP8] Widely used and supported. Recommended.\n[VP9] More efficient, but many not be fully supported everywhere."/>
-  <string key="MOVCodecTooltip" value="[ProRes4444] Produces very large files meant for professional video editing." />
+  <string key="MOVCodecTooltip" value="[ProRes] Produces very large files meant for professional video editing." />
   <string key="AVIFCodecTooltip" value="[Libaom-av1] Widely supported, lossless quality, slow encoding.\n[Libsvt-av1] Good quality, fast encoding." />
   <string key="HwAccelCodecTooltip" value="Fast encoding using GPU accelerated codecs.\nLess efficient, produces larger files for the same quality."/>
   <string key="GIFToolTooltip" value="[FFmpeg] Good quality, widely supported. Slightly larger.\n         Global palette, 256 colors total. Dithering optional.\n[Gifsky] Highest quality, smoother, but may cause flickering.\n         Local palette, 256 colors per frame. Dithering mandatory." />
   <string key="GIFDitheringTooltip" value="Fakes colors outside of the limited palette:\n[none] No dithering. Recommended until visually necessary.\n[bayer] Creates visible dither patterns/aesthetic.\n[floyd_steinberg] Creates smooth gradients and relatively low noise." />
+  <string key="MOVPreset" value="Encoding Preset" />
+  <string key="MOVPresetTooltip" value="[ProRes422Proxy] Lowest.\n[ProRes422LT] Low.\n[ProRes422] Moderate.\n[ProRes422HQ] Standard.\n[ProRes4444] High.\n[ProRes4444XQ] Highest" />
+  <string key="MOVPresetProRes422Proxy" value="ProRes422Proxy" />
+  <string key="MOVPresetProRes422LT" value="ProRes422LT" />
+  <string key="MOVPresetProRes422" value="ProRes422" />
+  <string key="MOVPresetProRes422HQ" value="ProRes422HQ" />
+  <string key="MOVPresetProRes4444" value="ProRes4444" />
+  <string key="MOVPresetProRes4444XQ" value="ProRes4444XQ" />
+  <string key="GIFSKIQuality" value="Quality" />
+  <string key="GIFSKIMotionQuality" value="MotionQuality" />
+  <string key="GIFSKILossyQuality" value="LossyQuality" />
+  <string key="GIFSKIQualityTooltip" value="Lower quality may give smaller file [default: 90]" />
+  <string key="GIFSKIMotionQualityTooltip" value="Lower values reduce motion" />
+  <string key="GIFSKILossyQualityTooltip" value="Lower values introduce noise and streaks" />
+  <string key="FFV1CodecTooltip" value="[FFV1] A Codec for Archives" />
+  <string key="FFV1GopSize" value="GOP size" />
+  <string key="FFV1Slices" value="Slices" />
+  <string key="FFV1GopSizeTooltip" value="Reuse context model within a group of frames to improve compression." />
+  <string key="FFV1SlicesTooltip" value="Each frame is split into this number of slices.\nThis affects multithreading performance,\nas well as filesize:\nIncreasing the number of slices might speed up performance,\nbut also increases the filesize." />
+  <string key="SameAsCapture" value="Same as capture" />
+  <string key="ToggleScreencapUI" value="Open Settings Toolbar" />
+  <string key="HwAccelSelector" value="Selector" />
+  <string key="HwAccelSelectorTooltip" value="Select the HW codec you want to use for encoding." />
+  <string key="MP4QualityTooltip" value="Lower is better,\n16 (H264), 21 (H265), 30 (AV1) is recommended.\nA value of 0 is recommended for use only by those\nwho are familiar with its purpose." />
 </root>

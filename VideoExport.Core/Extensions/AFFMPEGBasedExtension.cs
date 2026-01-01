@@ -31,6 +31,7 @@ namespace VideoExport.Extensions
         public virtual int progress { get { return this._progress; } }
         public virtual bool canProcessStandardOutput { get { return true; } }
         public bool canProcessStandardError { get { return true; } }
+        public virtual int channelType { get; set; }
 
         static AFFMPEGBasedExtension()
         {
@@ -41,11 +42,10 @@ namespace VideoExport.Extensions
         {
             this._ffmpegFolder = Path.Combine(VideoExport._pluginFolder, "ffmpeg");
             if (IntPtr.Size == 8)
-                this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg-64.exe"));
+                this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg.exe"));
             else
             {
                 // Since KK is the oldest supported game now, all games are 64bit
-                //this._ffmpegExe = Path.GetFullPath(Path.Combine(this._ffmpegFolder, "ffmpeg.exe"));
                 throw new InvalidOperationException("We're somehow running in a 32bit environment?");
             }
             _rotation = (Rotation)VideoExport._configFile.AddInt("ffmpegRotation", (int)Rotation.None, true);
@@ -141,15 +141,37 @@ namespace VideoExport.Extensions
                 hasFilters = true;
             }
 
+            if (hasFilters)
+            {
+                res = res + ", vflip";
+            }
+            else
+            {
+                res = "vflip";
+                hasFilters = true;
+            }
+
             if (_rotation != Rotation.None)
             {
-                for (int i = 0; i < (int)_rotation; i++)
+                if (hasFilters == true)
+                    res += ", ";
+
+                switch ((int)_rotation)
                 {
-                    if (hasFilters == false && i == 0)
-                        res += "transpose=1";
-                    else
-                        res += ",transpose=1";
+                    case 0:
+                        Debug.Log("something gone wrong with _rotation in CompileFilters()");
+                        break;
+                    case 1:
+                        res += $"transpose={(int)_rotation}";
+                        break;
+                    case 2:
+                        res += $"rotate=PI";
+                        break;
+                    case 3:
+                        res += $"transpose={(int)_rotation}";
+                        break;
                 }
+
                 hasFilters = true;
             }
 
@@ -160,9 +182,6 @@ namespace VideoExport.Extensions
                 res += additionalFiltersPost;
                 hasFilters = true;
             }
-
-            if (hasFilters)
-                res = "-vf \"" + res + "\"";
 
             return res;
         }

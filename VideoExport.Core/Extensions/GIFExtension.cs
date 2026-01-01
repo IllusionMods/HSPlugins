@@ -35,6 +35,10 @@ namespace VideoExport.Extensions
         private readonly string[] _ffmpegDitheringNames = Enum.GetValues(typeof(Dithering)).Cast<Dithering>().Select(x => GetDitheringString(x)).ToArray();
         private int[] _presetMaxColors = new[] { 8, 16, 32, 64, 128, 256 };
         private int _maxColors;
+        private bool _isSlave = false;
+        private int _gifskiQuality = 90;
+        private int _gifskiMotionQuality = 90;
+        private int _gifskiLossyQuality = 90;
 
         public GIFExtension()
         {
@@ -47,7 +51,7 @@ namespace VideoExport.Extensions
 
         public bool IsPaletteGenRequired()
         {
-            return this._gifTool == GifTool.FFmpeg;
+            return true;
         }
 
         public override void UpdateLanguage()
@@ -75,41 +79,73 @@ namespace VideoExport.Extensions
 
         public override string GetExecutable()
         {
-            if (_gifTool == GifTool.Gifski)
-                return this._gifskiExe;
-            return base.GetExecutable();
-        }
-
-        public string GetArgumentsPaletteGen(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
-        {
-            int coreCount = _coreCount;
-            string videoFilterArgument = $"-vf \"palettegen=stats_mode=diff:max_colors={_maxColors}\"";
-
-            string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {videoFilterArgument}";
-            string outputArgs = $"\"{fileName}.palette.png\"";
-
-            return $"{ffmpegArgs} {inputArgs} {outputArgs}";
-        }
-
-        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
-        {
-            if (this._gifTool == GifTool.Gifski)
+            if (_gifTool == GifTool.Gifski && _isSlave == false)
             {
-                return $"{(resize ? $"-W {resizeX} -H {resizeY}" : "")} --fps {fps} -o \"{fileName}.gif\" \"{framesFolder}\"\\{prefix}*{postfix}.{inputExtension} --quiet";
+                _isSlave = true;
+                return base.GetExecutable(); 
+            }
+            else if (_gifTool == GifTool.Gifski && _isSlave == true)
+            {
+                _isSlave = false;
+                return this._gifskiExe;
             }
             else
             {
-                int coreCount = _coreCount;
+                return base.GetExecutable(); 
+            }
+        }
 
-                string videoFilterArgument = CompileFiltersComplex(resize, resizeX, resizeY);
+        public string GetArgumentsPaletteGen(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, int originalX, int originalY, string fileName)
+        {
+            int coreCount = _coreCount;
 
-                string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-                string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -i {fileName}.palette.png {videoFilterArgument}";
+            if (this._gifTool == GifTool.Gifski)
+            {
+                string gifskiArgs = $"--fps {fps} --quality {_gifskiQuality} --motion-quality {_gifskiMotionQuality} --lossy-quality {_gifskiLossyQuality}";
+                return $"{gifskiArgs} {(resize ? $"-W {resizeX} -H {resizeY}" : $"-W {originalX} -H {originalY}")} -o \"{fileName}.gif\" \"{fileName}.mov\" --quiet";
+            }
+            else
+            {
+                string paletteGen = $"palettegen=stats_mode=diff:max_colors={_maxColors}";
+                string dithering = _ffmpegDitheringNames[(int)_ffmpegDithering];
+                string paletteUse = $"paletteuse=dither={dithering}";
+
+                string scale = "";
+                if (resize)
+                {
+                    scale = $",scale={resizeX}:-1:flags=lanczos";
+                }
+
+                string filterGraph = $"[0:v] fps={fps}{scale} [x]; [x] split [x0][x1]; [x0] {paletteGen} [p]; [x1][p] {paletteUse}";
+
+                string videoFilterArgument = $"-filter_complex \"{filterGraph}\"";
+
+                string ffmpegArgs = $"-loglevel error -threads {coreCount}";
+                string inputArgs = $"-i \"{fileName}.mov\" {videoFilterArgument}";
                 string outputArgs = $"\"{fileName}.gif\"";
 
                 return $"{ffmpegArgs} {inputArgs} {outputArgs}";
             }
+        }
+
+        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        {
+            int coreCount = _coreCount;
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
+
+            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
+
+            string codec = "prores";
+            string codecProfileName = "4";
+            string codecExtraArgs = "-profile:v " + codecProfileName;
+            string videoPixelFormatArg = transparency ? "yuva444p10le" : "yuv444p10le";
+
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
+            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
+            string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}, format={videoPixelFormatArg}\"";
+            string outputArgs = $"\"{fileName}.mov\"";
+
+            return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
         }
 
         public override void ProcessStandardOutput(char c)
@@ -177,9 +213,37 @@ namespace VideoExport.Extensions
                     this._ffmpegDithering = (Dithering)GUILayout.SelectionGrid((int)this._ffmpegDithering, this._ffmpegDitheringNames, 3);
                 }
                 GUILayout.EndVertical();
-
-                base.DisplayParams();
             }
+            else if (this._gifTool == GifTool.Gifski)
+            {
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKIQuality), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKIQualityTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+
+                GUILayout.BeginHorizontal();
+                {
+                    this._gifskiQuality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._gifskiQuality, 1, 100));
+                    GUILayout.Label(this._gifskiQuality.ToString("00"), GUILayout.ExpandWidth(false));
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKIMotionQuality), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKIMotionQualityTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+
+                GUILayout.BeginHorizontal();
+                {
+                    this._gifskiMotionQuality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._gifskiMotionQuality, 1, 100));
+                    GUILayout.Label(this._gifskiMotionQuality.ToString("00"), GUILayout.ExpandWidth(false));
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.Label(new GUIContent(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKILossyQuality), VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.GIFSKILossyQualityTooltip).Replace("\\n", "\n")), GUILayout.ExpandWidth(false));
+
+                GUILayout.BeginHorizontal();
+                {
+                    this._gifskiLossyQuality = Mathf.RoundToInt(GUILayout.HorizontalSlider(this._gifskiLossyQuality, 1, 100));
+                    GUILayout.Label(this._gifskiLossyQuality.ToString("00"), GUILayout.ExpandWidth(false));
+                }
+                GUILayout.EndHorizontal();
+            }
+                base.DisplayParams();
         }
 
         public override void SaveParams()

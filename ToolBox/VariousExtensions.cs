@@ -261,4 +261,53 @@ namespace ToolBox.Extensions {
             return EqualityComparer<T>.Default.GetHashCode(obj);
         }
     }
+
+    public class SimpleBytePool
+    {
+        private readonly Stack<byte[]> _pool = new Stack<byte[]>();
+        private readonly int _bufferSize;
+        private readonly object _lock = new object();
+
+        public SimpleBytePool(int bufferSize, int initialCapacity)
+        {
+            _bufferSize = bufferSize;
+            for (int i = 0; i < initialCapacity; i++)
+            {
+                _pool.Push(new byte[_bufferSize]);
+            }
+        }
+
+        public byte[] Rent()
+        {
+            lock (_lock)
+            {
+                return _pool.Count > 0 ? _pool.Pop() : new byte[_bufferSize];
+            }
+        }
+
+        public void Return(byte[] buffer)
+        {
+            if (buffer.Length != _bufferSize) return;
+
+            lock (_lock)
+            {
+                _pool.Push(buffer);
+            }
+        }
+
+        public void CleanupPool()
+        {
+            lock (_lock)
+            {
+                _pool.Clear();
+            }
+        }
+    }
+
+    public struct SimpleFrameData
+    {
+        public long index;
+        public byte[] data;
+    }
+
 }

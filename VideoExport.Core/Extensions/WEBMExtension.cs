@@ -40,6 +40,7 @@ namespace VideoExport.Extensions
 
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
         {
+            int coreCount = _coreCount;
             string pixFmt;
             switch (bitDepth)
             {
@@ -51,7 +52,16 @@ namespace VideoExport.Extensions
                     pixFmt = transparency ? "yuva420p10le -metadata:s:v:0 alpha_mode=\"1\"" : "yuv420p10le";
                     break;
             }
-            return $"-loglevel error -r {fps} -f image2 -i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" {this.CompileFilters(resize, resizeX, resizeY)} -c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : " -qmin 0")} -pix_fmt {pixFmt} -auto-alt-ref 0 -crf {this._quality} {(this._codec == Codec.VP8 ? "-b:v 10M" : "-b:v 0")} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -threads {_coreCount} -progress pipe:1 \"{fileName}.webm\"";
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
+            string autoAltRef = this._codec == Codec.VP8 ? "-auto-alt-ref 0" : "";
+            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
+
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
+            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
+            string codecArgs = $"-c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : "")} -pix_fmt {pixFmt} {autoAltRef} -crf {this._quality} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -vf \"{videoFilterArgument}\"";
+            string outputArgs = $"\"{fileName}.webm\"";
+
+            return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
         }
 
         public override void UpdateLanguage()

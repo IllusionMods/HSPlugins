@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MOVExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MP4Extension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBMExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\MKVExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBPExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ParallelScreenshotEncoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ReshadePlugin.cs" />
@@ -29,9 +30,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)VideoExport.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg-64.exe">
+    <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)ffmpeg\ffmpeg.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>VideoExport\ffmpeg\ffmpeg-64.exe</TargetPath>
+      <TargetPath>VideoExport\ffmpeg\ffmpeg.exe</TargetPath>
     </ContentWithTargetPath>
     <ContentWithTargetPath Include="$(MSBuildThisFileDirectory)ffmpeg\LICENSE.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -52,5 +53,13 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ve_toolbar_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\btn.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\btn_on.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\checkbox_norm.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\checkbox_on.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\PopupWindowOff.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\PopupWindowOn.png" />
   </ItemGroup>
 </Project>
