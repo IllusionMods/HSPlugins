@@ -22,6 +22,9 @@ using Unity.Collections;
 using UnityEngine.Rendering;
 using System.Collections.Concurrent;
 using System.Threading;
+#else
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 #endif
 
 #if IPA
@@ -1550,11 +1553,7 @@ namespace VideoExport
                             {
                                 if (_autoGenerateVideo)
                                 {
-#if (!KOIKATSU || SUNSHINE)
-                                    _frameDataBuffer = GetNativeRawData(texture);
-#else
-                                    _frameDataBuffer = texture.GetRawTextureData();
-#endif
+                                    _frameDataBuffer = GetNativeRawData(texture, _frameDataBuffer);
                                     _ffmpegStdin.BaseStream.Write(_frameDataBuffer, 0, _frameBufferSize);
                                     _ffmpegStdin.BaseStream.Flush();
                                 }
@@ -1869,13 +1868,13 @@ namespace VideoExport
         }
 
 #if (!KOIKATSU || SUNSHINE)
-        public byte[] GetNativeRawData(Texture2D texture)
+        public byte[] GetNativeRawData(Texture2D texture, byte[] textureBytes)
         {
             NativeArray<byte> nativeData = texture.GetRawTextureData<byte>();
-            nativeData.CopyTo(_frameDataBuffer);
+            nativeData.CopyTo(textureBytes);
             nativeData.Dispose();
 
-            return _frameDataBuffer;
+            return textureBytes;
         }
 
         private void OnCompleteReadback(AsyncGPUReadbackRequest request, RenderTexture rt)
@@ -2006,6 +2005,91 @@ namespace VideoExport
             }
 
             StopProcessByAsync();
+        }
+#else
+        //https://meetemq.com/2023/01/14/using-pointers-in-c-unity/
+        [MethodImpl(256)] //256 = MethodImplOptions.AggressiveInlining (enum member is missing but it still works)
+        public static unsafe void* GetInternalPointer(object obj)
+        {
+            return *(void**)((ulong)*(IntPtr*)&obj + (ulong)(sizeof(IntPtr) * 2));
+        }
+
+        // Structs and functions inferred from decompilation of CharaStudio.exe at 0x140805fe0
+        [StructLayout(LayoutKind.Sequential)]
+        private unsafe struct TextureAccess
+        {
+            public fixed byte otherData[80];
+            public TextureData* texData;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private unsafe struct TextureData
+        {
+            public fixed byte monoHeader[16];
+            public byte* tex;
+            public fixed byte otherData[40];
+            public ulong size;
+        }
+
+        public static byte[] GetNativeRawData(Texture2D tex, byte[] textureBytes)
+        {
+            //Pointer access can be flaky, try multiple times
+            const int maxAttempts = 10;
+            if (tex == null)
+                return null;
+
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                try
+                {
+                    byte[] result = GetNativeRawDataInternal(tex, textureBytes);
+                    if (result != null)
+                        return result;
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError("Exception in GetNativeRawDataInternal: " + e);
+                }
+            }
+
+            Logger.LogError("GetNativeRawDataInternal failed after " + maxAttempts + " attempts.");
+            return null;
+        }
+
+        private static unsafe byte[] GetNativeRawDataInternal(Texture2D tex, byte[] textureBytes)
+        {
+            var texPtr = (TextureAccess*)GetInternalPointer(tex);
+
+            if (texPtr == null)
+                return null;
+
+            TextureData* data = texPtr->texData;
+            if (data == null)
+            {
+                Logger.LogError("TextureData pointer is null.");
+                return null;
+            }
+
+            byte* nativeBuffer = data->tex;
+            if (nativeBuffer == null)
+            {
+                Logger.LogError("Native texture buffer pointer is null.");
+                return null;
+            }
+
+            ulong nativeSize = data->size;
+            if (nativeSize == 0 || nativeSize > int.MaxValue)
+            {
+                Logger.LogError($"Invalid native texture size: {nativeSize}");
+                return null;
+            }
+
+            if (textureBytes == null || textureBytes.Length != (int)nativeSize)
+            {
+                textureBytes = new byte[nativeSize];
+            }
+            Marshal.Copy(new IntPtr(nativeBuffer), textureBytes, 0, (int)nativeSize);
+            return textureBytes;
         }
 #endif
     }
