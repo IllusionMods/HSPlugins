@@ -2007,15 +2007,23 @@ namespace VideoExport
             StopProcessByAsync();
         }
 #else
+        //https://meetemq.com/2023/01/14/using-pointers-in-c-unity/
+        [MethodImpl(256)] //256 = MethodImplOptions.AggressiveInlining (enum member is missing but it still works)
+        public static unsafe void* GetInternalPointer(object obj)
+        {
+            return *(void**)((ulong)*(IntPtr*)&obj + (ulong)(sizeof(IntPtr) * 2));
+        }
+
+        // Structs and functions inferred from decompilation of CharaStudio.exe at 0x140805fe0
         [StructLayout(LayoutKind.Sequential)]
-        unsafe struct TextureAccess
+        private unsafe struct TextureAccess
         {
             public fixed byte otherData[80];
             public TextureData* texData;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        unsafe struct TextureData
+        private unsafe struct TextureData
         {
             public fixed byte monoHeader[16];
             public byte* tex;
@@ -2050,7 +2058,7 @@ namespace VideoExport
 
         private static unsafe byte[] GetNativeRawDataInternal(Texture2D tex, byte[] textureBytes)
         {
-            var texPtr = (TextureAccess*)PointerLib.GetInternalPointer(tex);
+            var texPtr = (TextureAccess*)GetInternalPointer(tex);
 
             if (texPtr == null)
                 return null;
@@ -2085,14 +2093,4 @@ namespace VideoExport
         }
 #endif
     }
-#if (KOIKATSU && !SUNSHINE)
-    public static class PointerLib //https://meetemq.com/2023/01/14/using-pointers-in-c-unity/
-    {
-        [MethodImpl(256)] //https://stackoverflow.com/a/43060488/23244567
-        public unsafe static void* GetInternalPointer(this object obj)
-        {
-            return *(void**)((ulong)*(IntPtr*)&obj + (ulong)(sizeof(IntPtr) * 2));
-        }
-    }
-#endif
 }
