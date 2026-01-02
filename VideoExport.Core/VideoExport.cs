@@ -1798,25 +1798,6 @@ namespace VideoExport
             }
             return path;
         }
-
-#if (KOIKATSU && !SUNSHINE)
-        [StructLayout(LayoutKind.Sequential)]
-        unsafe struct TextureAccess
-        {
-            public fixed byte otherData[80];
-            public TextureData* texData;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        unsafe struct TextureData
-        {
-            public fixed byte monoHeader[16];
-            public byte* tex;
-            public fixed byte otherData[40];
-            public ulong size;
-        }
-#endif
-
         #endregion
 
         private bool IsFFmpegProcessRunning()
@@ -2030,6 +2011,22 @@ namespace VideoExport
             StopProcessByAsync();
         }
 #else
+        [StructLayout(LayoutKind.Sequential)]
+        unsafe struct TextureAccess
+        {
+            public fixed byte otherData[80];
+            public TextureData* texData;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        unsafe struct TextureData
+        {
+            public fixed byte monoHeader[16];
+            public byte* tex;
+            public fixed byte otherData[40];
+            public ulong size;
+        }
+
         public static byte[] GetNativeRawData(Texture2D tex, byte[] textureBytes)
         {
             //Pointer access can be flaky, try multiple times
