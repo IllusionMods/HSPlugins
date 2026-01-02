@@ -1553,11 +1553,7 @@ namespace VideoExport
                             {
                                 if (_autoGenerateVideo)
                                 {
-#if (!KOIKATSU || SUNSHINE)
-                                    _frameDataBuffer = GetNativeRawData(texture);
-#else
                                     _frameDataBuffer = GetNativeRawData(texture, _frameDataBuffer);
-#endif
                                     _ffmpegStdin.BaseStream.Write(_frameDataBuffer, 0, _frameBufferSize);
                                     _ffmpegStdin.BaseStream.Flush();
                                 }
@@ -1872,13 +1868,13 @@ namespace VideoExport
         }
 
 #if (!KOIKATSU || SUNSHINE)
-        public byte[] GetNativeRawData(Texture2D texture)
+        public byte[] GetNativeRawData(Texture2D texture, byte[] textureBytes)
         {
             NativeArray<byte> nativeData = texture.GetRawTextureData<byte>();
-            nativeData.CopyTo(_frameDataBuffer);
+            nativeData.CopyTo(textureBytes);
             nativeData.Dispose();
 
-            return _frameDataBuffer;
+            return textureBytes;
         }
 
         private void OnCompleteReadback(AsyncGPUReadbackRequest request, RenderTexture rt)
@@ -2080,7 +2076,7 @@ namespace VideoExport
                 return null;
             }
 
-            if(textureBytes == null || textureBytes.Length != (int)nativeSize)
+            if (textureBytes == null || textureBytes.Length != (int)nativeSize)
             {
                 textureBytes = new byte[nativeSize];
             }
