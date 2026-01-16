@@ -54,13 +54,6 @@ namespace VideoExport.Extensions
             return true;
         }
 
-        public override void UpdateLanguage()
-        {
-            if (_gifTool == GifTool.Gifski)
-                return;
-            base.UpdateLanguage();
-        }
-
         public override bool IsCompatibleWithPlugin(IScreenshotPlugin plugin, out string reason)
         {
             if (this._gifTool == GifTool.Gifski && plugin.extension != "png")
@@ -243,7 +236,7 @@ namespace VideoExport.Extensions
                 }
                 GUILayout.EndHorizontal();
             }
-                base.DisplayParams();
+            base.DisplayParams();
         }
 
         public override void SaveParams()
