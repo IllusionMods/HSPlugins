@@ -188,7 +188,7 @@ namespace VideoExport
                 alignment = TextAnchor.MiddleLeft,
                 padding = new RectOffset(5, 5, 5, 5),
             };
-            TooltipStyle.normal.background = CreateBlackTexture();
+            TooltipStyle.normal.background = _winNormalBackground;
 
             BoxStyle = new GUIStyle(_originalSkin.box)
             {

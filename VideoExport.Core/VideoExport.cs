@@ -217,7 +217,9 @@ namespace VideoExport
             ToggleScreencapUI,
             HwAccelSelector,
             HwAccelSelectorTooltip,
-            MP4QualityTooltip
+            MP4QualityTooltip,
+            WebmMaxBitrate,
+            WebmMaxBitrateTooltip,
         }
 
         private enum LimitDurationType
@@ -289,13 +291,10 @@ namespace VideoExport
         private UpdateDynamicBonesType _selectedUpdateDynamicBones;
         private bool _realignTimeline = true;
         private int _prewarmLoopCount = 3;
-        private bool _clearSceneBeforeEncoding;
         private bool _closeWhenDone;
         private bool _parallelScreenshotEncoding;
         private ConfigEntry<Language> _language;
 
-        private Vector2 _extensionScrollPos;
-        private Vector2 _pluginScrollPos;
         private bool _showTooltips = true;
         private bool _showCaptureSection;
         private bool _showVideoSection;
@@ -308,11 +307,11 @@ namespace VideoExport
         private byte[] _frameDataBuffer;
         private int _frameBufferSize;
         private string _tempDateTime;
-        private int _asyncGPURequestCount = 0;
-        private int _asyncGPUCompleteCount = 0;
         private TimeSpan _elapsedRenderTime = TimeSpan.Zero;
 
 #if (!KOIKATSU || SUNSHINE)
+        private int _asyncGPURequestCount = 0;
+        private int _asyncGPUCompleteCount = 0;
         private ConcurrentQueue<SimpleFrameData> _ffmpegMasterFrameQueue = new ConcurrentQueue<SimpleFrameData>();
         private SortedList<long, byte[]> _reorderBuffer = new SortedList<long, byte[]>();
         private Thread _ffmpegMasterThread;
@@ -1014,7 +1013,11 @@ namespace VideoExport
 
             GUI.enabled = _generatingVideo == false && _startOnNextClick == false &&
                           (_limitDuration == false || _selectedLimitDuration != LimitDurationType.Animation || (_currentAnimator && _currentAnimator.speed > 0.001f && _animationIsPlaying));
-            _startOnNextClick = GUILayout.Toggle(_startOnNextClick, _currentDictionary.GetString(TranslationKey.StartRecordingOnNextClick));
+            bool shouldStartAtNextClick = GUILayout.Toggle(_startOnNextClick, _currentDictionary.GetString(TranslationKey.StartRecordingOnNextClick));
+            if (shouldStartAtNextClick != _startOnNextClick && GUI.enabled)
+            {
+                _startOnNextClick = shouldStartAtNextClick;
+            }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             {
@@ -1184,7 +1187,9 @@ namespace VideoExport
             int cachedCaptureFramerate = Time.captureFramerate;
             int cachedApplicationTargetFrameRate = Application.targetFrameRate;
             int cachedQualitySettingsVSyncCount = QualitySettings.vSyncCount;
+#if (!KOIKATSU || SUNSHINE)
             int applicationTargetFrameRateStablizer = 0;
+#endif
             Time.captureFramerate = _fps;
             Application.targetFrameRate = _fps;
             QualitySettings.vSyncCount = 0;
@@ -1343,9 +1348,6 @@ namespace VideoExport
             if (_autoGenerateVideo)
             {
                 _generatingVideo = false;
-
-                if (_clearSceneBeforeEncoding)
-                    Studio.Studio.Instance.InitScene(false);
 
                 _messageColor = Color.yellow;
                 if (Directory.Exists(_outputFolder.Value) == false)
