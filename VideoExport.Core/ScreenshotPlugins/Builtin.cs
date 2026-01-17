@@ -157,6 +157,11 @@ namespace VideoExport.ScreenshotPlugins
             return false;
         }
 
+        public bool IsVFlipNeeded()
+        {
+            return true;
+        }
+
         public Texture2D CaptureTexture()
         {
             Texture2D texture = null;

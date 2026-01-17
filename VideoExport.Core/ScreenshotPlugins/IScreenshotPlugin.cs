@@ -34,6 +34,7 @@ namespace VideoExport.ScreenshotPlugins
         RenderTexture CaptureRenderTexture();
         bool IsTextureCaptureAvailable();
         bool IsRenderTextureCaptureAvailable();
+        bool IsVFlipNeeded();
 #endif
         void OnEndRecording();
         void DisplayParams();

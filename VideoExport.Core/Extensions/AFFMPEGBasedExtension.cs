@@ -24,6 +24,7 @@ namespace VideoExport.Extensions
         protected static Rotation _rotation = Rotation.None;
         protected int _progress;
         protected static readonly int _coreCount;
+        protected bool _needsVFlip = true; 
 
         private StringBuilder _outputBuilder = new StringBuilder();
         private StringBuilder _errorBuilder = new StringBuilder();
@@ -135,19 +136,19 @@ namespace VideoExport.Extensions
 
             if (resize)
             {
-                if (hasFilters)
-                    res += ",";
+                if (hasFilters) res += ",";
                 res += $"scale={resizeX}x{resizeY}:flags=lanczos";
                 hasFilters = true;
             }
 
-            if (hasFilters)
+            if (_needsVFlip)
             {
-                res = res + ", vflip";
-            }
-            else
-            {
-                res = "vflip";
+                if (hasFilters)
+                {
+                    res += ",";
+                }
+
+                res += "vflip";
                 hasFilters = true;
             }
 
@@ -184,6 +185,11 @@ namespace VideoExport.Extensions
             }
 
             return res;
+        }
+
+        public void SetVFlipNeeded(bool needsVFlip)
+        {
+            _needsVFlip = needsVFlip;
         }
     }
 }
