@@ -966,14 +966,6 @@ namespace VideoExport
 
         void WindowOtherSection()
         {
-            IScreenshotPlugin screenshotPlugin = _screenshotPlugins[_selectedPlugin];
-            string imageExtension = screenshotPlugin.extension;
-            string tempName = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
-            string framesFolder = Path.Combine(_globalFramesFolder.Value, tempName);
-
-            IExtension extension = _extensions[(int)_selectedExtension];
-            string arguments = extension.GetArguments(SimplifyPath(framesFolder), imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, SimplifyPath(Path.Combine(_outputFolder.Value, tempName)));
-
             GUILayout.BeginVertical("Box");
             {
                 GUILayout.BeginHorizontal(Styles.headerStyle);
@@ -1372,36 +1364,19 @@ namespace VideoExport
                 {
                     extension.channelType = 1;
                 }
-
+                
+                extension.SetVFlipNeeded(screenshotPlugin.IsVFlipNeeded());
                 string arguments = extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
 
-                if (screenshotPlugin is ReshadePlugin)
+                int index = arguments.IndexOf("-vf");
+
+                if (arguments.Contains("-vf \"\""))
                 {
-                    int index;
-                    int indexVflip = arguments.IndexOf(", vflip");
-
-                    if (indexVflip >= 1)
-                    {
-                        arguments = arguments.Remove(indexVflip, 7);
-                    }
-
-                    indexVflip = arguments.IndexOf("vflip");
-
-                    if (indexVflip >= 1)
-                    {
-                        arguments = arguments.Remove(indexVflip, 5);
-                    }
-                    
-                    index = arguments.IndexOf("-vf");
-
-                    if (arguments.Contains("-vf \"\""))
-                    {
-                        arguments = arguments.Remove(index, 6);
-                    }
-                    else if (arguments[index + 5] == ',') 
-                    {
-                        arguments = arguments.Remove(index + 5, 1);
-                    }
+                    arguments = arguments.Remove(index, 6);
+                }
+                if (arguments[index + 5] == ',') 
+                {
+                    arguments = arguments.Remove(index + 5, 1);
                 }
 
                 arguments = "-s " + targetSize + " " + arguments;
@@ -1537,6 +1512,32 @@ namespace VideoExport
                             {
                                 Logger.LogWarning($"Frame capture for frame {i} didn't return a texture. Frame skipped.");
                             }
+                        }
+                    }
+                    else if (screenshotPlugin is Win32Plugin)
+                    {
+                        if (_autoGenerateVideo)
+                        {
+                            Texture2D texture = screenshotPlugin.CaptureTexture();
+                            if (texture)
+                            {
+                                _frameDataBuffer = GetNativeRawData(texture, _frameDataBuffer);
+                                _ffmpegStdin.BaseStream.Write(_frameDataBuffer, 0, _frameBufferSize);
+                                _ffmpegStdin.BaseStream.Flush();
+                                
+                                Destroy(texture);
+                                texture = null;
+                                generatedFrames++;
+                            }
+                        }
+                        else
+                        {
+                            byte[] frame = screenshotPlugin.Capture(savePath);
+                            if (frame != null)
+                            {
+                                File.WriteAllBytes(savePath, frame);
+                            }
+                            generatedFrames++;
                         }
                     }
                     else if (screenshotPlugin.IsTextureCaptureAvailable() == true)

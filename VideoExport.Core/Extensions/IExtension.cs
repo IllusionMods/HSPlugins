@@ -23,6 +23,7 @@ namespace VideoExport.Extensions
         void UpdateLanguage();
         void DisplayParams();
         void SaveParams();
+        void SetVFlipNeeded(bool needsVFlip);
     }
 
     public enum ExtensionsType

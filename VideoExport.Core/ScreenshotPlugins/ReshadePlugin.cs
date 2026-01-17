@@ -220,6 +220,11 @@ namespace VideoExport.ScreenshotPlugins
         {
             return false;
         }
+        
+        public bool IsVFlipNeeded()
+        {
+            return false;
+        }
 
         public Texture2D CaptureTexture()
         {
