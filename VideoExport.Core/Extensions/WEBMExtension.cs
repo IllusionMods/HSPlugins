@@ -31,6 +31,7 @@ namespace VideoExport.Extensions
         private int _quality;
         private Deadline _deadline;
         private string _maxBitrate;
+        private string _maxBitrateDisplay;
 
         public WEBMExtension() : base()
         {
@@ -39,6 +40,35 @@ namespace VideoExport.Extensions
             this._deadline = (Deadline)VideoExport._configFile.AddInt("webmDeadline", (int)Deadline.Best, true);
             this._deadlineCLIOptions = Enum.GetNames(typeof(Deadline)).Select(n => n.ToLowerInvariant()).ToArray();
             this._maxBitrate = VideoExport._configFile.AddString("webmMaxBitrate", "10M", true);
+            this._maxBitrateDisplay = _maxBitrate;
+            
+            ValidateConfig();
+        }
+        
+        private void ValidateConfig()
+        {
+            int minQuality = _codec == Codec.VP9 ? 0 : 4;
+            int maxQuality = 63;
+    
+            if (_quality < minQuality || _quality > maxQuality)
+            {
+                int originalQuality = _quality;
+                _quality = 15;
+                VideoExport.Logger.LogWarning($"[WEBM Extension] Invalid quality value {originalQuality} in config (valid range: {minQuality}-{maxQuality} for {_codec}). Reset to default: {_quality}");
+            }
+    
+            if (!ValidateBitrate(_maxBitrate))
+            {
+                string originalBitrate = _maxBitrate;
+                _maxBitrate = "10M";
+                _maxBitrateDisplay = _maxBitrate;
+                VideoExport.Logger.LogWarning($"[WEBM Extension] Invalid bitrate value '{originalBitrate}' in config (expected format: number followed by k/M/G, e.g., 10M). Reset to default: {_maxBitrate}");
+            }
+        }
+
+        private bool ValidateBitrate(string bitrate)
+        {
+            return !string.IsNullOrEmpty(bitrate) && Regex.IsMatch(bitrate, @"^([1-9]\d*)[kMG]$");
         }
 
         public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
@@ -126,28 +156,34 @@ namespace VideoExport.Extensions
                 
                 if (GUILayout.Button("3M", Styles.ButtonStyle, GUILayout.Width(40)))
                 {
-                    _maxBitrate = "3M";
+                    _maxBitrate = _maxBitrateDisplay = "3M";
                 }
                 if (GUILayout.Button("5M", Styles.ButtonStyle, GUILayout.Width(40)))
                 {
-                    _maxBitrate = "5M";
+                    _maxBitrate = _maxBitrateDisplay = "5M";
                 }
                 if (GUILayout.Button("10M", Styles.ButtonStyle, GUILayout.Width(40)))
                 {
-                    _maxBitrate = "10M";
+                    _maxBitrate = _maxBitrateDisplay = "10M";
                 }
                 if (GUILayout.Button("1G", Styles.ButtonStyle, GUILayout.Width(40)))
                 {
-                    _maxBitrate = "1G";
+                    _maxBitrate = _maxBitrateDisplay = "1G";
                 }
-                
-                string bitRate = GUILayout.TextField(_maxBitrate, GUILayout.Width(70), GUILayout.Height(30));
+    
+                _maxBitrateDisplay = GUILayout.TextField(_maxBitrateDisplay, GUILayout.Width(70), GUILayout.Height(30));
 
-                if (Regex.IsMatch(bitRate, @"\d+[kMG]"))
+                if (ValidateBitrate(_maxBitrateDisplay))
                 {
-                    _maxBitrate = bitRate;
+                    _maxBitrate = _maxBitrateDisplay;
                 }
-                
+                else
+                {
+                    GUILayout.EndHorizontal();
+                    GUILayout.Label(VideoExport._currentDictionary.GetString(VideoExport.TranslationKey.WebmMaxBitrateWarning), Styles.WarningLabelStyle, GUILayout.ExpandWidth(false));
+                    GUILayout.BeginHorizontal();
+                }
+    
                 GUILayout.EndHorizontal();
             }
 

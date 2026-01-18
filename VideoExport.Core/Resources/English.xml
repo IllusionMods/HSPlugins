@@ -129,4 +129,5 @@
   <string key="MP4QualityTooltip" value="Lower is better,\n16 (H264), 21 (H265), 30 (AV1) is recommended.\nA value of 0 is recommended for use only by those\nwho are familiar with its purpose." />
   <string key="WebmMaxBitrate" value="Target Bitrate" />
   <string key="WebmMaxBitrateTooltip" value="Sets the target bitrate for the encode.\nVP8 will still respect the quality setting, so even at the best quality 4,\nthe target bitrate will most likely not be reached.\nThe text field takes in number(k,M,G) as value.\nExample: 1000k for 1000 kbit/s.\n1G provides a high ceiling so the quality setting can use as much as needed.\nFor 1080p up to 60 fps, around 15M is fine.\nFor 4K, 25M and above are better." />
+  <string key="WebmMaxBitrateWarning" value="Invalid bitrate. Use format like 3M, 500k, or 1G with value > 0." />
 </root>

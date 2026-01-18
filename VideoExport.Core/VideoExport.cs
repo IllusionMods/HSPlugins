@@ -220,6 +220,7 @@ namespace VideoExport
             MP4QualityTooltip,
             WebmMaxBitrate,
             WebmMaxBitrateTooltip,
+            WebmMaxBitrateWarning,
         }
 
         private enum LimitDurationType
@@ -1040,10 +1041,7 @@ namespace VideoExport
                 }
                 else
                 {
-                    Color c = GUI.color;
-                    GUI.color = Color.yellow;
-                    GUILayout.Label("Video format is incompatible with the current screenshot plugin or its settings. Reason: " + reason);
-                    GUI.color = c;
+                    GUILayout.Label("Video format is incompatible with the current screenshot plugin or its settings. Reason: " + reason, Styles.WarningLabelStyle);
                 }
             }
             GUILayout.EndHorizontal();

@@ -40,6 +40,7 @@ namespace VideoExport
         public static GUIStyle WindowStyle;
         public static GUIStyle SmallButtonStyle;
         public static GUIStyle ProgressBar;
+        public static GUIStyle WarningLabelStyle;
         private static GUISkin _originalSkin = null;
         private static GUISkin _veSkin = null;
 
@@ -238,6 +239,13 @@ namespace VideoExport
             ProgressBar = new GUIStyle 
             { 
                 normal = new GUIStyleState { background = Texture2D.whiteTexture } 
+            };
+            
+            WarningLabelStyle = new GUIStyle(LabelStyle)
+            {
+                normal = { textColor = Color.yellow },
+                fontSize = CommonFontSize,
+                alignment = TextAnchor.MiddleLeft,
             };
         }
 
