@@ -1370,13 +1370,16 @@ namespace VideoExport
 
                 int index = arguments.IndexOf("-vf");
 
-                if (arguments.Contains("-vf \"\""))
+                if (index >= 0)
                 {
-                    arguments = arguments.Remove(index, 6);
-                }
-                if (arguments[index + 5] == ',') 
-                {
-                    arguments = arguments.Remove(index + 5, 1);
+                    if (arguments.Contains("-vf \"\"") && arguments.Length >= index + 6)
+                    {
+                        arguments = arguments.Remove(index, 6);
+                    }
+                    if (arguments.Length > index + 5 && arguments[index + 5] == ',')
+                    {
+                        arguments = arguments.Remove(index + 5, 1);
+                    }
                 }
 
                 arguments = "-s " + targetSize + " " + arguments;
