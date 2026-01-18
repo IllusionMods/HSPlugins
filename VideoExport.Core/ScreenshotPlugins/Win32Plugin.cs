@@ -128,7 +128,7 @@ namespace VideoExport.ScreenshotPlugins
             _graphics = Graphics.FromImage(_bitmap);
             _graphics.CompositingMode = CompositingMode.SourceCopy;
 
-            _flipBuffer = new Bitmap(w, h, PixelFormat.Format32bppArgb);
+            _flipBuffer = new Bitmap(w, h, PixelFormat.Format32bppPArgb);
             _flipGraphics = Graphics.FromImage(_flipBuffer);
             _flipGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
             _flipGraphics.CompositingMode = CompositingMode.SourceCopy;
@@ -212,7 +212,7 @@ namespace VideoExport.ScreenshotPlugins
             {
                 PerformCapture(out var width, out var height);
 
-                BitmapData data = _flipBuffer.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                BitmapData data = _flipBuffer.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format32bppPArgb);
                 try
                 {
                     if (data.Scan0 == IntPtr.Zero) return null;
@@ -228,13 +228,11 @@ namespace VideoExport.ScreenshotPlugins
 
                             for (int i = 0; i < pixelCount; i++)
                             {
-                                if (srcPixels != null)
-                                {
-                                    uint bgra = srcPixels[i];
-                                    dstPixels[i] = (bgra & 0xFF00FF00u) |
-                                                   ((bgra & 0x00FF0000u) >> 16) |
-                                                   ((bgra & 0x000000FFu) << 16);
-                                }
+                                // ReSharper disable once PossibleNullReferenceException
+                                uint bgra = srcPixels[i];
+                                dstPixels[i] = (bgra & 0xFF00FF00u) |
+                                               ((bgra & 0x00FF0000u) >> 16) |
+                                               ((bgra & 0x000000FFu) << 16);
                             }
                         }
                     }
