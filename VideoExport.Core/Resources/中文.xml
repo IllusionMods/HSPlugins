@@ -104,4 +104,7 @@
   <string key="GIFDitheringTooltip" value="模拟有限调色板外的颜色：\n[none] 无抖动。推荐默认使用，直到视觉需要。\n[bayer] 产生明显的抖动图案/美感。\n[floyd_steinberg] 产生平滑渐变且噪点较低。" />
   <string key="SameAsCapture" value="与捕获相同" />
   <string key="ToggleScreencapUI" value="打开设置工具栏" />
+  <string key="WebmMaxBitrate" value="目标比特率" />
+  <string key="WebmMaxBitrateTooltip" value="设置编码的目标比特率。\nVP8仍会遵循质量设置，因此即使在最佳质量4时，\n目标比特率也很有可能无法达到。\n文本字段接受数字(k,M,G)作为值。\n示例：1000k表示1000 kbit/s。\n1G提供了一个很高的上限，因此质量设置可以根据需要使用尽可能多的比特率。\n对于1080p最高60 fps，约15M即可。\n对于4K，25M及以上效果更好。" />
+  <string key="WebmMaxBitrateWarning" value="无效的比特率。请使用类似 3M、500k 或 1G 的格式，值必须大于0。" />
 </root>

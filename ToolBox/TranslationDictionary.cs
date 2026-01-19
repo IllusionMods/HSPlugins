@@ -35,7 +35,7 @@ namespace ToolBox
                                 break;
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         //Debug.LogWarning("Could not parse translation string " + node.OuterXml + " in " + resourceDictionary + "\n" + e);
                     }
