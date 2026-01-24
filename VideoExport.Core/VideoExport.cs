@@ -1517,6 +1517,7 @@ namespace VideoExport
                             }
                         }
                     }
+#if !KOIKATSU
                     else if (screenshotPlugin is Win32Plugin)
                     {
                         if (_autoGenerateVideo)
@@ -1543,6 +1544,7 @@ namespace VideoExport
                             generatedFrames++;
                         }
                     }
+#endif
                     else if (screenshotPlugin.IsTextureCaptureAvailable() == true)
                     {
                         Texture2D texture = screenshotPlugin.CaptureTexture();
