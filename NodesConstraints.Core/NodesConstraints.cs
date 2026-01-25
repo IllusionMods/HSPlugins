@@ -800,9 +800,7 @@ namespace NodesConstraints
                 Camera.main.gameObject.AddComponent<Expression>();
             }
 #if KOIKATSU
-            _kkAnimationControllerInstalled = BepInEx.Bootstrap.Chainloader.Plugins
-                                                          .Select(MetadataHelper.GetMetadata)
-                                                          .FirstOrDefault(x => x.GUID == "com.deathweasel.bepinex.animationcontroller") != null;
+            _kkAnimationControllerInstalled = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.deathweasel.bepinex.animationcontroller");
 #endif
             _imguiBackground = IMGUIExtensions.CreateUGUIPanelForIMGUI();
             this.ExecuteDelayed(() =>

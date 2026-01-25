@@ -4089,7 +4089,7 @@ namespace Timeline
                 int docCa = document.FirstChild.ReadInt("animationCategory");
                 int docNo = document.FirstChild.ReadInt("animationNo");
                 OCIChar character = _selectedOCI as OCIChar;
-                StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == docNo && x.GUID == docGUID && x.Group == docGr && x.Category == docCa);
+                StudioResolveInfo resolveInfo = UniversalAutoResolver.GetStudioResolveInfos(docGUID, docNo, false).FirstOrDefault(x => x.Group == docGr && x.Category == docCa);
                 if (character != null)
                 {
                     character.LoadAnime(docGr, docCa, resolveInfo != null ? resolveInfo.LocalSlot : docNo);
@@ -4124,7 +4124,7 @@ namespace Timeline
                 {
 #if KOIKATSU || SUNSHINE
                     OICharInfo.AnimeInfo info = character.oiCharInfo.animeInfo;
-                    StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.LocalSlot == info.no && x.Group == info.group && x.Category == info.category);
+                    StudioResolveInfo resolveInfo = UniversalAutoResolver.GetStudioResolveInfos(info.no, false).FirstOrDefault(x => x.Group == info.group && x.Category == info.category);
                     writer.WriteAttributeString("GUID", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.GUID : "");
                     writer.WriteValue("animationGroup", info.group);
                     writer.WriteValue("animationCategory", info.category);
