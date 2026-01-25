@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net46</TargetFramework>
+		<RootNamespace>HSUS</RootNamespace>
+		<AssemblyName>HS2US</AssemblyName>
+	</PropertyGroup>
+	<Import Project="..\UsefulStuff.Core\UsefulStuff.Core.projitems" Label="Shared" />
+	<Import Project="..\ToolBox\ToolBox.projitems" Label="Shared" />
+	<Import Project="..\UIUtility\UIUtility.projitems" Label="Shared" />
+</Project>

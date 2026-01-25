@@ -1,14 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net35</TargetFramework>
-		<RootNamespace>Timeline</RootNamespace>
-		<AssemblyName>Timeline</AssemblyName>
+		<OutputType>Library</OutputType>
+		<RootNamespace>HSPE</RootNamespace>
+		<AssemblyName>KKPE</AssemblyName>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Sideloader.Koikatu" Version="21.0.0" />
+		<None Update="Joan6694DynamicBoneColliders.zipmod">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="IllusionModdingAPI.KKAPI" Version="1.43.0" />
 	</ItemGroup>
-	<Import Project="..\Timeline.Core\Timeline.Core.projitems" Label="Shared" />
+	<Import Project="..\Core.PoseEditor\Core.PoseEditor.projitems" Label="Shared" />
 	<Import Project="..\ToolBox\ToolBox.projitems" Label="Shared" />
 	<Import Project="..\UIUtility\UIUtility.projitems" Label="Shared" />
 </Project>
