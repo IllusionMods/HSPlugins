@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+#pragma warning disable CS0436 // Some types in this file are defined in Assembly-CSharp
 namespace SuperScrollView
 {
 

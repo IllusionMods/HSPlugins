@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 
+#pragma warning disable CS0436 // Some types in this file are defined in Assembly-CSharp
 namespace SuperScrollView
 {
     public enum ItemCornerEnum
