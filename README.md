@@ -1,7 +1,9 @@
 # HSPlugins
 A collection of useful studio plugins.
 
-This is a fork of [HSPlugins](https://bitbucket.org/Joan6694/hsplugins/src/master/) by [Joan6694](https://joan6694.bitbucket.io/). Main reason for the fork is that Joan disappeared and the plugins needed to be ported to KKS.
+Make sure you download the version for your game (the first part before _ is the initials of the game, e.g. HS2 = HoneySelect2).
+
+You can get the latest nightly builds of all plugins from the [CI workflow](https://github.com/IllusionMods/HSPlugins/actions/workflows/ci.yaml). Open the latest successful run and download the build from the Artifacts section.
 
 Main changes in the fork:
 - Added KKS support to some of the plugins
@@ -18,3 +20,6 @@ Main changes in the fork:
 3. Pick the plugins that you want to install from the release zip and extract them into your game directory (the .dll files should end up inside the BepInEx\plugins folder).
 
 To see hotkeys used to use the plugins check plugin settings or the config files in BepInEx\config.
+
+## Credits
+This is a fork of [HSPlugins](https://bitbucket.org/Joan6694/hsplugins/src/master/) by [Joan6694](https://joan6694.bitbucket.io/). Main reason for the fork is that Joan disappeared and the plugins needed to be ported to KKS. Support for games older than KK was dropped to simplify the codebase. Some no longer used plugins are not able to build and are excluded from the solution. Use the legacy sln to build those if needed.
