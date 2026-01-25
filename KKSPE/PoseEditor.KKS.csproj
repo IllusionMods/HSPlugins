@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net46</TargetFramework>
+		<OutputType>Library</OutputType>
+		<RootNamespace>HSPE</RootNamespace>
+		<AssemblyName>KKSPE</AssemblyName>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Update="Joan6694DynamicBoneColliders.zipmod">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="IllusionModdingAPI.KKSAPI" Version="1.43.0" />
+	</ItemGroup>
+	<Import Project="..\Core.PoseEditor\Core.PoseEditor.projitems" Label="Shared" />
+</Project>

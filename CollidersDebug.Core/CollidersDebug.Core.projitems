@@ -6,9 +6,10 @@
     <SharedGUID>3b3c7451-90b2-4092-bdee-5b8ab8f50501</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>CollidersDebug.Core</Import_RootNamespace>
+    <Import_RootNamespace>CollidersDebug</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CollidersDebug.cs" />
   </ItemGroup>
 </Project>

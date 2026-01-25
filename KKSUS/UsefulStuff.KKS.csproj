@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net46</TargetFramework>
+		<RootNamespace>HSUS</RootNamespace>
+		<AssemblyName>KKSUS</AssemblyName>
+	</PropertyGroup>
+	<Import Project="..\UsefulStuff.Core\UsefulStuff.Core.projitems" Label="Shared" />
+</Project>

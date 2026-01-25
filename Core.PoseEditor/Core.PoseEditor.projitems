@@ -6,7 +6,7 @@
     <SharedGUID>607fcc24-1e15-4ff8-a662-21d28fe01671</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Core.PoseEditor</Import_RootNamespace>
+    <Import_RootNamespace>PoseEditor</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AMModules\AdvancedModeModule.cs" />

@@ -6,7 +6,7 @@
     <SharedGUID>27d7086f-b9a7-43e6-a4fd-dbda2b5c5375</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>VideoExport.Core</Import_RootNamespace>
+    <Import_RootNamespace>VideoExport</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
