@@ -44,9 +44,6 @@
 		<PackageReference Include="IllusionLibs.Koikatu.Vectrosity" Version="*" />
 	</ItemGroup>
 
-	<Import Project=".\ToolBox\ToolBox.projitems" Label="Shared" />
-	<Import Project=".\UIUtility\UIUtility.projitems" Label="Shared" />
-
 	<!--Add old constants to avoid having to change #defines in code-->
 	<PropertyGroup Condition="$([System.Text.RegularExpressions.Regex]::IsMatch(';$(DefineConstants);', ';AI;'))">
 		<DefineConstants>$(DefineConstants);BEPINEX;AISHOUJO</DefineConstants>
@@ -114,7 +111,7 @@
 
 		<RemoveDir Directories="$(CopyDir)" />
 		<Copy DestinationFolder="$(CopyDir)\BepInEx\plugins\%(BuildFiles.RecursiveDir)" SourceFiles="@(BuildFiles)" />
-		
+
 		<ItemGroup>
 			<ZipmodFiles Include="$(CopyDir)\BepInEx\plugins\**\*.zipmod"/>
 		</ItemGroup>

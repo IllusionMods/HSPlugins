@@ -9,4 +9,6 @@
 		<PackageReference Include="IllusionModdingAPI.KKAPI" Version="1.43.0" />
 	</ItemGroup>
 	<Import Project="..\VideoExport.Core\VideoExport.Core.projitems" Label="Shared" />
+	<Import Project="..\ToolBox\ToolBox.projitems" Label="Shared" />
+	<Import Project="..\UIUtility\UIUtility.projitems" Label="Shared" />
 </Project>

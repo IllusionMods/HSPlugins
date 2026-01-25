@@ -6,4 +6,5 @@
 		<PackageReference Include="IllusionModdingAPI.KKSAPI" Version="1.43.0" />
 	</ItemGroup>
 	<Import Project="..\CollidersDebug.Core\CollidersDebug.Core.projitems" Label="Shared" />
+	<Import Project="..\ToolBox\ToolBox.projitems" Label="Shared" />
 </Project>
