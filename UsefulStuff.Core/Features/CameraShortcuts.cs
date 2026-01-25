@@ -47,10 +47,11 @@ namespace HSUS.Features
             private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
                 MethodInfo inputGetAxis = typeof(UnityEngine.Input).GetMethod("GetAxis", BindingFlags.Public | BindingFlags.Static);
+                if (inputGetAxis == null) throw new ArgumentNullException(nameof(inputGetAxis));
                 List<CodeInstruction> instructionsList = instructions.ToList();
                 foreach (CodeInstruction inst in instructionsList)
                 {
-                    if (inst.opcode == OpCodes.Call && inst.operand == inputGetAxis)
+                    if (inst.opcode == OpCodes.Call && inputGetAxis.Equals(inst.operand))
                         yield return new CodeInstruction(OpCodes.Call, typeof(InputMouseProc_Patches).GetMethod(nameof(GetCameraMultiplier)));
                     else
                         yield return inst;
@@ -89,9 +90,10 @@ namespace HSUS.Features
             {
                 List<CodeInstruction> instructionsList = instructions.ToList();
                 MethodInfo timeDeltaTime = typeof(UnityEngine.Time).GetMethod("get_deltaTime", BindingFlags.Public | BindingFlags.Static);
+                if (timeDeltaTime == null) throw new ArgumentNullException(nameof(timeDeltaTime));
                 foreach (CodeInstruction inst in instructionsList)
                 {
-                    if (inst.opcode == OpCodes.Call && inst.operand == timeDeltaTime)
+                    if (inst.opcode == OpCodes.Call && timeDeltaTime.Equals(inst.operand))
                     {
                         string _getCameraMultiplierMethod = (_isStudioCam) ? nameof(GetCameraMultiplierStudio) : nameof(GetCameraMultiplier);
                         yield return new CodeInstruction(OpCodes.Call, typeof(InputKeyProc_Patches).GetMethod(_getCameraMultiplierMethod)) { labels = new List<Label>(inst.labels) };
