@@ -215,7 +215,6 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		UIUtility\UIUtility.projitems*{074e95d7-3b9a-4cd9-b1b6-6f7273d400a4}*SharedItemsImports = 13
 		ToolBox\ToolBox.projitems*{087d164b-3816-4884-9fa7-d5810a89f5e0}*SharedItemsImports = 5
-		UIUtility\UIUtility.projitems*{087d164b-3816-4884-9fa7-d5810a89f5e0}*SharedItemsImports = 5
 		VideoExport.Core\VideoExport.Core.projitems*{087d164b-3816-4884-9fa7-d5810a89f5e0}*SharedItemsImports = 5
 		Timeline.Core\Timeline.Core.projitems*{0e8a5a0b-d464-4950-ba76-e23f4f74fcfd}*SharedItemsImports = 5
 		ToolBox\ToolBox.projitems*{0e8a5a0b-d464-4950-ba76-e23f4f74fcfd}*SharedItemsImports = 5
@@ -259,7 +258,6 @@ Global
 		CollidersDebug.Core\CollidersDebug.Core.projitems*{7f202332-0583-4389-8092-a4702f67820d}*SharedItemsImports = 5
 		ToolBox\ToolBox.projitems*{7f202332-0583-4389-8092-a4702f67820d}*SharedItemsImports = 5
 		ToolBox\ToolBox.projitems*{87fcdd0f-fd4f-48ad-8a0a-56116ebb8bb5}*SharedItemsImports = 5
-		UIUtility\UIUtility.projitems*{87fcdd0f-fd4f-48ad-8a0a-56116ebb8bb5}*SharedItemsImports = 5
 		VideoExport.Core\VideoExport.Core.projitems*{87fcdd0f-fd4f-48ad-8a0a-56116ebb8bb5}*SharedItemsImports = 5
 		ToolBox\ToolBox.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 5
 		UIUtility\UIUtility.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 5
@@ -275,11 +273,9 @@ Global
 		NodesConstraints.Core\NodesConstraints.Core.projitems*{c55c162f-0f90-450b-96cc-6021168db63a}*SharedItemsImports = 5
 		ToolBox\ToolBox.projitems*{c55c162f-0f90-450b-96cc-6021168db63a}*SharedItemsImports = 5
 		ToolBox\ToolBox.projitems*{e0fd10af-2b3b-44a6-8699-31d24b84c551}*SharedItemsImports = 5
-		UIUtility\UIUtility.projitems*{e0fd10af-2b3b-44a6-8699-31d24b84c551}*SharedItemsImports = 5
 		VideoExport.Core\VideoExport.Core.projitems*{e0fd10af-2b3b-44a6-8699-31d24b84c551}*SharedItemsImports = 5
 		Timeline.Core\Timeline.Core.projitems*{e9a8dfae-8470-4ab1-b5a6-6f9c9b42a3d7}*SharedItemsImports = 13
 		ToolBox\ToolBox.projitems*{fb575d3d-f66e-482f-8447-b5a22b2a14a8}*SharedItemsImports = 5
-		UIUtility\UIUtility.projitems*{fb575d3d-f66e-482f-8447-b5a22b2a14a8}*SharedItemsImports = 5
 		VideoExport.Core\VideoExport.Core.projitems*{fb575d3d-f66e-482f-8447-b5a22b2a14a8}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
