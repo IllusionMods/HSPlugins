@@ -280,7 +280,7 @@ namespace VideoExport.ScreenshotPlugins
 
         private void SetStudioUIVisibility(bool target_visibility)
         {
-#if KOIKATSU
+#if KOIKATSU && !SUNSHINE
             Type hideUI = Type.GetType("HideAllUI.HideAllUICore,HideAllUI.Koikatu");
 #elif SUNSHINE
             Type hideUI = Type.GetType("HideAllUI.HideAllUICore,HideAllUI.KoikatsuSunshine");
