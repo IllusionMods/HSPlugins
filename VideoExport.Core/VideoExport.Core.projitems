@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBPExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ParallelScreenshotEncoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ReshadePlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ReshadeAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Styles.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TextureEncoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\Win32Plugin.cs" />
