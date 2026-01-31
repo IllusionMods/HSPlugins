@@ -25,7 +25,7 @@ namespace VideoExport.ScreenshotPlugins
         [DllImport("kernel32.dll")]
         private static extern bool CloseHandle(IntPtr hObject);
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern IntPtr CreateFileMapping(IntPtr hFile, IntPtr lpFileMappingAttributes, uint flProtect, uint dwMaximumSizeHigh, uint dwMaximumSizeLow, string lpName);
+        private static extern IntPtr CreateFileMapping(IntPtr hFile, IntPtr lpFileMappingAttributes, uint flProtect, uint dwMaximumSizeHigh, uint dwMaximumSizeLow, string lpName);
 
         const uint GENERIC_READ = 0x80000000;
         const uint FILE_MAP_READ = 0x04;
@@ -79,13 +79,13 @@ namespace VideoExport.ScreenshotPlugins
                 }
                 else
                 {
-                     VideoExport.Logger.LogError($"Failed to map view for Reshade Control SHM.");
+                    VideoExport.Logger.LogError($"Failed to map view for KKReshade Control SHM. This is not a problem, if KKReshade isn't the newest version.");
                 }
             }
             else
             {
                 int error = Marshal.GetLastWin32Error();
-                VideoExport.Logger.LogError($"Failed to create or open Reshade Control SHM. Error Code: {error}");
+                VideoExport.Logger.LogError($"Failed to create or open KKReshade Control SHM. This is not a problem, if KKReshade isn't the newest version. Error Code: {error}");
             }
 
             _initialized = true;

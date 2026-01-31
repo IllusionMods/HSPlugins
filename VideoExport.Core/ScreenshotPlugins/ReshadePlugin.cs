@@ -70,7 +70,7 @@ namespace VideoExport.ScreenshotPlugins
             this._autoHideUI = VideoExport._configFile.AddBool("autoHideUI", true, true);
             this._removeAlphaChannel = VideoExport._configFile.AddBool("removeAlphaChannel", true, true);
 
-            bool opened = ReshadeAPI.OpenSharedMemory();
+            var opened = ReshadeAPI.OpenSharedMemory();
             ReshadeAPI.SetCapture(false);
             
             return opened;
