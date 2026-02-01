@@ -1,27 +1,52 @@
-IF "%2" == "KK" (
-	IF EXIST "D:\Illusion\Koikatu\" XCOPY /y "%1" "D:\Illusion\Koikatu\BepInEx\plugins\"
-	)	
-IF "%2" == "KKS" (
-	IF EXIST "D:\Illusion\Koikatsu Sunshine\" XCOPY /y "%1" "D:\Illusion\Koikatsu Sunshine\BepInEx\plugins\"
-	)
-IF "%2" == "EC" (
-	IF EXIST "D:\Illusion\EmotionCreators\" XCOPY /y "%1" "D:\Illusion\EmotionCreators\BepInEx\plugins\"
-	)
-IF "%2" == "HS" (
-	IF EXIST "D:\Illusion\HoneySelect\" XCOPY /y "%1" "D:\Illusion\HoneySelect\BepInEx\plugins\"
-	)
-IF "%2" == "HS2" (
-	IF EXIST "D:\Illusion\HoneySelect2\" XCOPY /y "%1" "D:\Illusion\HoneySelect2\BepInEx\plugins\"
-	)
-IF "%2" == "AI" (
-	IF EXIST "D:\Illusion\AI-Syoujyo\" XCOPY /y "%1" "D:\Illusion\AI-Syoujyo\BepInEx\plugins\"
-	)
-IF "%2" == "PH" (
-	IF EXIST "D:\Illusion\PlayHome\" XCOPY /y "%1" "D:\Illusion\PlayHome\BepInEx\plugins\"
-	)
-IF "%2" == "PC" (
-	IF EXIST "D:\Illusion\PlayClub\" XCOPY /y "%1" "D:\Illusion\PlayClub\BepInEx\plugins\"
-	)
-IF "%2" == "SBPR" (
-	IF EXIST "D:\Illusion\Sexy Beach Premium Resort\" XCOPY /y "%1" "D:\Illusion\Sexy Beach Premium Resort\BepInEx\plugins\"
-	)
+@echo off
+setlocal ENABLEDELAYEDEXPANSION
+
+set "DLL=%~1"
+set "GAME=%~2"
+
+if "%DLL%"=="" echo ERROR: No DLL & exit /b 1
+if "%GAME%"=="" echo ERROR: No GAME & exit /b 1
+
+echo Copying %~nx1 to %GAME%...
+
+set "REGPATH="
+if "%GAME%"=="KK" set "REGPATH=HKCU:\Software\illusion\Koikatu\Koikatu"
+if "%GAME%"=="KKS" set "REGPATH=HKCU:\Software\illusion\KoikatsuSunshine\KoikatsuSunshine"
+if "%GAME%"=="HS2" set "REGPATH=HKCU:\Software\illusion\HoneySelect2\HoneySelect2"
+if "%GAME%"=="AI" set "REGPATH=HKCU:\Software\illusion\AI-Syoujyo\AI-Syoujyo"
+
+set "GAMEPATH="
+if defined REGPATH (
+    for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "(Get-ItemProperty '%REGPATH%').INSTALLDIR" 2^>nul`) do (
+        set "GAMEPATH=%%i"
+        if "!GAMEPATH:~-1!"=="\" set "GAMEPATH=!GAMEPATH:~0,-1!"
+        if "!GAMEPATH:~-1!"/=="/" set "GAMEPATH=!GAMEPATH:~0,-1!"
+    )
+)
+echo Registry GAMEPATH: [!GAMEPATH!]
+
+if "!GAMEPATH!"=="" (
+    echo Using fallback path for !GAME!...
+    if "!GAME!"=="KK" set "GAMEPATH=H:\KK"
+    if "!GAME!"=="KKS" set "GAMEPATH=H:\KKS"
+    if "!GAME!"=="EC" set "GAMEPATH=D:\Illusion\EmotionCreators"
+    if "!GAME!"=="HS" set "GAMEPATH=D:\Illusion\HoneySelect"
+    if "!GAME!"=="HS2" set "GAMEPATH=H:\HS2"
+    if "!GAME!"=="AI" set "GAMEPATH=H:\AI"
+    if "!GAME!"=="PH" set "GAMEPATH=D:\Illusion\PlayHome"
+    if "!GAME!"=="PC" set "GAMEPATH=D:\Illusion\PlayClub"
+    if "!GAME!"=="SBPR" set "GAMEPATH=D:\Illusion\Sext Beach Premium Resort"
+    echo Fallback GAMEPATH: [!GAMEPATH!]
+)
+
+if defined GAMEPATH (
+    set "FULLPATH=%GAMEPATH%\BepInEx\plugins"
+    echo Target: !FULLPATH!
+    if exist "!FULLPATH!\" (
+        xcopy /y /q "%DLL%" "!FULLPATH!\" >nul && echo %GAME%: !FULLPATH!\%~nx1 || echo Copy failed
+    ) else (
+        echo %GAME% not found: !FULLPATH!
+    )
+) else (
+    echo Unknown game: %GAME%
+)

@@ -71,13 +71,19 @@
 	</Target>
 
 
-	<PropertyGroup>
-		<PostBuildEvent Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-            IF EXIST "$(TargetDir)$(TargetName).pdb" IF EXIST "$(SolutionDir)pdb2mdb.exe" CALL "$(SolutionDir)pdb2mdb.exe" "$(TargetPath)"
-            IF EXIST "$(SolutionDir)PostBuild.bat" CALL "$(SolutionDir)PostBuild.bat" "$(TargetPath)" $(GameType)
-        </PostBuildEvent>
-	</PropertyGroup>
+	<Target Name="DebugPostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug' AND $([MSBuild]::IsOSPlatform('Windows'))">
+		<!-- pdb2mdb -->
+		<Exec Command="IF EXIST &quot;$(TargetDir)$(TargetName).pdb&quot; IF EXIST &quot;$(SolutionDir)pdb2mdb.exe&quot; CALL &quot;$(SolutionDir)pdb2mdb.exe&quot; &quot;$(TargetPath)&quot;" ContinueOnError="true" />
 
+		<!-- PostBuild.bat with explicit paths -->
+		<PropertyGroup>
+			<FullTargetPath>$(MSBuildProjectDirectory)\$(OutputPath)$(AssemblyName).dll</FullTargetPath>
+			<GameType Condition="'$(GameType)' == ''">$([System.Text.RegularExpressions.Regex]::Match($(MSBuildProjectName), '[^\.]*$'))</GameType>
+		</PropertyGroup>
+
+		<Exec Command='IF EXIST "$(SolutionDir)PostBuild.bat" CALL "$(SolutionDir)PostBuild.bat" "$(FullTargetPath)" "$(GameType)"' ContinueOnError="true" />
+		<Message Text="PostBuild: TargetPath=&quot;$(FullTargetPath)&quot; GameType=&quot;$(GameType)&quot;" Importance="high" />
+	</Target>
 
 	<!-- Inline task to get file version from assembly -->
 	<UsingTask TaskName="GetFileVersion" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
