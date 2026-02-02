@@ -240,7 +240,7 @@ namespace VideoExport.ScreenshotPlugins
             int width = (int)size.x;
             int height = (int)size.y;
 
-            TextureFormat textureFormat = TextureFormat.RGB24;
+            TextureFormat textureFormat = TextureFormat.RGBA32;
             RenderTextureFormat renderTextureFormat = RenderTextureFormat.ARGB32;
             int renderTextureDepth = 0;
 #if !HONEYSELECT
@@ -275,7 +275,7 @@ namespace VideoExport.ScreenshotPlugins
             int width = (int)size.x;
             int height = (int)size.y;
 
-            TextureFormat textureFormat = TextureFormat.RGB24;
+            TextureFormat textureFormat = TextureFormat.RGBA32;
 #if !HONEYSELECT
             if (this._imageFormat == VideoExport.ImgFormat.EXR)
             {
