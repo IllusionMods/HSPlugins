@@ -1,0 +1,59 @@
+@echo off
+setlocal ENABLEDELAYEDEXPANSION
+
+set "DLL=%~1"
+set "GAME=%~2"
+
+if "%DLL%"=="" echo ERROR: No DLL & exit /b 1
+if "%GAME%"=="" echo ERROR: No GAME & exit /b 1
+
+echo Copying %~nx1 to %GAME%...
+
+set "GAMEPATH="
+
+echo Checking defined paths for %GAME%...
+if "%GAME%"=="KK" set "GAMEPATH=D:\Illusion\KK"
+if "%GAME%"=="KKS" set "GAMEPATH=D:\Illusion\KKS"
+if "%GAME%"=="EC" set "GAMEPATH=D:\Illusion\EmotionCreators"
+if "%GAME%"=="HS" set "GAMEPATH=D:\Illusion\HoneySelect"
+if "%GAME%"=="HS2" set "GAMEPATH=D:\Illusion\HS2"
+if "%GAME%"=="AI" set "GAMEPATH=D:\Illusion\AI"
+if "%GAME%"=="PH" set "GAMEPATH=D:\Illusion\PlayHome"
+if "%GAME%"=="PC" set "GAMEPATH=D:\Illusion\PlayClub"
+if "%GAME%"=="SBPR" set "GAMEPATH=D:\Illusion\Sext Beach Premium Resort"
+
+if defined GAMEPATH (
+    if not exist "!GAMEPATH!\" (
+        echo Defined path not found: !GAMEPATH!
+        set "GAMEPATH="
+    )
+)
+
+set "REGPATH="
+if "%GAME%"=="KK" set "REGPATH=HKCU:\Software\illusion\Koikatu\Koikatu"
+if "%GAME%"=="KKS" set "REGPATH=HKCU:\Software\illusion\KoikatsuSunshine\KoikatsuSunshine"
+if "%GAME%"=="HS2" set "REGPATH=HKCU:\Software\illusion\HoneySelect2\HoneySelect2"
+if "%GAME%"=="AI" set "REGPATH=HKCU:\Software\illusion\AI-Syoujyo\AI-Syoujyo"
+
+if "!GAMEPATH!"=="" (
+    if defined REGPATH (
+        for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "(Get-ItemProperty '%REGPATH%').INSTALLDIR" 2^>nul`) do (
+            set "GAMEPATH=%%i"
+            if "!GAMEPATH:~-1!"=="\" set "GAMEPATH=!GAMEPATH:~0,-1!"
+            if "!GAMEPATH:~-1!"/=="/" set "GAMEPATH=!GAMEPATH:~0,-1!"
+        )
+        echo Registry GAMEPATH: [!GAMEPATH!]
+    )
+)
+
+if defined GAMEPATH (
+    set "FULLPATH=%GAMEPATH%\BepInEx\plugins"
+    echo Target: !FULLPATH!
+    if exist "!FULLPATH!\" (
+        xcopy /y /q "%DLL%" "!FULLPATH!\" >nul && echo %GAME%: !FULLPATH!\%~nx1 || echo Copy failed
+    ) else (
+        echo %GAME% not found: !FULLPATH!
+    )
+) else (
+    echo Unknown game: %GAME%
+)
