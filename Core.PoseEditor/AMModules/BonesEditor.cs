@@ -1185,7 +1185,7 @@ namespace HSPE.AMModules
                         xmlWriter.WriteAttributeString("posZ", XmlConvert.ToString(kvp.Value.position.value.z));
                     }
                     OCIChar.BoneInfo info = _target.GetBoneInfo(kvp.Key);
-                    if (kvp.Value.rotation.hasValue && (!_target.fkEnabled || info == null || info.active == false))
+                    if (kvp.Value.rotation.hasValue && (!_target.fkEnabled || info == null || !info.active))
                     {
                         xmlWriter.WriteAttributeString("rotW", XmlConvert.ToString(kvp.Value.rotation.value.w));
                         xmlWriter.WriteAttributeString("rotX", XmlConvert.ToString(kvp.Value.rotation.value.x));

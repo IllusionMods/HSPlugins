@@ -105,7 +105,7 @@ namespace HSPE.AMModules
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
                                 var newBone = new OCIChar.BoneInfo(guide, oiBoneInfo, 0);
 #else
-                                    var newBone = new OCIChar.BoneInfo(guide, oiBoneInfo);
+                                var newBone = new OCIChar.BoneInfo(guide, oiBoneInfo);
 #endif
                                 if (!fkObjects.ContainsKey(go))
                                     fkObjects.Add(go, newBone);
