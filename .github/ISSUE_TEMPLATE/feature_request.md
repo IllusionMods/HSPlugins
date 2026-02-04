@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: "[Plugin name] Feature description..."
+title: "[Plugin Name] Feature description..."
 labels: enhancement
 assignees: ''
 
