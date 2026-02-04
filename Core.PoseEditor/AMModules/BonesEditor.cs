@@ -1,9 +1,9 @@
-﻿using Studio;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Studio;
 using ToolBox.Extensions;
 using UnityEngine;
 using Vectrosity;
@@ -1021,9 +1021,10 @@ namespace HSPE.AMModules
         private void SetBoneRotation(Transform bone, Quaternion rotation)
         {
             OCIChar.BoneInfo value = null;
-            if (bone != null && _target.fkEnabled)
+            if (bone && _target.fkEnabled)
             {
-                _target.fkObjects.TryGetValue(bone.gameObject, out value);
+                // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                value = _target.GetBoneInfo(bone.gameObject);
             }
             if (value == null || !value.active)
             {
@@ -1042,12 +1043,12 @@ namespace HSPE.AMModules
             }
             OCIChar.BoneInfo value = null;
             OCIChar.BoneInfo value2 = null;
-            _target.fkObjects.TryGetValue(_boneTarget.gameObject, out value);
+            value = _target.GetBoneInfo(_boneTarget.gameObject);
             if (value != null && value.active)
             {
-                if (_twinBoneTarget != null && value != null && value.active)
+                if (_twinBoneTarget != null)
                 {
-                    _target.fkObjects.TryGetValue(_twinBoneTarget.gameObject, out value2);
+                    value2 = _target.GetBoneInfo(_twinBoneTarget.gameObject);
                 }
                 SetBoneTargetRotationFKNode(rotation, pushValue, value, value2);
             }
@@ -1183,8 +1184,8 @@ namespace HSPE.AMModules
                         xmlWriter.WriteAttributeString("posY", XmlConvert.ToString(kvp.Value.position.value.y));
                         xmlWriter.WriteAttributeString("posZ", XmlConvert.ToString(kvp.Value.position.value.z));
                     }
-                    OCIChar.BoneInfo info;
-                    if (kvp.Value.rotation.hasValue && (!_target.fkEnabled || !_target.fkObjects.TryGetValue(kvp.Key, out info) || info.active == false))
+                    OCIChar.BoneInfo info = _target.GetBoneInfo(kvp.Key);
+                    if (kvp.Value.rotation.hasValue && (!_target.fkEnabled || info == null || !info.active))
                     {
                         xmlWriter.WriteAttributeString("rotW", XmlConvert.ToString(kvp.Value.rotation.value.w));
                         xmlWriter.WriteAttributeString("rotX", XmlConvert.ToString(kvp.Value.rotation.value.x));
@@ -1321,13 +1322,14 @@ namespace HSPE.AMModules
             if (depth == 64)
                 return;
             TransformData data;
-            OCIChar.BoneInfo info;
-            if ((!_target.fkEnabled || !_target.fkObjects.TryGetValue(bone.gameObject, out info) || !info.active) && _dirtyBones.TryGetValue(bone.gameObject, out data))
+            OCIChar.BoneInfo info = _target.GetBoneInfo(bone.gameObject);
+            if ((!_target.fkEnabled || info == null || !info.active) && _dirtyBones.TryGetValue(bone.gameObject, out data))
             {
                 data.rotation.Reset();
                 SetBoneNotDirtyIf(bone.gameObject);
             }
-            if (_symmetricalEdition && twinBone != null && (!_target.fkEnabled || !_target.fkObjects.TryGetValue(twinBone.gameObject, out info) || !info.active) && _dirtyBones.TryGetValue(twinBone.gameObject, out data))
+            info = !twinBone ? null : _target.GetBoneInfo(twinBone.gameObject);
+            if (_symmetricalEdition && twinBone && (!_target.fkEnabled || info == null || !info.active) && _dirtyBones.TryGetValue(twinBone.gameObject, out data))
             {
                 data.rotation.Reset();
                 SetBoneNotDirtyIf(twinBone.gameObject);

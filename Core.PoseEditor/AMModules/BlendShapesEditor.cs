@@ -97,12 +97,6 @@ namespace HSPE.AMModules
             public float originalWeight;
         }
 
-        private class BlendLinkData
-        {
-            public SkinnedMeshRenderer renderer;
-            public string blendName;
-        }
-
 #if HONEYSELECT || KOIKATSU
         [HarmonyPatch(typeof(FaceBlendShape), "LateUpdate")]
         private class FaceBlendShape_Patches
@@ -496,7 +490,6 @@ namespace HSPE.AMModules
         private Vector2 _blendShapesScroll;
         private Vector2 _nonMatchBlendRendererScroll;
         private Vector2 _nonMatchBlendScroll;
-        private int _headlessReconstructionTimeout = 0;
         private BlendRenderer _faceRenderer;
         private BlendRenderer _skinnedMeshTarget;
         private BlendRenderer _nonMatchTarget;
