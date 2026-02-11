@@ -1232,7 +1232,7 @@ namespace NodesConstraints
 
                 if (constraint.enabled == false)
                 {
-                    constraint.SmoothDisconnectUpdate(false);
+                    constraint.SmoothDisconnectUpdate(!constraint.child && !constraint.parent);
                     continue;
                 }
 
