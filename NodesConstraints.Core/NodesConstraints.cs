@@ -229,7 +229,7 @@ namespace NodesConstraints
                 return (parentTransform.position - originalParentPosition);
             }
 
-            public void SmoothDisconnectUpdate()
+            public void SmoothDisconnectUpdate(bool updateTimer)
             {
                 if (position && smoothPos.disConnectionTime > 0.0f && smoothPos.disConnectionCurrentTime > 0.0f)
                 {
@@ -249,11 +249,11 @@ namespace NodesConstraints
                     if (!positionLocks.z)
                         targetPos.z = childTransform.position.z;
 
-                    smoothPos.disConnectionCurrentTime -= _deltaTime;
-
-                    if (smoothPos.disConnectionCurrentTime < 0)
+                    if (updateTimer)
                     {
-                        smoothPos.disConnectionCurrentTime = 0;
+                        smoothPos.disConnectionCurrentTime -= _deltaTime;
+                        if (smoothPos.disConnectionCurrentTime < 0)
+                            smoothPos.disConnectionCurrentTime = 0;
                     }
 
                     if (smoothPos.disConnectionCurrentTime > smoothPos.disConnectionTime)
@@ -262,9 +262,24 @@ namespace NodesConstraints
                     }
 
                     float t = Mathf.Clamp01(1.0f - smoothPos.disConnectionCurrentTime / smoothPos.disConnectionTime);
-                    targetPos = Vector3.Lerp(targetPos, childTransform.position, t);
+                    
+                    if (resetOriginalPosition)
+                    {
+                        targetPos = childTransform.parent != null ? childTransform.parent.TransformPoint(originalChildPosition) : originalChildPosition;
+                        childTransform.position = Vector3.Lerp(smoothPos.smoothStartValue, targetPos, t);
 
-                    childTransform.position = targetPos;
+                        if (t >= 1f)
+                        {
+                            childTransform.localPosition = originalChildPosition;
+                            if (child != null)
+                                child.changeAmount.pos = originalChildPosition;
+                        }
+                    }
+                    else
+                    {
+                        targetPos = Vector3.Lerp(targetPos, childTransform.position, t); 
+                        childTransform.position = targetPos;
+                    }
 
                     if (child != null)
                         child.changeAmount.pos = child.transformTarget.localPosition;
@@ -291,11 +306,11 @@ namespace NodesConstraints
                     targetRot *= rotationOffset;
                     targetRot = Quaternion.SlerpUnclamped(Quaternion.identity, targetRot, rotationChangeFactor);
 
-                    smoothRot.disConnectionCurrentTime -= _deltaTime;
-
-                    if (smoothRot.disConnectionCurrentTime < 0)
+                    if (updateTimer)
                     {
-                        smoothRot.disConnectionCurrentTime = 0;
+                        smoothRot.disConnectionCurrentTime -= _deltaTime;
+                        if (smoothRot.disConnectionCurrentTime < 0)
+                            smoothRot.disConnectionCurrentTime = 0;
                     }
 
                     if (smoothRot.disConnectionCurrentTime > smoothRot.disConnectionTime)
@@ -304,15 +319,31 @@ namespace NodesConstraints
                     }
 
                     float t = Mathf.Clamp01(1.0f - smoothRot.disConnectionCurrentTime / smoothRot.disConnectionTime);
-                    targetRot = Quaternion.Slerp(targetRot, childTransform.rotation, t);
 
-                    targetRot = Quaternion.Euler(
-                            rotationLocks.x ? targetRot.eulerAngles.x : childTransform.rotation.eulerAngles.x,
-                            rotationLocks.y ? targetRot.eulerAngles.y : childTransform.rotation.eulerAngles.y,
-                            rotationLocks.z ? targetRot.eulerAngles.z : childTransform.rotation.eulerAngles.z
-                        );
+                    if (resetOriginalRotation)
+                    {
+                        targetRot = childTransform.parent != null ? childTransform.parent.rotation * originalChildRotation : originalChildRotation;
+                        childTransform.rotation = Quaternion.Slerp(smoothRot.smoothStartValue, targetRot, t);
 
-                    childTransform.rotation = targetRot;
+                        if (t >= 1f)
+                        {
+                            childTransform.localRotation = originalChildRotation;
+                            if (child != null)
+                                child.changeAmount.rot = originalChildRotation.eulerAngles;
+                        }
+                    }
+                    else
+                    {
+                        targetRot = Quaternion.Slerp(targetRot, childTransform.rotation, t);
+
+                        targetRot = Quaternion.Euler(
+                                rotationLocks.x ? targetRot.eulerAngles.x : childTransform.rotation.eulerAngles.x,
+                                rotationLocks.y ? targetRot.eulerAngles.y : childTransform.rotation.eulerAngles.y,
+                                rotationLocks.z ? targetRot.eulerAngles.z : childTransform.rotation.eulerAngles.z
+                            );
+
+                        childTransform.rotation = targetRot;
+                    }
 
                     if (child != null)
                         child.changeAmount.rot = child.transformTarget.localEulerAngles;
@@ -332,11 +363,11 @@ namespace NodesConstraints
                     if (!scaleLocks.z)
                         targetScale.z = childTransform.localScale.z;
 
-                    smoothScale.disConnectionCurrentTime -= _deltaTime;
-
-                    if (smoothScale.disConnectionCurrentTime < 0)
+                    if (updateTimer)
                     {
-                        smoothScale.disConnectionCurrentTime = 0;
+                        smoothScale.disConnectionCurrentTime -= _deltaTime;
+                        if (smoothScale.disConnectionCurrentTime < 0)
+                            smoothScale.disConnectionCurrentTime = 0;
                     }
 
                     if (smoothScale.disConnectionCurrentTime > smoothScale.disConnectionTime)
@@ -345,11 +376,26 @@ namespace NodesConstraints
                     }
 
                     float t = Mathf.Clamp01(1.0f - smoothScale.disConnectionCurrentTime / smoothScale.disConnectionTime);
-                    targetScale = Vector3.Lerp(targetScale, childTransform.localScale, t);
+                    
+                    if (resetOriginalScale)
+                    {
+                        childTransform.localScale = Vector3.Lerp(smoothScale.smoothStartValue, originalChildScale, t);
 
-                    if (scaleDamp > 0)
-                        targetScale = Vector3.Lerp(childTransform.localScale, targetScale, GetInterpolationFactor(scaleDamp));
-                    childTransform.localScale = targetScale;
+                        if (t >= 1f)
+                        {
+                            childTransform.localScale = originalChildScale;
+                            if (child != null)
+                                child.changeAmount.scale = originalChildScale;
+                        }
+                    }
+                    else
+                    {
+                        targetScale = Vector3.Lerp(targetScale, childTransform.localScale, t);
+
+                        if (scaleDamp > 0)
+                            targetScale = Vector3.Lerp(childTransform.localScale, targetScale, GetInterpolationFactor(scaleDamp));
+                        childTransform.localScale = targetScale;
+                    }
 
                     if (child != null)
                         child.changeAmount.scale = child.transformTarget.localScale;
@@ -1155,7 +1201,7 @@ namespace NodesConstraints
                     }
                     else
                     {
-                        constraint.SmoothDisconnectUpdate();
+                        constraint.SmoothDisconnectUpdate(true);
                     }
                 }
             }
@@ -1185,7 +1231,10 @@ namespace NodesConstraints
                 }
 
                 if (constraint.enabled == false)
+                {
+                    constraint.SmoothDisconnectUpdate(!constraint.child && !constraint.parent);
                     continue;
+                }
 
                 /* There is a timing when Transform is reset by DynamicBone. Skip the reset value so that it is not taken into the constraint.
                  * It is assumed that the function call is from Expression_LateUpdate_Patches.
@@ -1726,8 +1775,9 @@ namespace NodesConstraints
                 {
                     constraint.smoothPos.disConnectionCurrentTime = constraint.smoothPos.disConnectionTime;
                     constraint.smoothPos.connectionCurrentTime = 0.0f;
+                    constraint.smoothPos.smoothStartValue = constraint.childTransform.position;
 
-                    if (constraint.resetOriginalPosition)
+                    if (constraint.resetOriginalPosition && constraint.smoothPos.disConnectionTime <= 0f)
                     {
                         constraint.childTransform.localPosition = constraint.originalChildPosition;
                         if (constraint.child != null)
@@ -1739,8 +1789,9 @@ namespace NodesConstraints
                 {
                     constraint.smoothRot.disConnectionCurrentTime = constraint.smoothRot.disConnectionTime;
                     constraint.smoothRot.connectionCurrentTime = 0.0f;
+                    constraint.smoothRot.smoothStartValue = constraint.childTransform.rotation;
 
-                    if (constraint.resetOriginalRotation)
+                    if (constraint.resetOriginalRotation && constraint.smoothRot.disConnectionTime <= 0f)
                     {
                         constraint.childTransform.localRotation = constraint.originalChildRotation;
                         if (constraint.child != null)
@@ -1752,8 +1803,9 @@ namespace NodesConstraints
                 {
                     constraint.smoothScale.disConnectionCurrentTime = constraint.smoothScale.disConnectionTime;
                     constraint.smoothScale.connectionCurrentTime = 0.0f;
+                    constraint.smoothScale.smoothStartValue = constraint.childTransform.localScale;
 
-                    if (constraint.resetOriginalScale)
+                    if (constraint.resetOriginalScale && constraint.smoothScale.disConnectionTime <= 0f)
                     {
                         constraint.childTransform.localScale = constraint.originalChildScale;
                         if (constraint.child != null)
@@ -1766,6 +1818,7 @@ namespace NodesConstraints
             {
                 constraint.originalChildPosition = constraint.childTransform.localPosition;
                 constraint.originalChildRotation = constraint.childTransform.localRotation;
+                constraint.originalChildScale = constraint.childTransform.localScale;
 
                 if (constraint.position)
                 {
