@@ -1,6 +1,7 @@
-﻿using Studio;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Studio;
 using UnityEngine;
 
 namespace HSPE.AMModules
@@ -75,6 +76,61 @@ namespace HSPE.AMModules
                         fkObjects.Add(bone.guideObject.transformTarget.gameObject, bone);
                 }
             }
+        }
+
+        public OCIChar.BoneInfo GetBoneInfo(GameObject go)
+        {
+            if (fkObjects.TryGetValue(go, out OCIChar.BoneInfo info))
+                return info;
+
+            switch (type)
+            {
+                case Type.Character:
+                    {
+                        foreach (var bone in ociChar.listBones.Where(bone => bone.guideObject && bone.guideObject.transformTarget && bone.guideObject.transformTarget.gameObject == go))
+                        {
+                            if (!fkObjects.ContainsKey(go))
+                                fkObjects.Add(go, bone);
+                            return bone;
+                        }
+
+                        if (ociChar.guideObject)
+                        {
+                            // Expensive fallback, but fine since it only handles missing GuideObjects and caches them.
+                            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                            foreach (GuideObject guide in ociChar.guideObject.transform.GetComponentsInChildren<GuideObject>(true))
+                            {
+                                if (guide.transformTarget != go.transform) continue;
+                                if (!ociChar.oiCharInfo.bones.TryGetValue(guide.dicKey, out OIBoneInfo oiBoneInfo)) continue;
+#if KOIKATSU || AISHOUJO || HONEYSELECT2
+                                var newBone = new OCIChar.BoneInfo(guide, oiBoneInfo, 0);
+#else
+                                var newBone = new OCIChar.BoneInfo(guide, oiBoneInfo);
+#endif
+                                if (!fkObjects.ContainsKey(go))
+                                    fkObjects.Add(go, newBone);
+                                return newBone;
+                            }
+                        }
+
+                        break;
+                    }
+                case Type.Item:
+                    {
+                        if (ociItem.listBones != null)
+                        {
+                            foreach (var bone in ociItem.listBones.Where(bone => bone.guideObject && bone.guideObject.transformTarget && bone.guideObject.transformTarget.gameObject == go))
+                            {
+                                if (!fkObjects.ContainsKey(go))
+                                    fkObjects.Add(go, bone);
+                                return bone;
+                            }
+                        }
+
+                        break;
+                    }
+            }
+            return null;
         }
 
     }
