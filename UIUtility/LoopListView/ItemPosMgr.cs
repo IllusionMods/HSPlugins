@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+#pragma warning disable CS0436 // Some types in this file are defined in Assembly-CSharp
 namespace SuperScrollView
 {
 

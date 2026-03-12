@@ -39,7 +39,9 @@ namespace HSPE
         internal BlendShapesEditor _blendShapesEditor;
         internal CollidersEditor _collidersEditor;
         internal IKEditor _ikEditor;
+#if AISHOUJO || HONEYSELECT2
         internal ClothesTransformEditor _clothesTransformEditor;
+#endif
         protected readonly List<AdvancedModeModule> _modules = new List<AdvancedModeModule>();
         protected AdvancedModeModule _currentModule;
         internal GenericOCITarget _target;

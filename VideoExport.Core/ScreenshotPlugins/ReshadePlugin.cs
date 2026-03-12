@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using UnityEngine;
 using VideoExport.Core;
 using System.Reflection;
@@ -14,131 +13,9 @@ using HarmonyLib;
 
 namespace VideoExport.ScreenshotPlugins
 {
-    internal class ReshadeAPI
-    {
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public unsafe struct Screenshot
-        {
-            public uint width;
-            public uint height;
-            public uint channels;
-            // followed by [width * height * channels] bytes
-        }
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        private static extern IntPtr OpenFileMapping(uint dwDesiredAccess, bool bInheritHandle, string lpName);
-        [DllImport("kernel32.dll")]
-        private static extern IntPtr MapViewOfFile(IntPtr hFileMappingObject, uint dwDesiredAccess, uint dwFileOffsetHigh, uint dwFileOffsetLow, uint dwNumberOfBytesToMap);
-        [DllImport("kernel32.dll")]
-        private static extern bool UnmapViewOfFile(IntPtr lpBaseAddress);
-        [DllImport("kernel32.dll")]
-        private static extern bool CloseHandle(IntPtr hObject);
-
-        const uint GENERIC_READ = 0x80000000;
-        const uint FILE_MAP_READ = 0x04;
-
-        const uint COLOR_CHANNELS = 4;
-        const uint MAX_IMAGE_SIZE = 7680 * 4320 * COLOR_CHANNELS;
-
-        private static IntPtr _shmFile = IntPtr.Zero;
-        private static IntPtr _shm = IntPtr.Zero;
-        private static bool _initialized = false;
-
-        private static string sharedMemoryName = "KKReshade_Screenshot_SHM";
-
-        public static bool OpenSharedMemory()
-        {
-            if (_initialized) return true;
-
-            _shmFile = OpenFileMapping(GENERIC_READ, false, sharedMemoryName);
-            if (_shmFile == IntPtr.Zero)
-            {
-                VideoExport.Logger.LogWarning("Failed to set up KKReshade, make sure it is properly installed and functioning.");
-                return false;
-            }
-
-            _shm = MapViewOfFile(_shmFile, FILE_MAP_READ, 0, 0, (uint)(Marshal.SizeOf(typeof(Screenshot)) + MAX_IMAGE_SIZE));
-            if (_shm == IntPtr.Zero)
-            {
-                VideoExport.Logger.LogError("Failed to set up KKReshade - Could not map view of the shared memory.");
-                CloseHandle(_shmFile);
-                return false;
-            }
-
-            _initialized = true;
-            return true;
-        }
-
-        public static void CloseSharedMemory()
-        {
-            if (_shm != IntPtr.Zero)
-            {
-                UnmapViewOfFile(_shm);
-                _shm = IntPtr.Zero;
-            }
-
-            if (_shmFile != IntPtr.Zero)
-            {
-                CloseHandle(_shmFile);
-                _shmFile = IntPtr.Zero;
-            }
-
-            _initialized = false;
-        }
-
-        public static bool IsAvailable()
-        {
-            return _initialized && _shmFile != IntPtr.Zero && _shm != IntPtr.Zero;
-        }
-
-        public static Texture2D RequestScreenshot(bool removeAlpha)
-        {
-            Screenshot screenshot = (Screenshot)Marshal.PtrToStructure(_shm, typeof(Screenshot));
-            uint imageSize = screenshot.width * screenshot.height * screenshot.channels;
-            IntPtr imageBytesPtr = new IntPtr(_shm.ToInt64() + Marshal.SizeOf(typeof(Screenshot)));
-            byte[] rawImageBytes = new byte[imageSize];
-            Marshal.Copy(imageBytesPtr, rawImageBytes, 0, (int) imageSize);
-
-            // Raw image comes flipped vertically, so we flip it back to normal
-            byte[] bytesRGBA = new byte[imageSize];
-            uint rowSize = screenshot.width * screenshot.channels;
-            for (uint y = 0; y < screenshot.height; y++)
-            {
-                uint srcRow = (screenshot.height - 1 - y) * rowSize;
-                uint dstRow = y * rowSize;
-                Buffer.BlockCopy(rawImageBytes, (int)srcRow, bytesRGBA, (int)dstRow, (int)rowSize);
-            }
-
-            if (removeAlpha)
-            {
-                uint rgbSize = screenshot.width * screenshot.height * 3;
-                byte[] bytesRGB = new byte[rgbSize];
-
-                for (int src = 0, dst = 0; src < bytesRGBA.Length; src += 4, dst += 3)
-                {
-                    bytesRGB[dst] = bytesRGBA[src];
-                    bytesRGB[dst + 1] = bytesRGBA[src + 1];
-                    bytesRGB[dst + 2] = bytesRGBA[src + 2];
-                }
-
-                Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGB24, false, false);
-                texture.LoadRawTextureData(bytesRGB);
-                texture.Apply();
-                return texture;
-            }
-            else
-            {
-                Texture2D texture = new Texture2D((int)screenshot.width, (int)screenshot.height, TextureFormat.RGBA32, false, false);
-                texture.LoadRawTextureData(bytesRGBA);
-                texture.Apply();
-                return texture;
-            }
-        }
-    }
-
     public class ReshadePlugin : IScreenshotPlugin
     {
-        public string name { get { return "Reshade"; } }
+        public string name => "Reshade";
 
         public Vector2 currentSize
         {
@@ -155,7 +32,8 @@ namespace VideoExport.ScreenshotPlugins
                 return new Vector2(width, height);
             }
         }
-        public bool transparency { get { return !_removeAlphaChannel; } }
+        public bool transparency => !_removeAlphaChannel;
+
         public string extension
         {
             get
@@ -172,13 +50,14 @@ namespace VideoExport.ScreenshotPlugins
                 }
             }
         }
-        public byte bitDepth { get { return 8; } }
+        public byte bitDepth => 8;
 
-        public VideoExport.ImgFormat imageFormat { get { return _imageFormat; } }
+        public VideoExport.ImgFormat imageFormat => _imageFormat;
         private VideoExport.ImgFormat _imageFormat;
         private bool _autoHideUI;
         private bool _removeAlphaChannel;
         private string[] _imageFormatNames;
+        public bool vFlip;
 
 #if IPA
         public bool Init(HarmonyInstance harmony)
@@ -191,7 +70,10 @@ namespace VideoExport.ScreenshotPlugins
             this._autoHideUI = VideoExport._configFile.AddBool("autoHideUI", true, true);
             this._removeAlphaChannel = VideoExport._configFile.AddBool("removeAlphaChannel", true, true);
 
-            return ReshadeAPI.OpenSharedMemory();
+            var opened = ReshadeAPI.OpenSharedMemory();
+            ReshadeAPI.SetCapture(false);
+            
+            return opened;
         }
 
         public void UpdateLanguage()
@@ -211,9 +93,24 @@ namespace VideoExport.ScreenshotPlugins
             return true;
         }
 
+        public bool IsRenderTextureCaptureAvailable()
+        {
+            return false;
+        }
+
+        public bool IsVFlipNeeded()
+        {
+            return false;
+        }
+
         public Texture2D CaptureTexture()
         {
-            return ReshadeAPI.RequestScreenshot(_removeAlphaChannel);
+            return ReshadeAPI.RequestScreenshot(_removeAlphaChannel, vFlip);
+        }
+
+        public RenderTexture CaptureRenderTexture()
+        {
+            return null;
         }
 
         public void OnStartRecording()
@@ -223,10 +120,12 @@ namespace VideoExport.ScreenshotPlugins
                 VideoExport.ShowUI = false;
                 SetStudioUIVisibility(false);
             }
+            ReshadeAPI.SetCapture(true);
         }
 
         public void OnEndRecording()
         {
+            ReshadeAPI.SetCapture(false);
             if (_autoHideUI)
             {
                 VideoExport.ShowUI = true;
@@ -253,14 +152,14 @@ namespace VideoExport.ScreenshotPlugins
 
         public void SaveParams()
         {
-            VideoExport._configFile.SetInt("reshadeImageFormat", (int)this._imageFormat);
-            VideoExport._configFile.SetBool("autoHideUI", (bool)this._autoHideUI);
-            VideoExport._configFile.SetBool("removeAlphaChannel", (bool)this._removeAlphaChannel);
+            VideoExport._configFile.SetInt("reshadeImageFormat", (int)_imageFormat);
+            VideoExport._configFile.SetBool("autoHideUI", _autoHideUI);
+            VideoExport._configFile.SetBool("removeAlphaChannel", _removeAlphaChannel);
         }
 
         private void SetStudioUIVisibility(bool target_visibility)
         {
-#if KOIKATSU
+#if KOIKATSU && !SUNSHINE
             Type hideUI = Type.GetType("HideAllUI.HideAllUICore,HideAllUI.Koikatu");
 #elif SUNSHINE
             Type hideUI = Type.GetType("HideAllUI.HideAllUICore,HideAllUI.KoikatsuSunshine");

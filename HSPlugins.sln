@@ -5,7 +5,7 @@ VisualStudioVersion = 17.1.32414.318
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PoseEditor", "PoseEditor", "{4A717F88-2D2F-4374-8F84-6B65FEA43E93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KKPE", "KKPE\KKPE.csproj", "{22D768D0-1405-453D-80AA-E91D1B0EB956}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoseEditor.KK", "KKPE\PoseEditor.KK.csproj", "{22D768D0-1405-453D-80AA-E91D1B0EB956}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PoseEditor.Core", "Core.PoseEditor\PoseEditor.Core.shproj", "{607FCC24-1E15-4FF8-A662-21D28FE01671}"
 EndProject
@@ -13,15 +13,13 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UIUtility", "UIUtility\UIUt
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ToolBox", "ToolBox\ToolBox.shproj", "{34A5E7CE-5612-4FEE-8290-2C4290363A40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KKSPE", "KKSPE\KKSPE.csproj", "{5E38F4CC-F411-4532-8361-46543715C48B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoseEditor.KKS", "KKSPE\PoseEditor.KKS.csproj", "{5E38F4CC-F411-4532-8361-46543715C48B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NodesConstraints", "NodesConstraints", "{4F7FCC33-018D-4EBC-A5E1-1A60BE091917}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodesConstraints.KK", "NodesConstraints.KK\NodesConstraints.KK.csproj", "{C55C162F-0F90-450B-96CC-6021168DB63A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodesConstraints.KKS", "NodesConstraints.KKS\NodesConstraints.KKS.csproj", "{73FEC2F5-225C-4363-984F-746DBAB6F6F5}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "NodesConstraints.Core", "NodesConstraints.Core\NodesConstraints.Core.shproj", "{4789548F-9126-4881-AD87-A5A68628062D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Timeline", "Timeline", "{322BDAAE-E671-42A5-A6C0-0120C629957A}"
 EndProject
@@ -33,15 +31,15 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Timeline.Core", "Timeline.C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UsefulStuff", "UsefulStuff", "{DADEF895-193D-4178-A67D-A54848914825}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KKSUS", "KKSUS\KKSUS.csproj", "{8D687395-37EC-4632-BFD3-BB9F56EC04B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsefulStuff.KKS", "KKSUS\UsefulStuff.KKS.csproj", "{8D687395-37EC-4632-BFD3-BB9F56EC04B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KKUS", "KKUS\KKUS.csproj", "{2E566206-CB55-49B1-9D60-6182D596292F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsefulStuff.KK", "KKUS\UsefulStuff.KK.csproj", "{2E566206-CB55-49B1-9D60-6182D596292F}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UsefulStuff.Core", "UsefulStuff.Core\UsefulStuff.Core.shproj", "{B4C7CDD3-B206-478D-B51F-FDC64C815F02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIPE", "AIPE\AIPE.csproj", "{18698BC1-FB52-4A36-9984-22A739269C83}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoseEditor.AI", "AIPE\PoseEditor.AI.csproj", "{18698BC1-FB52-4A36-9984-22A739269C83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HS2PE", "HS2PE\HS2PE.csproj", "{19BF99C1-720F-41F4-A241-EB4CF589E6AD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoseEditor.HS2", "HS2PE\PoseEditor.HS2.csproj", "{19BF99C1-720F-41F4-A241-EB4CF589E6AD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Timeline.AI", "Timeline.AI\Timeline.AI.csproj", "{7EF020D2-5340-455E-9CDB-466B5A2CED94}"
 EndProject
@@ -51,9 +49,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodesConstraints.AI", "Node
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodesConstraints.HS2", "NodesConstraints.HS2\NodesConstraints.HS2.csproj", "{9E8A6BDF-1100-4B2E-B2F4-69E1C00092AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIUS", "AIUS\AIUS.csproj", "{8E11FDE0-E762-4A16-92C9-48538A21137A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsefulStuff.AI", "AIUS\UsefulStuff.AI.csproj", "{8E11FDE0-E762-4A16-92C9-48538A21137A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HS2US", "HS2US\HS2US.csproj", "{73FD7F4C-C9AC-4366-956A-B580675AF57B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsefulStuff.HS2", "HS2US\UsefulStuff.HS2.csproj", "{73FD7F4C-C9AC-4366-956A-B580675AF57B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VideoExport", "VideoExport", "{6CE01CC0-5CAF-48B1-B21A-5E6FE306C23C}"
 EndProject
@@ -71,9 +69,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollidersDebug.KKS", "Colli
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CollidersDebug", "CollidersDebug", "{DF686ECF-D913-4C25-9876-A99C1706CBF3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollidersDebug.KK", "CollidersDebug.KK\CollidersDebug.KK.csproj", "{5F8EBCF4-40DD-430D-88E0-16FB47336638}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Solution", "_Solution", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		README.md = README.md
+	EndProjectSection
+EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CollidersDebug.Core", "CollidersDebug.Core\CollidersDebug.Core.shproj", "{3B3C7451-90B2-4092-BDEE-5B8AB8F50501}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollidersDebug.KK", "CollidersDebug.KK\CollidersDebug.KK.csproj", "{5F8EBCF4-40DD-430D-88E0-16FB47336638}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "NodesConstraints.Core", "NodesConstraints.Core\NodesConstraints.Core.shproj", "{4789548F-9126-4881-AD87-A5A68628062D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -179,7 +185,6 @@ Global
 		{5E38F4CC-F411-4532-8361-46543715C48B} = {4A717F88-2D2F-4374-8F84-6B65FEA43E93}
 		{C55C162F-0F90-450B-96CC-6021168DB63A} = {4F7FCC33-018D-4EBC-A5E1-1A60BE091917}
 		{73FEC2F5-225C-4363-984F-746DBAB6F6F5} = {4F7FCC33-018D-4EBC-A5E1-1A60BE091917}
-		{4789548F-9126-4881-AD87-A5A68628062D} = {4F7FCC33-018D-4EBC-A5E1-1A60BE091917}
 		{3978AEA2-BFCB-43C1-A909-921290587540} = {322BDAAE-E671-42A5-A6C0-0120C629957A}
 		{34F37CA2-ADA1-41D8-9AAA-CB9E67514373} = {322BDAAE-E671-42A5-A6C0-0120C629957A}
 		{E9A8DFAE-8470-4AB1-B5A6-6F9C9B42A3D7} = {322BDAAE-E671-42A5-A6C0-0120C629957A}
@@ -200,77 +205,78 @@ Global
 		{E0FD10AF-2B3B-44A6-8699-31D24B84C551} = {6CE01CC0-5CAF-48B1-B21A-5E6FE306C23C}
 		{087D164B-3816-4884-9FA7-D5810A89F5E0} = {6CE01CC0-5CAF-48B1-B21A-5E6FE306C23C}
 		{7F202332-0583-4389-8092-A4702F67820D} = {DF686ECF-D913-4C25-9876-A99C1706CBF3}
-		{3B3C7451-90B2-4092-BDEE-5B8AB8F50501} = {DF686ECF-D913-4C25-9876-A99C1706CBF3}
 		{5F8EBCF4-40DD-430D-88E0-16FB47336638} = {DF686ECF-D913-4C25-9876-A99C1706CBF3}
+		{3B3C7451-90B2-4092-BDEE-5B8AB8F50501} = {DF686ECF-D913-4C25-9876-A99C1706CBF3}
+		{4789548F-9126-4881-AD87-A5A68628062D} = {4F7FCC33-018D-4EBC-A5E1-1A60BE091917}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A138173C-ADED-4DEF-AE9B-B4B1F5CF0298}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		UIUtility\UIUtility.projitems*{074e95d7-3b9a-4cd9-b1b6-6f7273d400a4}*SharedItemsImports = 13
-		ToolBox\ToolBox.projitems*{087d164b-3816-4884-9fa7-d5810a89f5e0}*SharedItemsImports = 4
-		VideoExport.Core\VideoExport.Core.projitems*{087d164b-3816-4884-9fa7-d5810a89f5e0}*SharedItemsImports = 4
-		Timeline.Core\Timeline.Core.projitems*{0e8a5a0b-d464-4950-ba76-e23f4f74fcfd}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{0e8a5a0b-d464-4950-ba76-e23f4f74fcfd}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{0e8a5a0b-d464-4950-ba76-e23f4f74fcfd}*SharedItemsImports = 4
-		Core.PoseEditor\Core.PoseEditor.projitems*{18698bc1-fb52-4a36-9984-22a739269c83}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{18698bc1-fb52-4a36-9984-22a739269c83}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{18698bc1-fb52-4a36-9984-22a739269c83}*SharedItemsImports = 4
-		Core.PoseEditor\Core.PoseEditor.projitems*{19bf99c1-720f-41f4-a241-eb4cf589e6ad}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{19bf99c1-720f-41f4-a241-eb4cf589e6ad}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{19bf99c1-720f-41f4-a241-eb4cf589e6ad}*SharedItemsImports = 4
-		Core.PoseEditor\Core.PoseEditor.projitems*{22d768d0-1405-453d-80aa-e91d1b0eb956}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{22d768d0-1405-453d-80aa-e91d1b0eb956}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{22d768d0-1405-453d-80aa-e91d1b0eb956}*SharedItemsImports = 4
+		ToolBox\ToolBox.projitems*{087d164b-3816-4884-9fa7-d5810a89f5e0}*SharedItemsImports = 5
+		VideoExport.Core\VideoExport.Core.projitems*{087d164b-3816-4884-9fa7-d5810a89f5e0}*SharedItemsImports = 5
+		Timeline.Core\Timeline.Core.projitems*{0e8a5a0b-d464-4950-ba76-e23f4f74fcfd}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{0e8a5a0b-d464-4950-ba76-e23f4f74fcfd}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{0e8a5a0b-d464-4950-ba76-e23f4f74fcfd}*SharedItemsImports = 5
+		Core.PoseEditor\Core.PoseEditor.projitems*{18698bc1-fb52-4a36-9984-22a739269c83}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{18698bc1-fb52-4a36-9984-22a739269c83}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{18698bc1-fb52-4a36-9984-22a739269c83}*SharedItemsImports = 5
+		Core.PoseEditor\Core.PoseEditor.projitems*{19bf99c1-720f-41f4-a241-eb4cf589e6ad}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{19bf99c1-720f-41f4-a241-eb4cf589e6ad}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{19bf99c1-720f-41f4-a241-eb4cf589e6ad}*SharedItemsImports = 5
+		Core.PoseEditor\Core.PoseEditor.projitems*{22d768d0-1405-453d-80aa-e91d1b0eb956}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{22d768d0-1405-453d-80aa-e91d1b0eb956}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{22d768d0-1405-453d-80aa-e91d1b0eb956}*SharedItemsImports = 5
 		VideoExport.Core\VideoExport.Core.projitems*{27d7086f-b9a7-43e6-a4fd-dbda2b5c5375}*SharedItemsImports = 13
-		ToolBox\ToolBox.projitems*{2e566206-cb55-49b1-9d60-6182d596292f}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{2e566206-cb55-49b1-9d60-6182d596292f}*SharedItemsImports = 4
-		UsefulStuff.Core\UsefulStuff.Core.projitems*{2e566206-cb55-49b1-9d60-6182d596292f}*SharedItemsImports = 4
+		ToolBox\ToolBox.projitems*{2e566206-cb55-49b1-9d60-6182d596292f}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{2e566206-cb55-49b1-9d60-6182d596292f}*SharedItemsImports = 5
+		UsefulStuff.Core\UsefulStuff.Core.projitems*{2e566206-cb55-49b1-9d60-6182d596292f}*SharedItemsImports = 5
 		ToolBox\ToolBox.projitems*{34a5e7ce-5612-4fee-8290-2c4290363a40}*SharedItemsImports = 13
-		Timeline.Core\Timeline.Core.projitems*{34f37ca2-ada1-41d8-9aaa-cb9e67514373}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{34f37ca2-ada1-41d8-9aaa-cb9e67514373}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{34f37ca2-ada1-41d8-9aaa-cb9e67514373}*SharedItemsImports = 4
-		Timeline.Core\Timeline.Core.projitems*{3978aea2-bfcb-43c1-a909-921290587540}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{3978aea2-bfcb-43c1-a909-921290587540}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{3978aea2-bfcb-43c1-a909-921290587540}*SharedItemsImports = 4
+		Timeline.Core\Timeline.Core.projitems*{34f37ca2-ada1-41d8-9aaa-cb9e67514373}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{34f37ca2-ada1-41d8-9aaa-cb9e67514373}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{34f37ca2-ada1-41d8-9aaa-cb9e67514373}*SharedItemsImports = 5
+		Timeline.Core\Timeline.Core.projitems*{3978aea2-bfcb-43c1-a909-921290587540}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{3978aea2-bfcb-43c1-a909-921290587540}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{3978aea2-bfcb-43c1-a909-921290587540}*SharedItemsImports = 5
 		CollidersDebug.Core\CollidersDebug.Core.projitems*{3b3c7451-90b2-4092-bdee-5b8ab8f50501}*SharedItemsImports = 13
 		NodesConstraints.Core\NodesConstraints.Core.projitems*{4789548f-9126-4881-ad87-a5a68628062d}*SharedItemsImports = 13
-		Core.PoseEditor\Core.PoseEditor.projitems*{5e38f4cc-f411-4532-8361-46543715c48b}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{5e38f4cc-f411-4532-8361-46543715c48b}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{5e38f4cc-f411-4532-8361-46543715c48b}*SharedItemsImports = 4
-		CollidersDebug.Core\CollidersDebug.Core.projitems*{5f8ebcf4-40dd-430d-88e0-16fb47336638}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{5f8ebcf4-40dd-430d-88e0-16fb47336638}*SharedItemsImports = 4
+		Core.PoseEditor\Core.PoseEditor.projitems*{5e38f4cc-f411-4532-8361-46543715c48b}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{5e38f4cc-f411-4532-8361-46543715c48b}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{5e38f4cc-f411-4532-8361-46543715c48b}*SharedItemsImports = 5
+		CollidersDebug.Core\CollidersDebug.Core.projitems*{5f8ebcf4-40dd-430d-88e0-16fb47336638}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{5f8ebcf4-40dd-430d-88e0-16fb47336638}*SharedItemsImports = 5
 		Core.PoseEditor\Core.PoseEditor.projitems*{607fcc24-1e15-4ff8-a662-21d28fe01671}*SharedItemsImports = 13
-		ToolBox\ToolBox.projitems*{73fd7f4c-c9ac-4366-956a-b580675af57b}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{73fd7f4c-c9ac-4366-956a-b580675af57b}*SharedItemsImports = 4
-		UsefulStuff.Core\UsefulStuff.Core.projitems*{73fd7f4c-c9ac-4366-956a-b580675af57b}*SharedItemsImports = 4
-		NodesConstraints.Core\NodesConstraints.Core.projitems*{73fec2f5-225c-4363-984f-746dbab6f6f5}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{73fec2f5-225c-4363-984f-746dbab6f6f5}*SharedItemsImports = 4
-		Timeline.Core\Timeline.Core.projitems*{7ef020d2-5340-455e-9cdb-466b5a2ced94}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{7ef020d2-5340-455e-9cdb-466b5a2ced94}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{7ef020d2-5340-455e-9cdb-466b5a2ced94}*SharedItemsImports = 4
-		CollidersDebug.Core\CollidersDebug.Core.projitems*{7f202332-0583-4389-8092-a4702f67820d}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{7f202332-0583-4389-8092-a4702f67820d}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{87fcdd0f-fd4f-48ad-8a0a-56116ebb8bb5}*SharedItemsImports = 4
-		VideoExport.Core\VideoExport.Core.projitems*{87fcdd0f-fd4f-48ad-8a0a-56116ebb8bb5}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 4
-		UsefulStuff.Core\UsefulStuff.Core.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{8e11fde0-e762-4a16-92c9-48538a21137a}*SharedItemsImports = 4
-		UIUtility\UIUtility.projitems*{8e11fde0-e762-4a16-92c9-48538a21137a}*SharedItemsImports = 4
-		UsefulStuff.Core\UsefulStuff.Core.projitems*{8e11fde0-e762-4a16-92c9-48538a21137a}*SharedItemsImports = 4
-		NodesConstraints.Core\NodesConstraints.Core.projitems*{9e8a6bdf-1100-4b2e-b2f4-69e1c00092af}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{9e8a6bdf-1100-4b2e-b2f4-69e1c00092af}*SharedItemsImports = 4
-		NodesConstraints.Core\NodesConstraints.Core.projitems*{b0103fd9-f358-405e-98d8-6c408d3f725b}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{b0103fd9-f358-405e-98d8-6c408d3f725b}*SharedItemsImports = 4
+		ToolBox\ToolBox.projitems*{73fd7f4c-c9ac-4366-956a-b580675af57b}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{73fd7f4c-c9ac-4366-956a-b580675af57b}*SharedItemsImports = 5
+		UsefulStuff.Core\UsefulStuff.Core.projitems*{73fd7f4c-c9ac-4366-956a-b580675af57b}*SharedItemsImports = 5
+		NodesConstraints.Core\NodesConstraints.Core.projitems*{73fec2f5-225c-4363-984f-746dbab6f6f5}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{73fec2f5-225c-4363-984f-746dbab6f6f5}*SharedItemsImports = 5
+		Timeline.Core\Timeline.Core.projitems*{7ef020d2-5340-455e-9cdb-466b5a2ced94}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{7ef020d2-5340-455e-9cdb-466b5a2ced94}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{7ef020d2-5340-455e-9cdb-466b5a2ced94}*SharedItemsImports = 5
+		CollidersDebug.Core\CollidersDebug.Core.projitems*{7f202332-0583-4389-8092-a4702f67820d}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{7f202332-0583-4389-8092-a4702f67820d}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{87fcdd0f-fd4f-48ad-8a0a-56116ebb8bb5}*SharedItemsImports = 5
+		VideoExport.Core\VideoExport.Core.projitems*{87fcdd0f-fd4f-48ad-8a0a-56116ebb8bb5}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 5
+		UsefulStuff.Core\UsefulStuff.Core.projitems*{8d687395-37ec-4632-bfd3-bb9f56ec04b4}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{8e11fde0-e762-4a16-92c9-48538a21137a}*SharedItemsImports = 5
+		UIUtility\UIUtility.projitems*{8e11fde0-e762-4a16-92c9-48538a21137a}*SharedItemsImports = 5
+		UsefulStuff.Core\UsefulStuff.Core.projitems*{8e11fde0-e762-4a16-92c9-48538a21137a}*SharedItemsImports = 5
+		NodesConstraints.Core\NodesConstraints.Core.projitems*{9e8a6bdf-1100-4b2e-b2f4-69e1c00092af}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{9e8a6bdf-1100-4b2e-b2f4-69e1c00092af}*SharedItemsImports = 5
+		NodesConstraints.Core\NodesConstraints.Core.projitems*{b0103fd9-f358-405e-98d8-6c408d3f725b}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{b0103fd9-f358-405e-98d8-6c408d3f725b}*SharedItemsImports = 5
 		UsefulStuff.Core\UsefulStuff.Core.projitems*{b4c7cdd3-b206-478d-b51f-fdc64c815f02}*SharedItemsImports = 13
-		NodesConstraints.Core\NodesConstraints.Core.projitems*{c55c162f-0f90-450b-96cc-6021168db63a}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{c55c162f-0f90-450b-96cc-6021168db63a}*SharedItemsImports = 4
-		ToolBox\ToolBox.projitems*{e0fd10af-2b3b-44a6-8699-31d24b84c551}*SharedItemsImports = 4
-		VideoExport.Core\VideoExport.Core.projitems*{e0fd10af-2b3b-44a6-8699-31d24b84c551}*SharedItemsImports = 4
+		NodesConstraints.Core\NodesConstraints.Core.projitems*{c55c162f-0f90-450b-96cc-6021168db63a}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{c55c162f-0f90-450b-96cc-6021168db63a}*SharedItemsImports = 5
+		ToolBox\ToolBox.projitems*{e0fd10af-2b3b-44a6-8699-31d24b84c551}*SharedItemsImports = 5
+		VideoExport.Core\VideoExport.Core.projitems*{e0fd10af-2b3b-44a6-8699-31d24b84c551}*SharedItemsImports = 5
 		Timeline.Core\Timeline.Core.projitems*{e9a8dfae-8470-4ab1-b5a6-6f9c9b42a3d7}*SharedItemsImports = 13
-		ToolBox\ToolBox.projitems*{fb575d3d-f66e-482f-8447-b5a22b2a14a8}*SharedItemsImports = 4
-		VideoExport.Core\VideoExport.Core.projitems*{fb575d3d-f66e-482f-8447-b5a22b2a14a8}*SharedItemsImports = 4
+		ToolBox\ToolBox.projitems*{fb575d3d-f66e-482f-8447-b5a22b2a14a8}*SharedItemsImports = 5
+		VideoExport.Core\VideoExport.Core.projitems*{fb575d3d-f66e-482f-8447-b5a22b2a14a8}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

@@ -6,7 +6,7 @@
     <SharedGUID>4789548f-9126-4881-ad87-a5a68628062d</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>NodesConstraints.Core</Import_RootNamespace>
+    <Import_RootNamespace>NodesConstraints</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />

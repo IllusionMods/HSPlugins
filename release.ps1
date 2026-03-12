@@ -1,74 +1,50 @@
-# Env setup ---------------
-if ($PSScriptRoot -match '.+?\\bin\\?') {
-    $dir = $PSScriptRoot + "\"
-}
-else {
-    $dir = $PSScriptRoot + "\bin\"
-}
+$dir = $PSScriptRoot + "/bin/"
 
-$copy = $dir + "\copy\BepInEx\plugins" 
-Remove-Item -Force -Path ($dir + "\copy") -Recurse -ErrorAction SilentlyContinue
-Remove-Item -Force -Path ($dir + "\out\") -Recurse -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force -Path ($dir + "\out\")
+$Folder = $dir + "out"
 
-foreach ($subdir in Get-ChildItem -Path $dir -Directory -Exclude "Out")
-{
-    if ((Get-ChildItem -Path $subdir -Filter *.dll).Length -gt 0)
-    {
-    
-        $pluginDir = $subdir
-    }
-    else
-    {
-        $pluginDir = Get-Item ($subdir.FullName + "\BepInEx\plugins") 
-    }
-    Write-Information -MessageData ("Using " + $pluginDir + " as plugin directory")
-    
-    $outdir = $dir + "\out\" + $subdir.BaseName
-    New-Item -ItemType Directory -Force -Path $outdir
-
-    Copy-Item -Path ($dir + "\..\LICENSE") -Destination $outdir
-    Copy-Item -Path ($dir + "\..\Readme.md") -Destination $outdir
-
-    # Create releases ---------
-    function CreateZip ($pluginFile)
-    {
-        Remove-Item -Force -Path ($dir + "\copy") -Recurse -ErrorAction SilentlyContinue
-        New-Item -ItemType Directory -Force -Path $copy
-
-        # the actual dll
-        Copy-Item -Path $pluginFile.FullName -Destination $copy -Recurse -Force
-        # the docs xml if it exists
-        Copy-Item -Path ($pluginFile.DirectoryName + "\" + $pluginFile.BaseName + ".xml") -Destination $copy -Recurse -Force -ErrorAction Ignore
-        Copy-Item -Path ($pluginFile.DirectoryName + "\" + $pluginFile.BaseName) -Destination $copy -Recurse -Force -ErrorAction Ignore
-
-        if($pluginFile.Name -clike "*PE.dll")
-        {
-            New-Item -ItemType Directory -Force -Path ($dir + "\copy\mods")
-            Copy-Item -Path ($pluginDir.FullName + "\Joan6694DynamicBoneColliders.zipmod") -Destination ($dir + "\copy\mods") -Force 
-        }
-
-        # the replace removes .0 from the end of version up until it hits a non-0 or there are only 2 version parts remaining (e.g. v1.0 v1.0.1)
-        $ver = (Get-ChildItem -Path ($copy) -Filter "*.dll" -Recurse -Force)[0].VersionInfo.FileVersion.ToString() -replace "^([\d+\.]+?\d+)[\.0]*$", '${1}'
-
-        Compress-Archive -Path ($dir + "\copy\*") -Force -CompressionLevel "Optimal" -DestinationPath ($outdir + "\" + $pluginFile.BaseName + "_" + "v" + $ver + ".zip")
-    }
-
-    foreach ($pluginFile in Get-ChildItem -Path $pluginDir -Filter *.dll) 
-    {
-        try
-        {
-            CreateZip ($pluginFile)
-        }
-        catch 
-        {
-            # retry
-            CreateZip ($pluginFile)
-        }
-    }
-
-    Compress-Archive -Path ($outdir + "\*") -Force -CompressionLevel "NoCompression" -DestinationPath ($dir + "\out\" + $subdir.BaseName + "_HSPlugins_" + (Get-Date).ToString("yyyy.MM.dd") + ".zip")
-    
+# Ensure the folder exists
+if (-not (Test-Path $Folder -PathType Container)) {
+    Write-Error "Folder '$Folder' does not exist."
+    exit 1
 }
 
-Remove-Item -Force -Path ($dir + "\copy") -Recurse
+# Get all zip files in the folder
+$zipFiles = Get-ChildItem -Path $Folder -Filter '*.zip' | Where-Object { -not $_.PSIsContainer }
+
+# Get current date in YYYY-MM-DD format
+$currentDate = Get-Date -Format 'yyyy-MM-dd'
+
+# Group files by prefix (before first '_')
+$groups = $zipFiles | Group-Object { $_.BaseName.Split('_')[0] }
+
+foreach ($group in $groups) {
+    $prefix = $group.Name
+    $archiveName = $dir + $prefix + "_HSPlugins_" + $currentDate + ".zip"
+
+    Remove-Item $archiveName -ErrorAction SilentlyContinue
+
+    # Create a temporary directory for renamed files
+    $tempDir = Join-Path $dir "temp_$prefix"
+    if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force }
+    New-Item -ItemType Directory -Path $tempDir | Out-Null
+
+    # Copy and rename files to temp directory (remove prefix and underscore)
+    $renamedFiles = @()
+    foreach ($file in $group.Group) {
+        $originalName = $file.Name
+        $newName = $originalName -replace "^$prefix[_]", ''
+        $destPath = Join-Path $tempDir $newName
+        Copy-Item $file.FullName $destPath
+        $renamedFiles += $destPath
+    }
+
+    $licensePath = Join-Path $dir "..\LICENSE"
+    $readmePath = Join-Path $dir "..\Readme.md"
+    $renamedFiles += $licensePath
+    $renamedFiles += $readmePath
+    Compress-Archive -Path $renamedFiles -DestinationPath $archiveName
+    Write-Host "Created archive: $archiveName"
+
+    # Clean up temp directory
+    Remove-Item $tempDir -Recurse -Force
+}

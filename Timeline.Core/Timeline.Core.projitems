@@ -6,7 +6,7 @@
     <SharedGUID>e9a8dfae-8470-4ab1-b5a6-6f9c9b42a3d7</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Timeline.Core</Import_RootNamespace>
+    <Import_RootNamespace>Timeline</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />

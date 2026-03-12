@@ -6,7 +6,7 @@
     <SharedGUID>b4c7cdd3-b206-478d-b51f-fdc64c815f02</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>UsefulStuff.Core</Import_RootNamespace>
+    <Import_RootNamespace>UsefulStuff</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />

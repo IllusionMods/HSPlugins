@@ -26,15 +26,16 @@ namespace VideoExport.Extensions
         {
             int coreCount = _coreCount;
             string pixFmt = transparency ? "yuva420p" : "yuv420p";
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
             string codec = _codecCLIOptions[(int)this._codec];
             string codecExtraArgs = $"-qscale {this._quality} -loop 0";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f image2 -threads {coreCount} -progress pipe:1";
-            string inputArgs = $"-i \"{framesFolder}\\{prefix}%d{postfix}.{inputExtension}\" -pix_fmt {pixFmt} {videoFilterArgument}";
-            string codecArgs = $"-c:v {codec} {codecExtraArgs}";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
+            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
+            string codecArgs = $"-c:v {codec} {codecExtraArgs} -pix_fmt {pixFmt} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.webp\"";
 
             return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";

@@ -296,7 +296,7 @@ namespace Timeline
                         int nodeGr = node.ReadInt("valueGroup");
                         int nodeCa = node.ReadInt("valueCategory");
                         int nodeNo = node.ReadInt("valueNo");                        
-                        StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == nodeNo && x.GUID == nodeGUID && x.Group == nodeGr && x.Category == nodeCa);
+                        StudioResolveInfo resolveInfo = UniversalAutoResolver.GetStudioResolveInfos(nodeGUID, nodeNo, false).FirstOrDefault(x => x.Group == nodeGr && x.Category == nodeCa);
                         return nodeNo >= UniversalAutoResolver.BaseSlotID && resolveInfo == null
                             ? new OICharInfo.AnimeInfo() { group = 0, category = 0, no = 0 } // This prevents some of the potential LoadAnime spam
                             : new OICharInfo.AnimeInfo() { group = nodeGr, category = nodeCa, no = resolveInfo != null ? resolveInfo.LocalSlot : nodeNo };
@@ -304,7 +304,7 @@ namespace Timeline
                     writeValueToXml: (parameter, writer, o) =>
                     {
                         OICharInfo.AnimeInfo info = (OICharInfo.AnimeInfo)o;
-                        StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.LocalSlot == info.no && x.Group == info.group && x.Category == info.category);
+                        StudioResolveInfo resolveInfo = UniversalAutoResolver.GetStudioResolveInfos(info.no, false).FirstOrDefault(x => x.Group == info.group && x.Category == info.category);
                         writer.WriteAttributeString("GUID", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.GUID : "");
                         writer.WriteValue("valueGroup", info.group);
                         writer.WriteValue("valueCategory", info.category);

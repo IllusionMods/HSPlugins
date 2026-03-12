@@ -59,7 +59,7 @@ namespace Timeline
     {
         #region Constants
         public const string Name = "Timeline";
-        public const string Version = "1.5.4";
+        public const string Version = "1.5.5.1";
         public const string GUID = "com.joan6694.illusionplugins.timeline";
         internal const string _ownerId = "Timeline";
 #if KOIKATSU || AISHOUJO || HONEYSELECT2
@@ -693,7 +693,7 @@ namespace Timeline
         {
             float realDuration = 0;
             Interpolable interpolable = _self._interpolables.Values.FirstOrDefault(x => x.id == "timeScale");
-            if (interpolable == null)
+            if (interpolable == null || !interpolable.enabled)
                 return (Time.timeScale == 0) ? duration : duration / Time.timeScale;
 
             List<KeyValuePair<float, Keyframe>> keyframes = interpolable.keyframes.TakeWhile(x => x.Key <= duration).ToList();
@@ -4089,7 +4089,7 @@ namespace Timeline
                 int docCa = document.FirstChild.ReadInt("animationCategory");
                 int docNo = document.FirstChild.ReadInt("animationNo");
                 OCIChar character = _selectedOCI as OCIChar;
-                StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.Slot == docNo && x.GUID == docGUID && x.Group == docGr && x.Category == docCa);
+                StudioResolveInfo resolveInfo = UniversalAutoResolver.GetStudioResolveInfos(docGUID, docNo, false).FirstOrDefault(x => x.Group == docGr && x.Category == docCa);
                 if (character != null)
                 {
                     character.LoadAnime(docGr, docCa, resolveInfo != null ? resolveInfo.LocalSlot : docNo);
@@ -4124,7 +4124,7 @@ namespace Timeline
                 {
 #if KOIKATSU || SUNSHINE
                     OICharInfo.AnimeInfo info = character.oiCharInfo.animeInfo;
-                    StudioResolveInfo resolveInfo = UniversalAutoResolver.LoadedStudioResolutionInfo.FirstOrDefault(x => x.LocalSlot == info.no && x.Group == info.group && x.Category == info.category);
+                    StudioResolveInfo resolveInfo = UniversalAutoResolver.GetStudioResolveInfos(info.no, false).FirstOrDefault(x => x.Group == info.group && x.Category == info.category);
                     writer.WriteAttributeString("GUID", info.no >= UniversalAutoResolver.BaseSlotID && resolveInfo != null ? resolveInfo.GUID : "");
                     writer.WriteValue("animationGroup", info.group);
                     writer.WriteValue("animationCategory", info.category);

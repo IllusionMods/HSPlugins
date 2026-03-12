@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
+#pragma warning disable CS0436 // Some types in this file are defined in Assembly-CSharp
 namespace SuperScrollView
 {
     public class ClickEventListener : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler

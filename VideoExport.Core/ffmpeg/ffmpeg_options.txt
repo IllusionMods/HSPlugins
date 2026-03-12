@@ -1,0 +1,145 @@
+# Lines starting with this character are ignored
+# To override some options specifically for the shared build, create a ffmpeg_options_shared.txt file.
+
+# Basic built-in options, can be removed if you delete "--disable-autodetect"
+#--disable-autodetect
+--disable-everything # Nothing... but everything...!
+#--disable-decoders
+#--disable-encoders
+--disable-shared
+--disable-debug
+--disable-logging
+--disable-doc
+#--disable-programs
+--disable-ffplay
+--disable-ffprobe
+--enable-gpl
+#--enable-nonfree
+--enable-static
+
+# Hardware Acceleration
+## AMD
+--enable-amf
+
+## NVIDIA
+--enable-cuda
+--enable-cuvid
+--enable-nvenc
+--enable-ffnvcodec
+--enable-nvdec
+--enable-cuda-llvm
+--enable-cuda-nvcc
+
+## INTEL
+--enable-libvpl
+
+## OS-WINDOWS
+--enable-d3d12va
+--enable-d3d11va
+--enable-dxva2
+
+## OS-FREE
+--enable-vulkan
+--enable-opencl
+--enable-opengl
+
+# EXT_LIBS
+
+## IMAGE
+--enable-libwebp
+
+## VIDEO
+#--enable-libxvid # MPEG2
+#--enable-libtheora # THEORA
+--enable-libvpx # VP8, VP9
+#--enable-libsvtvp9 # VP9 ?
+--enable-libx264 # H264
+#--enable-libopenh264 # H264
+--enable-libx265 # HEVC
+#--enable-libsvthevc # HEVC ?
+--enable-libaom # AV1 CODEC
+#--enable-librav1e # AV1
+--enable-libsvtav1 # AV1 ENC
+#--enable-libdav1d # AV1 DEC
+#--enable-libvvenc # VVC ENC
+#--enable-libvvdec # VVC DEC
+
+# PROTOCOL
+--enable-protocol=file
+--enable-protocol=pipe
+--enable-protocol=fd
+
+# PARSER
+--enable-parser=prores
+--enable-parser=h264
+--enable-parser=hevc
+--enable-parser=vp8
+--enable-parser=vp9
+--enable-parser=av1
+
+# DEMUXER
+--enable-demuxer=rawvideo
+--enable-demuxer=mov
+
+# MUXER
+--enable-muxer=gif
+--enable-muxer=webp
+--enable-muxer=mov
+--enable-muxer=matroska
+--enable-muxer=mp4
+--enable-muxer=webm
+--enable-muxer=avif
+
+# FILTER
+--enable-filter=scale
+--enable-filter=vflip
+--enable-filter=transpose
+--enable-filter=rotate
+--enable-filter=format
+--enable-filter=fps
+--enable-filter=palettegen
+--enable-filter=paletteuse
+--enable-filter=split
+
+# ENCODER
+
+## IMAGE
+--enable-encoder=gif
+--enable-encoder=libwebp
+--enable-encoder=libwebp_anim
+
+## VIDEO
+--enable-encoder=rawvideo
+--enable-encoder=prores_ks
+--enable-encoder=ffv1
+--enable-encoder=ffv1_vulkan
+--enable-encoder=libx264
+--enable-encoder=h264_amf
+--enable-encoder=h264_mf
+--enable-encoder=h264_nvenc
+--enable-encoder=h264_qsv
+--enable-encoder=h264_vulkan
+--enable-encoder=libx265
+--enable-encoder=hevc_amf
+--enable-encoder=hevc_d3d12va
+--enable-encoder=hevc_mf
+--enable-encoder=hevc_nvenc
+--enable-encoder=hevc_qsv
+--enable-encoder=hevc_vulkan
+--enable-encoder=libvpx_vp8
+--enable-encoder=libvpx_vp9
+--enable-encoder=vp9_qsv
+--enable-encoder=libaom_av1
+--enable-encoder=libsvtav1
+--enable-encoder=av1_amf
+--enable-encoder=av1_d3d12va
+--enable-encoder=av1_mf
+--enable-encoder=av1_nvenc
+--enable-encoder=av1_qsv
+--enable-encoder=av1_vulkan
+
+# DECODER
+
+## VIDEO
+--enable-decoder=rawvideo
+--enable-decoder=prores

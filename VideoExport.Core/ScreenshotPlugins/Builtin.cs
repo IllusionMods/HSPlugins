@@ -152,6 +152,16 @@ namespace VideoExport.ScreenshotPlugins
             return true;
         }
 
+        public bool IsRenderTextureCaptureAvailable()
+        {
+            return false;
+        }
+
+        public bool IsVFlipNeeded()
+        {
+            return true;
+        }
+
         public Texture2D CaptureTexture()
         {
             Texture2D texture = null;
@@ -165,6 +175,11 @@ namespace VideoExport.ScreenshotPlugins
                     break;
             }
             return texture;
+        }
+
+        public RenderTexture CaptureRenderTexture()
+        {
+            return null;
         }
 
         public void OnEndRecording()
@@ -225,7 +240,7 @@ namespace VideoExport.ScreenshotPlugins
             int width = (int)size.x;
             int height = (int)size.y;
 
-            TextureFormat textureFormat = TextureFormat.RGB24;
+            TextureFormat textureFormat = TextureFormat.RGBA32;
             RenderTextureFormat renderTextureFormat = RenderTextureFormat.ARGB32;
             int renderTextureDepth = 0;
 #if !HONEYSELECT
@@ -260,7 +275,7 @@ namespace VideoExport.ScreenshotPlugins
             int width = (int)size.x;
             int height = (int)size.y;
 
-            TextureFormat textureFormat = TextureFormat.RGB24;
+            TextureFormat textureFormat = TextureFormat.RGBA32;
 #if !HONEYSELECT
             if (this._imageFormat == VideoExport.ImgFormat.EXR)
             {
