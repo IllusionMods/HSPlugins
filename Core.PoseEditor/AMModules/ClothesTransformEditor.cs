@@ -454,20 +454,23 @@ namespace HSPE.AMModules
                     {
                         foreach (SkinnedMeshRenderer renderer in _clothesRenderers[i])
                         {
-                            if(createdBones.ContainsKey(renderer) == false)
+                            if (renderer != null)
                             {
-                                Transform[] newBones = new Transform[renderer.bones.Length];
-                                Array.Copy(renderer.bones, newBones, renderer.bones.Length);
-                                createdBones.Add(renderer, newBones);
-                            }
-
-                            Transform[] bones = createdBones[renderer];
-
-                            for(int j = 0; j < bones.Length; j++)
-                            {
-                                if (bones[j] == transferList.Value.clotheSlot[i].transform)
+                                if (createdBones.ContainsKey(renderer) == false)
                                 {
-                                    bones[j] = transferList.Key.transform;
+                                    Transform[] newBones = new Transform[renderer.bones.Length];
+                                    Array.Copy(renderer.bones, newBones, renderer.bones.Length);
+                                    createdBones.Add(renderer, newBones);
+                                }
+
+                                Transform[] bones = createdBones[renderer];
+
+                                for (int j = 0; j < bones.Length; j++)
+                                {
+                                    if (bones[j] == transferList.Value.clotheSlot[i].transform)
+                                    {
+                                        bones[j] = transferList.Key.transform;
+                                    }
                                 }
                             }
                         }
