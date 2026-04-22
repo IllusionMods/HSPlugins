@@ -194,13 +194,13 @@ namespace HSPE.AMModules
 
         private void LateUpdate()
         {
-            if(_renderersChanged == false)
+            if (_renderersChanged == false)
             {
                 if (_currSearchStartTargetTransform != null)
                 {
                     for (int index = 0; index < _clothesKeys.Length; index++)
                     {
-                        if(_clothesKeyTransforms[index] == null)
+                        if (_clothesKeyTransforms[index] == null)
                         {
                             _renderersChanged = true;
                             break;
@@ -446,25 +446,31 @@ namespace HSPE.AMModules
 
             Dictionary<SkinnedMeshRenderer, Transform[]> createdBones = new Dictionary<SkinnedMeshRenderer, Transform[]>();
 
-            for (int i = 0; i < (int)ChoiceType.Count; i++)
+            foreach (var transferList in _clothesTransferLists)
             {
-                foreach (SkinnedMeshRenderer renderer in _clothesRenderers[i])
+                for (int i = 0; i < (int)ChoiceType.Count; i++)
                 {
-                    if (renderer != null)
+                    if (transferList.Value.clotheSlot[i] != null)
                     {
-                        for (int j = 0; j < renderer.bones.Length; j++)
+                        foreach (SkinnedMeshRenderer renderer in _clothesRenderers[i])
                         {
-                            if (renderer.bones[j] != null)
+                            if (renderer != null)
                             {
-                                if (renderer.bones[j].name.Contains(_cloneToken))
+                                if (createdBones.ContainsKey(renderer) == false)
                                 {
-                                    if (createdBones.ContainsKey(renderer) == false)
-                                    {
-                                        createdBones.Add(renderer, new Transform[renderer.bones.Length]);
-                                        createdBones[renderer] = renderer.bones;
-                                    }
+                                    Transform[] newBones = new Transform[renderer.bones.Length];
+                                    Array.Copy(renderer.bones, newBones, renderer.bones.Length);
+                                    createdBones.Add(renderer, newBones);
+                                }
 
-                                    createdBones[renderer][j] = renderer.bones[j].parent;
+                                Transform[] bones = createdBones[renderer];
+
+                                for (int j = 0; j < bones.Length; j++)
+                                {
+                                    if (bones[j] == transferList.Value.clotheSlot[i].transform)
+                                    {
+                                        bones[j] = transferList.Key.transform;
+                                    }
                                 }
                             }
                         }
@@ -885,7 +891,7 @@ namespace HSPE.AMModules
                 _ChoiceKey.TryGetValue(targetClothesTransform.name, out currChoice);
                 if (currChoice < ChoiceType.Gloves)
                 {
-                    var allRenderers = targetClothesTransform.GetComponentsInChildren<SkinnedMeshRenderer>();
+                    var allRenderers = targetClothesTransform.GetComponentsInChildren<SkinnedMeshRenderer>(true);
                     var clotheTransform = GetDefHalfClothesTransform(targetClothesTransform);
 
                     foreach (var currRenderer in allRenderers)
@@ -924,7 +930,7 @@ namespace HSPE.AMModules
 
         private void RefreshClothesRenderers()
         {
-            if(_parent == null || _parent.gameObject == null)
+            if (_parent == null || _parent.gameObject == null)
             {
                 return;
             }
@@ -953,7 +959,7 @@ namespace HSPE.AMModules
                     _ChoiceKey.TryGetValue(_clothesKeyTransforms[i].name, out currChoice);
                     if (currChoice < ChoiceType.Gloves)
                     {
-                        var allRenderers = _clothesKeyTransforms[i].GetComponentsInChildren<SkinnedMeshRenderer>();
+                        var allRenderers = _clothesKeyTransforms[i].GetComponentsInChildren<SkinnedMeshRenderer>(true);
                         var clotheTransform = GetDefHalfClothesTransform(_clothesKeyTransforms[i]);
 
                         foreach (var currRenderer in allRenderers)
@@ -990,7 +996,7 @@ namespace HSPE.AMModules
                     {
                         if (currChoice != ChoiceType.Count)
                         {
-                            var renderers = _clothesKeyTransforms[i].GetComponentsInChildren<SkinnedMeshRenderer>();
+                            var renderers = _clothesKeyTransforms[i].GetComponentsInChildren<SkinnedMeshRenderer>(true);
 
                             if (renderers.Length > 0)
                             {
@@ -1027,8 +1033,9 @@ namespace HSPE.AMModules
                                 {
                                     if (createdBones.ContainsKey(renderer) == false)
                                     {
-                                        createdBones.Add(renderer, new Transform[renderer.bones.Length]);
-                                        createdBones[renderer] = renderer.bones;
+                                        Transform[] newBones = new Transform[renderer.bones.Length];
+                                        Array.Copy(renderer.bones, newBones, renderer.bones.Length);
+                                        createdBones.Add(renderer, newBones);
                                     }
 
                                     createdBones[renderer][i] = currTransfer.transform;
@@ -1070,8 +1077,9 @@ namespace HSPE.AMModules
                     {
                         if (createdBones.ContainsKey(renderer) == false)
                         {
-                            createdBones.Add(renderer, new Transform[renderer.bones.Length]);
-                            createdBones[renderer] = renderer.bones;
+                            Transform[] newBones = new Transform[renderer.bones.Length];
+                            Array.Copy(renderer.bones, newBones, renderer.bones.Length);
+                            createdBones.Add(renderer, newBones);
                         }
 
                         if (transfer == null)
@@ -1122,8 +1130,9 @@ namespace HSPE.AMModules
                         {
                             if (createdBones.ContainsKey(renderer) == false)
                             {
-                                createdBones.Add(renderer, new Transform[renderer.bones.Length]);
-                                createdBones[renderer] = renderer.bones;
+                                Transform[] newBones = new Transform[renderer.bones.Length];
+                                Array.Copy(renderer.bones, newBones, renderer.bones.Length);
+                                createdBones.Add(renderer, newBones);
                             }
 
                             if (transfer == null)
