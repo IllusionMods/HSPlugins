@@ -3,13 +3,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using System.Linq;
 using VideoExport.Core;
-
-
-#if IPA
-using Harmony;
-#elif BEPINEX
 using HarmonyLib;
-#endif
 
 namespace VideoExport.ScreenshotPlugins
 {
@@ -80,11 +74,7 @@ namespace VideoExport.ScreenshotPlugins
 
         private RenderTexture _cachedRenderTexture;
 
-#if IPA
-        public bool Init(HarmonyInstance harmony)
-#elif BEPINEX
         public bool Init(Harmony harmony)
-#endif
         {
             this._scaleFactor = VideoExport._configFile.AddFloat("builtinSizeMultiplier", 1f, true);
             this._captureMode = (CaptureMode)VideoExport._configFile.AddInt("builtinCaptureMode", (int)CaptureMode.Normal, true);

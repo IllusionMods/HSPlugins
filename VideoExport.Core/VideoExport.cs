@@ -27,14 +27,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 #endif
 
-#if IPA
-using IllusionPlugin;
-using Harmony;
-#elif BEPINEX
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-#endif
 
 namespace VideoExport
 {
@@ -49,29 +44,10 @@ namespace VideoExport
     [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #endif
     public class VideoExport : GenericPlugin
-#if IPA
-                               , IEnhancedPlugin
-#endif
     {
         public const string Version = "2.0.3";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
-
-#if IPA
-        public override string Name { get { return _name; } }
-        public override string Version
-        {
-            get
-            {
-                return _versionNum
-#if BETA
-                    + "b"
-#endif
-                    ;
-            }
-        }
-        public override string[] Filter { get { return new[] { "StudioNEO_32", "StudioNEO_64" }; } }
-#endif
 
         #region Types
         public enum ImgFormat
@@ -555,11 +531,7 @@ namespace VideoExport
         #endregion
 
         #region Private Methods
-#if IPA
         private void AddScreenshotPlugin<T>(Harmony harmony) where T : IScreenshotPlugin, new()
-#elif BEPINEX
-        private void AddScreenshotPlugin<T>(Harmony harmony) where T : IScreenshotPlugin, new()
-#endif
         {
             try
             {

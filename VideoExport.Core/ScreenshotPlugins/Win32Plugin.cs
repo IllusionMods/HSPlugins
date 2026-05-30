@@ -8,11 +8,7 @@ using Graphics = System.Drawing.Graphics;
 using System.Linq;
 using Color = System.Drawing.Color;
 
-#if IPA
-using Harmony;
-#elif BEPINEX
 using HarmonyLib;
-#endif
 
 namespace VideoExport.ScreenshotPlugins
 {
@@ -89,11 +85,7 @@ namespace VideoExport.ScreenshotPlugins
         private Vector2 _lastSize;
         private readonly object _bitmapLock = new object();
 
-#if IPA
-        public bool Init(HarmonyInstance harmony)
-#elif BEPINEX
         public bool Init(Harmony harmony)
-#endif
         {
             _imageFormat = (VideoExport.ImgFormat)VideoExport._configFile.AddInt("win32ImageFormat", (int)VideoExport.ImgFormat.BMP, true);
             _imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat)).Where(x => x != nameof(VideoExport.ImgFormat.EXR)).ToArray();
