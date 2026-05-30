@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 using VideoExport.ScreenshotPlugins;
 
-namespace VideoExport.Extensions
+namespace VideoExport.VideoExtensions
 {
     public class GIFExtension : AFFMPEGBasedExtension
     {

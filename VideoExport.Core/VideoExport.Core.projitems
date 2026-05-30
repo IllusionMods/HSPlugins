@@ -10,15 +10,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\AFFMPEGBasedExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\AVIFExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\GIFExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\IExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\MOVExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\MP4Extension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBMExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\MKVExtension.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\WEBPExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\AFFMPEGBasedExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\AVIFExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\GIFExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\IVideoExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\MOVExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\MP4Extension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\WEBMExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\MKVExtension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\WEBPExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ParallelScreenshotEncoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ReshadePlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ReshadeAPI.cs" />
@@ -28,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\Builtin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\IScreenshotPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ScreencapPlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TranslationKey.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VideoExport.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using VideoExport.ScreenshotPlugins;
 
-namespace VideoExport.Extensions
+namespace VideoExport.VideoExtensions
 {
-    public interface IExtension
+    public interface IVideoExtension
     {
         int progress { get; }
         bool canProcessStandardOutput { get; }

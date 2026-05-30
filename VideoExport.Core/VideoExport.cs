@@ -10,7 +10,7 @@ using BepInEx.Logging;
 using ToolBox;
 using ToolBox.Extensions;
 using UnityEngine;
-using VideoExport.Extensions;
+using VideoExport.VideoExtensions;
 using VideoExport.ScreenshotPlugins;
 using Resources = UnityEngine.Resources;
 using VideoExport.Core;
@@ -107,7 +107,7 @@ namespace VideoExport
         private Rect _windowRect = new Rect(Screen.width / 2 - 320, 100, Styles.WindowWidth, 10);
         private static RectTransform _imguiBackground;
         private string _currentMessage;
-        private readonly List<IExtension> _extensions = new List<IExtension>();
+        private readonly List<IVideoExtension> _extensions = new List<IVideoExtension>();
         private Color _messageColor = Color.white;
         private float _progressBarPercentage;
         private bool _startOnNextClick = false;
@@ -123,7 +123,7 @@ namespace VideoExport
         private int _selectedPlugin = 0;
         private int _fps = 60;
         private int _exportFps = 60;
-        private int[] _presetFps = new[] { 12, 24, 30, 60, 120 };
+        private readonly int[] _presetFps = new[] { 12, 24, 30, 60, 120 };
         private bool _autoGenerateVideo;
         private bool _limitDuration;
         private LimitDurationType _selectedLimitDuration;
@@ -378,7 +378,7 @@ namespace VideoExport
             _configFile.SetBool("parallelScreenshotEncoding", _parallelScreenshotEncoding);
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.SaveParams();
-            foreach (IExtension extension in _extensions)
+            foreach (IVideoExtension extension in _extensions)
                 extension.SaveParams();
             _configFile.Save();
         }
@@ -410,7 +410,6 @@ namespace VideoExport
             {
                 Logger.LogError("Couldn't add screenshot plugin " + typeof(T).FullName + ".\n" + e);
             }
-
         }
 
         private void LimitCount()
@@ -717,7 +716,7 @@ namespace VideoExport
         private void WindowVideoSection()
         {
             IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
-            IExtension extension = _extensions[(int)_selectedExtension];
+            IVideoExtension extension = _extensions[(int)_selectedExtension];
             bool prevGuiEnabled = GUI.enabled;
             Vector2 currentSize = plugin.currentSize;
 
@@ -838,7 +837,7 @@ namespace VideoExport
         private void WindowRecordSection()
         {
             IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
-            IExtension extension = _extensions[(int)_selectedExtension];
+            IVideoExtension extension = _extensions[(int)_selectedExtension];
 
             bool prevGuiEnabled = GUI.enabled;
             GUILayout.BeginHorizontal(Styles.EmptyBoxStyle);
@@ -974,7 +973,7 @@ namespace VideoExport
 
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.UpdateLanguage();
-            foreach (IExtension extension in _extensions)
+            foreach (IVideoExtension extension in _extensions)
                 extension.UpdateLanguage();
         }
 
@@ -1167,7 +1166,7 @@ namespace VideoExport
                     ((ReshadePlugin)screenshotPlugin).vFlip = true;
                 }
             }
-            
+
             IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
             Vector2 currentSize = plugin.currentSize;
             string targetSize = currentSize.x + "x" + currentSize.y;
@@ -1187,8 +1186,8 @@ namespace VideoExport
                 {
                     yield return null;
                 }
-                    
-                IExtension extension = _extensions[(int)_selectedExtension];
+
+                IVideoExtension extension = _extensions[(int)_selectedExtension];
 
                 string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, _tempDateTime));
                 if (screenshotPlugin is ScreencapPlugin && screenshotPlugin.IsRenderTextureCaptureAvailable() == true)
@@ -1203,7 +1202,7 @@ namespace VideoExport
                 {
                     extension.channelType = 1;
                 }
-                
+
                 extension.SetVFlipNeeded(screenshotPlugin.IsVFlipNeeded());
                 string arguments = extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
 
@@ -1261,7 +1260,7 @@ namespace VideoExport
             }
 
             Logger.LogInfo(
-                BuildAlignedLogBlock("Starting frame capture:", 
+                BuildAlignedLogBlock("Starting frame capture:",
                 new[]
                     {
                         "Total frames",
@@ -1430,7 +1429,7 @@ namespace VideoExport
                 }
 
                 elapsed = DateTime.Now - startTime;
-                
+
                 _elapsedRenderTime = elapsed;
 
                 TimeSpan remaining = TimeSpan.FromSeconds((limit - i - 1) * elapsed.TotalSeconds / (i + 1));
@@ -1472,27 +1471,27 @@ namespace VideoExport
             }
 
             if (
-                !_autoGenerateVideo || 
+                !_autoGenerateVideo ||
                 !(
-                    screenshotPlugin is ScreencapPlugin && 
-                    screenshotPlugin.IsRenderTextureCaptureAvailable() == true && 
+                    screenshotPlugin is ScreencapPlugin &&
+                    screenshotPlugin.IsRenderTextureCaptureAvailable() == true &&
                     _autoGenerateVideo
                 )
             )
             {
                 _elapsedRenderTime = TimeSpan.Zero;
-                
+
                 Logger.LogInfo(
-                    BuildAlignedLogBlock("Completed frame capture:", 
-                        new []
+                    BuildAlignedLogBlock("Completed frame capture:",
+                        new[]
                         {
                             "Elapsed time",
                             "Frame count",
                             "Generated frame count",
                             "Missing frames",
                             "Generated video"
-                        }, 
-                        new []
+                        },
+                        new[]
                         {
                             $"{elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}",
                             _limitDuration ? _recordingFrameLimit.ToString() : generatedFrames.ToString(),
@@ -1532,7 +1531,7 @@ namespace VideoExport
 
         private Process StartExternalProcess(string exe, string arguments, bool redirectStandardOutput, bool redirectStandardError, bool redirectStandardInput)
         {
-            IExtension extension = _extensions[(int)_selectedExtension];
+            IVideoExtension extension = _extensions[(int)_selectedExtension];
 
             Logger.LogInfo($"Starting process: {exe} {arguments}");
             Process proc = new Process
@@ -1585,7 +1584,7 @@ namespace VideoExport
                 //proc.BeginOutputReadLine();
             }
 
-            IExtension extension = _extensions[(int)_selectedExtension];
+            IVideoExtension extension = _extensions[(int)_selectedExtension];
             extension.ResetProgress();
 
             DateTime startTime = DateTime.Now;
@@ -1677,7 +1676,7 @@ namespace VideoExport
                 _frameDataBuffer = new byte[_frameBufferSize];
             }
         }
-        
+
         private static string BuildAlignedLogBlock(string headerTitle, string[] titles, string[] values)
         {
             if (titles == null) throw new ArgumentNullException(nameof(titles));

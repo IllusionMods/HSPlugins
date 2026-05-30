@@ -6,7 +6,7 @@ using ToolBox.Extensions;
 using UnityEngine;
 using VideoExport.ScreenshotPlugins;
 
-namespace VideoExport.Extensions
+namespace VideoExport.VideoExtensions
 {
     public class WEBMExtension : AFFMPEGBasedExtension
     {

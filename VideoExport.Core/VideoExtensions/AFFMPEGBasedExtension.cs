@@ -5,9 +5,9 @@ using ToolBox.Extensions;
 using UnityEngine;
 using VideoExport.ScreenshotPlugins;
 
-namespace VideoExport.Extensions
+namespace VideoExport.VideoExtensions
 {
-    public abstract class AFFMPEGBasedExtension : IExtension
+    public abstract class AFFMPEGBasedExtension : IVideoExtension 
     {
         protected enum Rotation
         {
