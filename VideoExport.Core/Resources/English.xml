@@ -130,4 +130,30 @@
   <string key="WebmMaxBitrate" value="Target Bitrate" />
   <string key="WebmMaxBitrateTooltip" value="Sets the target bitrate for the encode.\nVP8 will still respect the quality setting, so even at the best quality 4,\nthe target bitrate will most likely not be reached.\nThe text field takes in number(k,M,G) as value.\nExample: 1000k for 1000 kbit/s.\n1G provides a high ceiling so the quality setting can use as much as needed.\nFor 1080p up to 60 fps, around 15M is fine.\nFor 4K, 25M and above are better." />
   <string key="WebmMaxBitrateWarning" value="Invalid bitrate. Use format like 3M, 500k, or 1G with value > 0." />
+  <string key="AudioSectionHeading" value="AUDIO SETTINGS" />
+  <string key="AudioEncoder" value="Codec" />
+  <string key="AudioEncoderTooltip" value="[AAC] Advanced Audio Codec, a well-rounded default.\n[AC3] Implements part of ATSC A/52:2010 and ETSI TS 102 366.\n[FLAC] Free Lossless Audio Codec, big size but very good quality\n[OPUS] Opus encoder, apparently WIP. (for the nerds)\n[VORB] Vorbis encoder. (for the nerds)" />
+  <string key="InclAudio" value="Include audio from supporting plugins" />
+  <string key="InclAudioTooltip" value="Audio from plugins that register with VE will be included.\nDoes nothing without other supporting plugins." />
+  <string key="AudioBitrate" value="Bitrate (kbps)" />
+  <string key="AudioSamples" value="Sampling (kHz)" />
+  <string key="AACMethod" value="Method" />
+  <string key="AACProfile" value="Profile" />
+  <string key="AC3NoOpts" value="No encoder\noptions available." />
+  <string key="Enabled" value="Enabled" />
+  <string key="Disabled" value="Disabled" />
+  <string key="FlacCompression" value="Compression" />
+  <string key="FlacLPCPrecision" value="LPC Prec." />
+  <string key="FlacLPCType" value="LPC Type" />
+  <string key="FlacCholeskyPasses" value="LPC Passes" />
+  <string key="FlacPredictionOrder" value="Pred. Ord." />
+  <string key="FlacExactRice" value="Exact Rice" />
+  <string key="OpusCompression" value="Compression" />
+  <string key="OpusVBR" value="Var BR" />
+  <string key="OpusFramesize" value="Framesize" />
+  <string key="VorbisVBR" value="Use Variable Bitrate" />
+  <string key="VorbisQuality" value="Quality" />
+  <string key="VorbisMinRate" value="Min BR" />
+  <string key="VorbisMaxRate" value="Max BR" />
+  <string key="VorbisIBlock" value="IBlock" />
 </root>

@@ -168,6 +168,7 @@ namespace VideoExport.VideoExtensions
             }
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
+            string audioArgs = "";
             string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
             string codecArgs = $"-vcodec {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt} -vf \"{videoFilterArgument}\"";
             string outputArgs = $"\"{fileName}.mp4\"";

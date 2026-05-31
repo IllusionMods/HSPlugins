@@ -10,6 +10,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioCodecs\AACCodec - Copy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioCodecs\FLACCodec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioCodecs\AC3Codec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioCodecs\VorbisCodec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioCodecs\OpusCodec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioCodecs\IAudioCodec.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioPlugins\IAudioPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\AFFMPEGBasedExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\AVIFExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VideoExtensions\GIFExtension.cs" />

@@ -107,4 +107,30 @@
   <string key="WebmMaxBitrate" value="目标比特率" />
   <string key="WebmMaxBitrateTooltip" value="设置编码的目标比特率。\nVP8仍会遵循质量设置，因此即使在最佳质量4时，\n目标比特率也很有可能无法达到。\n文本字段接受数字(k,M,G)作为值。\n示例：1000k表示1000 kbit/s。\n1G提供了一个很高的上限，因此质量设置可以根据需要使用尽可能多的比特率。\n对于1080p最高60 fps，约15M即可。\n对于4K，25M及以上效果更好。" />
   <string key="WebmMaxBitrateWarning" value="无效的比特率。请使用类似 3M、500k 或 1G 的格式，值必须大于0。" />
+  <string key="AudioSectionHeading" value="音频设置" />
+  <string key="AudioEncoder" value="编码器" />
+  <string key="AudioEncoderTooltip" value="[AAC] 高级音频编解码器，功能全面的默认编解码器。\n[AC3] 实现了 ATSC A/52:2010 和 ETSI TS 102 366 的部分标准。\n[FLAC] 无损音频编解码器，体积较大但音质极佳\n[OPUS] Opus 编码器，目前仍在开发中。\n[VORB] Vorbis 编码器。" />
+  <string key="InclAudio" value="包含来自支持插件的音频" />
+  <string key="InclAudioTooltip" value="将包含来自已在 VE 中注册的插件的音频。\n如果没有其他支持插件，则不会执行任何操作。" />
+  <string key="AudioBitrate" value="比特率 (kbps)" />
+  <string key="AudioSamples" value="采样率 (kHz)" />
+  <string key="AACMethod" value="方法" />
+  <string key="AACProfile" value="轮廓" />
+  <string key="AC3NoOpts" value="没有可用的编码器选项。" />
+  <string key="Enabled" value="已启用" />
+  <string key="Disabled" value="已禁用" />
+  <string key="FlacCompression" value="压缩" />
+  <string key="FlacLPCPrecision" value="LPC 精度" />
+  <string key="FlacLPCType" value="LPC 类型" />
+  <string key="FlacCholeskyPasses" value="LPC 通道" />
+  <string key="FlacPredictionOrder" value="预测顺序" />
+  <string key="FlacExactRice" value="精确 Rice" />
+  <string key="OpusCompression" value="压缩" />
+  <string key="OpusVBR" value="可变比特率" />
+  <string key="OpusFramesize" value="帧尺寸" />
+  <string key="VorbisVBR" value="使用可变比特率" />
+  <string key="VorbisQuality" value="质量" />
+  <string key="VorbisMinRate" value="最小比特率" />
+  <string key="VorbisMaxRate" value="最大比特率" />
+  <string key="VorbisIBlock" value="IBlock" />
 </root>

@@ -10,7 +10,9 @@ using BepInEx.Logging;
 using ToolBox;
 using ToolBox.Extensions;
 using UnityEngine;
+using VideoExport.AudioPlugins;
 using VideoExport.VideoExtensions;
+using VideoExport.AudioExtensions;
 using VideoExport.ScreenshotPlugins;
 using Resources = UnityEngine.Resources;
 using VideoExport.Core;
@@ -30,6 +32,7 @@ using System.Runtime.CompilerServices;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using VideoExport.AudioCodecs;
 
 namespace VideoExport
 {
@@ -43,7 +46,7 @@ namespace VideoExport
     [BepInDependency(Screencap.ScreenshotManager.GUID, Screencap.ScreenshotManager.Version)]
     [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #endif
-    public class VideoExport : GenericPlugin
+    public partial class VideoExport : GenericPlugin
     {
         public const string Version = "2.0.3";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
@@ -103,6 +106,7 @@ namespace VideoExport
         private bool _breakRecording = false;
         private bool _generatingVideo = false;
         private readonly List<IScreenshotPlugin> _screenshotPlugins = new List<IScreenshotPlugin>();
+        private readonly List<IAudioPlugin> _audioPlugins = new List<IAudioPlugin>();
         private const int _uniqueId = ('V' << 24) | ('I' << 16) | ('D' << 8) | 'E';
         private Rect _windowRect = new Rect(Screen.width / 2 - 320, 100, Styles.WindowWidth, 10);
         private static RectTransform _imguiBackground;
@@ -119,6 +123,13 @@ namespace VideoExport
         private int _recordingFrameLimit;
         private bool _timelinePresent = false;
         private float _realTimelineDuration;
+
+        private bool _includeAudio;
+        private int _exportSampleRate;
+        private int _selectedCodec;
+        private readonly List<IAudioCodec> _codecs = new List<IAudioCodec>();
+        private readonly int[] _presetSampleRate = new[] { 8000, 11025, 16000, 22050, 32000, 44100, 88200 };
+        private readonly Dictionary<IAudioPlugin, AudioPluginConfig> _audioPluginConfigs = new Dictionary<IAudioPlugin, AudioPluginConfig>();
 
         private int _selectedPlugin = 0;
         private int _fps = 60;
@@ -142,6 +153,7 @@ namespace VideoExport
         private bool _showTooltips = true;
         private bool _showCaptureSection;
         private bool _showVideoSection;
+        private bool _showAudioSection;
         private bool _showOtherSection;
         private bool _exportFpsSameAsCapture = true;
 
@@ -177,6 +189,13 @@ namespace VideoExport
 
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigStartStopShortcut { get; private set; }
+        internal string[] CodecNames
+        {
+            get
+            {
+                return _codecs.Select(x => x.Name).ToArray();
+            }
+        }
 
         public static bool ShowUI
         {
@@ -230,6 +249,9 @@ namespace VideoExport
             _parallelScreenshotEncoding = _configFile.AddBool("parallelScreenshotEncoding", false, true);
             _language = Config.Bind(Name, "Language", Language.English, "Interface language");
             _language.SettingChanged += (sender, args) => SetLanguage(_language.Value);
+            _includeAudio = _configFile.AddBool("includeAudio", true, true);
+            _selectedCodec = _configFile.AddInt("selectedCodec", 0, true);
+            _exportSampleRate = _configFile.AddInt("exportSampleRate", 44100, true);
             SetLanguage(_language.Value);
 
             // If old directories exist, keep using them by default, otherwise use the new defaults
@@ -252,6 +274,12 @@ namespace VideoExport
             _extensionsNames = Enum.GetNames(typeof(ExtensionsType));
             if ((int)_selectedExtension >= _extensionsNames.Length)
                 _selectedExtension = ExtensionsType.MP4;
+
+            _codecs.Add(new AACCodec());
+            _codecs.Add(new AC3Codec());
+            _codecs.Add(new FLACCodec());
+            _codecs.Add(new OpusCodec());
+            _codecs.Add(new VorbisCodec());
 
             _timelinePresent = TimelineCompatibility.Init();
 
@@ -376,24 +404,61 @@ namespace VideoExport
             _configFile.SetBool("showOtherSection", _showOtherSection);
             _configFile.SetBool("showTooltips", _showTooltips);
             _configFile.SetBool("parallelScreenshotEncoding", _parallelScreenshotEncoding);
+            _configFile.SetBool("includeAudio", _includeAudio);
+            _configFile.SetInt("selectedCodec", _selectedCodec);
+            _configFile.SetInt("exportSampleRate", _exportSampleRate);
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.SaveParams();
             foreach (IVideoExtension extension in _extensions)
                 extension.SaveParams();
+            foreach (IAudioCodec codec in _codecs)
+                codec.SaveParams();
             _configFile.Save();
         }
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Start video recording.
+        /// </summary>
         public void RecordVideo()
         {
             if (_isRecording == false)
                 StartCoroutine(RecordVideo_Routine_Safe());
         }
 
+        /// <summary>
+        /// Stop video recording. Does not stop immediately, only once it's safe to do so.
+        /// </summary>
         public void StopRecording()
         {
             _breakRecording = true;
+        }
+
+        /// <summary>
+        /// Register a new audio provider, which must implement the IAudioPlugin interface.
+        /// </summary>
+        /// <typeparam name="T">Type of the registered audio provider, must implement IAudioPlugin</typeparam>
+        /// <param name="plugin">The instance of the registered audio provider</param>
+        /// <returns>Whether the registration was successful</returns>
+        public bool AddAudioPlugin<T>(T plugin) where T : IAudioPlugin
+        {
+            try
+            {
+                if (_audioPlugins.Contains(plugin))
+                    return false;
+                if (_audioPlugins.Select(x => x.GetType()).Contains(plugin.GetType()))
+                    return false;
+
+                _audioPlugins.Add(plugin);
+                _audioPluginConfigs.Add(plugin, new AudioPluginConfig(plugin));
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Couldn't add audio plugin " + typeof(T).FullName + ".\n" + e);
+                return false;
+            }
         }
         #endregion
 
@@ -802,6 +867,74 @@ namespace VideoExport
             GUILayout.EndVertical();
         }
 
+        private void WindowAudioSection()
+        {
+            IAudioCodec codec = _codecs[_selectedCodec];
+
+            GUILayout.BeginVertical("Box");
+            {
+                GUILayout.BeginHorizontal(Styles.headerStyle);
+                {
+                    GUI.backgroundColor = Color.gray;
+                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioSectionHeading)), Styles.SectionLabelStyle);
+                    if (GUILayout.Button(_showAudioSection ? "▲" : "▼", GUILayout.Width(30)))
+                    {
+                        _showAudioSection = !_showAudioSection;
+                    }
+                    GUI.backgroundColor = Color.white;
+                }
+                GUILayout.EndHorizontal();
+
+                if (!_showAudioSection)
+                {
+                    GUILayout.EndVertical();
+                    return;
+                }
+
+                GUILayout.BeginHorizontal(Styles.EmptyBoxStyle);
+                {
+                    _includeAudio = GUILayout.Toggle(_includeAudio, new GUIContent(_currentDictionary.GetString(TranslationKey.InclAudio), _currentDictionary.GetString(TranslationKey.InclAudioTooltip).Replace("\\n", "\n")));
+                    if (!_includeAudio)
+                    {
+                        GUILayout.EndHorizontal();
+                        GUILayout.EndVertical();
+                        return;
+                    }
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioSamples)));
+
+                    foreach (int presetRate in _presetSampleRate)
+                        if (GUILayout.Button((presetRate / 1000f).ToString("0.0"), Styles.ButtonStyle, GUILayout.Width(42)))
+                            _exportSampleRate = presetRate;
+
+                    string sampleString = GUILayout.TextField(_exportSampleRate.ToString(), GUILayout.Width(50), GUILayout.Height(30));
+                    if (int.TryParse(sampleString, out int res))
+                        _exportSampleRate = Mathf.Clamp(res, 8000, 192000);
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 7));
+                    {
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioEncoder), _currentDictionary.GetString(TranslationKey.AudioEncoderTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
+                        _selectedCodec = GUILayout.SelectionGrid(_selectedCodec, CodecNames, 1);
+                    }
+                    GUILayout.EndVertical();
+
+                    GUILayout.BeginVertical(Styles.BoxStyle);
+                    codec.DisplayParams();
+                    GUILayout.EndVertical();
+                }
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndVertical();
+        }
+
         void WindowOtherSection()
         {
             GUILayout.BeginVertical("Box");
@@ -917,6 +1050,11 @@ namespace VideoExport
                 GUILayout.Space(Styles.SectionSpacing);
                 WindowVideoSection();
                 GUILayout.Space(Styles.SectionSpacing);
+                if (_autoGenerateVideo)
+                {
+                    WindowAudioSection();
+                    GUILayout.Space(Styles.SectionSpacing);
+                }
                 WindowOtherSection();
                 GUILayout.Space(Styles.SectionSpacing);
                 WindowRecordSection();
