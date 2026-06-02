@@ -158,6 +158,9 @@ namespace VideoExport
             VorbisMinRate,
             VorbisMaxRate,
             VorbisIBlock,
+            NoAudioPlugins,
+            AudioPluginVolume,
+            AudioPluginVolumeTooltip,
         }
     }
 }

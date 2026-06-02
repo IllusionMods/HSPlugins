@@ -1,9 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using VideoExport.ScreenshotPlugins;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using VideoExport.ScreenshotPlugins;
+using System.IO;
+using System;
 
 namespace VideoExport.VideoExtensions
 {
@@ -121,7 +121,8 @@ namespace VideoExport.VideoExtensions
             }
         }
 
-        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public override void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
             int coreCount = _coreCount;
             string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
@@ -133,12 +134,12 @@ namespace VideoExport.VideoExtensions
             string codecExtraArgs = "-profile:v " + codecProfileName;
             string videoPixelFormatArg = transparency ? "yuva444p10le" : "yuv444p10le";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
-            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
-            string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}, format={videoPixelFormatArg}\"";
-            string outputArgs = $"\"{fileName}.mov\"";
-
-            return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
+            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
+            filterArgs = $"[0:v]{videoFilterArgument},format={videoPixelFormatArg}[vid]";
+            mapArgs = "-map [vid]";
+            codecArgs = $"-c:v {codec} {codecExtraArgs}";
+            outputArgs = $"\"{fileName}.mov\"";
         }
 
         public override void ProcessStandardOutput(char c)

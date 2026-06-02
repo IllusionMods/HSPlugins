@@ -33,6 +33,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using VideoExport.AudioCodecs;
+using System.Text.RegularExpressions;
 
 namespace VideoExport
 {
@@ -291,6 +292,9 @@ namespace VideoExport
 #if !KOIKATSU
                 AddScreenshotPlugin<Win32Plugin>(harmony);
 #endif
+#if DEBUG
+                AddAudioPlugin(new DummyPlugin(), out _);
+#endif
 
                 if (_screenshotPlugins.Count == 0)
                     Logger.LogError("No compatible screenshot plugin found, please install one.");
@@ -330,7 +334,7 @@ namespace VideoExport
                 RecordVideo();
                 _startOnNextClick = false;
             }
-            TreeNodeObject treeNode = Studio.Studio.Instance?.treeNodeCtrl.selectNode;
+            TreeNodeObject treeNode = Studio.Studio.Instance.treeNodeCtrl.selectNode;
             _currentAnimator = null;
             if (treeNode != null)
             {
@@ -441,22 +445,41 @@ namespace VideoExport
         /// <typeparam name="T">Type of the registered audio provider, must implement IAudioPlugin</typeparam>
         /// <param name="plugin">The instance of the registered audio provider</param>
         /// <returns>Whether the registration was successful</returns>
-        public bool AddAudioPlugin<T>(T plugin) where T : IAudioPlugin
+        public bool AddAudioPlugin<T>(T plugin, out string error) where T : IAudioPlugin
         {
             try
             {
                 if (_audioPlugins.Contains(plugin))
+                {
+                    error = "Plugin already registered!";
                     return false;
+                }
                 if (_audioPlugins.Select(x => x.GetType()).Contains(plugin.GetType()))
+                {
+                    error = "A plugin of the same type has already been registered!";
                     return false;
+                }
+                if (!Regex.IsMatch(plugin.SafeName, @"^[a-zA-Z0-9_\.]{3,20}$"))
+                {
+                    error = "The plugin's safe name doesn't match the criteria!";
+                    return false;
+                }
+                if (_audioPlugins.Any(x => x.SafeName == plugin.SafeName))
+                {
+                    error = "The plugin's safe name is already in use!";
+                    return false;
+                }
 
                 _audioPlugins.Add(plugin);
                 _audioPluginConfigs.Add(plugin, new AudioPluginConfig(plugin));
+
+                error = "-";
                 return true;
             }
             catch (Exception e)
             {
-                Logger.LogError("Couldn't add audio plugin " + typeof(T).FullName + ".\n" + e);
+                error = "Couldn't add audio plugin " + typeof(T).FullName + "!\n" + e;
+                Logger.LogError(error);
                 return false;
             }
         }
@@ -599,6 +622,7 @@ namespace VideoExport
             {
                 GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUILayout.Space(30);
                     GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.CaptureSettingsHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showCaptureSection ? "▲" : "▼", GUILayout.Width(30)))
@@ -782,13 +806,14 @@ namespace VideoExport
         {
             IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
             IVideoExtension extension = _extensions[(int)_selectedExtension];
-            bool prevGuiEnabled = GUI.enabled;
+            bool prevGuiEnabled;
             Vector2 currentSize = plugin.currentSize;
 
             GUILayout.BeginVertical("Box");
             {
                 GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUILayout.Space(30);
                     GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.VideoSettingsHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showVideoSection ? "▲" : "▼", GUILayout.Width(30)))
@@ -870,11 +895,13 @@ namespace VideoExport
         private void WindowAudioSection()
         {
             IAudioCodec codec = _codecs[_selectedCodec];
+            bool prevEnabled;
 
             GUILayout.BeginVertical("Box");
             {
                 GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUILayout.Space(30);
                     GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioSectionHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showAudioSection ? "▲" : "▼", GUILayout.Width(30)))
@@ -903,6 +930,48 @@ namespace VideoExport
                 }
                 GUILayout.EndHorizontal();
 
+                if (_audioPlugins.Count == 0)
+                {
+                    GUILayout.Space(10);
+                    GUILayout.BeginHorizontal();
+                    {
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.NoAudioPlugins)), Styles.CenteredLabelStyle);
+                    }
+                    GUILayout.EndHorizontal();
+                    GUILayout.Space(20);
+
+                    GUILayout.EndVertical();
+                    return;
+                }
+
+                foreach (var plugin in _audioPlugins)
+                {
+                    var config = _audioPluginConfigs[plugin];
+                    GUILayout.BeginHorizontal();
+                    {
+                        GUILayout.Label(new GUIContent(plugin.Name));
+                        config.enabled = GUILayout.Toggle(config.enabled, new GUIContent(_currentDictionary.GetString(TranslationKey.Enabled)), GUILayout.ExpandWidth(false));
+                    }
+                    GUILayout.EndHorizontal();
+
+                    prevEnabled = GUI.enabled;
+                    GUI.enabled = config.enabled;
+                    GUILayout.BeginHorizontal();
+                    {
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioPluginVolume), _currentDictionary.GetString(TranslationKey.AudioPluginVolumeTooltip)), GUILayout.ExpandWidth(false));
+                        float newVol = GUILayout.HorizontalSlider(config.volume, 0, 2);
+                        if (newVol != config.volume)
+                            config.volume = Mathf.RoundToInt(newVol * 100) / 100f;
+                        GUILayout.Label(config.volume.ToString("0.00"), Styles.CenteredLabelStyle, GUILayout.Width(50));
+                    }
+                    GUILayout.EndHorizontal();
+                    GUI.enabled = prevEnabled;
+                }
+
+                GUILayout.Space(10);
+
+                prevEnabled = GUI.enabled;
+                GUI.enabled = _audioPluginConfigs.Any(x => x.Value.enabled);
                 GUILayout.BeginHorizontal();
                 {
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioSamples)));
@@ -931,6 +1000,7 @@ namespace VideoExport
                     GUILayout.EndVertical();
                 }
                 GUILayout.EndHorizontal();
+                GUI.enabled = prevEnabled;
             }
             GUILayout.EndVertical();
         }
@@ -941,6 +1011,7 @@ namespace VideoExport
             {
                 GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUILayout.Space(30);
                     GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.OtherSettingsHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showOtherSection ? "▲" : "▼", GUILayout.Width(30)))
@@ -1281,7 +1352,7 @@ namespace VideoExport
             int i = 0;
             string imageExtension = screenshotPlugin.extension;
 
-            if (screenshotPlugin is ReshadePlugin)
+            if (screenshotPlugin is ReshadePlugin rePlugin)
             {
                 // For the ReshadePlugin, we cannot capture the current frame because Reshade runs after the end of frame.
                 // The Reshade addon stores the frame after reshade finishes effects. That buffer will be one frame behind us.
@@ -1295,25 +1366,72 @@ namespace VideoExport
                     yield return new WaitForEndOfFrame();
                 }
 
-                if (_autoGenerateVideo)
-                {
-                    ((ReshadePlugin)screenshotPlugin).vFlip = false;
-                }
-                else
-                {
-                    ((ReshadePlugin)screenshotPlugin).vFlip = true;
-                }
+                rePlugin.vFlip = !_autoGenerateVideo;
             }
 
             IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
             Vector2 currentSize = plugin.currentSize;
             string targetSize = currentSize.x + "x" + currentSize.y;
 
+            var dicTmpFiles = new Dictionary<IAudioPlugin, string>();
             int totalFrames = 0;
             bool error = false;
             if (_autoGenerateVideo)
             {
                 _generatingVideo = false;
+
+                var pipeFrom = _audioPluginConfigs.Where(x => x.Value.enabled);
+                float audioStart = TimelineCompatibility.GetPlaybackTime();
+                float audioLength = (limit / (float)exportInterval) / _fps;
+
+                if (pipeFrom.Count() > 0)
+                {
+                    Logger.LogDebug("Starting audio feed...");
+
+                    Logger.LogInfo(
+                        BuildAlignedLogBlock("Audio feed details:",
+                            new[]
+                            {
+                            "# of active plugins",
+                            "Start time",
+                            "Duration",
+                            "Sampling rate",
+                            "Codec"
+                            },
+                            new[]
+                            {
+                            pipeFrom.Count().ToString(),
+                            audioStart.ToString("0.00"),
+                            audioLength.ToString("0.00"),
+                            _exportSampleRate.ToString(),
+                            _codecs[_selectedCodec].Name
+                            }
+                        )
+                    );
+
+                    foreach (var kvp in pipeFrom)
+                    {
+                        var br = kvp.Key.MakeAudioStream(audioStart, audioLength, _exportSampleRate);
+                        string tmpAudioFileName = SimplifyPath(Path.Combine(_outputFolder.Value, $"_tmp_{kvp.Key.SafeName}_{_tempDateTime}.bin"));
+                        dicTmpFiles[kvp.Key] = tmpAudioFileName;
+                        var fs = File.Open(tmpAudioFileName, FileMode.Create);
+                        int dataWrittenPrev = -1;
+                        int dataWritten = 0;
+                        int bufferSize = 30000;
+                        while(dataWritten < br.BaseStream.Length && dataWrittenPrev != dataWritten)
+                        {
+                            dataWrittenPrev = dataWritten;
+                            var data = br.ReadBytes(bufferSize);
+                            fs.Write(data, 0, data.Length);
+                            fs.Flush();
+                            dataWritten += data.Length;
+                        }
+                        fs.Close();
+                        br.Close();
+                    }
+
+                    Logger.LogDebug("Streams finished writing");
+                }
 
                 _messageColor = Color.yellow;
                 if (Directory.Exists(_outputFolder.Value) == false)
@@ -1326,6 +1444,7 @@ namespace VideoExport
                 }
 
                 IVideoExtension extension = _extensions[(int)_selectedExtension];
+                IAudioCodec codec = _codecs[_selectedCodec];
 
                 string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, _tempDateTime));
                 if (screenshotPlugin is ScreencapPlugin && screenshotPlugin.IsRenderTextureCaptureAvailable() == true)
@@ -1342,23 +1461,21 @@ namespace VideoExport
                 }
 
                 extension.SetVFlipNeeded(screenshotPlugin.IsVFlipNeeded());
-                string arguments = extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
+                codec.GetArguments(_exportSampleRate, audioLength, _audioPluginConfigs, dicTmpFiles, 
+                    out int numInputsUsed, out string aInputArgs, out string aFilterArgs, out string aMapArgs, out string aCodecArgs);
+                extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName,
+                    out string vInputArgs, out string vFilterArgs, out string vMapArgs, out string vCodecArgs, out string vOutputArgs);
 
-                int index = arguments.IndexOf("-vf");
+                string arguments = $"-s {targetSize} " +
+                    $"{vInputArgs} {aInputArgs} " +
+                    ((vFilterArgs != "" || aFilterArgs != "") 
+                        ? $"-filter_complex \"{vFilterArgs}{(aFilterArgs == "" ? "" : "; ")}{aFilterArgs}\" "
+                        : "") +
+                    $"{vMapArgs} {aMapArgs} " +
+                    $"{vCodecArgs} {aCodecArgs} " +
+                    vOutputArgs;
+                arguments = arguments.Replace("\";", "\"").Replace("\",", "\"").Replace("  ", " ");
 
-                if (index >= 0)
-                {
-                    if (arguments.Contains("-vf \"\"") && arguments.Length >= index + 6)
-                    {
-                        arguments = arguments.Remove(index, 6);
-                    }
-                    if (arguments.Length > index + 5 && arguments[index + 5] == ',')
-                    {
-                        arguments = arguments.Remove(index + 5, 1);
-                    }
-                }
-
-                arguments = "-s " + targetSize + " " + arguments;
                 totalFrames = _recordingFrameLimit * _exportFps / _fps;
 
                 if (error == false)
@@ -1399,7 +1516,7 @@ namespace VideoExport
 
             Logger.LogInfo(
                 BuildAlignedLogBlock("Starting frame capture:",
-                new[]
+                    new[]
                     {
                         "Total frames",
                         "Export frames",
@@ -1645,6 +1762,18 @@ namespace VideoExport
 
             if (_autoGenerateVideo)
             {
+                foreach (var kvp in dicTmpFiles)
+                {
+                    try
+                    {
+                        File.Delete(kvp.Value);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogWarning("Failed to auto delete temporary files: " + e);
+                    }
+                }
+
                 try
                 {
                     Directory.Delete(framesFolder, false);

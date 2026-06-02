@@ -1,7 +1,7 @@
-﻿using System;
+﻿using VideoExport.ScreenshotPlugins;
 using System.Linq;
 using UnityEngine;
-using VideoExport.ScreenshotPlugins;
+using System;
 
 namespace VideoExport.VideoExtensions
 {
@@ -76,7 +76,8 @@ namespace VideoExport.VideoExtensions
             }
         }
 
-        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public override void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
             string pixFmt;
             switch (bitDepth)
@@ -167,13 +168,12 @@ namespace VideoExport.VideoExtensions
                 codec = codecOptions[(int)this._codec];
             }
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
-            string audioArgs = "";
-            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
-            string codecArgs = $"-vcodec {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt} -vf \"{videoFilterArgument}\"";
-            string outputArgs = $"\"{fileName}.mp4\"";
-
-            return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
+            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
+            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
+            mapArgs = "-map [vid]";
+            codecArgs = $"-c:v {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt}";
+            outputArgs = $"\"{fileName}.mp4\"";
         }
 
         public override void UpdateLanguage()

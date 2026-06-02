@@ -156,4 +156,7 @@
   <string key="VorbisMinRate" value="Min BR" />
   <string key="VorbisMaxRate" value="Max BR" />
   <string key="VorbisIBlock" value="IBlock" />
+  <string key="NoAudioPlugins" value="No audio plugins registered!" />
+  <string key="AudioPluginVolume" value="Volume" />
+  <string key="AudioPluginVolumeTooltip" value="Warning: High volumes might lead to audio clipping!" />
 </root>

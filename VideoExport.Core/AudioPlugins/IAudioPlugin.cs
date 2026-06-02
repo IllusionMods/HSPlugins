@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using HarmonyLib;
@@ -9,32 +10,32 @@ namespace VideoExport.AudioPlugins
 {
     public interface IAudioPlugin
     {
-        string name { get; }
+        /// <summary>
+        /// Name of the plugin for display purposes
+        /// </summary>
+        string Name { get; }
 
-        VideoExport.ImgFormat imageFormat { get; }
+        /// <summary>
+        /// Name of the plugin for ID purposes. Alphanumeric, _ and . only, 3-20 characters!
+        /// </summary>
+        string SafeName { get; }
 
-        bool Init(Harmony harmony);
-        void UpdateLanguage();
-        void OnStartRecording();
-        byte[] Capture(string saveTo);
-
-        Texture2D CaptureTexture();
-        RenderTexture CaptureRenderTexture();
-        bool IsTextureCaptureAvailable();
-        bool IsRenderTextureCaptureAvailable();
-        bool IsVFlipNeeded();
-
-        void OnEndRecording();
-        void DisplayParams();
-        void SaveParams();
+        /// <summary>
+        /// Assembles and returns the audio that should be included alongside the video file.
+        /// </summary>
+        /// <param name="startTime">Start time of export in Timeline in seconds</param>
+        /// <param name="duration">Total length of the final mix in seconds</param>
+        /// <param name="sampleRate">Sample rate that'll be used in the final mix</param>
+        /// <returns>The StreamReader of the assembled audio</returns>
+        BinaryReader MakeAudioStream(float startTime, float duration, int sampleRate);
     }
 
-    public struct AudioPluginConfig
+    internal class AudioPluginConfig
     {
-        readonly IAudioPlugin plugin;
+        public readonly IAudioPlugin plugin;
 
-        bool enabled;
-        float volume;
+        public bool enabled;
+        public float volume;
 
         public AudioPluginConfig(IAudioPlugin plugin)
         {

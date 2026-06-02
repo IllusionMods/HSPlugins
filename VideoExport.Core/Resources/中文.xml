@@ -133,4 +133,7 @@
   <string key="VorbisMinRate" value="最小比特率" />
   <string key="VorbisMaxRate" value="最大比特率" />
   <string key="VorbisIBlock" value="IBlock" />
+  <string key="NoAudioPlugins" value="未注册任何音频插件！" />
+  <string key="AudioPluginVolume" value="体积" />
+  <string key="AudioPluginVolumeTooltip" value="警告：音量过大可能会导致音频爆音！" />
 </root>

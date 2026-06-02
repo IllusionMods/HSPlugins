@@ -39,7 +39,7 @@ namespace VideoExport.AudioCodecs
             GUILayout.BeginHorizontal();
             {
                 Bitrate = Mathf.RoundToInt(GUILayout.HorizontalSlider(Bitrate, 32, 256));
-                GUILayout.Label(this.Bitrate.ToString("000"), GUILayout.ExpandWidth(false));
+                GUILayout.Label(Bitrate.ToString("000"), GUILayout.ExpandWidth(false));
             }
             GUILayout.EndHorizontal();
 
@@ -65,9 +65,31 @@ namespace VideoExport.AudioCodecs
             VideoExport._configFile.SetInt("aacCodingProfile", (int)Profile);
         }
 
-        public string GetArguments(int sampleRate, Dictionary<IAudioPlugin, AudioPluginConfig> audioPlugins, out int numInputsUsed)
+        public void GetArguments(
+            int sampleRate,
+            float duration,
+            Dictionary<IAudioPlugin, AudioPluginConfig> audioPlugins, 
+            Dictionary<IAudioPlugin, string> audioFiles, 
+            out int numInputsUsed,
+            out string inputArgs,
+            out string filterArgs,
+            out string mapArgs,
+            out string codecArgs)
         {
-            return AudioCodecCommon.GetArguments(sampleRate, "", audioPlugins, out numInputsUsed);
+            string profile = "aac_low";
+            switch (Profile)
+            {
+                case CodingProfile.MPEG2Low:
+                    profile = "mpeg2_aac_low";
+                    break;
+                case CodingProfile.LTP:
+                    profile = "aac_ltp";
+                    break;
+            }
+
+            codecArgs = $"-c:a aac -b:a {Bitrate * 1000} -aac_coder {Method.ToString().ToLower()} -profile:a {profile}";
+
+            AudioCodecCommon.GetArguments(sampleRate, duration, audioPlugins, audioFiles, out numInputsUsed, out inputArgs, out filterArgs, out mapArgs);
         }
     }
 }

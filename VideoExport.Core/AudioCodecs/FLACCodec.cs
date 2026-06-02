@@ -1,6 +1,8 @@
-﻿using System;
+﻿using VideoExport.AudioExtensions;
+using System.Collections.Generic;
+using VideoExport.AudioPlugins;
 using UnityEngine;
-using VideoExport.AudioExtensions;
+using System;
 
 namespace VideoExport.AudioCodecs
 {
@@ -103,9 +105,20 @@ namespace VideoExport.AudioCodecs
             VideoExport._configFile.SetBool("flacExactRice", ExactRice);
         }
 
-        public string GetArguments(int bitrate)
+        public void GetArguments(
+            int sampleRate,
+            float duration,
+            Dictionary<IAudioPlugin, AudioPluginConfig> audioPlugins,
+            Dictionary<IAudioPlugin, string> audioFiles,
+            out int numInputsUsed,
+            out string inputArgs,
+            out string filterArgs,
+            out string mapArgs,
+            out string codecArgs)
         {
-            return AudioCodecCommon.GetArguments(bitrate, Name);
+            codecArgs = $"";
+
+            AudioCodecCommon.GetArguments(sampleRate, duration, audioPlugins, audioFiles, out numInputsUsed, out inputArgs, out filterArgs, out mapArgs);
         }
     }
 }

@@ -1,9 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using VideoExport.ScreenshotPlugins;
 using System.Text;
-using ToolBox.Extensions;
 using UnityEngine;
-using VideoExport.ScreenshotPlugins;
+using System.IO;
+using System;
 
 namespace VideoExport.VideoExtensions
 {
@@ -70,11 +69,14 @@ namespace VideoExport.VideoExtensions
             return this._ffmpegExe;
         }
 
-        public abstract string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName);
+        public abstract void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs);
 
-        public string GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public void GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
-            return GetArguments(framesFolder, "", "", inputExtension, bitDepth, fps, transparency, resize, resizeX, resizeY, fileName);
+            GetArguments(framesFolder, "", "", inputExtension, bitDepth, fps, transparency, resize, resizeX, resizeY, fileName,
+                out inputArgs, out filterArgs, out mapArgs, out codecArgs, out outputArgs);
         }
 
         public virtual void ResetProgress()
