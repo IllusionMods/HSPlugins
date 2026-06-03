@@ -1,5 +1,4 @@
-﻿using VideoExport.AudioExtensions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using VideoExport.AudioPlugins;
 using UnityEngine;
 
@@ -35,7 +34,7 @@ namespace VideoExport.AudioCodecs
             out string mapArgs,
             out string codecArgs)
         {
-            codecArgs = $"";
+            codecArgs = $"-c:a ac3";
 
             AudioCodecCommon.GetArguments(sampleRate, duration, audioPlugins, audioFiles, out numInputsUsed, out inputArgs, out filterArgs, out mapArgs);
         }

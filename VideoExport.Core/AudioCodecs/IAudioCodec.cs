@@ -3,7 +3,7 @@ using System.Text;
 using VideoExport.AudioPlugins;
 using System.Linq;
 
-namespace VideoExport.AudioExtensions
+namespace VideoExport.AudioCodecs
 {
     internal interface IAudioCodec
     {

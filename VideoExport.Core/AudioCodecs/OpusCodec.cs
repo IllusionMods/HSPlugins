@@ -1,9 +1,9 @@
-﻿using VideoExport.AudioExtensions;
+﻿using System;
 using System.Collections.Generic;
-using VideoExport.AudioPlugins;
 using System.Linq;
+using System.Text;
 using UnityEngine;
-using System;
+using VideoExport.AudioPlugins;
 
 namespace VideoExport.AudioCodecs
 {
@@ -84,7 +84,12 @@ namespace VideoExport.AudioCodecs
             out string mapArgs,
             out string codecArgs)
         {
-            codecArgs = $"";
+            var sb = new StringBuilder("-c:a libopus ");
+            sb.Append($"-b:a {Bitrate * 1000} ");
+            sb.Append($"-vbr {VBR.ToString().ToLower()} ");
+            sb.Append($"-compression_level {Compression} ");
+            sb.Append($"-frame_duration {frameSizeOpts[Framesize]} ");
+            codecArgs = sb.ToString();
 
             AudioCodecCommon.GetArguments(sampleRate, duration, audioPlugins, audioFiles, out numInputsUsed, out inputArgs, out filterArgs, out mapArgs);
         }

@@ -12,7 +12,7 @@ using ToolBox.Extensions;
 using UnityEngine;
 using VideoExport.AudioPlugins;
 using VideoExport.VideoExtensions;
-using VideoExport.AudioExtensions;
+using VideoExport.AudioCodecs;
 using VideoExport.ScreenshotPlugins;
 using Resources = UnityEngine.Resources;
 using VideoExport.Core;
@@ -32,7 +32,6 @@ using System.Runtime.CompilerServices;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using VideoExport.AudioCodecs;
 using System.Text.RegularExpressions;
 
 namespace VideoExport
@@ -1762,6 +1761,8 @@ namespace VideoExport
 
             if (_autoGenerateVideo)
             {
+                yield return new WaitForSeconds(5);
+
                 foreach (var kvp in dicTmpFiles)
                 {
                     try

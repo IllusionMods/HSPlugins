@@ -1,8 +1,8 @@
-﻿using VideoExport.AudioExtensions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using VideoExport.AudioPlugins;
 using UnityEngine;
 using System;
+using System.Text;
 
 namespace VideoExport.AudioCodecs
 {
@@ -17,10 +17,10 @@ namespace VideoExport.AudioCodecs
         }
         public enum PredictionOrder
         {
-            _Estimation,
-            _2Level,
-            _4Level,
-            _8Level,
+            _estimation,
+            _2level,
+            _4level,
+            _8level,
             _search,
             _log
         }
@@ -40,7 +40,7 @@ namespace VideoExport.AudioCodecs
             LPCPrecision = VideoExport._configFile.AddInt("flacLPCPrecision", 15, true);
             LPCType = (LPCAlgoType)VideoExport._configFile.AddInt("flacLPCType", (int)LPCAlgoType.None, true);
             CholeskyPasses = VideoExport._configFile.AddInt("flacCholeskyPasses", 1, true);
-            PredOrder = (PredictionOrder)VideoExport._configFile.AddInt("flacPredOrder", (int)PredictionOrder._Estimation, true);
+            PredOrder = (PredictionOrder)VideoExport._configFile.AddInt("flacPredOrder", (int)PredictionOrder._estimation, true);
             ExactRice = VideoExport._configFile.AddBool("flacExactRice", true, true);
         }
 
@@ -116,7 +116,16 @@ namespace VideoExport.AudioCodecs
             out string mapArgs,
             out string codecArgs)
         {
-            codecArgs = $"";
+            var sb = new StringBuilder("-c:a flac ");
+            sb.Append($"-compression_level {Compression} ");
+            sb.Append($"-lpc_coeff_precision {LPCPrecision} ");
+            sb.Append($"-lpc_type {LPCType.ToString().ToLower()} ");
+            if (LPCType == LPCAlgoType.Cholesky)
+                sb.Append($"-lpc_passes {CholeskyPasses} ");
+            sb.Append($"-prediction_order_method {PredOrder.ToString().Trim('_')} ");
+            if (ExactRice)
+                sb.Append("-exact_rice_parameters 1 ");
+            codecArgs = sb.ToString();
 
             AudioCodecCommon.GetArguments(sampleRate, duration, audioPlugins, audioFiles, out numInputsUsed, out inputArgs, out filterArgs, out mapArgs);
         }

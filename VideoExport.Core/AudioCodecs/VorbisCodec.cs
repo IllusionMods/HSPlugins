@@ -1,7 +1,8 @@
-﻿using VideoExport.AudioExtensions;
+﻿using ADV.Commands.Base;
 using System.Collections.Generic;
-using VideoExport.AudioPlugins;
+using System.Text;
 using UnityEngine;
+using VideoExport.AudioPlugins;
 
 namespace VideoExport.AudioCodecs
 {
@@ -106,7 +107,19 @@ namespace VideoExport.AudioCodecs
             out string mapArgs,
             out string codecArgs)
         {
-            codecArgs = $"";
+            var sb = new StringBuilder("-c:a libvorbis ");
+            if (UseVBR)
+            {
+                sb.Append($"-q:a {Quality} ");
+                sb.Append($"-minrate:a {MinRate} ");
+                sb.Append($"-maxrate:a {MaxRate} ");
+            }
+            else
+            {
+                sb.Append($"-b:a {Bitrate * 1000} ");
+            }
+            sb.Append($"-iblock {IBlock} ");
+            codecArgs = sb.ToString();
 
             AudioCodecCommon.GetArguments(sampleRate, duration, audioPlugins, audioFiles, out numInputsUsed, out inputArgs, out filterArgs, out mapArgs);
         }

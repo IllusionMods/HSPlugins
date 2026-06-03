@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using VideoExport.AudioExtensions;
 using VideoExport.AudioPlugins;
 
 namespace VideoExport.AudioCodecs
