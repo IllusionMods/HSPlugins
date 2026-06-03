@@ -10,7 +10,7 @@ namespace VideoExport.AudioPlugins
 
         public BinaryReader MakeAudioStream(float startTime, float duration, int sampleRate)
         {
-            return new BinaryReader(new StreamReader(@"F:\Recordings\ffmpeg_trial\1.mp3").BaseStream);
+            return new BinaryReader(File.OpenRead(@"<yourExamplePathHere>.mp3"));
         }
     }
 }

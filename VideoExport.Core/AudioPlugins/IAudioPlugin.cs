@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using HarmonyLib;
-using UnityEngine;
+﻿using System.IO;
 
 namespace VideoExport.AudioPlugins
 {
@@ -26,7 +20,7 @@ namespace VideoExport.AudioPlugins
         /// <param name="startTime">Start time of export in Timeline in seconds</param>
         /// <param name="duration">Total length of the final mix in seconds</param>
         /// <param name="sampleRate">Sample rate that'll be used in the final mix</param>
-        /// <returns>The StreamReader of the assembled audio</returns>
+        /// <returns>The BinaryReader of the assembled audio</returns>
         BinaryReader MakeAudioStream(float startTime, float duration, int sampleRate);
     }
 

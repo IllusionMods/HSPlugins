@@ -281,6 +281,9 @@ namespace VideoExport
             _codecs.Add(new OpusCodec());
             _codecs.Add(new VorbisCodec());
 
+            if (_selectedCodec >= _codecs.Count)
+                _selectedCodec = 0;
+
             _timelinePresent = TimelineCompatibility.Init();
 
             this.ExecuteDelayed(() =>
@@ -1379,11 +1382,13 @@ namespace VideoExport
             {
                 _generatingVideo = false;
 
-                var pipeFrom = _audioPluginConfigs.Where(x => x.Value.enabled);
+                var pipeFrom = _includeAudio 
+                    ? _audioPluginConfigs.Where(x => x.Value.enabled)
+                    : null;
                 float audioStart = TimelineCompatibility.GetPlaybackTime();
                 float audioLength = (limit / (float)exportInterval) / _fps;
 
-                if (pipeFrom.Count() > 0)
+                if (pipeFrom?.Count() > 0)
                 {
                     Logger.LogDebug("Starting audio feed...");
 
@@ -1413,20 +1418,18 @@ namespace VideoExport
                         var br = kvp.Key.MakeAudioStream(audioStart, audioLength, _exportSampleRate);
                         string tmpAudioFileName = SimplifyPath(Path.Combine(_outputFolder.Value, $"_tmp_{kvp.Key.SafeName}_{_tempDateTime}.bin"));
                         dicTmpFiles[kvp.Key] = tmpAudioFileName;
-                        var fs = File.Open(tmpAudioFileName, FileMode.Create);
-                        int dataWrittenPrev = -1;
-                        int dataWritten = 0;
                         int bufferSize = 30000;
-                        while(dataWritten < br.BaseStream.Length && dataWrittenPrev != dataWritten)
-                        {
-                            dataWrittenPrev = dataWritten;
-                            var data = br.ReadBytes(bufferSize);
-                            fs.Write(data, 0, data.Length);
-                            fs.Flush();
-                            dataWritten += data.Length;
-                        }
-                        fs.Close();
-                        br.Close();
+                        byte[] data;
+
+                        using (br) 
+                        using (var fs = File.Open(tmpAudioFileName, FileMode.Create, FileAccess.Write, FileShare.Read)) 
+                            while (true)
+                            {
+                                data = br.ReadBytes(bufferSize);
+                                if (data == null || data.Length == 0)
+                                    break;
+                                fs.Write(data, 0, data.Length);
+                            }
                     }
 
                     Logger.LogDebug("Streams finished writing");
@@ -1438,9 +1441,7 @@ namespace VideoExport
                 _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
                 // Need to match the timing of the first frame, excluding the timeline.
                 if (_selectedLimitDuration != LimitDurationType.Timeline)
-                {
                     yield return null;
-                }
 
                 IVideoExtension extension = _extensions[(int)_selectedExtension];
                 IAudioCodec codec = _codecs[_selectedCodec];
@@ -1460,10 +1461,19 @@ namespace VideoExport
                 }
 
                 extension.SetVFlipNeeded(screenshotPlugin.IsVFlipNeeded());
-                codec.GetArguments(_exportSampleRate, audioLength, _audioPluginConfigs, dicTmpFiles, 
-                    out int numInputsUsed, out string aInputArgs, out string aFilterArgs, out string aMapArgs, out string aCodecArgs);
+
+                string aInputArgs = ""; string aFilterArgs = ""; string aMapArgs = ""; string aCodecArgs = "";
+                if (_includeAudio && dicTmpFiles.Count > 0)
+                    codec.GetArguments(_exportSampleRate, audioLength, pipeFrom.ToDictionary(x => x.Key, x => x.Value), dicTmpFiles, 
+                        out int numInputsUsed, out aInputArgs, out aFilterArgs, out aMapArgs, out aCodecArgs);
+
                 extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName,
                     out string vInputArgs, out string vFilterArgs, out string vMapArgs, out string vCodecArgs, out string vOutputArgs);
+
+                if (vFilterArgs == null || vFilterArgs == "")
+                    vMapArgs = "-map [0:v]";
+                if (vFilterArgs == null || Regex.IsMatch(vFilterArgs, @"^\[[\w:]+\]\W*\[[\w]+\]$"))
+                    vFilterArgs = vMapArgs = "";
 
                 string arguments = $"-s {targetSize} " +
                     $"{vInputArgs} {aInputArgs} " +
@@ -1761,7 +1771,7 @@ namespace VideoExport
 
             if (_autoGenerateVideo)
             {
-                yield return new WaitForSeconds(5);
+                yield return StartCoroutine(WaitForFFmpegExit());
 
                 foreach (var kvp in dicTmpFiles)
                 {

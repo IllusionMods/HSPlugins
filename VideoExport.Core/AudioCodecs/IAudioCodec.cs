@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 using VideoExport.AudioPlugins;
-using System.Linq;
 
 namespace VideoExport.AudioCodecs
 {
@@ -52,11 +53,11 @@ namespace VideoExport.AudioCodecs
             var sb = new StringBuilder();
             foreach (var kvp in getFrom)
             {
-                sb.Append($"[{i}:a]volume={kvp.Value.volume}[{kvp.Key.SafeName}]; ");
+                sb.Append($"[{i}:a]volume={kvp.Value.volume.ToString(CultureInfo.InvariantCulture)}[{kvp.Key.SafeName}]; ");
                 i++;
             }
             sb.Append(string.Concat(getFrom.Select(x => $"[{x.Key.SafeName}]").ToArray()));
-            sb.Append($"amerge=inputs={getFrom.Count},atrim=duration={duration},aresample={sampleRate}[aud]");
+            sb.Append($"amerge=inputs={getFrom.Count},atrim=duration={duration.ToString(CultureInfo.InvariantCulture)},aresample={sampleRate}[aud]");
             filterArgs = sb.ToString();
 
             // Mapping
