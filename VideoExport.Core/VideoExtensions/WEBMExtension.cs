@@ -1,12 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using ToolBox.Extensions;
-using UnityEngine;
+﻿using System.Text.RegularExpressions;
 using VideoExport.ScreenshotPlugins;
+using System.Linq;
+using UnityEngine;
+using System;
 
-namespace VideoExport.Extensions
+namespace VideoExport.VideoExtensions
 {
     public class WEBMExtension : AFFMPEGBasedExtension
     {
@@ -71,7 +69,8 @@ namespace VideoExport.Extensions
             return !string.IsNullOrEmpty(bitrate) && Regex.IsMatch(bitrate, @"^([1-9]\d*)[kMG]$");
         }
 
-        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public override void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
             int coreCount = _coreCount;
             string pixFmt;
@@ -89,12 +88,12 @@ namespace VideoExport.Extensions
             string autoAltRef = this._codec == Codec.VP8 ? "-auto-alt-ref 0" : "";
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
-            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
-            string codecArgs = $"-c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : "")} -pix_fmt {pixFmt} {autoAltRef} -b:v {(_codec == Codec.VP9 ? "0" : _maxBitrate)} -crf {this._quality} -deadline {this._deadlineCLIOptions[(int)this._deadline]} -vf \"{videoFilterArgument}\"";
-            string outputArgs = $"\"{fileName}.webm\"";
-
-            return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
+            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
+            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
+            mapArgs = "-map [vid]";
+            codecArgs = $"-c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : "")} -pix_fmt {pixFmt} {autoAltRef} -b:v {(_codec == Codec.VP9 ? "0" : _maxBitrate)} -crf {this._quality} -deadline {this._deadlineCLIOptions[(int)this._deadline]}";
+            outputArgs = $"\"{fileName}.webm\"";
         }
 
         public override void UpdateLanguage()

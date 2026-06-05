@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using VideoExport.ScreenshotPlugins;
+﻿using VideoExport.ScreenshotPlugins;
+using UnityEngine;
 
-namespace VideoExport.Extensions
+namespace VideoExport.VideoExtensions
 {
     public class AVIFExtension : AFFMPEGBasedExtension
     {
@@ -23,7 +23,8 @@ namespace VideoExport.Extensions
             this._quality = VideoExport._configFile.AddInt("avifQuality", 28, true);
         }
 
-        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public override void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
             int coreCount = _coreCount;
             string pixFmt = transparency ? "yuva420p" : "yuv420p";
@@ -39,12 +40,12 @@ namespace VideoExport.Extensions
             }
             string rateControlArgument = $"-crf {_quality} -b:v 0";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
-            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
-            string codecArgs = $"-vcodec {codec} {codecExtraArgs} {rateControlArgument} -pix_fmt {pixFmt} -vf \"{videoFilterArgument}\"";
-            string outputArgs = $"\"{fileName}.avif\"";
-
-            return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
+            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
+            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
+            mapArgs = "-map [vid]";
+            codecArgs = $"-c:v {codec} {codecExtraArgs} {rateControlArgument} -pix_fmt {pixFmt}";
+            outputArgs = $"\"{fileName}.avif\"";
         }
 
         public override bool IsCompatibleWithPlugin(IScreenshotPlugin plugin, out string reason)

@@ -10,7 +10,9 @@ using BepInEx.Logging;
 using ToolBox;
 using ToolBox.Extensions;
 using UnityEngine;
-using VideoExport.Extensions;
+using VideoExport.AudioPlugins;
+using VideoExport.VideoExtensions;
+using VideoExport.AudioCodecs;
 using VideoExport.ScreenshotPlugins;
 using Resources = UnityEngine.Resources;
 using VideoExport.Core;
@@ -27,14 +29,10 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 #endif
 
-#if IPA
-using IllusionPlugin;
-using Harmony;
-#elif BEPINEX
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-#endif
+using System.Text.RegularExpressions;
 
 namespace VideoExport
 {
@@ -48,30 +46,11 @@ namespace VideoExport
     [BepInDependency(Screencap.ScreenshotManager.GUID, Screencap.ScreenshotManager.Version)]
     [BepInDependency(KKAPI.KoikatuAPI.GUID, KKAPI.KoikatuAPI.VersionConst)]
 #endif
-    public class VideoExport : GenericPlugin
-#if IPA
-                               , IEnhancedPlugin
-#endif
+    public partial class VideoExport : GenericPlugin
     {
         public const string Version = "2.0.3";
         public const string GUID = "com.joan6694.illusionplugins.videoexport";
         public const string Name = "VideoExport";
-
-#if IPA
-        public override string Name { get { return _name; } }
-        public override string Version
-        {
-            get
-            {
-                return _versionNum
-#if BETA
-                    + "b"
-#endif
-                    ;
-            }
-        }
-        public override string[] Filter { get { return new[] { "StudioNEO_32", "StudioNEO_64" }; } }
-#endif
 
         #region Types
         public enum ImgFormat
@@ -88,139 +67,6 @@ namespace VideoExport
         {
             English,
             中文 // Chinese
-        }
-
-        internal enum TranslationKey
-        {
-            CurrentSize,
-            Framerate,
-            ExportFramerate,
-            AutoDeleteImages,
-            LimitBy,
-            LimitByFrames,
-            LimitBySeconds,
-            LimitByAnimation,
-            LimitByTimeline,
-            LimitByPrewarmLoopCount,
-            LimitByLoopsToRecord,
-            LimitByLimitCount,
-            Seconds,
-            Frames,
-            Resize,
-            ResizeDefault,
-            DBUpdateMode,
-            DBDefault,
-            DBEveryFrame,
-            EmptyScene,
-            CloseStudio,
-            ParallelScreenshotEncoding,
-            StartRecordingOnNextClick,
-            StartRecording,
-            StopRecording,
-            PrewarmingAnimation,
-            RealignTimeline,
-            TakingScreenshot,
-            ETA,
-            Elapsed,
-            GeneratingVideo,
-            Done,
-            GeneratingError,
-            VideosFolderDesc,
-            FramesFolderDesc,
-            BuiltInCaptureTool,
-            Win32CaptureTool,
-            SizeMultiplier,
-            CaptureMode,
-            ImageFormat,
-            CaptureModeNormal,
-            CaptureModeImmediate,
-            CaptureModeWin32,
-            ScreencapCaptureType,
-            ScreencapCaptureTypeNormal,
-            ScreencapCaptureType360,
-            Screencap3D,
-            Rotation,
-            RotationNone,
-            Rotation90,
-            Rotation180,
-            Rotation270,
-            BitDepthError,
-            GIFError,
-            Codec,
-            HwAccelCodec,
-            MP4Quality,
-            MP4Preset,
-            MP4PresetSlower,
-            MP4PresetMedium,
-            MP4PresetFaster,
-            VP8Quality,
-            VP9Quality,
-            WEBMDeadline,
-            WEBMDeadlineBest,
-            WEBMDeadlineGood,
-            WEBMDeadlineRealtime,
-            WEBPQuality,
-            AVIFQuality,
-            GIFTool,
-            GIFMaxColors,
-            GIFDithering,
-            ShowTooltips,
-            CaptureSettingsHeading,
-            VideoSettingsHeading,
-            OtherSettingsHeading,
-            ScreenshotTool,
-            Extension,
-            CreateVideo,
-            AutoHideUI,
-            RemoveAlphaChannel,
-            FramerateTooltip,
-            ExportFramerateTooltip,
-            DBUpdateModeTooltip,
-            ScreenshotToolTooltip,
-            LimitByTooltip,
-            LimitByPrewarmLoopCountTooltip,
-            LimitByLoopsToRecordTooltip,
-            LimitByLimitCountTooltip,
-            RealignTimelineTooltip,
-            ParallelEncodingTooltip,
-            CaptureModeTooltip,
-            ImageFormatTooltip,
-            ExtensionTooltip,
-            RemoveAlphaChannelTooltip,
-            HwAccelCodecTooltip,
-            MP4CodecTooltip,
-            WEBMCodecTooltip,
-            AVIFCodecTooltip,
-            MOVCodecTooltip,
-            GIFToolTooltip,
-            GIFDitheringTooltip,
-            MOVPreset,
-            MOVPresetTooltip,
-            MOVPresetProRes422Proxy,
-            MOVPresetProRes422LT,
-            MOVPresetProRes422,
-            MOVPresetProRes422HQ,
-            MOVPresetProRes4444,
-            MOVPresetProRes4444XQ,
-            GIFSKIQuality,
-            GIFSKIMotionQuality,
-            GIFSKILossyQuality,
-            GIFSKIQualityTooltip,
-            GIFSKIMotionQualityTooltip,
-            GIFSKILossyQualityTooltip,
-            FFV1CodecTooltip,
-            FFV1GopSize,
-            FFV1Slices,
-            FFV1GopSizeTooltip,
-            FFV1SlicesTooltip,
-            SameAsCapture,
-            ToggleScreencapUI,
-            HwAccelSelector,
-            HwAccelSelectorTooltip,
-            MP4QualityTooltip,
-            WebmMaxBitrate,
-            WebmMaxBitrateTooltip,
-            WebmMaxBitrateWarning,
         }
 
         private enum LimitDurationType
@@ -260,11 +106,12 @@ namespace VideoExport
         private bool _breakRecording = false;
         private bool _generatingVideo = false;
         private readonly List<IScreenshotPlugin> _screenshotPlugins = new List<IScreenshotPlugin>();
+        private readonly List<IAudioPlugin> _audioPlugins = new List<IAudioPlugin>();
         private const int _uniqueId = ('V' << 24) | ('I' << 16) | ('D' << 8) | 'E';
         private Rect _windowRect = new Rect(Screen.width / 2 - 320, 100, Styles.WindowWidth, 10);
         private static RectTransform _imguiBackground;
         private string _currentMessage;
-        private readonly List<IExtension> _extensions = new List<IExtension>();
+        private readonly List<IVideoExtension> _extensions = new List<IVideoExtension>();
         private Color _messageColor = Color.white;
         private float _progressBarPercentage;
         private bool _startOnNextClick = false;
@@ -277,10 +124,17 @@ namespace VideoExport
         private bool _timelinePresent = false;
         private float _realTimelineDuration;
 
+        private bool _includeAudio;
+        private int _exportSampleRate;
+        private int _selectedCodec;
+        private readonly List<IAudioCodec> _codecs = new List<IAudioCodec>();
+        private readonly int[] _presetSampleRate = new[] { 8000, 11025, 16000, 22050, 32000, 44100, 88200 };
+        private readonly Dictionary<IAudioPlugin, AudioPluginConfig> _audioPluginConfigs = new Dictionary<IAudioPlugin, AudioPluginConfig>();
+
         private int _selectedPlugin = 0;
         private int _fps = 60;
         private int _exportFps = 60;
-        private int[] _presetFps = new[] { 12, 24, 30, 60, 120 };
+        private readonly int[] _presetFps = new[] { 12, 24, 30, 60, 120 };
         private bool _autoGenerateVideo;
         private bool _limitDuration;
         private LimitDurationType _selectedLimitDuration;
@@ -299,6 +153,7 @@ namespace VideoExport
         private bool _showTooltips = true;
         private bool _showCaptureSection;
         private bool _showVideoSection;
+        private bool _showAudioSection;
         private bool _showOtherSection;
         private bool _exportFpsSameAsCapture = true;
 
@@ -334,6 +189,13 @@ namespace VideoExport
 
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigStartStopShortcut { get; private set; }
+        internal string[] CodecNames
+        {
+            get
+            {
+                return _codecs.Select(x => x.Name).ToArray();
+            }
+        }
 
         public static bool ShowUI
         {
@@ -387,6 +249,9 @@ namespace VideoExport
             _parallelScreenshotEncoding = _configFile.AddBool("parallelScreenshotEncoding", false, true);
             _language = Config.Bind(Name, "Language", Language.English, "Interface language");
             _language.SettingChanged += (sender, args) => SetLanguage(_language.Value);
+            _includeAudio = _configFile.AddBool("includeAudio", true, true);
+            _selectedCodec = _configFile.AddInt("selectedCodec", 0, true);
+            _exportSampleRate = _configFile.AddInt("exportSampleRate", 44100, true);
             SetLanguage(_language.Value);
 
             // If old directories exist, keep using them by default, otherwise use the new defaults
@@ -410,6 +275,15 @@ namespace VideoExport
             if ((int)_selectedExtension >= _extensionsNames.Length)
                 _selectedExtension = ExtensionsType.MP4;
 
+            _codecs.Add(new AACCodec());
+            _codecs.Add(new AC3Codec());
+            _codecs.Add(new FLACCodec());
+            _codecs.Add(new OpusCodec());
+            _codecs.Add(new VorbisCodec());
+
+            if (_selectedCodec >= _codecs.Count)
+                _selectedCodec = 0;
+
             _timelinePresent = TimelineCompatibility.Init();
 
             this.ExecuteDelayed(() =>
@@ -419,6 +293,9 @@ namespace VideoExport
                 AddScreenshotPlugin<ReshadePlugin>(harmony);
 #if !KOIKATSU
                 AddScreenshotPlugin<Win32Plugin>(harmony);
+#endif
+#if DEBUG
+                AddAudioPlugin(new DummyPlugin(), out _);
 #endif
 
                 if (_screenshotPlugins.Count == 0)
@@ -459,7 +336,7 @@ namespace VideoExport
                 RecordVideo();
                 _startOnNextClick = false;
             }
-            TreeNodeObject treeNode = Studio.Studio.Instance?.treeNodeCtrl.selectNode;
+            TreeNodeObject treeNode = Studio.Studio.Instance.treeNodeCtrl.selectNode;
             _currentAnimator = null;
             if (treeNode != null)
             {
@@ -533,33 +410,85 @@ namespace VideoExport
             _configFile.SetBool("showOtherSection", _showOtherSection);
             _configFile.SetBool("showTooltips", _showTooltips);
             _configFile.SetBool("parallelScreenshotEncoding", _parallelScreenshotEncoding);
+            _configFile.SetBool("includeAudio", _includeAudio);
+            _configFile.SetInt("selectedCodec", _selectedCodec);
+            _configFile.SetInt("exportSampleRate", _exportSampleRate);
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.SaveParams();
-            foreach (IExtension extension in _extensions)
+            foreach (IVideoExtension extension in _extensions)
                 extension.SaveParams();
+            foreach (IAudioCodec codec in _codecs)
+                codec.SaveParams();
             _configFile.Save();
         }
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// Start video recording.
+        /// </summary>
         public void RecordVideo()
         {
             if (_isRecording == false)
                 StartCoroutine(RecordVideo_Routine_Safe());
         }
 
+        /// <summary>
+        /// Stop video recording. Does not stop immediately, only once it's safe to do so.
+        /// </summary>
         public void StopRecording()
         {
             _breakRecording = true;
         }
+
+        /// <summary>
+        /// Register a new audio provider, which must implement the IAudioPlugin interface.
+        /// </summary>
+        /// <typeparam name="T">Type of the registered audio provider, must implement IAudioPlugin</typeparam>
+        /// <param name="plugin">The instance of the registered audio provider</param>
+        /// <returns>Whether the registration was successful</returns>
+        public bool AddAudioPlugin<T>(T plugin, out string error) where T : IAudioPlugin
+        {
+            try
+            {
+                if (_audioPlugins.Contains(plugin))
+                {
+                    error = "Plugin already registered!";
+                    return false;
+                }
+                if (_audioPlugins.Select(x => x.GetType()).Contains(plugin.GetType()))
+                {
+                    error = "A plugin of the same type has already been registered!";
+                    return false;
+                }
+                if (!Regex.IsMatch(plugin.SafeName, @"^[a-zA-Z0-9_\.]{3,20}$"))
+                {
+                    error = "The plugin's safe name doesn't match the criteria!";
+                    return false;
+                }
+                if (_audioPlugins.Any(x => x.SafeName == plugin.SafeName))
+                {
+                    error = "The plugin's safe name is already in use!";
+                    return false;
+                }
+
+                _audioPlugins.Add(plugin);
+                _audioPluginConfigs.Add(plugin, new AudioPluginConfig(plugin));
+
+                error = "-";
+                return true;
+            }
+            catch (Exception e)
+            {
+                error = "Couldn't add audio plugin " + typeof(T).FullName + "!\n" + e;
+                Logger.LogError(error);
+                return false;
+            }
+        }
         #endregion
 
         #region Private Methods
-#if IPA
         private void AddScreenshotPlugin<T>(Harmony harmony) where T : IScreenshotPlugin, new()
-#elif BEPINEX
-        private void AddScreenshotPlugin<T>(Harmony harmony) where T : IScreenshotPlugin, new()
-#endif
         {
             try
             {
@@ -571,7 +500,6 @@ namespace VideoExport
             {
                 Logger.LogError("Couldn't add screenshot plugin " + typeof(T).FullName + ".\n" + e);
             }
-
         }
 
         private void LimitCount()
@@ -696,6 +624,7 @@ namespace VideoExport
             {
                 GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUILayout.Space(30);
                     GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.CaptureSettingsHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showCaptureSection ? "▲" : "▼", GUILayout.Width(30)))
@@ -878,14 +807,15 @@ namespace VideoExport
         private void WindowVideoSection()
         {
             IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
-            IExtension extension = _extensions[(int)_selectedExtension];
-            bool prevGuiEnabled = GUI.enabled;
+            IVideoExtension extension = _extensions[(int)_selectedExtension];
+            bool prevGuiEnabled;
             Vector2 currentSize = plugin.currentSize;
 
             GUILayout.BeginVertical("Box");
             {
                 GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUILayout.Space(30);
                     GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.VideoSettingsHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showVideoSection ? "▲" : "▼", GUILayout.Width(30)))
@@ -964,12 +894,126 @@ namespace VideoExport
             GUILayout.EndVertical();
         }
 
+        private void WindowAudioSection()
+        {
+            IAudioCodec codec = _codecs[_selectedCodec];
+            bool prevEnabled;
+
+            GUILayout.BeginVertical("Box");
+            {
+                GUILayout.BeginHorizontal(Styles.headerStyle);
+                {
+                    GUILayout.Space(30);
+                    GUI.backgroundColor = Color.gray;
+                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioSectionHeading)), Styles.SectionLabelStyle);
+                    if (GUILayout.Button(_showAudioSection ? "▲" : "▼", GUILayout.Width(30)))
+                    {
+                        _showAudioSection = !_showAudioSection;
+                    }
+                    GUI.backgroundColor = Color.white;
+                }
+                GUILayout.EndHorizontal();
+
+                if (!_showAudioSection)
+                {
+                    GUILayout.EndVertical();
+                    return;
+                }
+
+                GUILayout.BeginHorizontal(Styles.EmptyBoxStyle);
+                {
+                    _includeAudio = GUILayout.Toggle(_includeAudio, new GUIContent(_currentDictionary.GetString(TranslationKey.InclAudio), _currentDictionary.GetString(TranslationKey.InclAudioTooltip).Replace("\\n", "\n")));
+                    if (!_includeAudio)
+                    {
+                        GUILayout.EndHorizontal();
+                        GUILayout.EndVertical();
+                        return;
+                    }
+                }
+                GUILayout.EndHorizontal();
+
+                if (_audioPlugins.Count == 0)
+                {
+                    GUILayout.Space(10);
+                    GUILayout.BeginHorizontal();
+                    {
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.NoAudioPlugins)), Styles.CenteredLabelStyle);
+                    }
+                    GUILayout.EndHorizontal();
+                    GUILayout.Space(20);
+
+                    GUILayout.EndVertical();
+                    return;
+                }
+
+                foreach (var plugin in _audioPlugins)
+                {
+                    var config = _audioPluginConfigs[plugin];
+                    GUILayout.BeginHorizontal();
+                    {
+                        GUILayout.Label(new GUIContent(plugin.Name));
+                        config.enabled = GUILayout.Toggle(config.enabled, new GUIContent(_currentDictionary.GetString(TranslationKey.Enabled)), GUILayout.ExpandWidth(false));
+                    }
+                    GUILayout.EndHorizontal();
+
+                    prevEnabled = GUI.enabled;
+                    GUI.enabled = config.enabled;
+                    GUILayout.BeginHorizontal();
+                    {
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioPluginVolume), _currentDictionary.GetString(TranslationKey.AudioPluginVolumeTooltip)), GUILayout.ExpandWidth(false));
+                        float newVol = GUILayout.HorizontalSlider(config.volume, 0, 2);
+                        if (newVol != config.volume)
+                            config.volume = Mathf.RoundToInt(newVol * 100) / 100f;
+                        GUILayout.Label(config.volume.ToString("0.00"), Styles.CenteredLabelStyle, GUILayout.Width(50));
+                    }
+                    GUILayout.EndHorizontal();
+                    GUI.enabled = prevEnabled;
+                }
+
+                GUILayout.Space(10);
+
+                prevEnabled = GUI.enabled;
+                GUI.enabled = _audioPluginConfigs.Any(x => x.Value.enabled);
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioSamples)));
+
+                    foreach (int presetRate in _presetSampleRate)
+                        if (GUILayout.Button((presetRate / 1000f).ToString("0.0"), Styles.ButtonStyle, GUILayout.Width(42)))
+                            _exportSampleRate = presetRate;
+
+                    string sampleString = GUILayout.TextField(_exportSampleRate.ToString(), GUILayout.Width(50), GUILayout.Height(30));
+                    if (int.TryParse(sampleString, out int res))
+                        _exportSampleRate = Mathf.Clamp(res, 8000, 192000);
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 7));
+                    {
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioEncoder), _currentDictionary.GetString(TranslationKey.AudioEncoderTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
+                        _selectedCodec = GUILayout.SelectionGrid(_selectedCodec, CodecNames, 1);
+                    }
+                    GUILayout.EndVertical();
+
+                    GUILayout.BeginVertical(Styles.BoxStyle);
+                    codec.DisplayParams();
+                    GUILayout.EndVertical();
+                }
+                GUILayout.EndHorizontal();
+                GUI.enabled = prevEnabled;
+            }
+            GUILayout.EndVertical();
+        }
+
         void WindowOtherSection()
         {
             GUILayout.BeginVertical("Box");
             {
                 GUILayout.BeginHorizontal(Styles.headerStyle);
                 {
+                    GUILayout.Space(30);
                     GUI.backgroundColor = Color.gray;
                     GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.OtherSettingsHeading)), Styles.SectionLabelStyle);
                     if (GUILayout.Button(_showOtherSection ? "▲" : "▼", GUILayout.Width(30)))
@@ -999,7 +1043,7 @@ namespace VideoExport
         private void WindowRecordSection()
         {
             IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
-            IExtension extension = _extensions[(int)_selectedExtension];
+            IVideoExtension extension = _extensions[(int)_selectedExtension];
 
             bool prevGuiEnabled = GUI.enabled;
             GUILayout.BeginHorizontal(Styles.EmptyBoxStyle);
@@ -1079,6 +1123,11 @@ namespace VideoExport
                 GUILayout.Space(Styles.SectionSpacing);
                 WindowVideoSection();
                 GUILayout.Space(Styles.SectionSpacing);
+                if (_autoGenerateVideo)
+                {
+                    WindowAudioSection();
+                    GUILayout.Space(Styles.SectionSpacing);
+                }
                 WindowOtherSection();
                 GUILayout.Space(Styles.SectionSpacing);
                 WindowRecordSection();
@@ -1135,7 +1184,7 @@ namespace VideoExport
 
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.UpdateLanguage();
-            foreach (IExtension extension in _extensions)
+            foreach (IVideoExtension extension in _extensions)
                 extension.UpdateLanguage();
         }
 
@@ -1305,7 +1354,7 @@ namespace VideoExport
             int i = 0;
             string imageExtension = screenshotPlugin.extension;
 
-            if (screenshotPlugin is ReshadePlugin)
+            if (screenshotPlugin is ReshadePlugin rePlugin)
             {
                 // For the ReshadePlugin, we cannot capture the current frame because Reshade runs after the end of frame.
                 // The Reshade addon stores the frame after reshade finishes effects. That buffer will be one frame behind us.
@@ -1319,25 +1368,72 @@ namespace VideoExport
                     yield return new WaitForEndOfFrame();
                 }
 
-                if (_autoGenerateVideo)
-                {
-                    ((ReshadePlugin)screenshotPlugin).vFlip = false;
-                }
-                else
-                {
-                    ((ReshadePlugin)screenshotPlugin).vFlip = true;
-                }
+                rePlugin.vFlip = !_autoGenerateVideo;
             }
-            
+
             IScreenshotPlugin plugin = _screenshotPlugins[(int)_selectedPlugin];
             Vector2 currentSize = plugin.currentSize;
             string targetSize = currentSize.x + "x" + currentSize.y;
 
+            var dicTmpFiles = new Dictionary<IAudioPlugin, string>();
             int totalFrames = 0;
             bool error = false;
             if (_autoGenerateVideo)
             {
                 _generatingVideo = false;
+
+                var pipeFrom = _includeAudio 
+                    ? _audioPluginConfigs.Where(x => x.Value.enabled)
+                    : null;
+                float audioStart = TimelineCompatibility.GetPlaybackTime();
+                float audioLength = (limit / (float)exportInterval) / _fps;
+
+                if (pipeFrom?.Count() > 0)
+                {
+                    Logger.LogDebug("Starting audio feed...");
+
+                    Logger.LogInfo(
+                        BuildAlignedLogBlock("Audio feed details:",
+                            new[]
+                            {
+                            "# of active plugins",
+                            "Start time",
+                            "Duration",
+                            "Sampling rate",
+                            "Codec"
+                            },
+                            new[]
+                            {
+                            pipeFrom.Count().ToString(),
+                            audioStart.ToString("0.00"),
+                            audioLength.ToString("0.00"),
+                            _exportSampleRate.ToString(),
+                            _codecs[_selectedCodec].Name
+                            }
+                        )
+                    );
+
+                    foreach (var kvp in pipeFrom)
+                    {
+                        var br = kvp.Key.MakeAudioStream(audioStart, audioLength, _exportSampleRate);
+                        string tmpAudioFileName = SimplifyPath(Path.Combine(_outputFolder.Value, $"_tmp_{kvp.Key.SafeName}_{_tempDateTime}.bin"));
+                        dicTmpFiles[kvp.Key] = tmpAudioFileName;
+                        int bufferSize = 30000;
+                        byte[] data;
+
+                        using (br) 
+                        using (var fs = File.Open(tmpAudioFileName, FileMode.Create, FileAccess.Write, FileShare.Read)) 
+                            while (true)
+                            {
+                                data = br.ReadBytes(bufferSize);
+                                if (data == null || data.Length == 0)
+                                    break;
+                                fs.Write(data, 0, data.Length);
+                            }
+                    }
+
+                    Logger.LogDebug("Streams finished writing");
+                }
 
                 _messageColor = Color.yellow;
                 if (Directory.Exists(_outputFolder.Value) == false)
@@ -1345,11 +1441,10 @@ namespace VideoExport
                 _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
                 // Need to match the timing of the first frame, excluding the timeline.
                 if (_selectedLimitDuration != LimitDurationType.Timeline)
-                {
                     yield return null;
-                }
-                    
-                IExtension extension = _extensions[(int)_selectedExtension];
+
+                IVideoExtension extension = _extensions[(int)_selectedExtension];
+                IAudioCodec codec = _codecs[_selectedCodec];
 
                 string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, _tempDateTime));
                 if (screenshotPlugin is ScreencapPlugin && screenshotPlugin.IsRenderTextureCaptureAvailable() == true)
@@ -1364,25 +1459,32 @@ namespace VideoExport
                 {
                     extension.channelType = 1;
                 }
-                
+
                 extension.SetVFlipNeeded(screenshotPlugin.IsVFlipNeeded());
-                string arguments = extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName);
 
-                int index = arguments.IndexOf("-vf");
+                string aInputArgs = ""; string aFilterArgs = ""; string aMapArgs = ""; string aCodecArgs = "";
+                if (_includeAudio && dicTmpFiles.Count > 0)
+                    codec.GetArguments(_exportSampleRate, audioLength, pipeFrom.ToDictionary(x => x.Key, x => x.Value), dicTmpFiles, 
+                        out int numInputsUsed, out aInputArgs, out aFilterArgs, out aMapArgs, out aCodecArgs);
 
-                if (index >= 0)
-                {
-                    if (arguments.Contains("-vf \"\"") && arguments.Length >= index + 6)
-                    {
-                        arguments = arguments.Remove(index, 6);
-                    }
-                    if (arguments.Length > index + 5 && arguments[index + 5] == ',')
-                    {
-                        arguments = arguments.Remove(index + 5, 1);
-                    }
-                }
+                extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName,
+                    out string vInputArgs, out string vFilterArgs, out string vMapArgs, out string vCodecArgs, out string vOutputArgs);
 
-                arguments = "-s " + targetSize + " " + arguments;
+                if (vFilterArgs == null || vFilterArgs == "")
+                    vMapArgs = "-map [0:v]";
+                if (vFilterArgs == null || Regex.IsMatch(vFilterArgs, @"^\[[\w:]+\]\W*\[[\w]+\]$"))
+                    vFilterArgs = vMapArgs = "";
+
+                string arguments = $"-s {targetSize} " +
+                    $"{vInputArgs} {aInputArgs} " +
+                    ((vFilterArgs != "" || aFilterArgs != "") 
+                        ? $"-filter_complex \"{vFilterArgs}{(aFilterArgs == "" ? "" : "; ")}{aFilterArgs}\" "
+                        : "") +
+                    $"{vMapArgs} {aMapArgs} " +
+                    $"{vCodecArgs} {aCodecArgs} " +
+                    vOutputArgs;
+                arguments = arguments.Replace("\";", "\"").Replace("\",", "\"").Replace("  ", " ");
+
                 totalFrames = _recordingFrameLimit * _exportFps / _fps;
 
                 if (error == false)
@@ -1422,8 +1524,8 @@ namespace VideoExport
             }
 
             Logger.LogInfo(
-                BuildAlignedLogBlock("Starting frame capture:", 
-                new[]
+                BuildAlignedLogBlock("Starting frame capture:",
+                    new[]
                     {
                         "Total frames",
                         "Export frames",
@@ -1591,7 +1693,7 @@ namespace VideoExport
                 }
 
                 elapsed = DateTime.Now - startTime;
-                
+
                 _elapsedRenderTime = elapsed;
 
                 TimeSpan remaining = TimeSpan.FromSeconds((limit - i - 1) * elapsed.TotalSeconds / (i + 1));
@@ -1633,27 +1735,27 @@ namespace VideoExport
             }
 
             if (
-                !_autoGenerateVideo || 
+                !_autoGenerateVideo ||
                 !(
-                    screenshotPlugin is ScreencapPlugin && 
-                    screenshotPlugin.IsRenderTextureCaptureAvailable() == true && 
+                    screenshotPlugin is ScreencapPlugin &&
+                    screenshotPlugin.IsRenderTextureCaptureAvailable() == true &&
                     _autoGenerateVideo
                 )
             )
             {
                 _elapsedRenderTime = TimeSpan.Zero;
-                
+
                 Logger.LogInfo(
-                    BuildAlignedLogBlock("Completed frame capture:", 
-                        new []
+                    BuildAlignedLogBlock("Completed frame capture:",
+                        new[]
                         {
                             "Elapsed time",
                             "Frame count",
                             "Generated frame count",
                             "Missing frames",
                             "Generated video"
-                        }, 
-                        new []
+                        },
+                        new[]
                         {
                             $"{elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}",
                             _limitDuration ? _recordingFrameLimit.ToString() : generatedFrames.ToString(),
@@ -1669,6 +1771,20 @@ namespace VideoExport
 
             if (_autoGenerateVideo)
             {
+                yield return StartCoroutine(WaitForFFmpegExit());
+
+                foreach (var kvp in dicTmpFiles)
+                {
+                    try
+                    {
+                        File.Delete(kvp.Value);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogWarning("Failed to auto delete temporary files: " + e);
+                    }
+                }
+
                 try
                 {
                     Directory.Delete(framesFolder, false);
@@ -1693,7 +1809,7 @@ namespace VideoExport
 
         private Process StartExternalProcess(string exe, string arguments, bool redirectStandardOutput, bool redirectStandardError, bool redirectStandardInput)
         {
-            IExtension extension = _extensions[(int)_selectedExtension];
+            IVideoExtension extension = _extensions[(int)_selectedExtension];
 
             Logger.LogInfo($"Starting process: {exe} {arguments}");
             Process proc = new Process
@@ -1746,7 +1862,7 @@ namespace VideoExport
                 //proc.BeginOutputReadLine();
             }
 
-            IExtension extension = _extensions[(int)_selectedExtension];
+            IVideoExtension extension = _extensions[(int)_selectedExtension];
             extension.ResetProgress();
 
             DateTime startTime = DateTime.Now;
@@ -1838,7 +1954,7 @@ namespace VideoExport
                 _frameDataBuffer = new byte[_frameBufferSize];
             }
         }
-        
+
         private static string BuildAlignedLogBlock(string headerTitle, string[] titles, string[] values)
         {
             if (titles == null) throw new ArgumentNullException(nameof(titles));

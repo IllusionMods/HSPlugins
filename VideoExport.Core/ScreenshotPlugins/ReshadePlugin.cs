@@ -3,13 +3,7 @@ using UnityEngine;
 using VideoExport.Core;
 using System.Reflection;
 using System.Linq;
-
-
-#if IPA
-using Harmony;
-#elif BEPINEX
 using HarmonyLib;
-#endif
 
 namespace VideoExport.ScreenshotPlugins
 {
@@ -59,11 +53,7 @@ namespace VideoExport.ScreenshotPlugins
         private string[] _imageFormatNames;
         public bool vFlip;
 
-#if IPA
-        public bool Init(HarmonyInstance harmony)
-#elif BEPINEX
         public bool Init(Harmony harmony)
-#endif
         {
             this._imageFormat = (VideoExport.ImgFormat)VideoExport._configFile.AddInt("reshadeImageFormat", (int)VideoExport.ImgFormat.BMP, true);
             this._imageFormatNames = Enum.GetNames(typeof(VideoExport.ImgFormat)).Where(x => x != nameof(VideoExport.ImgFormat.EXR)).ToArray();

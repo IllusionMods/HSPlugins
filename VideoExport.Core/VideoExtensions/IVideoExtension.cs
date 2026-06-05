@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using VideoExport.ScreenshotPlugins;
+﻿using VideoExport.ScreenshotPlugins;
 
-namespace VideoExport.Extensions
+namespace VideoExport.VideoExtensions
 {
-    public interface IExtension
+    public interface IVideoExtension
     {
         int progress { get; }
         bool canProcessStandardOutput { get; }
@@ -15,8 +11,10 @@ namespace VideoExport.Extensions
 
         bool IsCompatibleWithPlugin(IScreenshotPlugin plugin, out string reason);
         string GetExecutable();
-        string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName);
-        string GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName);
+        void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs);
+        void GetArguments(string framesFolder, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs);
         void ResetProgress();
         void ProcessStandardOutput(char c);
         void ProcessStandardError(char c);

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using VideoExport.ScreenshotPlugins;
 using UnityEngine;
-using VideoExport.ScreenshotPlugins;
+using System;
 
-namespace VideoExport.Extensions
+namespace VideoExport.VideoExtensions
 {
     public class MKVExtension : AFFMPEGBasedExtension
     {
@@ -26,7 +26,8 @@ namespace VideoExport.Extensions
             this._slices = VideoExport._configFile.AddInt("ffv1Slices", 4, true);
         }
 
-        public override string GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName)
+        public override void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
             int coreCount = _coreCount;
             string pixFmt = transparency ? "yuva444p" : "yuv444p";
@@ -38,12 +39,12 @@ namespace VideoExport.Extensions
             string codec = _codecCLIOptions[(int)this._codec] + " -level 3";
             string codecExtraArgs = $"-g {this._gopSize} -slices {this._slices}";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount}";
-            string inputArgs = $"-pix_fmt {channelTypeArg} -i {framesFolder}";
-            string codecArgs = $"-c:v {codec} {codecExtraArgs} -vf \"{videoFilterArgument}\"";
-            string outputArgs = $"\"{fileName}.mkv\"";
-
-            return $"{ffmpegArgs} {inputArgs} {codecArgs} {outputArgs}";
+            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
+            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
+            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
+            mapArgs = "-map [vid]";
+            codecArgs = $"-c:v {codec} {codecExtraArgs}";
+            outputArgs = $"\"{fileName}.mkv\"";
         }
 
         public override bool IsCompatibleWithPlugin(IScreenshotPlugin plugin, out string reason)
