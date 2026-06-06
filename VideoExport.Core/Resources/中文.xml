@@ -15,7 +15,6 @@
   <string key="Frames" value="帧" />
   <string key="Resize" value="调整尺寸" />
   <string key="ResizeDefault" value="默认" />
-  <string key="Format" value="格式" />
   <string key="DBUpdateMode" value="动态骨骼更新模式" />
   <string key="DBDefault" value="默认" />
   <string key="DBEveryFrame" value="每帧" />
@@ -42,7 +41,6 @@
   <string key="CaptureModeNormal" value="标准" />
   <string key="CaptureModeImmediate" value="高速" />
   <string key="ImageFormat" value="图像格式" />
-  <string key="Transparent" value="Alpha透明通道" />
   <string key="ScreencapCaptureType" value="截图类型" />
   <string key="ScreencapCaptureTypeNormal" value="标准" />
   <string key="ScreencapCaptureType360" value="360°环绕截图" />
@@ -60,7 +58,6 @@
   <string key="MP4PresetSlower" value="质量" />
   <string key="MP4PresetMedium" value="平衡" />
   <string key="MP4PresetFaster" value="速度" />
-  <string key="WEBMCodec" value="编码器" />
   <string key="MP4Quality" value="质量（数值越低越好，推荐使用 18）" />
   <string key="VP8Quality" value="质量（数值越低越好，推荐使用 10）" />
   <string key="VP9Quality" value="质量（数值越低越好，推荐使用 30）" />
@@ -108,6 +105,7 @@
   <string key="WebmMaxBitrateTooltip" value="设置编码的目标比特率。\nVP8仍会遵循质量设置，因此即使在最佳质量4时，\n目标比特率也很有可能无法达到。\n文本字段接受数字(k,M,G)作为值。\n示例：1000k表示1000 kbit/s。\n1G提供了一个很高的上限，因此质量设置可以根据需要使用尽可能多的比特率。\n对于1080p最高60 fps，约15M即可。\n对于4K，25M及以上效果更好。" />
   <string key="WebmMaxBitrateWarning" value="无效的比特率。请使用类似 3M、500k 或 1G 的格式，值必须大于0。" />
   <string key="AudioSectionHeading" value="音频设置" />
+  <string key="AudioUnsupportedFormat" value="此格式不支持音频。" />
   <string key="AudioEncoder" value="编码器" />
   <string key="AudioEncoderTooltip" value="[AAC] 高级音频编解码器，功能全面的默认编解码器。\n[AC3] 实现了 ATSC A/52:2010 和 ETSI TS 102 366 的部分标准。\n[FLAC] 无损音频编解码器，体积较大但音质极佳\n[OPUS] Opus 编码器，目前仍在开发中。\n[VORB] Vorbis 编码器。" />
   <string key="InclAudio" value="包含来自支持插件的音频" />
@@ -115,7 +113,7 @@
   <string key="AudioBitrate" value="比特率 (kbps)" />
   <string key="AudioSamples" value="采样率 (kHz)" />
   <string key="AACMethod" value="方法" />
-  <string key="AACProfile" value="轮廓" />
+  <string key="AACProfile" value="规格" />
   <string key="AC3NoOpts" value="没有可用的编码器选项。" />
   <string key="Enabled" value="已启用" />
   <string key="Disabled" value="已禁用" />
@@ -134,6 +132,30 @@
   <string key="VorbisMaxRate" value="最大比特率" />
   <string key="VorbisIBlock" value="IBlock" />
   <string key="NoAudioPlugins" value="未注册任何音频插件！" />
-  <string key="AudioPluginVolume" value="体积" />
+  <string key="AudioPluginVolume" value="音量" />
   <string key="AudioPluginVolumeTooltip" value="警告：音量过大可能会导致音频爆音！" />
+  <string key="CaptureModeWin32" value="Win32" />
+  <string key="AVIFQuality" value="质量（数值越低越好，推荐使用 28）" />
+  <string key="MOVPreset" value="编码预设" />
+  <string key="MOVPresetTooltip" value="[ProRes422Proxy] 最低。\n[ProRes422LT] 低。\n[ProRes422] 中等。\n[ProRes422HQ] 标准。\n[ProRes4444] 高。\n[ProRes4444XQ] 最高" />
+  <string key="MOVPresetProRes422Proxy" value="ProRes422Proxy" />
+  <string key="MOVPresetProRes422LT" value="ProRes422LT" />
+  <string key="MOVPresetProRes422" value="ProRes422" />
+  <string key="MOVPresetProRes422HQ" value="ProRes422HQ" />
+  <string key="MOVPresetProRes4444" value="ProRes4444" />
+  <string key="MOVPresetProRes4444XQ" value="ProRes4444XQ" />
+  <string key="GIFSKIQuality" value="质量" />
+  <string key="GIFSKIMotionQuality" value="运动质量" />
+  <string key="GIFSKILossyQuality" value="有损质量" />
+  <string key="GIFSKIQualityTooltip" value="较低的质量可能使文件更小[默认：90]" />
+  <string key="GIFSKIMotionQualityTooltip" value="较低的数值会减少运动" />
+  <string key="GIFSKILossyQualityTooltip" value="较低的数值会引入噪点和条纹" />
+  <string key="FFV1CodecTooltip" value="[FFV1] 一种用于存档的编码器" />
+  <string key="FFV1GopSize" value="GOP 大小" />
+  <string key="FFV1Slices" value="切片数" />
+  <string key="FFV1GopSizeTooltip" value="在一组帧内重用上下文模型以提升压缩率。" />
+  <string key="FFV1SlicesTooltip" value="每帧被分割成此数量的切片。\n这会影响多线程性能，\n以及文件大小：\n增加切片数可能会提升性能，\n但也会增加文件大小。" />
+  <string key="HwAccelSelector" value="选择器" />
+  <string key="HwAccelSelectorTooltip" value="选择要用于编码的硬件编码器。" />
+  <string key="MP4QualityTooltip" value="数值越低越好，\n推荐 16（H264）、21（H265）、30（AV1）。\n数值为 0 仅推荐给\n了解其用途的用户使用。" />
 </root>

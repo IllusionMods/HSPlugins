@@ -160,6 +160,11 @@ namespace VideoExport
         private Process _ffmpegProcessMaster;
         private Process _ffmpegProcessSlave;
         private BinaryWriter _ffmpegStdin;
+#if (!KOIKATSU || SUNSHINE)
+        // Set when capture has fed all frames so the async writer can close ffmpeg's stdin without waiting
+        // for _isRecording (cleared only after the blocking WaitForFFmpegExit). Avoids a deadlock.
+        private volatile bool _ffmpegInputComplete;
+#endif
         private byte[] _frameDataBuffer;
         private int _frameBufferSize;
         private string _tempDateTime;
@@ -336,7 +341,7 @@ namespace VideoExport
                 RecordVideo();
                 _startOnNextClick = false;
             }
-            TreeNodeObject treeNode = Studio.Studio.Instance.treeNodeCtrl.selectNode;
+            TreeNodeObject treeNode = Studio.Studio.Instance?.treeNodeCtrl.selectNode;
             _currentAnimator = null;
             if (treeNode != null)
             {
@@ -894,6 +899,25 @@ namespace VideoExport
             GUILayout.EndVertical();
         }
 
+        // Audio codecs each video container can mux. Containers not listed (GIF/WEBP/AVIF) carry no audio.
+        private static readonly Dictionary<ExtensionsType, HashSet<string>> _containerAudioCodecs = new Dictionary<ExtensionsType, HashSet<string>>
+        {
+            { ExtensionsType.MP4,  new HashSet<string> { "AAC", "AC3", "Opus" } },
+            { ExtensionsType.WEBM, new HashSet<string> { "Opus", "Vorbis" } },
+            { ExtensionsType.MOV,  new HashSet<string> { "AAC", "AC3" } },
+            { ExtensionsType.MKV,  new HashSet<string> { "AAC", "AC3", "FLAC", "Opus", "Vorbis" } },
+        };
+
+        private static bool ContainerSupportsAudio(ExtensionsType ext)
+        {
+            return _containerAudioCodecs.TryGetValue(ext, out HashSet<string> codecs) && codecs.Count > 0;
+        }
+
+        private static bool CodecCompatibleWithContainer(ExtensionsType ext, string codecName)
+        {
+            return _containerAudioCodecs.TryGetValue(ext, out HashSet<string> codecs) && codecs.Contains(codecName);
+        }
+
         private void WindowAudioSection()
         {
             IAudioCodec codec = _codecs[_selectedCodec];
@@ -931,6 +955,20 @@ namespace VideoExport
                     }
                 }
                 GUILayout.EndHorizontal();
+
+                if (!ContainerSupportsAudio(_selectedExtension))
+                {
+                    GUILayout.Space(10);
+                    GUILayout.BeginHorizontal();
+                    {
+                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioUnsupportedFormat)), Styles.CenteredLabelStyle);
+                    }
+                    GUILayout.EndHorizontal();
+                    GUILayout.Space(20);
+
+                    GUILayout.EndVertical();
+                    return;
+                }
 
                 if (_audioPlugins.Count == 0)
                 {
@@ -993,11 +1031,20 @@ namespace VideoExport
                     GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 7));
                     {
                         GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioEncoder), _currentDictionary.GetString(TranslationKey.AudioEncoderTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
-                        _selectedCodec = GUILayout.SelectionGrid(_selectedCodec, CodecNames, 1);
+                        var compatibleCodecs = new List<int>();
+                        for (int codecIndex = 0; codecIndex < _codecs.Count; codecIndex++)
+                            if (CodecCompatibleWithContainer(_selectedExtension, _codecs[codecIndex].Name))
+                                compatibleCodecs.Add(codecIndex);
+                        if (!compatibleCodecs.Contains(_selectedCodec))
+                            _selectedCodec = compatibleCodecs[0];
+                        int gridSelection = compatibleCodecs.IndexOf(_selectedCodec);
+                        gridSelection = GUILayout.SelectionGrid(gridSelection, compatibleCodecs.Select(codecIndex => _codecs[codecIndex].Name).ToArray(), 1);
+                        _selectedCodec = compatibleCodecs[gridSelection];
                     }
                     GUILayout.EndVertical();
 
                     GUILayout.BeginVertical(Styles.BoxStyle);
+                    codec = _codecs[_selectedCodec];
                     codec.DisplayParams();
                     GUILayout.EndVertical();
                 }
@@ -1382,11 +1429,21 @@ namespace VideoExport
             {
                 _generatingVideo = false;
 
-                var pipeFrom = _includeAudio 
-                    ? _audioPluginConfigs.Where(x => x.Value.enabled)
+                ExtensionsType containerType = _selectedExtension;
+                bool audioMuxAllowed = _includeAudio && CodecCompatibleWithContainer(containerType, _codecs[_selectedCodec].Name);
+                if (_includeAudio && !audioMuxAllowed)
+                    Logger.LogWarning($"[VideoExport] Audio not muxed: codec {_codecs[_selectedCodec].Name} is not compatible with the {containerType} container.");
+
+                var pipeFrom = audioMuxAllowed
+                    ? _audioPluginConfigs.Where(x => x.Value.enabled).ToList()
                     : null;
                 float audioStart = TimelineCompatibility.GetPlaybackTime();
                 float audioLength = (limit / (float)exportInterval) / _fps;
+
+                if (!Directory.Exists(_outputFolder.Value))
+                {
+                    Directory.CreateDirectory(_outputFolder.Value);
+                }
 
                 if (pipeFrom?.Count() > 0)
                 {
@@ -1436,8 +1493,6 @@ namespace VideoExport
                 }
 
                 _messageColor = Color.yellow;
-                if (Directory.Exists(_outputFolder.Value) == false)
-                    Directory.CreateDirectory(_outputFolder.Value);
                 _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
                 // Need to match the timing of the first frame, excluding the timeline.
                 if (_selectedLimitDuration != LimitDurationType.Timeline)
@@ -1463,17 +1518,20 @@ namespace VideoExport
                 extension.SetVFlipNeeded(screenshotPlugin.IsVFlipNeeded());
 
                 string aInputArgs = ""; string aFilterArgs = ""; string aMapArgs = ""; string aCodecArgs = "";
-                if (_includeAudio && dicTmpFiles.Count > 0)
-                    codec.GetArguments(_exportSampleRate, audioLength, pipeFrom.ToDictionary(x => x.Key, x => x.Value), dicTmpFiles, 
+                if (audioMuxAllowed && dicTmpFiles.Count > 0)
+                    codec.GetArguments(_exportSampleRate, audioLength, pipeFrom.ToDictionary(x => x.Key, x => x.Value), dicTmpFiles,
                         out int numInputsUsed, out aInputArgs, out aFilterArgs, out aMapArgs, out aCodecArgs);
 
                 extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName,
                     out string vInputArgs, out string vFilterArgs, out string vMapArgs, out string vCodecArgs, out string vOutputArgs);
 
                 if (vFilterArgs == null || vFilterArgs == "")
-                    vMapArgs = "-map [0:v]";
+                    vMapArgs = "-map 0:v";
                 if (vFilterArgs == null || Regex.IsMatch(vFilterArgs, @"^\[[\w:]+\]\W*\[[\w]+\]$"))
-                    vFilterArgs = vMapArgs = "";
+                {
+                    vFilterArgs = "";
+                    vMapArgs = (aMapArgs != "") ? "-map 0:v" : "";
+                }
 
                 string arguments = $"-s {targetSize} " +
                     $"{vInputArgs} {aInputArgs} " +
@@ -1500,6 +1558,7 @@ namespace VideoExport
                         screenshotPlugin.IsRenderTextureCaptureAvailable() == true && _autoGenerateVideo)
                     {
                         _simpleBytePool = new SimpleBytePool(_frameBufferSize, _simpleBytePoolSize);
+                        _ffmpegInputComplete = false;
                         _ffmpegMasterThread = new Thread(FFmpegMasterWriteLoop);
                         _ffmpegMasterThread.Priority = System.Threading.ThreadPriority.AboveNormal;
                         _ffmpegMasterThread.Start();
@@ -1771,6 +1830,10 @@ namespace VideoExport
 
             if (_autoGenerateVideo)
             {
+#if (!KOIKATSU || SUNSHINE)
+                // Tell the async writer no more frames are coming so it closes ffmpeg's stdin (else WaitForFFmpegExit deadlocks).
+                _ffmpegInputComplete = true;
+#endif
                 yield return StartCoroutine(WaitForFFmpegExit());
 
                 foreach (var kvp in dicTmpFiles)
@@ -2094,16 +2157,18 @@ namespace VideoExport
                     _nextFrameToProcess++;
                 }
 
-                if (!_isRecording
+                bool stopRequested = !_isRecording || _ffmpegInputComplete;
+
+                if (stopRequested
                     && _ffmpegMasterFrameQueue.IsEmpty
                     && _asyncGPUCompleteCount >= _asyncGPURequestCount)
                 {
                     break;
                 }
 
-                // If recording is already stopped, but we still have pending GPU work,
+                // If input is complete, but we still have pending GPU work,
                 // accumulate wait time and eventually bail out with a warning.
-                if (!_isRecording
+                if (stopRequested
                     && (_asyncGPUCompleteCount < _asyncGPURequestCount
                         || !_ffmpegMasterFrameQueue.IsEmpty))
                 {

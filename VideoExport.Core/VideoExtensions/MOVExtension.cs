@@ -24,7 +24,7 @@ namespace VideoExport.VideoExtensions
         private readonly string[] _codecProfiles =
             { "0", "1", "2", "3", "4", "5" };
         private string[] _presetNames;
-        private readonly string[] _codecCLIOptions = { "prores" };
+        private readonly string[] _codecCLIOptions = { "prores_ks" };
 
         private Codec _codec;
         private CodecProfile _codecProfile;
@@ -40,8 +40,6 @@ namespace VideoExport.VideoExtensions
             int coreCount = _coreCount;
             string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
-            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
-
             string codec = _codecCLIOptions[(int)this._codec];
             string codecProfileName = _codecProfiles[(int)this._codecProfile];
             string codecExtraArgs = "-profile:v " + codecProfileName;
@@ -50,10 +48,11 @@ namespace VideoExport.VideoExtensions
             {
                 videoPixelFormatArg = "yuv444p10le";
             }
+            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY, additionalFiltersPost: $"format={videoPixelFormatArg}");
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
             inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
-            filterArgs = $"[0:v]{videoFilterArgument}, format={videoPixelFormatArg}[vid]";
+            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
             mapArgs = "-map [vid]";
             codecArgs = $"-c:v {codec} {codecExtraArgs}";
             outputArgs = $"\"{fileName}.mov\"";

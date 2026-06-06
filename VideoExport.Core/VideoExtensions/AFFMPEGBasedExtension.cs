@@ -171,7 +171,8 @@ namespace VideoExport.VideoExtensions
                         res += $"rotate=PI";
                         break;
                     case 3:
-                        res += $"transpose={(int)_rotation}";
+                        // transpose=2 = 90 CCW (= 270 CW)
+                        res += "transpose=2";
                         break;
                 }
 
