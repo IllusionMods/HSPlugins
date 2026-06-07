@@ -1641,6 +1641,7 @@ namespace VideoExport
                 _messageColor = Color.red;
                 _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
                 setError(true);
+                _breakRecording = true;
                 proc.Close();
                 yield break;
             }
