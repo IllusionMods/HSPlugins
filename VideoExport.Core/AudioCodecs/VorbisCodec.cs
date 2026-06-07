@@ -9,6 +9,7 @@ namespace VideoExport.AudioCodecs
     internal class VorbisCodec : IAudioCodec
     {
         public string Name { get { return "Vorbis"; } }
+        public AudioCodecType CodecType { get { return AudioCodecType.Vorbis; } }
         public bool UseVBR { get; set; }
         public int Bitrate { get; set; }
         public float Quality { get; set; }

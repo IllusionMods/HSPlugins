@@ -8,6 +8,7 @@ namespace VideoExport.AudioCodecs
     {
 
         public string Name { get { return "AC3"; } }
+        public AudioCodecType CodecType { get { return AudioCodecType.AC3; } }
 
         public AC3Codec()
         {

@@ -21,6 +21,7 @@ namespace VideoExport.AudioCodecs
         }
 
         public string Name { get { return "AAC"; } }
+        public AudioCodecType CodecType { get { return AudioCodecType.AAC; } }
         public int Bitrate { get; set; }
         public CodingMethod Method { get; set; }
         public CodingProfile Profile { get; set; }

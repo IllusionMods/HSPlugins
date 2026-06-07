@@ -20,6 +20,7 @@ namespace VideoExport.AudioCodecs
         public readonly float[] frameSizeOpts = new[] { 2.5f, 5f, 10f, 20f, 40f, 60f };
 
         public string Name { get { return "Opus"; } }
+        public AudioCodecType CodecType { get { return AudioCodecType.Opus; } }
         public int Compression { get; set; }
         public int Bitrate { get; set; }
         public VBRType VBR { get; set; }

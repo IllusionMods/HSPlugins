@@ -37,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\IScreenshotPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ScreenshotPlugins\ScreencapPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TranslationKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AudioAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VideoExport.cs" />
   </ItemGroup>
   <ItemGroup>
