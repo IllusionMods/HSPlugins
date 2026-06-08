@@ -8,7 +8,7 @@
 #--disable-encoders
 --disable-shared
 --disable-debug
---disable-logging
+#--disable-logging
 --disable-doc
 #--disable-programs
 --disable-ffplay
@@ -27,21 +27,21 @@
 --enable-nvenc
 --enable-ffnvcodec
 --enable-nvdec
---enable-cuda-llvm
---enable-cuda-nvcc
+#--enable-cuda-llvm
+#--enable-cuda-nvcc
 
 ## INTEL
 --enable-libvpl
 
 ## OS-WINDOWS
---enable-d3d12va
+#--enable-d3d12va
 --enable-d3d11va
 --enable-dxva2
 
 ## OS-FREE
---enable-vulkan
---enable-opencl
---enable-opengl
+#--enable-av1_vulkan
+#--enable-opencl
+#--enable-opengl
 
 # EXT_LIBS
 
@@ -64,6 +64,10 @@
 #--enable-libvvenc # VVC ENC
 #--enable-libvvdec # VVC DEC
 
+## AUDIO
+--enable-libopus
+--enable-libvorbis
+
 # PROTOCOL
 --enable-protocol=file
 --enable-protocol=pipe
@@ -76,10 +80,25 @@
 --enable-parser=vp8
 --enable-parser=vp9
 --enable-parser=av1
+## AUDIO
+--enable-parser=aac
+--enable-parser=ac3
+--enable-parser=flac
+--enable-parser=vorbis
+--enable-parser=opus
+--enable-parser=mpegaudio
 
 # DEMUXER
 --enable-demuxer=rawvideo
 --enable-demuxer=mov
+## AUDIO
+--enable-demuxer=mp3
+--enable-demuxer=wav
+--enable-demuxer=ogg
+--enable-demuxer=flac
+--enable-demuxer=aac
+--enable-demuxer=w64
+--enable-demuxer=aiff
 
 # MUXER
 --enable-muxer=gif
@@ -100,6 +119,14 @@
 --enable-filter=palettegen
 --enable-filter=paletteuse
 --enable-filter=split
+## AUDIO
+--enable-filter=volume
+--enable-filter=amix
+--enable-filter=amerge
+--enable-filter=atrim
+--enable-filter=aresample
+--enable-filter=aformat
+--enable-filter=anull
 
 # ENCODER
 
@@ -112,34 +139,53 @@
 --enable-encoder=rawvideo
 --enable-encoder=prores_ks
 --enable-encoder=ffv1
---enable-encoder=ffv1_vulkan
+#--enable-encoder=ffv1_vulkan
 --enable-encoder=libx264
 --enable-encoder=h264_amf
---enable-encoder=h264_mf
+#--enable-encoder=h264_mf
 --enable-encoder=h264_nvenc
 --enable-encoder=h264_qsv
---enable-encoder=h264_vulkan
+#--enable-encoder=h264_vulkan
 --enable-encoder=libx265
 --enable-encoder=hevc_amf
---enable-encoder=hevc_d3d12va
---enable-encoder=hevc_mf
+#--enable-encoder=hevc_d3d12va
+#--enable-encoder=hevc_mf
 --enable-encoder=hevc_nvenc
 --enable-encoder=hevc_qsv
---enable-encoder=hevc_vulkan
+#--enable-encoder=hevc_vulkan
 --enable-encoder=libvpx_vp8
 --enable-encoder=libvpx_vp9
---enable-encoder=vp9_qsv
+#--enable-encoder=vp9_qsv
 --enable-encoder=libaom_av1
 --enable-encoder=libsvtav1
 --enable-encoder=av1_amf
---enable-encoder=av1_d3d12va
---enable-encoder=av1_mf
+#--enable-encoder=av1_d3d12va
+#--enable-encoder=av1_mf
 --enable-encoder=av1_nvenc
 --enable-encoder=av1_qsv
---enable-encoder=av1_vulkan
+#--enable-encoder=av1_vulkan
+
+## AUDIO
+--enable-encoder=aac
+--enable-encoder=ac3
+--enable-encoder=flac
+--enable-encoder=libopus
+--enable-encoder=libvorbis
 
 # DECODER
 
 ## VIDEO
 --enable-decoder=rawvideo
 --enable-decoder=prores
+
+## AUDIO (decode plugin audio so it can be transcoded)
+--enable-decoder=aac
+--enable-decoder=mp3float
+--enable-decoder=flac
+--enable-decoder=vorbis
+--enable-decoder=opus
+--enable-decoder=pcm_s16le
+--enable-decoder=pcm_s24le
+--enable-decoder=pcm_s32le
+--enable-decoder=pcm_f32le
+--enable-decoder=pcm_u8

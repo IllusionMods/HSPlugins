@@ -106,7 +106,6 @@ namespace VideoExport
         private bool _breakRecording = false;
         private bool _generatingVideo = false;
         private readonly List<IScreenshotPlugin> _screenshotPlugins = new List<IScreenshotPlugin>();
-        private readonly List<IAudioPlugin> _audioPlugins = new List<IAudioPlugin>();
         private const int _uniqueId = ('V' << 24) | ('I' << 16) | ('D' << 8) | 'E';
         private Rect _windowRect = new Rect(Screen.width / 2 - 320, 100, Styles.WindowWidth, 10);
         private static RectTransform _imguiBackground;
@@ -123,13 +122,6 @@ namespace VideoExport
         private int _recordingFrameLimit;
         private bool _timelinePresent = false;
         private float _realTimelineDuration;
-
-        private bool _includeAudio;
-        private int _exportSampleRate;
-        private int _selectedCodec;
-        private readonly List<IAudioCodec> _codecs = new List<IAudioCodec>();
-        private readonly int[] _presetSampleRate = new[] { 8000, 11025, 16000, 22050, 32000, 44100, 88200 };
-        private readonly Dictionary<IAudioPlugin, AudioPluginConfig> _audioPluginConfigs = new Dictionary<IAudioPlugin, AudioPluginConfig>();
 
         private int _selectedPlugin = 0;
         private int _fps = 60;
@@ -153,13 +145,17 @@ namespace VideoExport
         private bool _showTooltips = true;
         private bool _showCaptureSection;
         private bool _showVideoSection;
-        private bool _showAudioSection;
         private bool _showOtherSection;
         private bool _exportFpsSameAsCapture = true;
 
         private Process _ffmpegProcessMaster;
         private Process _ffmpegProcessSlave;
         private BinaryWriter _ffmpegStdin;
+#if (!KOIKATSU || SUNSHINE)
+        // Set when capture has fed all frames so the async writer can close ffmpeg's stdin without waiting
+        // for _isRecording (cleared only after the blocking WaitForFFmpegExit). Avoids a deadlock.
+        private volatile bool _ffmpegInputComplete;
+#endif
         private byte[] _frameDataBuffer;
         private int _frameBufferSize;
         private string _tempDateTime;
@@ -189,13 +185,6 @@ namespace VideoExport
 
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigStartStopShortcut { get; private set; }
-        internal string[] CodecNames
-        {
-            get
-            {
-                return _codecs.Select(x => x.Name).ToArray();
-            }
-        }
 
         public static bool ShowUI
         {
@@ -275,14 +264,7 @@ namespace VideoExport
             if ((int)_selectedExtension >= _extensionsNames.Length)
                 _selectedExtension = ExtensionsType.MP4;
 
-            _codecs.Add(new AACCodec());
-            _codecs.Add(new AC3Codec());
-            _codecs.Add(new FLACCodec());
-            _codecs.Add(new OpusCodec());
-            _codecs.Add(new VorbisCodec());
-
-            if (_selectedCodec >= _codecs.Count)
-                _selectedCodec = 0;
+            InitAudio();
 
             _timelinePresent = TimelineCompatibility.Init();
 
@@ -336,7 +318,7 @@ namespace VideoExport
                 RecordVideo();
                 _startOnNextClick = false;
             }
-            TreeNodeObject treeNode = Studio.Studio.Instance.treeNodeCtrl.selectNode;
+            TreeNodeObject treeNode = Studio.Studio.Instance?.treeNodeCtrl.selectNode;
             _currentAnimator = null;
             if (treeNode != null)
             {
@@ -410,15 +392,11 @@ namespace VideoExport
             _configFile.SetBool("showOtherSection", _showOtherSection);
             _configFile.SetBool("showTooltips", _showTooltips);
             _configFile.SetBool("parallelScreenshotEncoding", _parallelScreenshotEncoding);
-            _configFile.SetBool("includeAudio", _includeAudio);
-            _configFile.SetInt("selectedCodec", _selectedCodec);
-            _configFile.SetInt("exportSampleRate", _exportSampleRate);
             foreach (IScreenshotPlugin plugin in _screenshotPlugins)
                 plugin.SaveParams();
             foreach (IVideoExtension extension in _extensions)
                 extension.SaveParams();
-            foreach (IAudioCodec codec in _codecs)
-                codec.SaveParams();
+            SaveAudioConfig();
             _configFile.Save();
         }
         #endregion
@@ -441,50 +419,6 @@ namespace VideoExport
             _breakRecording = true;
         }
 
-        /// <summary>
-        /// Register a new audio provider, which must implement the IAudioPlugin interface.
-        /// </summary>
-        /// <typeparam name="T">Type of the registered audio provider, must implement IAudioPlugin</typeparam>
-        /// <param name="plugin">The instance of the registered audio provider</param>
-        /// <returns>Whether the registration was successful</returns>
-        public bool AddAudioPlugin<T>(T plugin, out string error) where T : IAudioPlugin
-        {
-            try
-            {
-                if (_audioPlugins.Contains(plugin))
-                {
-                    error = "Plugin already registered!";
-                    return false;
-                }
-                if (_audioPlugins.Select(x => x.GetType()).Contains(plugin.GetType()))
-                {
-                    error = "A plugin of the same type has already been registered!";
-                    return false;
-                }
-                if (!Regex.IsMatch(plugin.SafeName, @"^[a-zA-Z0-9_\.]{3,20}$"))
-                {
-                    error = "The plugin's safe name doesn't match the criteria!";
-                    return false;
-                }
-                if (_audioPlugins.Any(x => x.SafeName == plugin.SafeName))
-                {
-                    error = "The plugin's safe name is already in use!";
-                    return false;
-                }
-
-                _audioPlugins.Add(plugin);
-                _audioPluginConfigs.Add(plugin, new AudioPluginConfig(plugin));
-
-                error = "-";
-                return true;
-            }
-            catch (Exception e)
-            {
-                error = "Couldn't add audio plugin " + typeof(T).FullName + "!\n" + e;
-                Logger.LogError(error);
-                return false;
-            }
-        }
         #endregion
 
         #region Private Methods
@@ -894,119 +828,6 @@ namespace VideoExport
             GUILayout.EndVertical();
         }
 
-        private void WindowAudioSection()
-        {
-            IAudioCodec codec = _codecs[_selectedCodec];
-            bool prevEnabled;
-
-            GUILayout.BeginVertical("Box");
-            {
-                GUILayout.BeginHorizontal(Styles.headerStyle);
-                {
-                    GUILayout.Space(30);
-                    GUI.backgroundColor = Color.gray;
-                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioSectionHeading)), Styles.SectionLabelStyle);
-                    if (GUILayout.Button(_showAudioSection ? "▲" : "▼", GUILayout.Width(30)))
-                    {
-                        _showAudioSection = !_showAudioSection;
-                    }
-                    GUI.backgroundColor = Color.white;
-                }
-                GUILayout.EndHorizontal();
-
-                if (!_showAudioSection)
-                {
-                    GUILayout.EndVertical();
-                    return;
-                }
-
-                GUILayout.BeginHorizontal(Styles.EmptyBoxStyle);
-                {
-                    _includeAudio = GUILayout.Toggle(_includeAudio, new GUIContent(_currentDictionary.GetString(TranslationKey.InclAudio), _currentDictionary.GetString(TranslationKey.InclAudioTooltip).Replace("\\n", "\n")));
-                    if (!_includeAudio)
-                    {
-                        GUILayout.EndHorizontal();
-                        GUILayout.EndVertical();
-                        return;
-                    }
-                }
-                GUILayout.EndHorizontal();
-
-                if (_audioPlugins.Count == 0)
-                {
-                    GUILayout.Space(10);
-                    GUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.NoAudioPlugins)), Styles.CenteredLabelStyle);
-                    }
-                    GUILayout.EndHorizontal();
-                    GUILayout.Space(20);
-
-                    GUILayout.EndVertical();
-                    return;
-                }
-
-                foreach (var plugin in _audioPlugins)
-                {
-                    var config = _audioPluginConfigs[plugin];
-                    GUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Label(new GUIContent(plugin.Name));
-                        config.enabled = GUILayout.Toggle(config.enabled, new GUIContent(_currentDictionary.GetString(TranslationKey.Enabled)), GUILayout.ExpandWidth(false));
-                    }
-                    GUILayout.EndHorizontal();
-
-                    prevEnabled = GUI.enabled;
-                    GUI.enabled = config.enabled;
-                    GUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioPluginVolume), _currentDictionary.GetString(TranslationKey.AudioPluginVolumeTooltip)), GUILayout.ExpandWidth(false));
-                        float newVol = GUILayout.HorizontalSlider(config.volume, 0, 2);
-                        if (newVol != config.volume)
-                            config.volume = Mathf.RoundToInt(newVol * 100) / 100f;
-                        GUILayout.Label(config.volume.ToString("0.00"), Styles.CenteredLabelStyle, GUILayout.Width(50));
-                    }
-                    GUILayout.EndHorizontal();
-                    GUI.enabled = prevEnabled;
-                }
-
-                GUILayout.Space(10);
-
-                prevEnabled = GUI.enabled;
-                GUI.enabled = _audioPluginConfigs.Any(x => x.Value.enabled);
-                GUILayout.BeginHorizontal();
-                {
-                    GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioSamples)));
-
-                    foreach (int presetRate in _presetSampleRate)
-                        if (GUILayout.Button((presetRate / 1000f).ToString("0.0"), Styles.ButtonStyle, GUILayout.Width(42)))
-                            _exportSampleRate = presetRate;
-
-                    string sampleString = GUILayout.TextField(_exportSampleRate.ToString(), GUILayout.Width(50), GUILayout.Height(30));
-                    if (int.TryParse(sampleString, out int res))
-                        _exportSampleRate = Mathf.Clamp(res, 8000, 192000);
-                }
-                GUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal();
-                {
-                    GUILayout.BeginVertical(GUILayout.Width(Styles.WindowWidth / 7));
-                    {
-                        GUILayout.Label(new GUIContent(_currentDictionary.GetString(TranslationKey.AudioEncoder), _currentDictionary.GetString(TranslationKey.AudioEncoderTooltip).Replace("\\n", "\n")), Styles.CenteredLabelStyle);
-                        _selectedCodec = GUILayout.SelectionGrid(_selectedCodec, CodecNames, 1);
-                    }
-                    GUILayout.EndVertical();
-
-                    GUILayout.BeginVertical(Styles.BoxStyle);
-                    codec.DisplayParams();
-                    GUILayout.EndVertical();
-                }
-                GUILayout.EndHorizontal();
-                GUI.enabled = prevEnabled;
-            }
-            GUILayout.EndVertical();
-        }
-
         void WindowOtherSection()
         {
             GUILayout.BeginVertical("Box");
@@ -1375,76 +1196,28 @@ namespace VideoExport
             Vector2 currentSize = plugin.currentSize;
             string targetSize = currentSize.x + "x" + currentSize.y;
 
-            var dicTmpFiles = new Dictionary<IAudioPlugin, string>();
+            var audioFeed = new AudioFeedResult();
             int totalFrames = 0;
             bool error = false;
             if (_autoGenerateVideo)
             {
                 _generatingVideo = false;
 
-                var pipeFrom = _includeAudio 
-                    ? _audioPluginConfigs.Where(x => x.Value.enabled)
-                    : null;
-                float audioStart = TimelineCompatibility.GetPlaybackTime();
-                float audioLength = (limit / (float)exportInterval) / _fps;
-
-                if (pipeFrom?.Count() > 0)
+                if (!Directory.Exists(_outputFolder.Value))
                 {
-                    Logger.LogDebug("Starting audio feed...");
-
-                    Logger.LogInfo(
-                        BuildAlignedLogBlock("Audio feed details:",
-                            new[]
-                            {
-                            "# of active plugins",
-                            "Start time",
-                            "Duration",
-                            "Sampling rate",
-                            "Codec"
-                            },
-                            new[]
-                            {
-                            pipeFrom.Count().ToString(),
-                            audioStart.ToString("0.00"),
-                            audioLength.ToString("0.00"),
-                            _exportSampleRate.ToString(),
-                            _codecs[_selectedCodec].Name
-                            }
-                        )
-                    );
-
-                    foreach (var kvp in pipeFrom)
-                    {
-                        var br = kvp.Key.MakeAudioStream(audioStart, audioLength, _exportSampleRate);
-                        string tmpAudioFileName = SimplifyPath(Path.Combine(_outputFolder.Value, $"_tmp_{kvp.Key.SafeName}_{_tempDateTime}.bin"));
-                        dicTmpFiles[kvp.Key] = tmpAudioFileName;
-                        int bufferSize = 30000;
-                        byte[] data;
-
-                        using (br) 
-                        using (var fs = File.Open(tmpAudioFileName, FileMode.Create, FileAccess.Write, FileShare.Read)) 
-                            while (true)
-                            {
-                                data = br.ReadBytes(bufferSize);
-                                if (data == null || data.Length == 0)
-                                    break;
-                                fs.Write(data, 0, data.Length);
-                            }
-                    }
-
-                    Logger.LogDebug("Streams finished writing");
+                    Directory.CreateDirectory(_outputFolder.Value);
                 }
 
+                float audioLength = (limit / (float)exportInterval) / _fps;
+                audioFeed = BuildAudioFeed(audioLength);
+
                 _messageColor = Color.yellow;
-                if (Directory.Exists(_outputFolder.Value) == false)
-                    Directory.CreateDirectory(_outputFolder.Value);
                 _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingVideo);
                 // Need to match the timing of the first frame, excluding the timeline.
                 if (_selectedLimitDuration != LimitDurationType.Timeline)
                     yield return null;
 
                 IVideoExtension extension = _extensions[(int)_selectedExtension];
-                IAudioCodec codec = _codecs[_selectedCodec];
 
                 string fileName = SimplifyPath(Path.Combine(_outputFolder.Value, _tempDateTime));
                 if (screenshotPlugin is ScreencapPlugin && screenshotPlugin.IsRenderTextureCaptureAvailable() == true)
@@ -1462,26 +1235,24 @@ namespace VideoExport
 
                 extension.SetVFlipNeeded(screenshotPlugin.IsVFlipNeeded());
 
-                string aInputArgs = ""; string aFilterArgs = ""; string aMapArgs = ""; string aCodecArgs = "";
-                if (_includeAudio && dicTmpFiles.Count > 0)
-                    codec.GetArguments(_exportSampleRate, audioLength, pipeFrom.ToDictionary(x => x.Key, x => x.Value), dicTmpFiles, 
-                        out int numInputsUsed, out aInputArgs, out aFilterArgs, out aMapArgs, out aCodecArgs);
-
                 extension.GetArguments("-", imageExtension, screenshotPlugin.bitDepth, _exportFps, screenshotPlugin.transparency, _resize, _resizeX, _resizeY, fileName,
                     out string vInputArgs, out string vFilterArgs, out string vMapArgs, out string vCodecArgs, out string vOutputArgs);
 
                 if (vFilterArgs == null || vFilterArgs == "")
-                    vMapArgs = "-map [0:v]";
+                    vMapArgs = "-map 0:v";
                 if (vFilterArgs == null || Regex.IsMatch(vFilterArgs, @"^\[[\w:]+\]\W*\[[\w]+\]$"))
-                    vFilterArgs = vMapArgs = "";
+                {
+                    vFilterArgs = "";
+                    vMapArgs = (audioFeed.MapArgs != "") ? "-map 0:v" : "";
+                }
 
                 string arguments = $"-s {targetSize} " +
-                    $"{vInputArgs} {aInputArgs} " +
-                    ((vFilterArgs != "" || aFilterArgs != "") 
-                        ? $"-filter_complex \"{vFilterArgs}{(aFilterArgs == "" ? "" : "; ")}{aFilterArgs}\" "
+                    $"{vInputArgs} {audioFeed.InputArgs} " +
+                    ((vFilterArgs != "" || audioFeed.FilterArgs != "")
+                        ? $"-filter_complex \"{vFilterArgs}{(audioFeed.FilterArgs == "" ? "" : "; ")}{audioFeed.FilterArgs}\" "
                         : "") +
-                    $"{vMapArgs} {aMapArgs} " +
-                    $"{vCodecArgs} {aCodecArgs} " +
+                    $"{vMapArgs} {audioFeed.MapArgs} " +
+                    $"{vCodecArgs} {audioFeed.CodecArgs} " +
                     vOutputArgs;
                 arguments = arguments.Replace("\";", "\"").Replace("\",", "\"").Replace("  ", " ");
 
@@ -1500,6 +1271,7 @@ namespace VideoExport
                         screenshotPlugin.IsRenderTextureCaptureAvailable() == true && _autoGenerateVideo)
                     {
                         _simpleBytePool = new SimpleBytePool(_frameBufferSize, _simpleBytePoolSize);
+                        _ffmpegInputComplete = false;
                         _ffmpegMasterThread = new Thread(FFmpegMasterWriteLoop);
                         _ffmpegMasterThread.Priority = System.Threading.ThreadPriority.AboveNormal;
                         _ffmpegMasterThread.Start();
@@ -1771,9 +1543,13 @@ namespace VideoExport
 
             if (_autoGenerateVideo)
             {
+#if (!KOIKATSU || SUNSHINE)
+                // Tell the async writer no more frames are coming so it closes ffmpeg's stdin (else WaitForFFmpegExit deadlocks).
+                _ffmpegInputComplete = true;
+#endif
                 yield return StartCoroutine(WaitForFFmpegExit());
 
-                foreach (var kvp in dicTmpFiles)
+                foreach (var kvp in audioFeed.TmpFiles)
                 {
                     try
                     {
@@ -1850,7 +1626,25 @@ namespace VideoExport
                 yield return StartCoroutine(WaitForFFmpegExit());
             }
 
-            proc.Start();
+            bool started = false;
+            try
+            {
+                proc.Start();
+                started = true;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Failed to launch '{proc.StartInfo.FileName}'. Make sure the executable exists and isn't blocked by antivirus.\n{e}");
+            }
+            if (!started)
+            {
+                _messageColor = Color.red;
+                _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
+                setError(true);
+                _breakRecording = true;
+                proc.Close();
+                yield break;
+            }
 
             if (proc.StartInfo.RedirectStandardInput)
             {
@@ -1877,19 +1671,30 @@ namespace VideoExport
 
             proc.WaitForExit();
 
-            var errorOut = proc.StandardError.ReadToEnd()?.Trim();
-            if (!string.IsNullOrEmpty(errorOut))
-                Logger.LogInfo(errorOut);
+            string errorOut = null;
+            if (proc.StartInfo.RedirectStandardError)
+                errorOut = proc.StandardError.ReadToEnd()?.Trim();
 
             yield return null;
-            if (proc.ExitCode == 0)
+
+            int exitCode = proc.ExitCode;
+            if (exitCode == 0)
             {
+                if (!string.IsNullOrEmpty(errorOut))
+                    Logger.LogInfo(errorOut);
+
                 _messageColor = Color.green;
                 _currentMessage = _currentDictionary.GetString(TranslationKey.Done) +
                   $"\nTime spent:{elapsed.Hours:0}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
             }
             else
             {
+                string stage = isMaster ? "main encode pass" : "secondary pass (GIF palette)";
+                Logger.LogError(
+                    $"ffmpeg failed during the {stage} (exit code {exitCode}); the output file was not produced.\n" +
+                    $"Command: {proc.StartInfo.FileName} {proc.StartInfo.Arguments}\n" +
+                    $"ffmpeg output:\n{(string.IsNullOrEmpty(errorOut) ? "(no error output captured)" : errorOut)}");
+
                 _messageColor = Color.red;
                 _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
                 setError(true);
@@ -2094,16 +1899,18 @@ namespace VideoExport
                     _nextFrameToProcess++;
                 }
 
-                if (!_isRecording
+                bool stopRequested = !_isRecording || _ffmpegInputComplete;
+
+                if (stopRequested
                     && _ffmpegMasterFrameQueue.IsEmpty
                     && _asyncGPUCompleteCount >= _asyncGPURequestCount)
                 {
                     break;
                 }
 
-                // If recording is already stopped, but we still have pending GPU work,
+                // If input is complete, but we still have pending GPU work,
                 // accumulate wait time and eventually bail out with a warning.
-                if (!_isRecording
+                if (stopRequested
                     && (_asyncGPUCompleteCount < _asyncGPURequestCount
                         || !_ffmpegMasterFrameQueue.IsEmpty))
                 {

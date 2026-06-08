@@ -33,8 +33,7 @@ namespace VideoExport.VideoExtensions
             string pixFmt = transparency ? "yuva444p" : "yuv444p";
             string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
-            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
-            videoFilterArgument = videoFilterArgument + $", format={pixFmt}";
+            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY, additionalFiltersPost: $"format={pixFmt}");
 
             string codec = _codecCLIOptions[(int)this._codec] + " -level 3";
             string codecExtraArgs = $"-g {this._gopSize} -slices {this._slices}";

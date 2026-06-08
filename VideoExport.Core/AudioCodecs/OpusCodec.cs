@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -19,6 +20,7 @@ namespace VideoExport.AudioCodecs
         public readonly float[] frameSizeOpts = new[] { 2.5f, 5f, 10f, 20f, 40f, 60f };
 
         public string Name { get { return "Opus"; } }
+        public AudioCodecType CodecType { get { return AudioCodecType.Opus; } }
         public int Compression { get; set; }
         public int Bitrate { get; set; }
         public VBRType VBR { get; set; }
@@ -29,7 +31,7 @@ namespace VideoExport.AudioCodecs
             Compression = VideoExport._configFile.AddInt("opusCompression", 10, true);
             Bitrate = VideoExport._configFile.AddInt("opusBitrate", 128, true);
             VBR = (VBRType)VideoExport._configFile.AddInt("opusVBR", (int)VBRType.Off, true);
-            Framesize = VideoExport._configFile.AddInt("opusFramesize", 3, true);
+            Framesize = Mathf.Clamp(VideoExport._configFile.AddInt("opusFramesize", 3, true), 0, frameSizeOpts.Length - 1);
         }
 
         public void DisplayParams()
@@ -88,7 +90,7 @@ namespace VideoExport.AudioCodecs
             sb.Append($"-b:a {Bitrate * 1000} ");
             sb.Append($"-vbr {VBR.ToString().ToLower()} ");
             sb.Append($"-compression_level {Compression} ");
-            sb.Append($"-frame_duration {frameSizeOpts[Framesize]} ");
+            sb.Append($"-frame_duration {frameSizeOpts[Mathf.Clamp(Framesize, 0, frameSizeOpts.Length - 1)].ToString(CultureInfo.InvariantCulture)} ");
             codecArgs = sb.ToString();
 
             AudioCodecCommon.GetArguments(sampleRate, duration, audioPlugins, audioFiles, out numInputsUsed, out inputArgs, out filterArgs, out mapArgs);

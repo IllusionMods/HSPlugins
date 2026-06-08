@@ -133,6 +133,7 @@ namespace VideoExport
             WebmMaxBitrateTooltip,
             WebmMaxBitrateWarning,
             AudioSectionHeading,
+            AudioUnsupportedFormat,
             AudioEncoder,
             AudioEncoderTooltip,
             InclAudio,

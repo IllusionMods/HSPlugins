@@ -9,6 +9,7 @@ namespace VideoExport.AudioCodecs
     internal class VorbisCodec : IAudioCodec
     {
         public string Name { get { return "Vorbis"; } }
+        public AudioCodecType CodecType { get { return AudioCodecType.Vorbis; } }
         public bool UseVBR { get; set; }
         public int Bitrate { get; set; }
         public float Quality { get; set; }
@@ -111,8 +112,8 @@ namespace VideoExport.AudioCodecs
             if (UseVBR)
             {
                 sb.Append($"-q:a {Quality.ToString(CultureInfo.InvariantCulture)} ");
-                sb.Append($"-minrate:a {MinRate} ");
-                sb.Append($"-maxrate:a {MaxRate} ");
+                sb.Append($"-minrate:a {MinRate * 1000} ");
+                sb.Append($"-maxrate:a {MaxRate * 1000} ");
             }
             else
             {

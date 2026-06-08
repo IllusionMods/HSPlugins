@@ -127,16 +127,15 @@ namespace VideoExport.VideoExtensions
             int coreCount = _coreCount;
             string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
-            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
-
-            string codec = "prores";
+            string codec = "prores_ks";
             string codecProfileName = "4";
             string codecExtraArgs = "-profile:v " + codecProfileName;
             string videoPixelFormatArg = transparency ? "yuva444p10le" : "yuv444p10le";
+            string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY, additionalFiltersPost: $"format={videoPixelFormatArg}");
 
             string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
             inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
-            filterArgs = $"[0:v]{videoFilterArgument},format={videoPixelFormatArg}[vid]";
+            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
             mapArgs = "-map [vid]";
             codecArgs = $"-c:v {codec} {codecExtraArgs}";
             outputArgs = $"\"{fileName}.mov\"";

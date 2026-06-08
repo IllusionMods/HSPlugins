@@ -6,9 +6,19 @@ using VideoExport.AudioPlugins;
 
 namespace VideoExport.AudioCodecs
 {
+    internal enum AudioCodecType
+    {
+        AAC,
+        AC3,
+        FLAC,
+        Opus,
+        Vorbis
+    }
+
     internal interface IAudioCodec
     {
         string Name { get; }
+        AudioCodecType CodecType { get; }
 
         void DisplayParams();
         void SaveParams();
@@ -47,17 +57,17 @@ namespace VideoExport.AudioCodecs
 
             // Input
             inputArgs = string.Concat(getFrom.Select(x => $"-i \"{audioFiles[x.Key]}\" ").ToArray());
-            
+
             // Filtering
-            int i = 1; // Starting from 1 because video already used one input
             var sb = new StringBuilder();
-            foreach (var kvp in getFrom)
+            for (int i = 0; i < getFrom.Count; i++)
             {
-                sb.Append($"[{i}:a]volume={kvp.Value.volume.ToString(CultureInfo.InvariantCulture)}[{kvp.Key.SafeName}]; ");
-                i++;
+                // i + 1 because the video already used input 0.
+                sb.Append($"[{i + 1}:a]volume={getFrom[i].Value.volume.ToString(CultureInfo.InvariantCulture)}[a_{i}]; ");
             }
-            sb.Append(string.Concat(getFrom.Select(x => $"[{x.Key.SafeName}]").ToArray()));
-            sb.Append($"amerge=inputs={getFrom.Count},atrim=duration={duration.ToString(CultureInfo.InvariantCulture)},aresample={sampleRate}[aud]");
+            for (int i = 0; i < getFrom.Count; i++)
+                sb.Append($"[a_{i}]");
+            sb.Append($"amix=inputs={getFrom.Count}:normalize=0,atrim=duration={duration.ToString(CultureInfo.InvariantCulture)},aresample={sampleRate}[aud]");
             filterArgs = sb.ToString();
 
             // Mapping

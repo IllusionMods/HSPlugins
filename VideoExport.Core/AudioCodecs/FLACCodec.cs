@@ -27,6 +27,7 @@ namespace VideoExport.AudioCodecs
         public readonly string[] PredictionOrderLabels = new string[] { "Est", "2L", "4L", "8L", "Srch", "Log" };
 
         public string Name { get { return "FLAC"; } }
+        public AudioCodecType CodecType { get { return AudioCodecType.FLAC; } }
         public int Compression { get; set; }
         public int LPCPrecision { get; set; }
         public LPCAlgoType LPCType { get; set; }
