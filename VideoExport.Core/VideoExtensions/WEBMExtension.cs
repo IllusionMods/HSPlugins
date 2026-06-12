@@ -72,28 +72,24 @@ namespace VideoExport.VideoExtensions
         public override void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
             out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
-            int coreCount = _coreCount;
             string pixFmt;
             switch (bitDepth)
             {
                 default:
                 case 8:
-                    pixFmt = transparency ? "yuva420p -metadata:s:v:0 alpha_mode=\"1\"" : "yuv420p";
+                    pixFmt = transparency ? "yuva420p" : "yuv420p";
                     break;
                 case 10:
-                    pixFmt = transparency ? "yuva420p10le -metadata:s:v:0 alpha_mode=\"1\"" : "yuv420p10le";
+                    pixFmt = transparency ? "yuva420p10le" : "yuv420p10le";
                     break;
             }
-            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
+            string alphaMeta = transparency ? " -metadata:s:v:0 alpha_mode=\"1\"" : "";
             string autoAltRef = this._codec == Codec.VP8 ? "-auto-alt-ref 0" : "";
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
-            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
-            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
-            mapArgs = "-map [vid]";
-            codecArgs = $"-c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : "")} -pix_fmt {pixFmt} {autoAltRef} -b:v {(_codec == Codec.VP9 ? "0" : _maxBitrate)} -crf {this._quality} -deadline {this._deadlineCLIOptions[(int)this._deadline]}";
-            outputArgs = $"\"{fileName}.webm\"";
+            BuildCommonArgs(framesFolder, fps, videoFilterArgument,
+                $"-c:v libvpx{(this._codec == Codec.VP9 ? "-vp9" : "")} -pix_fmt {pixFmt}{alphaMeta} {autoAltRef} -b:v {(_codec == Codec.VP9 ? "0" : _maxBitrate)} -crf {this._quality} -deadline {this._deadlineCLIOptions[(int)this._deadline]}",
+                fileName, "webm", out inputArgs, out filterArgs, out mapArgs, out codecArgs, out outputArgs);
         }
 
         public override void UpdateLanguage()

@@ -23,7 +23,7 @@ namespace VideoExport.VideoExtensions
         protected static Rotation _rotation = Rotation.None;
         protected int _progress;
         protected static readonly int _coreCount;
-        protected bool _needsVFlip = true; 
+        protected bool _needsVFlip = true;
 
         private StringBuilder _outputBuilder = new StringBuilder();
         private StringBuilder _errorBuilder = new StringBuilder();
@@ -193,6 +193,23 @@ namespace VideoExport.VideoExtensions
         public void SetVFlipNeeded(bool needsVFlip)
         {
             _needsVFlip = needsVFlip;
+        }
+
+        protected void BuildCommonArgs(string framesFolder, int fps, string videoFilterArgument, string codecArgs,
+            string fileName, string extension,
+            out string inputArgs, out string filterArgs, out string mapArgs, out string finalCodecArgs, out string outputArgs,
+            bool tagColor = true)
+        {
+            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
+            inputArgs = $"-loglevel error -r {fps} -f rawvideo -threads {_coreCount - 1} -pix_fmt {channelTypeArg} -i {framesFolder}";
+            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
+            mapArgs = "-map [vid]";
+            // Tag the stream's color matrix and range so players don't guess and mis-decode the colors
+            // (issue #198). GIF passes false (palette, no YUV range to signal).
+            finalCodecArgs = tagColor
+                ? $"{codecArgs} -colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv"
+                : codecArgs;
+            outputArgs = $"\"{fileName}.{extension}\"";
         }
     }
 }

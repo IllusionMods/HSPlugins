@@ -124,21 +124,14 @@ namespace VideoExport.VideoExtensions
         public override void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
             out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
-            int coreCount = _coreCount;
-            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
-
             string codec = "prores_ks";
             string codecProfileName = "4";
             string codecExtraArgs = "-profile:v " + codecProfileName;
             string videoPixelFormatArg = transparency ? "yuva444p10le" : "yuv444p10le";
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY, additionalFiltersPost: $"format={videoPixelFormatArg}");
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
-            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
-            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
-            mapArgs = "-map [vid]";
-            codecArgs = $"-c:v {codec} {codecExtraArgs}";
-            outputArgs = $"\"{fileName}.mov\"";
+            BuildCommonArgs(framesFolder, fps, videoFilterArgument, $"-c:v {codec} {codecExtraArgs}",
+                fileName, "mov", out inputArgs, out filterArgs, out mapArgs, out codecArgs, out outputArgs, tagColor: false);
         }
 
         public override void ProcessStandardOutput(char c)
