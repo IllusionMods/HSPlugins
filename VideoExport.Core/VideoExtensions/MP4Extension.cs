@@ -91,8 +91,6 @@ namespace VideoExport.VideoExtensions
                     break;
             }
 
-            int coreCount = _coreCount;
-            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
             string[] codecOptions = _codecCLIOptions;
             string codec = codecOptions[(int)this._codec];
             string tuneArgument = (codec == "libx264") ? "-tune animation" : "";
@@ -168,12 +166,9 @@ namespace VideoExport.VideoExtensions
                 codec = codecOptions[(int)this._codec];
             }
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
-            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
-            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
-            mapArgs = "-map [vid]";
-            codecArgs = $"-c:v {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt}";
-            outputArgs = $"\"{fileName}.mp4\"";
+            BuildCommonArgs(framesFolder, fps, videoFilterArgument,
+                $"-c:v {codec} {tuneArgument} {presetArgument} {rateControlArgument} -pix_fmt {pixFmt}",
+                fileName, "mp4", out inputArgs, out filterArgs, out mapArgs, out codecArgs, out outputArgs);
         }
 
         public override void UpdateLanguage()

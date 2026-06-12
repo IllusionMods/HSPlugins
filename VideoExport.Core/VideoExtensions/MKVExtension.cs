@@ -29,21 +29,15 @@ namespace VideoExport.VideoExtensions
         public override void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
             out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
-            int coreCount = _coreCount;
             string pixFmt = transparency ? "yuva444p" : "yuv444p";
-            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY, additionalFiltersPost: $"format={pixFmt}");
 
             string codec = _codecCLIOptions[(int)this._codec] + " -level 3";
             string codecExtraArgs = $"-g {this._gopSize} -slices {this._slices}";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
-            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
-            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
-            mapArgs = "-map [vid]";
-            codecArgs = $"-c:v {codec} {codecExtraArgs}";
-            outputArgs = $"\"{fileName}.mkv\"";
+            BuildCommonArgs(framesFolder, fps, videoFilterArgument, $"-c:v {codec} {codecExtraArgs}",
+                fileName, "mkv", out inputArgs, out filterArgs, out mapArgs, out codecArgs, out outputArgs);
         }
 
         public override bool IsCompatibleWithPlugin(IScreenshotPlugin plugin, out string reason)

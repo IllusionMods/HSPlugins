@@ -26,9 +26,7 @@ namespace VideoExport.VideoExtensions
         public override void GetArguments(string framesFolder, string prefix, string postfix, string inputExtension, byte bitDepth, int fps, bool transparency, bool resize, int resizeX, int resizeY, string fileName,
             out string inputArgs, out string filterArgs, out string mapArgs, out string codecArgs, out string outputArgs)
         {
-            int coreCount = _coreCount;
             string pixFmt = transparency ? "yuva420p" : "yuv420p";
-            string channelTypeArg = ((ChannelType)channelType).ToString().ToLower();
 
             string videoFilterArgument = this.CompileFilters(resize, resizeX, resizeY);
 
@@ -40,12 +38,9 @@ namespace VideoExport.VideoExtensions
             }
             string rateControlArgument = $"-crf {_quality} -b:v 0";
 
-            string ffmpegArgs = $"-loglevel error -r {fps} -f rawvideo -threads {coreCount - 1}";
-            inputArgs = $"{ffmpegArgs} -pix_fmt {channelTypeArg} -i {framesFolder}";
-            filterArgs = $"[0:v]{videoFilterArgument}[vid]";
-            mapArgs = "-map [vid]";
-            codecArgs = $"-c:v {codec} {codecExtraArgs} {rateControlArgument} -pix_fmt {pixFmt}";
-            outputArgs = $"\"{fileName}.avif\"";
+            BuildCommonArgs(framesFolder, fps, videoFilterArgument,
+                $"-c:v {codec} {codecExtraArgs} {rateControlArgument} -pix_fmt {pixFmt}",
+                fileName, "avif", out inputArgs, out filterArgs, out mapArgs, out codecArgs, out outputArgs);
         }
 
         public override bool IsCompatibleWithPlugin(IScreenshotPlugin plugin, out string reason)
