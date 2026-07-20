@@ -1369,6 +1369,7 @@ namespace VideoExport
                                 _asyncGPURequestCount++;
                                 var req = AsyncGPUReadback.Request(rt, 0, (request) => OnCompleteReadback(request, rt));
 #endif
+                                generatedFrames++;
                             }
                             else
                             {
@@ -1543,6 +1544,12 @@ namespace VideoExport
 
             if (_autoGenerateVideo)
             {
+                if (generatedFrames == 0)
+                {
+                    Logger.LogError("No frames were captured — the screenshot plugin returned no texture for the " +
+                                    "entire recording, so the video will be empty. If using Screenshot Manager 360 capture, check its settings.");
+                    _currentMessage = _currentDictionary.GetString(TranslationKey.GeneratingError);
+                }
 #if (!KOIKATSU || SUNSHINE)
                 // Tell the async writer no more frames are coming so it closes ffmpeg's stdin (else WaitForFFmpegExit deadlocks).
                 _ffmpegInputComplete = true;

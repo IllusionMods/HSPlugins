@@ -38,7 +38,8 @@ namespace VideoExport.ScreenshotPlugins
                         if (_in3d) size.x = (size.x - (int)(size.x * ImageSeparationOffset.Value)) * 2;
                         return size;
                     case CaptureType.ThreeHundredSixty:
-                        size = new Vector2(Resolution360.Value, Mathf.FloorToInt(Resolution360.Value / 2f));
+                        float width360 = is180.Value ? Resolution360.Value / 2f : Resolution360.Value;
+                        size = new Vector2(width360, Mathf.FloorToInt(Resolution360.Value / 2f));
                         if (_in3d) size.x *= 2;
                         return size;
                     default:
