@@ -83,6 +83,13 @@ namespace NodesConstraints
 #endif
 
         #region Private Types
+        internal enum FreeMoveMode
+        {
+            Off,
+            SelectedNodes,
+            AllNodes
+        }
+
         private enum SimpleListShowNodeType
         {
             All,
@@ -178,7 +185,112 @@ namespace NodesConstraints
             public Quaternion originalParentRotation;
             public Vector3 originalParentScale;
 
+            // Free move (Timeline paused): the constraint is temporarily not applied so the child can be moved by hand
+            public bool freeMove = false;
+            private Vector3 _freeMoveStartPosition;
+            private Quaternion _freeMoveStartRotation;
+            private Vector3 _freeMoveStartScale;
+
             public Constraint() { }
+
+            public void BeginFreeMove()
+            {
+                freeMove = true;
+                _freeMoveStartPosition = childTransform.localPosition;
+                _freeMoveStartRotation = childTransform.localRotation;
+                _freeMoveStartScale = childTransform.localScale;
+            }
+
+            // Returns true if any offset was recalculated
+            public bool EndFreeMove()
+            {
+                freeMove = false;
+                if (parentTransform == null || childTransform == null)
+                    return false;
+
+                bool changed = false;
+                if (position && (childTransform.localPosition - _freeMoveStartPosition).sqrMagnitude > 1e-10f)
+                {
+                    RecapturePositionOffset();
+                    changed = true;
+                }
+                if (rotation && Quaternion.Angle(childTransform.localRotation, _freeMoveStartRotation) > 0.01f)
+                {
+                    RecaptureRotationOffset();
+                    changed = true;
+                }
+                if (scale && (childTransform.localScale - _freeMoveStartScale).sqrMagnitude > 1e-10f)
+                {
+                    RecaptureScaleOffset();
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    // Skip smoothing so the child does not jump away from where it was placed
+                    smoothPos.connectionCurrentTime = 0f;
+                    smoothRot.connectionCurrentTime = 0f;
+                    smoothScale.connectionCurrentTime = 0f;
+                }
+                return changed;
+            }
+
+            // Inverse of UpdatePosition(): offset that makes the constraint keep the child where it is now
+            private void RecapturePositionOffset()
+            {
+                Vector3 movement;
+                if (mirrorPosition)
+                    movement = -GetPositionMovement() * (positionChangeFactor + 1);
+                else
+                    movement = GetPositionMovement() * (positionChangeFactor - 1);
+                positionOffset = parentTransform.InverseTransformPoint(childTransform.position) - movement;
+            }
+
+            // Inverse of UpdateRotation()
+            private void RecaptureRotationOffset()
+            {
+                if (Mathf.Abs(rotationChangeFactor) < 0.0001f)
+                    return;
+
+                Quaternion baseRot;
+                if (lookAt)
+                {
+                    Vector3 dir = parentTransform.position - childTransform.position;
+                    if (dir.sqrMagnitude < 1e-12f)
+                        return;
+                    baseRot = Quaternion.LookRotation(dir);
+                    if (mirrorRotation)
+                        baseRot = new Quaternion(baseRot.x * -1f, baseRot.y * -1f, baseRot.z, baseRot.w);
+                }
+                else if (mirrorRotation)
+                    baseRot = originalParentRotation * Quaternion.Inverse(GetRotationChange());
+                else
+                    baseRot = originalParentRotation * GetRotationChange();
+
+                Quaternion full = Quaternion.SlerpUnclamped(Quaternion.identity, childTransform.rotation, 1f / rotationChangeFactor);
+                rotationOffset = Quaternion.Inverse(baseRot) * full;
+            }
+
+            // Inverse of UpdateScale()
+            private void RecaptureScaleOffset()
+            {
+                if (childTransform.parent == null)
+                    return;
+                Vector3 childParentScale = childTransform.parent.lossyScale;
+                Vector3 parentScale = parentTransform.lossyScale;
+                float exp = mirrorScale ? -scaleChangeFactor : scaleChangeFactor;
+                Vector3 result = scaleOffset;
+                for (int i = 0; i < 3; i++)
+                {
+                    if (Mathf.Approximately(originalParentScale[i], 0f))
+                        continue;
+                    float denom = originalParentScale[i] / childParentScale[i] * Mathf.Pow(parentScale[i] / originalParentScale[i], exp);
+                    if (Mathf.Approximately(denom, 0f) || float.IsNaN(denom) || float.IsInfinity(denom))
+                        continue;
+                    result[i] = childTransform.localScale[i] / denom;
+                }
+                scaleOffset = result;
+            }
 
             public Constraint(Constraint other) : this()
             {
@@ -752,6 +864,7 @@ namespace NodesConstraints
         internal static ConfigEntry<KeyboardShortcut> ConfigMainWindowShortcut { get; private set; }
         internal static ConfigEntry<int> ConstraintsAreaHeight { get; private set; }
         internal static ConfigEntry<int> NodesAreaHeight { get; private set; }
+        internal static ConfigEntry<FreeMoveMode> ConfigFreeMoveWhenPaused { get; private set; }
 
         public bool ShowUI
         {
@@ -775,6 +888,11 @@ namespace NodesConstraints
             ConfigMainWindowShortcut = Config.Bind("Config", "Open NodeConstraints UI", new KeyboardShortcut(KeyCode.I, KeyCode.LeftControl));
             ConstraintsAreaHeight = Config.Bind("Interface", "Constraints Area Height", 150, new ConfigDescription("", new AcceptableValueRange<int>(40, 300)));
             NodesAreaHeight = Config.Bind("Interface", "Nodes Area Height", 200, new ConfigDescription("", new AcceptableValueRange<int>(40, 300)));
+            ConfigFreeMoveWhenPaused = Config.Bind("Timeline", "Free move when Timeline is paused", FreeMoveMode.Off,
+                "When Timeline is not playing, constrained nodes can be moved by hand and the constraint offset is recalculated from their new position afterwards.\n" +
+                "SelectedNodes - only constraints whose child node is currently selected are released (offset is updated when the node is deselected or playback starts).\n" +
+                "AllNodes - all constraints with a node as the child are released while paused (offsets of moved nodes are updated when playback starts).\n" +
+                "Off - original behaviour (default). Requires Timeline.");
 
             _self = this;
 #if HONEYSELECT
@@ -905,7 +1023,7 @@ namespace NodesConstraints
                 _imguiBackground.gameObject.SetActive(false);
 
             if (ShowUI)
-                _windowRect.height = 200f + ConstraintsAreaHeight.Value + NodesAreaHeight.Value;
+                _windowRect.height = 225f + ConstraintsAreaHeight.Value + NodesAreaHeight.Value;
         }
 
         [HarmonyPatch]
@@ -1167,8 +1285,98 @@ namespace NodesConstraints
         }
 
         // Applies the constraints that have GuideObjects linked (so that the underlying systems IK and FK can use those data after)
+        private bool ShouldFreeMove(Constraint constraint, bool paused, FreeMoveMode mode, HashSet<GuideObject> selected)
+        {
+            if (!paused || !constraint.enabled || constraint.child == null || constraint.childTransform == null)
+                return false;
+            switch (mode)
+            {
+                case FreeMoveMode.AllNodes:
+                    return true;
+                case FreeMoveMode.SelectedNodes:
+                    return selected != null && selected.Contains(constraint.child);
+                default:
+                    return false;
+            }
+        }
+
+        private int _freeMoveCount;
+        private FreeMoveMode _lastFreeMoveMode = FreeMoveMode.SelectedNodes;
+        private static readonly GUIContent[] _freeMoveModeNames =
+        {
+            new GUIContent("Selected node", "Only the constraint(s) of the currently selected node are released.\nSelect a constrained node while Timeline is paused and move it; the new offset is saved when you deselect it or press Play."),
+            new GUIContent("All nodes", "All constraints with a node as the child are released while Timeline is paused.\nMove any constrained nodes; offsets of the moved ones are saved when you press Play.\nConstraints on bones without a node are not affected.")
+        };
+
+        private void DrawFreeMoveOptions()
+        {
+            GUILayout.BeginHorizontal();
+            {
+                GUI.enabled = _hasTimeline;
+                FreeMoveMode mode = ConfigFreeMoveWhenPaused.Value;
+                if (mode != FreeMoveMode.Off)
+                    _lastFreeMoveMode = mode;
+
+                bool enabled = mode != FreeMoveMode.Off;
+                bool newEnabled = GUILayout.Toggle(enabled, new GUIContent("Free move when Timeline is paused",
+                    "Lets you move a constrained node without removing the constraint.\n" +
+                    "While Timeline is paused or stopped, the constraint stops holding the node, so you can move, rotate and scale it by hand.\n" +
+                    "When the node is deselected or playback starts, the constraint offset is recalculated from the new position (like 'Use current'), so the node keeps its new placement relative to the parent.\n" +
+                    "Only the changed parts (position / rotation / scale) are updated. Requires Timeline."));
+                if (newEnabled != enabled)
+                    ConfigFreeMoveWhenPaused.Value = newEnabled ? _lastFreeMoveMode : FreeMoveMode.Off;
+
+                GUI.enabled = _hasTimeline && newEnabled;
+                int index = _lastFreeMoveMode == FreeMoveMode.AllNodes ? 1 : 0;
+                int newIndex = GUILayout.Toolbar(index, _freeMoveModeNames, GUILayout.ExpandWidth(false));
+                if (newIndex != index)
+                {
+                    _lastFreeMoveMode = newIndex == 1 ? FreeMoveMode.AllNodes : FreeMoveMode.SelectedNodes;
+                    ConfigFreeMoveWhenPaused.Value = _lastFreeMoveMode;
+                }
+                GUI.enabled = true;
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        // Releases/re-engages constraints depending on the Timeline play state
+        private void UpdateFreeMoveStates()
+        {
+            FreeMoveMode mode = ConfigFreeMoveWhenPaused.Value;
+            bool paused = _hasTimeline && mode != FreeMoveMode.Off && !TimelineCompatibility.GetIsPlaying();
+            bool selectedChanged = false;
+            _freeMoveCount = 0;
+            for (int i = 0; i < _constraints.Count; i++)
+            {
+                Constraint constraint = _constraints[i];
+                if (constraint.parentTransform == null || constraint.childTransform == null)
+                    continue;
+                bool shouldFree = ShouldFreeMove(constraint, paused, mode, _selectedGuideObjects);
+                if (shouldFree && !constraint.freeMove)
+                    constraint.BeginFreeMove();
+                else if (!shouldFree && constraint.freeMove)
+                {
+                    if (constraint.EndFreeMove() && constraint == _selectedConstraint)
+                        selectedChanged = true;
+                }
+                if (constraint.freeMove)
+                    _freeMoveCount++;
+            }
+
+            if (selectedChanged)
+            {
+                _displayedConstraint.positionOffset = _selectedConstraint.positionOffset;
+                _displayedConstraint.rotationOffset = _selectedConstraint.rotationOffset;
+                _displayedConstraint.scaleOffset = _selectedConstraint.scaleOffset;
+                UpdateDisplayedPositionOffset();
+                UpdateDisplayedRotationOffset();
+                UpdateDisplayedScaleOffset();
+            }
+        }
+
         private void ApplyNodesConstraints()
         {
+            UpdateFreeMoveStates();
             List<int> toDelete = null;
             for (int i = 0; i < _constraints.Count; i++)
             {
@@ -1185,6 +1393,9 @@ namespace NodesConstraints
                     }
                     continue;
                 }
+
+                if (constraint.freeMove)
+                    continue;
 
                 if (constraint.child != null || constraint.parent != null)
                 {
@@ -1235,6 +1446,9 @@ namespace NodesConstraints
                     constraint.SmoothDisconnectUpdate(!constraint.child && !constraint.parent);
                     continue;
                 }
+
+                if (constraint.freeMove)
+                    continue;
 
                 /* There is a timing when Transform is reset by DynamicBone. Skip the reset value so that it is not taken into the constraint.
                  * It is assumed that the function call is from Expression_LateUpdate_Patches.
@@ -1391,6 +1605,15 @@ namespace NodesConstraints
                 {
                     GUILayout.BeginVertical();
                     {
+                        if (_freeMoveCount > 0)
+                        {
+                            Color c = GUI.color;
+                            GUI.color = Color.yellow;
+                            GUILayout.Label(new GUIContent($"Timeline paused: {_freeMoveCount} constraint(s) released, move freely",
+                                "These constraints are temporarily not applied. Their offsets will be updated from the new position when the node is deselected or Timeline starts playing."));
+                            GUI.color = c;
+                        }
+
                         GUILayout.BeginHorizontal();
                         {
                             GUILayout.Label((_displayedConstraint.parentTransform != null ? _displayedConstraint.parentTransform.name : ""));
@@ -1716,6 +1939,8 @@ namespace NodesConstraints
                 _debugMode = GUILayout.Toggle(_debugMode, "Debug", GUILayout.ExpandWidth(false));
                 GUI.enabled = true;
                 GUILayout.EndHorizontal();
+
+                DrawFreeMoveOptions();
 
                 if (_debugMode && _selectedBone != null)
                 {
