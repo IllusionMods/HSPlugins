@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInInterpolables.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compat\ShalltyTracks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graph\CurveComponents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interpolable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)InterpolableModel.cs" />
