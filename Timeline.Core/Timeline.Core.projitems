@@ -30,6 +30,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimelineEdits.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineGraphOps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineGroupSplit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineKeySets.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineMarkers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineOrphans.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineRecord.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewInterp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewKeySets.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewMini.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewNla.cs" />
