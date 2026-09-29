@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInInterpolables.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Compat\NodesConstraintsLink.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Compat\ShalltyTracks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graph\CurveComponents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interpolable.cs" />
@@ -39,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimelinePicker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineRecord.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineRefresh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineRig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineSimplify.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineStrips.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineStudioUndo.cs" />
@@ -71,6 +73,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewPath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewPicker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewProps.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewRig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewTheme.cs" />
   </ItemGroup>
