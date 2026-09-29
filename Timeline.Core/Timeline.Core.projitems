@@ -30,6 +30,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimelineEdits.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineGraphOps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineGroupSplit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineKeyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineKeySets.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineMarkers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineOrphans.cs" />
