@@ -1104,10 +1104,13 @@ namespace HSPE.AMModules
 
         private Vector3 GetBoneScale(Transform bone)
         {
+            // Reads the bone it was given, like GetBonePosition and GetBoneRotation do. It used to look
+            // at _boneTarget instead, so it answered for whichever bone happened to be selected in the
+            // UI rather than the one asked about.
             TransformData data;
-            if (_dirtyBones.TryGetValue(_boneTarget.gameObject, out data) && data.scale.hasValue)
+            if (_dirtyBones.TryGetValue(bone.gameObject, out data) && data.scale.hasValue)
                 return data.scale;
-            return _boneTarget.localScale;
+            return bone.localScale;
         }
 
         private void SetBoneTargetScale(Vector3 scale)
@@ -1693,7 +1696,7 @@ namespace HSPE.AMModules
                             pair.key.SetBonePosition(pair.value, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor));
                         },
                         interpolateAfter: null,
-                        isCompatibleWithTarget: IsCompatibleWithTarget,
+                        isCompatibleWithTarget: oci => IsCombinedCompatibleWithTarget(oci, "bonePos"),
                         getValue: (oci, parameter) => ((HashedPair<BonesEditor, Transform>)parameter).value.localPosition,
                         readValueFromXml: (parameter, node) => node.ReadVector3("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Vector3)o),
@@ -1713,7 +1716,7 @@ namespace HSPE.AMModules
                             pair.key.SetBoneRotation(pair.value, Quaternion.SlerpUnclamped((Quaternion)leftValue, (Quaternion)rightValue, factor));
                         },
                         interpolateAfter: null,
-                        isCompatibleWithTarget: IsCompatibleWithTarget,
+                        isCompatibleWithTarget: oci => IsCombinedCompatibleWithTarget(oci, "boneRot"),
                         getValue: (oci, parameter) => ((HashedPair<BonesEditor, Transform>)parameter).value.localRotation,
                         readValueFromXml: (parameter, node) => node.ReadQuaternion("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Quaternion)o),
@@ -1733,7 +1736,7 @@ namespace HSPE.AMModules
                             pair.key.SetBoneScale(pair.value, Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor));
                         },
                         interpolateAfter: null,
-                        isCompatibleWithTarget: IsCompatibleWithTarget,
+                        isCompatibleWithTarget: oci => IsCombinedCompatibleWithTarget(oci, "boneScale"),
                         getValue: (oci, parameter) => ((HashedPair<BonesEditor, Transform>)parameter).value.localScale,
                         readValueFromXml: (parameter, node) => node.ReadVector3("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Vector3)o),
@@ -1742,6 +1745,83 @@ namespace HSPE.AMModules
                         writeParameterToXml: WriteParameterToXml,
                         checkIntegrity: CheckIntegrity,
                         getFinalName: (name, oci, parameter) => $"B Scale ({((HashedPair<BonesEditor, Transform>)parameter).value.name})");
+
+                // Read through the editor, never off the transform. SetBone* only records the value in
+                // _dirtyBones and the transform is not written until LateUpdate, so an axis reading
+                // localPosition would see the animator's pose instead of what the previous axis just
+                // wrote, and would overwrite it. Only the last axis of the three would survive.
+                // Only where Timeline splits transform tracks: with an older one the per axis tracks
+                // would sit next to the combined ones and fight them over the same bone.
+                if (ToolBox.TimelineCompatibility.SupportsSplitTransforms == false)
+                    return;
+                AddSplitAxes("bonePos", "Position",
+                             pair => pair.key.GetBonePosition(pair.value),
+                             (pair, v) => pair.key.SetBonePosition(pair.value, v));
+                AddSplitAxes("boneRot", "Rotation",
+                             pair => pair.key.GetBoneRotation(pair.value).eulerAngles,
+                             (pair, v) => pair.key.SetBoneRotation(pair.value, Quaternion.Euler(v)));
+                AddSplitAxes("boneScale", "Scale",
+                             pair => pair.key.GetBoneScale(pair.value),
+                             (pair, v) => pair.key.SetBoneScale(pair.value, v));
+            }
+
+            private static float GetAxis(Vector3 v, int axis)
+            {
+                return axis == 0 ? v.x : axis == 1 ? v.y : v.z;
+            }
+
+            private static Vector3 WithAxis(Vector3 v, int axis, float value)
+            {
+                if (axis == 0)
+                    v.x = value;
+                else if (axis == 1)
+                    v.y = value;
+                else
+                    v.z = value;
+                return v;
+            }
+
+            /// <summary>
+            /// Registers the three per axis versions of a bone transform track.
+            ///
+            /// The combined tracks hold one vector per keyframe with a single curve shared by all three
+            /// axes, so the axes can never be timed apart. Each axis track reads the bone's current
+            /// value, replaces its own component and writes it back; the three run in the same pass and
+            /// each sees what the previous wrote, so they compose. Axes with no track keep their pose.
+            /// </summary>
+            private static void AddSplitAxes(string idPrefix, string namePrefix,
+                                             Func<HashedPair<BonesEditor, Transform>, Vector3> read,
+                                             Action<HashedPair<BonesEditor, Transform>, Vector3> write)
+            {
+                string[] axisNames = { "X", "Y", "Z" };
+                string[] splitIds = { idPrefix + "X", idPrefix + "Y", idPrefix + "Z" };
+
+                for (int i = 0; i < 3; ++i)
+                {
+                    int axis = i;
+                    ToolBox.TimelineCompatibility.AddInterpolableModelDynamic(
+                            owner: HSPE.Name,
+                            id: splitIds[axis],
+                            name: $"Bone {namePrefix} {axisNames[axis]}",
+                            interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
+                            {
+                                HashedPair<BonesEditor, Transform> pair = (HashedPair<BonesEditor, Transform>)parameter;
+                                write(pair, WithAxis(read(pair), axis, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)));
+                            },
+                            interpolateAfter: null,
+                            isCompatibleWithTarget: IsCompatibleWithTarget,
+                            getValue: (oci, parameter) => GetAxis(read((HashedPair<BonesEditor, Transform>)parameter), axis),
+                            readValueFromXml: (parameter, node) => node.ReadFloat("value"),
+                            writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o),
+                            getParameter: GetParameter,
+                            readParameterFromXml: ReadParameterFromXml,
+                            writeParameterToXml: WriteParameterToXml,
+                            checkIntegrity: CheckIntegrity,
+                            getFinalName: (name, oci, parameter) => $"B {namePrefix} {axisNames[axis]} ({((HashedPair<BonesEditor, Transform>)parameter).value.name})"
+                    );
+                }
+
+                ToolBox.TimelineCompatibility.RegisterSplittableTransform(HSPE.Name, idPrefix, splitIds);
             }
 
             private static bool CheckIntegrity(ObjectCtrlInfo oci, object parameter, object leftValue, object rightValue)
@@ -1757,6 +1837,18 @@ namespace HSPE.AMModules
             private static bool IsCompatibleWithTarget(ObjectCtrlInfo oci)
             {
                 return oci != null && oci.guideObject != null && oci.guideObject.transformTarget != null && oci.guideObject.transformTarget.GetComponent<PoseController>() != null;
+            }
+
+            /// <summary>
+            /// Same as <see cref="IsCompatibleWithTarget"/>, but also hides the combined track once the
+            /// bone has per axis ones, so the two can never exist and overwrite each other. Picking an
+            /// axis track while the combined one exists splits it instead, Timeline handles that.
+            /// </summary>
+            private static bool IsCombinedCompatibleWithTarget(ObjectCtrlInfo oci, string combinedId)
+            {
+                if (IsCompatibleWithTarget(oci) == false)
+                    return false;
+                return ToolBox.TimelineCompatibility.HasAnySplit(GetParameter(oci), HSPE.Name, combinedId) == false;
             }
 
             private static object GetParameter(ObjectCtrlInfo oci)
