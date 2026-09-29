@@ -24,6 +24,8 @@ namespace ToolBox
         private static Action _refreshInterpolablesList;
         private static MethodInfo _estimateRealDuration;
         private static Type _interpolableDelegate;
+        private static MethodInfo _registerSplittableTransform;
+        private static MethodInfo _hasAnySplit;
 
         public static bool Init()
         {
@@ -42,6 +44,10 @@ namespace ToolBox
                     _refreshInterpolablesList = (Action)Delegate.CreateDelegate(typeof(Action), timelineType.GetMethod("RefreshInterpolablesList", BindingFlags.Public | BindingFlags.Static));
                     _estimateRealDuration = timelineType.GetMethod("EstimateRealDuration", BindingFlags.Public | BindingFlags.Static);
                     _interpolableDelegate = Type.GetType("Timeline.InterpolableDelegate,Timeline");
+                    // Added in Timeline 1.5.7. Left null on older builds, the split feature then simply
+                    // does not appear rather than breaking the plugin.
+                    _registerSplittableTransform = timelineType.GetMethod("RegisterSplittableTransform", BindingFlags.Public | BindingFlags.Static);
+                    _hasAnySplit = timelineType.GetMethod("HasAnySplit", BindingFlags.Public | BindingFlags.Static);
                     return true;
                 }
             }
@@ -75,6 +81,37 @@ namespace ToolBox
         public static void Stop()
         {
             _stop();
+        }
+
+        /// <summary>
+        /// Tells Timeline that a combined transform track can be exchanged for three per axis ones, so it
+        /// can offer Split and Merge on it. No-op on Timeline versions that predate the feature.
+        /// </summary>
+        /// <summary>
+        /// Whether this Timeline splits transform tracks per axis. An older one has no idea a per axis
+        /// track stands in for a combined one, so the two would fight over the same value there.
+        /// </summary>
+        public static bool SupportsSplitTransforms
+        {
+            get { return _registerSplittableTransform != null; }
+        }
+
+        public static void RegisterSplittableTransform(string owner, string combinedId, string[] splitIds)
+        {
+            if (_registerSplittableTransform == null)
+                return;
+            _registerSplittableTransform.Invoke(null, new object[] { owner, combinedId, splitIds });
+        }
+
+        /// <summary>
+        /// Whether any per axis version of a combined track already exists for this parameter. Used to
+        /// hide the combined track so the two can never fight over the same value.
+        /// </summary>
+        public static bool HasAnySplit(object parameter, string owner, string combinedId)
+        {
+            if (_hasAnySplit == null)
+                return false;
+            return (bool)_hasAnySplit.Invoke(null, new object[] { parameter, owner, combinedId });
         }
 
         /// <summary>
