@@ -18,10 +18,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)KeyframeHandles.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KeyframeSpline.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\BezierMath.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\CurveReduction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Timeline.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineBake.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineButton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineEasing.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineGraphOps.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineMarkers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineRecord.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineSimplify.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineStudioUndo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineTracks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineTrim.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineUndo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TrackExtrapolation.cs" />
