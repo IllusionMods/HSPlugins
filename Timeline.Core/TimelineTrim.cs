@@ -1,177 +1,51 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using UILib;
-using UILib.ContextMenu;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace Timeline
 {
+    /// <summary>
+    /// Trim (#219, by wooshaq): mark a range on the time ruler and delete every keyframe outside it,
+    /// splitting the curves that cross its edges so what is kept plays as before. The range is marked
+    /// with control + drag on the ruler and the trim is in the ruler's right click menu.
+    /// </summary>
     public partial class Timeline
     {
         #region Trim - Private Variables
         private const float _trimTimeEpsilon = 0.0001f;
         private const float _trimMinLength = 0.01f;
-        private static readonly Color _trimRangeFillColor = new Color(1f, 0.72f, 0.1f, 0.18f);
-        private static readonly Color _trimRangeEdgeColor = new Color(1f, 0.72f, 0.1f, 0.9f);
+        internal static readonly Color _trimRangeFillColor = new Color(1f, 0.72f, 0.1f, 0.18f);
+        internal static readonly Color _trimRangeEdgeColor = new Color(1f, 0.72f, 0.1f, 0.9f);
 
-        private RectTransform _trimRangeOverlay;
-        private bool _hasTrimRange;
-        private bool _isTrimRangeSelecting;
-        private bool _trimRangeDragging;
-        private bool _trimDisabled;
+        internal bool _hasTrimRange;
+        internal bool _isTrimRangeSelecting;
         private float _trimRangeAnchor;
-        private float _trimRangeStart;
-        private float _trimRangeEnd;
+        internal float _trimRangeStart;
+        internal float _trimRangeEnd;
         #endregion
 
-        #region Trim - Range UI
-        private void InitTrimRange()
+        #region Trim - Range
+        /// <summary>Control + press on the ruler: the range starts there.</summary>
+        internal void BeginTrimRangeSelect(float time)
         {
-            Image fill = UIUtility.CreateImage("Trim Range", _grid);
-            fill.sprite = null;
-            fill.color = _trimRangeFillColor;
-            fill.raycastTarget = false;
-            _trimRangeOverlay = fill.rectTransform;
-            _trimRangeOverlay.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
-            _trimRangeOverlay.anchorMin = new Vector2(0f, 0f);
-            _trimRangeOverlay.anchorMax = new Vector2(0f, 1f);
-            _trimRangeOverlay.pivot = new Vector2(0f, 0.5f);
-            _trimRangeOverlay.offsetMin = Vector2.zero;
-            _trimRangeOverlay.offsetMax = Vector2.zero;
-
-            for (int i = 0; i < 2; i++)
-            {
-                Image edge = UIUtility.CreateImage(i == 0 ? "Start" : "End", _trimRangeOverlay);
-                edge.sprite = null;
-                edge.color = _trimRangeEdgeColor;
-                edge.raycastTarget = false;
-                RectTransform rt = edge.rectTransform;
-                rt.anchorMin = new Vector2(i, 0f);
-                rt.anchorMax = new Vector2(i, 1f);
-                rt.pivot = new Vector2(0.5f, 0.5f);
-                rt.sizeDelta = new Vector2(2f, 0f);
-                rt.anchoredPosition = Vector2.zero;
-            }
-
-            // Below the playback cursor so the cursor stays visible.
-            _trimRangeOverlay.SetSiblingIndex(_cursor.GetSiblingIndex());
-            _trimRangeOverlay.gameObject.SetActive(false);
-        }
-
-        private void UpdateTrimRangeOverlay()
-        {
-            if (_trimRangeOverlay == null || _trimDisabled)
-                return;
-
-            // Ctrl+click without drag (no drag events fired): finish the selection when the button is released.
-            if (_isTrimRangeSelecting && Input.GetMouseButton(0) == false)
-                FinishTrimRangeSelect();
-
-            bool show = _hasTrimRange || _isTrimRangeSelecting;
-            if (_trimRangeOverlay.gameObject.activeSelf != show)
-                _trimRangeOverlay.gameObject.SetActive(show);
-            if (show == false)
-                return;
-
-            float x0 = TrimTimeToGridX(_trimRangeStart);
-            float x1 = TrimTimeToGridX(_trimRangeEnd);
-            _trimRangeOverlay.offsetMin = new Vector2(x0, 0f);
-            _trimRangeOverlay.offsetMax = new Vector2(Mathf.Max(x1, x0 + 1f), 0f);
-        }
-
-        private float TrimTimeToGridX(float time)
-        {
-            // Same convention as the playback cursor, which is anchored to the left edge of the grid.
-            return _duration > 0f ? time * _grid.rect.width / _duration : 0f;
-        }
-
-        private void OnGridTopPointerDown(PointerEventData eventData)
-        {
-            _trimRangeDragging = false;
-            if (_trimDisabled || _trimRangeOverlay == null)
-            {
-                OnGridTopMouse(eventData);
-                return;
-            }
-            try
-            {
-                _trimRangeDragging = eventData.button == PointerEventData.InputButton.Left && IsTrimSelectModifierHeld();
-                if (_trimRangeDragging)
-                {
-                    BeginTrimRangeSelect(eventData);
-                    return;
-                }
-                if (eventData.button == PointerEventData.InputButton.Right)
-                {
-                    ShowTrimContextMenu(eventData);
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                _trimRangeDragging = false;
-                _trimDisabled = true;
-                ClearTrimRange();
-                Logger.LogError("Trim: error on the time bar, the trim feature is disabled\n" + e);
-            }
-            OnGridTopMouse(eventData);
-        }
-
-        private static bool IsTrimSelectModifierHeld()
-        {
-            return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-        }
-
-        private bool TryGetGridTopTime(PointerEventData eventData, out float time)
-        {
-            time = 0f;
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_gridTop, eventData.position, eventData.pressEventCamera, out Vector2 localPoint))
-                return false;
-            time = 10f * localPoint.x / (_baseGridWidth * _zoomLevel);
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-                float beat = _blockLength / _divisions;
-                float mod = time % beat;
-                if (mod / beat > 0.5f)
-                    time += beat - mod;
-                else
-                    time -= mod;
-            }
             time = Mathf.Clamp(time, 0f, _duration);
-            return true;
-        }
-
-        private void BeginTrimRangeSelect(PointerEventData eventData)
-        {
-            if (!TryGetGridTopTime(eventData, out float time))
-                return;
             _isTrimRangeSelecting = true;
             _hasTrimRange = false;
             _trimRangeAnchor = time;
             _trimRangeStart = time;
             _trimRangeEnd = time;
-            UpdateTrimRangeOverlay();
         }
 
-        private void UpdateTrimRangeSelect(PointerEventData eventData)
+        internal void UpdateTrimRangeSelect(float time)
         {
-            if (!TryGetGridTopTime(eventData, out float time))
-                return;
+            time = Mathf.Clamp(time, 0f, _duration);
             _trimRangeStart = Mathf.Min(_trimRangeAnchor, time);
             _trimRangeEnd = Mathf.Max(_trimRangeAnchor, time);
-            UpdateTrimRangeOverlay();
         }
 
-        private void EndTrimRangeSelect(PointerEventData eventData)
-        {
-            UpdateTrimRangeSelect(eventData);
-            FinishTrimRangeSelect();
-        }
-
-        private void FinishTrimRangeSelect()
+        /// <summary>On release; a control + click without a drag clears the range.</summary>
+        internal void FinishTrimRangeSelect()
         {
             _isTrimRangeSelecting = false;
             if (_trimRangeEnd - _trimRangeStart >= _trimMinLength)
@@ -180,7 +54,7 @@ namespace Timeline
                 ClearTrimRange();
         }
 
-        private void SetTrimRange(float start, float end)
+        internal void SetTrimRange(float start, float end)
         {
             if (end < start)
             {
@@ -198,10 +72,9 @@ namespace Timeline
             _hasTrimRange = true;
             _trimRangeStart = start;
             _trimRangeEnd = end;
-            UpdateTrimRangeOverlay();
         }
 
-        private void SetTrimRangeEdge(bool isStart, float time)
+        internal void SetTrimRangeEdge(bool isStart, float time)
         {
             time = Mathf.Clamp(time, 0f, _duration);
             float start = _hasTrimRange ? _trimRangeStart : 0f;
@@ -213,15 +86,13 @@ namespace Timeline
             SetTrimRange(start, end);
         }
 
-        private void ClearTrimRange()
+        internal void ClearTrimRange()
         {
             _hasTrimRange = false;
             _isTrimRangeSelecting = false;
-            if (_trimRangeOverlay != null)
-                _trimRangeOverlay.gameObject.SetActive(false);
         }
 
-        private float GetCursorTime()
+        internal float GetCursorTime()
         {
             float time = _playbackTime % _duration;
             if (time == 0f && _playbackTime == _duration)
@@ -229,79 +100,26 @@ namespace Timeline
             return time;
         }
 
-        private static string FormatTrimTime(float time)
+        internal static string FormatTrimTime(float time)
         {
             return $"{Mathf.FloorToInt(time / 60):00}:{(time % 60):00.000}";
         }
 
-        private void ShowTrimContextMenu(PointerEventData eventData)
+        /// <summary>Asks first: what is cut cannot be brought back but by undo.</summary>
+        internal void RequestTrim(bool moveToStart)
         {
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)_ui.transform, eventData.position, eventData.pressEventCamera, out Vector2 localPoint))
-                return;
-
-            List<AContextMenuElement> elements = new List<AContextMenuElement>();
-            if (_hasTrimRange)
-            {
-                elements.Add(new LeafElement()
-                {
-                    icon = _deleteSprite,
-                    text = $"Trim to {FormatTrimTime(_trimRangeStart)} - {FormatTrimTime(_trimRangeEnd)}",
-                    onClick = p => RequestTrim(true)
-                });
-                elements.Add(new LeafElement()
-                {
-                    icon = _deleteSprite,
-                    text = "Trim (keep original times)",
-                    onClick = p => RequestTrim(false)
-                });
-            }
-            elements.Add(new LeafElement()
-            {
-                icon = _chevronDownSprite,
-                text = "Set trim start at cursor",
-                onClick = p => SetTrimRangeEdge(true, GetCursorTime())
-            });
-            elements.Add(new LeafElement()
-            {
-                icon = _chevronDownSprite,
-                text = "Set trim end at cursor",
-                onClick = p => SetTrimRangeEdge(false, GetCursorTime())
-            });
-            if (_selectedKeyframes.Count > 1)
-            {
-                elements.Add(new LeafElement()
-                {
-                    icon = _selectAllSprite,
-                    text = "Trim range from selected keyframes",
-                    onClick = p => SetTrimRange(_selectedKeyframes.Min(k => k.Key), _selectedKeyframes.Max(k => k.Key))
-                });
-            }
-            if (_hasTrimRange)
-            {
-                elements.Add(new LeafElement()
-                {
-                    icon = _checkboxSprite,
-                    text = "Clear trim range",
-                    onClick = p => ClearTrimRange()
-                });
-            }
-            UIUtility.ShowContextMenu(_ui, localPoint, elements, 240);
-        }
-
-        private void RequestTrim(bool moveToStart)
-        {
-            if (!_hasTrimRange)
+            if (!_hasTrimRange || _view == null)
                 return;
             float start = _trimRangeStart;
             float end = _trimRangeEnd;
             string message = moveToStart
-                ? $"Trim the timeline to {FormatTrimTime(start)} - {FormatTrimTime(end)}?\nEverything before and after this range will be deleted, the range will start at 00:00 and the duration will be set to {FormatTrimTime(end - start)}."
-                : $"Delete all keyframes before {FormatTrimTime(start)} and after {FormatTrimTime(end)}?";
-            UIUtility.DisplayConfirmationDialog(result =>
+                ? $"Everything before {FormatTrimTime(start)} and after {FormatTrimTime(end)} is deleted, the range then starts at 00:00 and the scene lasts {FormatTrimTime(end - start)}."
+                : $"Every keyframe before {FormatTrimTime(start)} and after {FormatTrimTime(end)} is deleted.";
+            _view.Confirm(moveToStart ? "Trim the timeline" : "Trim, keeping the times", message, "Trim", () =>
             {
-                if (result)
-                    TrimTimeline(start, end, moveToStart);
-            }, message);
+                RecordUndo("Trim");
+                TrimTimeline(start, end, moveToStart);
+            });
         }
         #endregion
 
@@ -355,7 +173,6 @@ namespace Timeline
             }
 
             _selectedKeyframes.Clear();
-            CloseKeyframeWindow();
             if (emptied.Count != 0)
                 RemoveInterpolables(emptied);
 
@@ -469,7 +286,6 @@ namespace Timeline
             _startTime = Time.time - time;
             bool wasPlaying = _isPlaying;
             _isPlaying = true;
-            UpdateCursor();
             Interpolate(true);
             Interpolate(false);
             _isPlaying = wasPlaying;

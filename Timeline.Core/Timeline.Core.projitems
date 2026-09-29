@@ -26,11 +26,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimelineBake.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineButton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineEasing.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineEdits.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineGraphOps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineGroupSplit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineMarkers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineOrphans.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineRecord.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineRefresh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineSimplify.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineStrips.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineStudioUndo.cs" />
@@ -39,11 +41,31 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimelineUndo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TrackExtrapolation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\Icons.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\Kit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\Paint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\Pal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\Svg.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\TimelineView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewChannels.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewDialogs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewDrag.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewExtras.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewFloat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewGrid.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewHeader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewInterp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewMenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewMini.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewNla.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewPanels.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewPath.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewProps.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewStatus.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewTheme.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\Help.txt" />
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\TimelineResources.unity3d" />
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\TimelineResourcesKoi.unity3d" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\timeline_button.png" />
   </ItemGroup>
 </Project>
