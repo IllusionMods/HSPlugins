@@ -16,17 +16,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)Keyframe.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Timeline.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineButton.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineStudioUndo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineTrim.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineUndo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tree.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\Help.txt" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\TimelineResources.unity3d" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\TimelineResourcesKoi.unity3d" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\timeline_button.png" />
   </ItemGroup>
 </Project>
