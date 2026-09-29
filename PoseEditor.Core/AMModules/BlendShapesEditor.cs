@@ -2130,7 +2130,7 @@ namespace HSPE.AMModules
                             }
                         },
                         interpolateAfter: null,
-                        isCompatibleWithTarget: oci => oci != null && oci.guideObject != null && oci.guideObject.transformTarget != null && oci.guideObject.transformTarget.GetComponent<PoseController>() != null,
+                        isCompatibleWithTarget: HasBlendTarget,
                         getValue: (oci, parameter) =>
                         {
                             IndividualParameter p = (IndividualParameter)parameter;
@@ -2141,7 +2141,7 @@ namespace HSPE.AMModules
                         getParameter: oci =>
                         {
                             PoseController controller = oci.guideObject.transformTarget.GetComponent<PoseController>();
-                            return new IndividualParameter(controller._blendShapesEditor, controller._blendShapesEditor._skinnedMeshTarget, controller._blendShapesEditor._lastEditedBlendShape);
+                            return new IndividualParameter(controller._blendShapesEditor, MeshTargetOf(controller._blendShapesEditor), controller._blendShapesEditor._lastEditedBlendShape);
                         },
                         readParameterFromXml: (oci, node) => new IndividualParameter(oci.guideObject.transformTarget.GetComponent<PoseController>()._blendShapesEditor, node.Attributes["parameter1"].Value, node.ReadInt("parameter2")),
                         writeParameterToXml: (oci, writer, o) =>
@@ -2198,7 +2198,7 @@ namespace HSPE.AMModules
                             }
                         },
                         interpolateAfter: null,
-                        isCompatibleWithTarget: oci => oci != null && oci.guideObject != null && oci.guideObject.transformTarget != null && oci.guideObject.transformTarget.GetComponent<PoseController>() != null,
+                        isCompatibleWithTarget: HasBlendTarget,
                         getValue: GetGroupValue,
                         readValueFromXml: ReadGroupValueFromXml,
                         writeValueToXml: WriteGroupValueToXml,
@@ -2238,7 +2238,7 @@ namespace HSPE.AMModules
                             }
                         },
                         interpolateAfter: null,
-                        isCompatibleWithTarget: oci => oci != null && oci.guideObject != null && oci.guideObject.transformTarget != null && oci.guideObject.transformTarget.GetComponent<CharaPoseController>() != null,
+                        isCompatibleWithTarget: oci => HasBlendTarget(oci) && oci.guideObject.transformTarget.GetComponent<CharaPoseController>() != null,
                         getValue: GetGroupValue,
                         readValueFromXml: ReadGroupValueFromXml,
                         writeValueToXml: WriteGroupValueToXml,
@@ -2270,7 +2270,7 @@ namespace HSPE.AMModules
                             }
                         },
                         interpolateAfter: null,
-                        isCompatibleWithTarget: oci => oci != null && oci.guideObject != null && oci.guideObject.transformTarget != null && oci.guideObject.transformTarget.GetComponent<PoseController>() != null,
+                        isCompatibleWithTarget: HasBlendTarget,
                         getValue: (oci, parameter) =>
                         {
                             IndividualParameter p = (IndividualParameter)parameter;
@@ -2281,7 +2281,7 @@ namespace HSPE.AMModules
                         getParameter: oci =>
                         {
                             PoseController controller = oci.guideObject.transformTarget.GetComponent<PoseController>();
-                            return new IndividualParameter(controller._blendShapesEditor, controller._blendShapesEditor._skinnedMeshTarget, controller._blendShapesEditor._lastEditedBlendShape);
+                            return new IndividualParameter(controller._blendShapesEditor, MeshTargetOf(controller._blendShapesEditor), controller._blendShapesEditor._lastEditedBlendShape);
                         },
                         readParameterFromXml: (oci, node) => new IndividualParameter(oci.guideObject.transformTarget.GetComponent<PoseController>()._blendShapesEditor, node.Attributes["parameter1"].Value, node.ReadInt("parameter2")),
                         writeParameterToXml: (oci, writer, o) =>
@@ -2358,7 +2358,31 @@ namespace HSPE.AMModules
             private static object GetGroupParameter(ObjectCtrlInfo oci)
             {
                 PoseController controller = oci.guideObject.transformTarget.GetComponent<PoseController>();
-                return new GroupParameter(controller._blendShapesEditor, controller._blendShapesEditor._skinnedMeshTarget);
+                return new GroupParameter(controller._blendShapesEditor, MeshTargetOf(controller._blendShapesEditor));
+            }
+
+            /// <summary>
+            /// The mesh a blend shape track is made for: the one picked in the Blend Shapes tab, or the
+            /// first one there is when none has been picked yet, which used to throw.
+            /// </summary>
+            private static BlendRenderer MeshTargetOf(BlendShapesEditor editor)
+            {
+                if (editor == null)
+                    return null;
+                if (editor._skinnedMeshTarget != null)
+                    return editor._skinnedMeshTarget;
+                foreach (KeyValuePair<string, BlendRenderer> pair in editor._blendRenderers)
+                    return pair.Value;
+                return null;
+            }
+
+            /// <summary>Blend shape tracks are offered for what has a mesh with blend shapes to make them for.</summary>
+            private static bool HasBlendTarget(ObjectCtrlInfo oci)
+            {
+                if (oci == null || oci.guideObject == null || oci.guideObject.transformTarget == null)
+                    return false;
+                PoseController controller = oci.guideObject.transformTarget.GetComponent<PoseController>();
+                return controller != null && MeshTargetOf(controller._blendShapesEditor) != null;
             }
 
             private static object GetGroupValue(ObjectCtrlInfo oci, object parameter)
