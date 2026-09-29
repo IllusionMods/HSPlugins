@@ -11,14 +11,20 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInInterpolables.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graph\CurveComponents.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interpolable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)InterpolableModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Keyframe.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyframeHandles.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyframeSpline.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\BezierMath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Timeline.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineButton.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineEasing.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineStudioUndo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineTrim.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineUndo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TrackExtrapolation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tree.cs" />
   </ItemGroup>
   <ItemGroup>
