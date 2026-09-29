@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyConstraints.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyNodes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyPoseEditorNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyTrackTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\BezierMath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\CurveReduction.cs" />
