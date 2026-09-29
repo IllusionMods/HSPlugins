@@ -33,6 +33,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimelineKeySets.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineMarkers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineOrphans.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelinePicker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineRecord.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineRefresh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineSimplify.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewNla.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewPanels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewPath.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewPicker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewProps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewTheme.cs" />
