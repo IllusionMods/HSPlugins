@@ -1,5 +1,7 @@
 ﻿using Studio;
+using System;
 using System.Collections.Generic;
+using System.Xml;
 using ToolBox.Extensions;
 using UnityEngine;
 #if AISHOUJO || HONEYSELECT2
@@ -192,6 +194,96 @@ namespace Timeline
             ));
         }
 
+        /// <summary>Axis of a split transform track.</summary>
+        private enum Axis
+        {
+            X = 0,
+            Y = 1,
+            Z = 2
+        }
+
+        private static float GetAxis(Vector3 v, Axis axis)
+        {
+            return axis == Axis.X ? v.x : axis == Axis.Y ? v.y : v.z;
+        }
+
+        private static Vector3 WithAxis(Vector3 v, Axis axis, float value)
+        {
+            if (axis == Axis.X)
+                v.x = value;
+            else if (axis == Axis.Y)
+                v.y = value;
+            else
+                v.z = value;
+            return v;
+        }
+
+        /// <summary>
+        /// Registers the three per axis versions of a guide object transform track.
+        ///
+        /// The combined tracks store one Vector3 per keyframe with a single curve for all three axes, so
+        /// the axes can never have different timing. Splitting them is what allows something like a jump,
+        /// where forward motion is linear while height eases in and out.
+        ///
+        /// Each axis reads the current vector, replaces its own component and writes it back. All three
+        /// run in the same pass and each sees what the previous one wrote, so they compose. The axes that
+        /// are not keyframed simply keep whatever the user posed.
+        /// </summary>
+        private static void AddSplitTransform(string idPrefix, string namePrefix, string combinedId,
+                                              Func<GuideObject, Vector3> read, Action<GuideObject, Vector3> write)
+        {
+            string[] splitIds = { idPrefix + "X", idPrefix + "Y", idPrefix + "Z" };
+
+            foreach (Axis axis in new[] { Axis.X, Axis.Y, Axis.Z })
+            {
+                Axis captured = axis;
+                Timeline.AddInterpolableModel(new InterpolableModel(
+                        owner: Timeline._ownerId,
+                        id: idPrefix + captured,
+                        name: $"Selected GuideObject {namePrefix} {captured}",
+                        interpolateBefore: (oci, parameter, leftValue, rightValue, factor) =>
+                        {
+                            GuideObject guideObject = (GuideObject)parameter;
+                            write(guideObject, WithAxis(read(guideObject), captured, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)));
+                        },
+                        interpolateAfter: (oci, parameter, leftValue, rightValue, factor) =>
+                        {
+                            GuideObject guideObject = (GuideObject)parameter;
+                            write(guideObject, WithAxis(read(guideObject), captured, Mathf.LerpUnclamped((float)leftValue, (float)rightValue, factor)));
+                        },
+                        // Always offered. Picking one while the combined track still exists splits that
+                        // track rather than creating a second one that would fight over the same vector,
+                        // which is handled in Timeline.AddInterpolable.
+                        isCompatibleWithTarget: oci => oci != null,
+                        getValue: (oci, parameter) => GetAxis(read((GuideObject)parameter), captured),
+                        readValueFromXml: (parameter, node) => node.ReadFloat("value"),
+                        writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (float)o),
+                        getParameter: oci => GuideObjectManager.Instance.selectObject,
+                        readParameterFromXml: ReadGuideObjectParameter,
+                        writeParameterToXml: WriteGuideObjectParameter,
+                        checkIntegrity: (oci, parameter, leftValue, rightValue) => parameter != null,
+                        getFinalName: (name, oci, parameter) => $"GO {namePrefix} {captured} ({((GuideObject)parameter).transformTarget.name})"
+                ));
+            }
+
+            Timeline.RegisterSplittableTransform(Timeline._ownerId, combinedId, splitIds);
+        }
+
+        private static object ReadGuideObjectParameter(ObjectCtrlInfo oci, XmlNode node)
+        {
+            Transform t = oci.guideObject.transformTarget.Find(node.Attributes["guideObjectPath"].Value);
+            if (t == null)
+                return null;
+            GuideObject guideObject;
+            Timeline._self._allGuideObjects.TryGetValue(t, out guideObject);
+            return guideObject;
+        }
+
+        private static void WriteGuideObjectParameter(ObjectCtrlInfo oci, XmlTextWriter writer, object o)
+        {
+            writer.WriteAttributeString("guideObjectPath", ((GuideObject)o).transformTarget.GetPathFrom(oci.guideObject.transformTarget));
+        }
+
         private static void TranslateRotationScale()
         {
             Timeline.AddInterpolableModel(new InterpolableModel(
@@ -200,7 +292,7 @@ namespace Timeline
                     name: "Selected GuideObject Pos",
                     interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((GuideObject)parameter).changeAmount.pos = Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor),
                     interpolateAfter: (oci, parameter, leftValue, rightValue, factor) => ((GuideObject)parameter).changeAmount.pos = Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor),
-                    isCompatibleWithTarget: oci => oci != null,
+                    isCompatibleWithTarget: oci => oci != null && Timeline.HasAnySplit(GuideObjectManager.Instance.selectObject, Timeline._ownerId, "guideObjectPos") == false,
                     getValue: (oci, parameter) => ((GuideObject)parameter).changeAmount.pos,
                     readValueFromXml: (parameter, node) => node.ReadVector3("value"),
                     writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Vector3)o),
@@ -224,7 +316,7 @@ namespace Timeline
                     name: "Selected GuideObject Rot",
                     interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((GuideObject)parameter).changeAmount.rot = Quaternion.SlerpUnclamped((Quaternion)leftValue, (Quaternion)rightValue, factor).eulerAngles,
                     interpolateAfter: (oci, parameter, leftValue, rightValue, factor) => ((GuideObject)parameter).changeAmount.rot = Quaternion.SlerpUnclamped((Quaternion)leftValue, (Quaternion)rightValue, factor).eulerAngles,
-                    isCompatibleWithTarget: (oci) => oci != null,
+                    isCompatibleWithTarget: (oci) => oci != null && Timeline.HasAnySplit(GuideObjectManager.Instance.selectObject, Timeline._ownerId, "guideObjectRot") == false,
                     getValue: (oci, parameter) => Quaternion.Euler(((GuideObject)parameter).changeAmount.rot),
                     readValueFromXml: (parameter, node) => node.ReadQuaternion("value"),
                     writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Quaternion)o),
@@ -248,7 +340,7 @@ namespace Timeline
                     name: "Selected GuideObject Scl",
                     interpolateBefore: (oci, parameter, leftValue, rightValue, factor) => ((GuideObject)parameter).changeAmount.scale = Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor),
                     interpolateAfter: (oci, parameter, leftValue, rightValue, factor) => ((GuideObject)parameter).changeAmount.scale = Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor),
-                    isCompatibleWithTarget: (oci) => oci != null,
+                    isCompatibleWithTarget: (oci) => oci != null && Timeline.HasAnySplit(GuideObjectManager.Instance.selectObject, Timeline._ownerId, "guideObjectScale") == false,
                     getValue: (oci, parameter) => ((GuideObject)parameter).changeAmount.scale,
                     readValueFromXml: (parameter, node) => node.ReadVector3("value"),
                     writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Vector3)o),
@@ -266,6 +358,16 @@ namespace Timeline
                     checkIntegrity: (oci, parameter, leftValue, rightValue) => parameter != null,
                     getFinalName: (name, oci, parameter) => $"GO Scale ({((GuideObject)parameter).transformTarget.name})"
             ));
+
+            AddSplitTransform("guideObjectPos", "Position", "guideObjectPos",
+                              go => go.changeAmount.pos, (go, v) => go.changeAmount.pos = v);
+            // Rotation is stored as euler degrees on the guide object anyway, so splitting it is exact on
+            // the value. It does interpolate differently from the combined track though: three
+            // independent angles do not trace the same path as a slerp between two quaternions.
+            AddSplitTransform("guideObjectRot", "Rotation", "guideObjectRot",
+                              go => go.changeAmount.rot, (go, v) => go.changeAmount.rot = v);
+            AddSplitTransform("guideObjectScale", "Scale", "guideObjectScale",
+                              go => go.changeAmount.scale, (go, v) => go.changeAmount.scale = v);
         }
 
         private static void Animation()
