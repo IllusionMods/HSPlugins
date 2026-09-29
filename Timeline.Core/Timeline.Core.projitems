@@ -22,6 +22,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Nla\MotionStrip.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Nla\NlaStack.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Nla\ValueBlend.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyConstraints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\BezierMath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\CurveReduction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Timeline.cs" />
