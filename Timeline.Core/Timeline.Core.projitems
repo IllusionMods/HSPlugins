@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Nla\NlaStack.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Nla\ValueBlend.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyConstraints.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyPoseEditorNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shallty\ShalltyUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\BezierMath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shared\CurveReduction.cs" />
