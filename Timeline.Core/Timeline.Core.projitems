@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Shared\CurveReduction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Timeline.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineBake.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineBakeSources.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineButton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineEasing.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineEdits.cs" />
