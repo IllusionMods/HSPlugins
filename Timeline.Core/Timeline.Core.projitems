@@ -27,7 +27,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimelineButton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineEasing.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineGraphOps.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineGroupSplit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineMarkers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineOrphans.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineRecord.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineSimplify.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineStrips.cs" />
