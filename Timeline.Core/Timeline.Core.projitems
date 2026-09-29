@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TimelineButton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineEasing.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineEdits.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimelineFlipbook.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineGraphOps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineGroupSplit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimelineKeyNode.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewDialogs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewDrag.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewExtras.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\ViewFlipbook.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewFloat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)View\ViewGrid.cs" />
