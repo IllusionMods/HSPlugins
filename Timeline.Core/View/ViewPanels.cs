@@ -25,6 +25,9 @@ namespace Timeline
             private string _addQuery = "";
             private ObjectCtrlInfoRef _apFor;
             private Studio.GuideObject _apNode;
+            /// <summary>What the list showed, as one number, and when to look again; see TickAdd.</summary>
+            private int _apSig;
+            private float _apCheckAt;
 
             /// <summary>Which object the list was built for, so it is rebuilt when the selection changes.</summary>
             private sealed class ObjectCtrlInfoRef
@@ -171,6 +174,50 @@ namespace Timeline
                 }
             }
 
+            /// <summary>
+            /// Every plugin that registered tracks, in the usual order, each with the tracks that fit what is
+            /// selected now. Without a search a plugin is listed even when none fit: many add tracks for what is
+            /// picked in their own window (a constraint, a renderer, a material), and the old list always
+            /// showed them, so a missing one reads as a missing plugin.
+            /// </summary>
+            private List<KeyValuePair<string, List<InterpolableModel>>> AddGroups()
+            {
+                string q = _addQuery.Trim().ToLowerInvariant();
+                var groups = new List<KeyValuePair<string, List<InterpolableModel>>>();
+                foreach (KeyValuePair<string, List<InterpolableModel>> owner in T._interpolableModelsDictionary.OrderBy(p => T._hardCodedOwnerOrder.TryGetValue(p.Key, out int order) ? order : int.MaxValue))
+                {
+                    var fits = new List<InterpolableModel>();
+                    foreach (InterpolableModel model in owner.Value)
+                    {
+                        if (model.IsCompatibleWithTarget(T._selectedOCI) == false)
+                            continue;
+                        if (q.Length != 0 && (model.name + " " + owner.Key).ToLowerInvariant().Contains(q) == false)
+                            continue;
+                        fits.Add(model);
+                    }
+                    if (fits.Count == 0 && q.Length != 0)
+                        continue;
+                    groups.Add(new KeyValuePair<string, List<InterpolableModel>>(owner.Key, fits));
+                }
+                return groups;
+            }
+
+            /// <summary>Which tracks the list offers, as one number, to tell when it needs drawing again.</summary>
+            private static int Signature(List<KeyValuePair<string, List<InterpolableModel>>> groups)
+            {
+                unchecked
+                {
+                    int h = 17;
+                    foreach (KeyValuePair<string, List<InterpolableModel>> g in groups)
+                    {
+                        h = h * 31 + g.Key.GetHashCode();
+                        foreach (InterpolableModel m in g.Value)
+                            h = h * 31 + m.GetHashCode();
+                    }
+                    return h;
+                }
+            }
+
             private bool Added(InterpolableModel model)
             {
                 return ExistingFor(model) != null;
@@ -215,21 +262,27 @@ namespace Timeline
                     note.rectTransform.sizeDelta = new Vector2(0f, 40f);
                     WrapPad(note, 10f, 8f);
                 }
-                string owner = null;
+                List<KeyValuePair<string, List<InterpolableModel>>> groups = AddGroups();
+                _apSig = Signature(groups);
                 int count = 0;
-                foreach (InterpolableModel model in AddCandidates())
+                foreach (KeyValuePair<string, List<InterpolableModel>> group in groups)
                 {
-                    if (model.owner != owner)
+                    RectTransform cat = Kit.Node("Cat", _apList);
+                    Kit.Size(cat.gameObject, -1f, 21f);
+                    Kit.Text("T", cat, group.Key.ToUpperInvariant(), 10, Pal.C(0x6B6E74), TextAnchor.LowerLeft).rectTransform.Fill(10f, 8f, 10f, 3f);
+                    if (group.Value.Count == 0)
                     {
-                        owner = model.owner;
-                        RectTransform cat = Kit.Node("Cat", _apList);
-                        Kit.Size(cat.gameObject, -1f, 21f);
-                        Kit.Text("T", cat, owner.ToUpperInvariant(), 10, Pal.C(0x6B6E74), TextAnchor.LowerLeft).rectTransform.Fill(10f, 8f, 10f, 3f);
+                        Text none = Kit.Paragraph("None", _apList, "Nothing for this selection. Some plugins add tracks for what is picked in their own window.", 11, Pal.C(0x6B6E74));
+                        WrapPad(none, 22f, 4f);
+                        continue;
                     }
-                    AddItem(model);
-                    ++count;
+                    foreach (InterpolableModel model in group.Value)
+                    {
+                        AddItem(model);
+                        ++count;
+                    }
                 }
-                if (count == 0)
+                if (count == 0 && groups.Count == 0)
                 {
                     Text none = Kit.Paragraph("Note", _apList, _addQuery.Trim().Length == 0 ? "Nothing can be animated on this." : "Nothing matches “" + _addQuery + "”.", 11, Pal.C(0x9A9DA2));
                     WrapPad(none, 10f, 8f);
@@ -305,8 +358,18 @@ namespace Timeline
             private void TickAdd()
             {
                 // A node track is added for the selected node, so picking another node changes the list too.
-                if (_addp != null && _addp.gameObject.activeSelf && (_apFor == null || _apFor.oci != T._selectedOCI || _apNode != Studio.GuideObjectManager.Instance.selectObject))
+                if (_addp == null || _addp.gameObject.activeSelf == false)
+                    return;
+                if (_apFor == null || _apFor.oci != T._selectedOCI || _apNode != Studio.GuideObjectManager.Instance.selectObject)
                     RenderAddList();
+                // A plugin's tracks can also depend on what is picked in its own window, which says nothing
+                // when that changes; so a few times a second the list is worked out again and redrawn if it differs.
+                else if (Time.unscaledTime >= _apCheckAt)
+                {
+                    _apCheckAt = Time.unscaledTime + 0.3f;
+                    if (Signature(AddGroups()) != _apSig)
+                        RenderAddList();
+                }
             }
             #endregion
 
