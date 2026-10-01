@@ -243,6 +243,8 @@ namespace Timeline
                 foreach (Interpolable track in tracks)
                     track.color = groupColor;
                 _interpolablesTree.GroupTogether(tracks, new InterpolableGroup { name = armatureName });
+                // The armature's group holds the tracks of several constraint objects; only the grouped list shows it as one.
+                _view?.ShowGroupedIfMixed();
             }
 
             var animPage = new PickerPage { name = charaName + " | Animation", color = groupColor, showNodes = true };

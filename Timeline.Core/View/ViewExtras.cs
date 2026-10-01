@@ -91,7 +91,7 @@ namespace Timeline
                     "x=" + F(_win.anchoredPosition.x), "y=" + F(_win.anchoredPosition.y), "w=" + F(winW), "h=" + F(winH),
                     "chan=" + F(chanW), "props=" + (props ? 1 : 0), "float=" + (_propsFloat ? 1 : 0),
                     "editor=" + editor, "compact=" + (compact ? 1 : 0), "summary=" + (showSummary ? 1 : 0),
-                    "groupKeys=" + groupKeys, "snap=" + snap, "handles=" + (showHandles ? 1 : 0),
+                    "groupKeys=" + groupKeys, "list=" + listMode, "snap=" + snap, "handles=" + (showHandles ? 1 : 0),
                     "normalize=" + (normalize ? 1 : 0), "path=" + (showPath ? 1 : 0), "pathRange=" + F(pathRange)
                 };
                 if (_pwin != null)
@@ -151,6 +151,9 @@ namespace Timeline
                 compact = num("compact", 0) > 0.5f;
                 showSummary = num("summary", 1) > 0.5f;
                 groupKeys = str("groupKeys", groupKeys);
+                listMode = str("list", listMode);
+                if (listMode != "object" && listMode != "tree")
+                    listMode = "object";
                 snap = str("snap", snap);
                 showHandles = num("handles", 1) > 0.5f;
                 normalize = num("normalize", 0) > 0.5f;
@@ -329,15 +332,16 @@ namespace Timeline
                 foreach (KeyValuePair<GroupNode<InterpolableGroup>, int> pair in AllGroups())
                 {
                     GroupNode<InterpolableGroup> g = pair.Key;
-                    // Groups belong to one object, so only the ones already holding its tracks, or none.
-                    bool fits = LeavesInOrder(g.children).All(t => t.oci == oci);
+                    // Listed by object, a group shows under each object it holds, so only the ones already
+                    // holding this object's tracks are offered. As grouped, any group can take any track.
+                    bool fits = Grouped || LeavesInOrder(g.children).All(t => t.oci == oci);
                     if (fits == false)
                         continue;
                     bool current = tracks.Count != 0 && tracks.All(t => { LeafNode<Interpolable> leaf = T._interpolablesTree.GetLeafNode(t); return leaf != null && leaf.parent == g; });
                     items.Add(new MenuItem { label = new string(' ', pair.Value * 3) + g.obj.name, check = current, act = () => MoveToGroup(tracks, g) });
                 }
                 items.Add(new MenuItem { sep = true });
-                items.Add(new MenuItem { label = "New group", act = () => { T._interpolablesTree.GroupTogether(tracks, new InterpolableGroup { name = "New group" }); T.UpdateInterpolablesView(); } });
+                items.Add(new MenuItem { label = "New group", act = () => { T._interpolablesTree.GroupTogether(tracks, new InterpolableGroup { name = "New group" }); T.UpdateInterpolablesView(); NoteMixedGroup(); } });
                 return items;
             }
 

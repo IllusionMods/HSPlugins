@@ -13,8 +13,9 @@ namespace Timeline
         internal sealed partial class View
         {
             /// <summary>
-            /// Rows dragged in the channel list: before or after another row, or into a group. Only within
-            /// the character they belong to, as groups are one character's.
+            /// Rows dragged in the channel list: before or after another row, or into a group. Listed by
+            /// object, only within the object they belong to, as each object shows its own part of a group;
+            /// listed as grouped, anywhere, so one group can hold tracks of several objects.
             /// </summary>
             private sealed class RowDrag
             {
@@ -66,7 +67,7 @@ namespace Timeline
                     owner = OwnerKey(r.tr.oci);
                     // A selected track brings the rest of the selection of the same character with it.
                     IEnumerable<Interpolable> tracks = T._selectedInterpolables.Contains(r.tr)
-                            ? _rows.Where(x => x.type == RowType.Track && T._selectedInterpolables.Contains(x.tr) && OwnerKey(x.tr.oci) == owner).Select(x => x.tr)
+                            ? _rows.Where(x => x.type == RowType.Track && T._selectedInterpolables.Contains(x.tr) && (Grouped || OwnerKey(x.tr.oci) == owner)).Select(x => x.tr)
                             : new[] { r.tr };
                     foreach (Interpolable t in tracks)
                     {
@@ -133,7 +134,7 @@ namespace Timeline
                 else
                     return;
                 _rowDrag.zone = zone;
-                bool valid = RowOwner(target) == _rowDrag.owner && Contains(target) == false;
+                bool valid = (Grouped || RowOwner(target) == _rowDrag.owner) && Contains(target) == false;
                 _rowDrag.valid = valid;
 
                 float top = target.y - scrollY;
@@ -183,7 +184,7 @@ namespace Timeline
                 if (d.target == null || d.valid == false)
                 {
                     if (d.target != null)
-                        Toast("Groups belong to one character: tracks can only move within their own.");
+                        Toast("Listed by object, tracks move within their own object. View › List tracks › As grouped lets one group hold several.");
                     return;
                 }
 

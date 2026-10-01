@@ -1724,6 +1724,8 @@ namespace Timeline
                 ClearTrimRange();
                 _selectedOCI = null;
                 _selectedKeyframes.Clear();
+                // A grouped list the last scene asked for does not carry over to this one, nor to a new scene.
+                _view?.ForgetSceneGrouping();
 
                 List<KeyValuePair<int, ObjectCtrlInfo>> dic = new SortedDictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl).ToList();
                 SceneLoad(node, dic);
@@ -1782,9 +1784,11 @@ namespace Timeline
             else
                 ImportShalltyGroups();
             ReadPicker(node, dic);
-            int split = SplitMixedGroups();
-            if (split != 0)
-                Logger.LogMessage(split + " group(s) held tracks of more than one character and are now one group per character.");
+            // Groups stay exactly as saved, a group holding tracks of several objects included: older scenes
+            // keep many objects in one group, and reshaping them here would be written back on the next save.
+            // Such a group only reads as one in the grouped list, so that is the one shown, for this scene.
+            if (_view != null && _view.ShowGroupedIfMixed())
+                Logger.LogMessage("This scene keeps tracks of several objects in one group, so the track list shows the groups as arranged for it. View › List tracks › By object switches back.");
             if (_orphanTracks.Count != orphansBefore)
                 ReportOrphanTracks();
             if (HandleMath.converted != 0)

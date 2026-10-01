@@ -304,6 +304,21 @@ namespace Timeline
                     rows.Add(summary);
                 }
 
+                if (Grouped)
+                {
+                    // As grouped: the tree as it was arranged, groups first and nested as they are, with every
+                    // object's tracks together. Each track row says whose it is.
+                    var all = new List<Interpolable>();
+                    Walk(T._interpolablesTree.tree, null, 0, rows, all, true, true);
+                    if (summary != null)
+                    {
+                        summary.tracks.AddRange(all);
+                        if (all.Count == 0)
+                            rows.Remove(summary);
+                    }
+                    return Place(rows);
+                }
+
                 var owners = new List<ObjectCtrlInfo>();
                 bool scene = false;
                 foreach (Interpolable track in LeavesInOrder(T._interpolablesTree.tree))
@@ -334,7 +349,12 @@ namespace Timeline
                 }
                 if (summary != null && summary.tracks.Count == 0)
                     rows.Remove(summary);
+                return Place(rows);
+            }
 
+            /// <summary>Stacks the rows from the top and keeps their total height.</summary>
+            private List<Row> Place(List<Row> rows)
+            {
                 float y = 0f;
                 foreach (Row r in rows)
                 {
@@ -359,8 +379,11 @@ namespace Timeline
                 }
             }
 
-            /// <summary>Adds the rows for one object's part of the tree. Returns its tracks either way.</summary>
-            private void Walk(List<INode> nodes, ObjectCtrlInfo oci, int depth, List<Row> rows, List<Interpolable> tracks, bool emit)
+            /// <summary>
+            /// Adds the rows for one object's part of the tree, or with anyOwner for all of it. Returns its
+            /// tracks either way.
+            /// </summary>
+            private void Walk(List<INode> nodes, ObjectCtrlInfo oci, int depth, List<Row> rows, List<Interpolable> tracks, bool emit, bool anyOwner = false)
             {
                 float row = ROW;
                 foreach (INode node in nodes)
@@ -368,7 +391,8 @@ namespace Timeline
                     if (node.type == INodeType.Leaf)
                     {
                         Interpolable track = ((LeafNode<Interpolable>)node).obj;
-                        if (track.oci != oci || Matches(track) == false)
+                        bool other = anyOwner ? onlySel && T._selectedOCI != null && track.oci != T._selectedOCI : track.oci != oci;
+                        if (other || Matches(track) == false)
                             continue;
                         tracks.Add(track);
                         if (emit)
@@ -389,7 +413,7 @@ namespace Timeline
                     int at = rows.Count;
                     if (emit)
                         rows.Add(groupRow);
-                    Walk(group.children, oci, depth + 1, rows, inGroup, emit && group.obj.expanded);
+                    Walk(group.children, oci, depth + 1, rows, inGroup, emit && group.obj.expanded, anyOwner);
                     if (inGroup.Count == 0)
                     {
                         if (emit)
@@ -402,6 +426,86 @@ namespace Timeline
             }
 
             private readonly HashSet<Interpolable> _axOpen = new HashSet<Interpolable>();
+
+            /// <summary>After a group is made: one holding several objects' tracks only reads as one group in the grouped list.</summary>
+            private void NoteMixedGroup()
+            {
+                if (ShowGroupedIfMixed())
+                    Toast("That group holds tracks of several objects, so the list now shows the groups as arranged (View › List tracks).");
+            }
+
+            /// <summary>
+            /// Set while the scene open now groups several objects together, which only the grouped list shows
+            /// as one group. It is the scene's, not a setting: a new or another scene goes back to listMode.
+            /// </summary>
+            private bool _autoGrouped;
+
+            /// <summary>Whether the list is laid out as grouped right now, by choice or for this scene.</summary>
+            private bool Grouped
+            {
+                get { return listMode == "tree" || _autoGrouped; }
+            }
+
+            /// <summary>Chosen in the View menu: kept as the setting, and it overrides what a scene asked for.</summary>
+            private void SetListMode(string mode)
+            {
+                listMode = mode;
+                _autoGrouped = false;
+                RefreshList();
+            }
+
+            private void RefreshList()
+            {
+                scrollY = 0f;
+                _rowsDirty = true;
+                ++_rowsVersion;
+            }
+
+            /// <summary>A scene is about to be read: what the last one needed no longer applies.</summary>
+            public void ForgetSceneGrouping()
+            {
+                if (_autoGrouped == false)
+                    return;
+                _autoGrouped = false;
+                RefreshList();
+            }
+
+            /// <summary>
+            /// Shows the grouped list for this scene when a group holds tracks of more than one object, as only
+            /// that list shows such a group as one. True when the list changed.
+            /// </summary>
+            public bool ShowGroupedIfMixed()
+            {
+                if (Grouped || HasMixedGroup() == false)
+                    return false;
+                _autoGrouped = true;
+                RefreshList();
+                return true;
+            }
+
+            /// <summary>A group inside a mixed one makes its parent mixed too, so the top level is enough.</summary>
+            private bool HasMixedGroup()
+            {
+                foreach (INode node in T._interpolablesTree.tree)
+                {
+                    GroupNode<InterpolableGroup> group = node as GroupNode<InterpolableGroup>;
+                    if (group == null)
+                        continue;
+                    bool first = true;
+                    ObjectCtrlInfo owner = null;
+                    foreach (Interpolable track in LeavesInOrder(group.children))
+                    {
+                        if (first)
+                        {
+                            owner = track.oci;
+                            first = false;
+                        }
+                        else if (track.oci != owner)
+                            return true;
+                    }
+                }
+                return false;
+            }
 
             private bool IsCollapsed(Row r)
             {
@@ -665,6 +769,8 @@ namespace Timeline
                         string prop = PropOf(r.tr);
                         if (prop != null)
                             label += " " + Kit.Dim("· " + prop);
+                        if (Grouped)
+                            label += " " + Kit.Dim("· " + Kit.Escape(ObjectName(r.tr.oci)));
                         break;
                 }
                 if (off)
@@ -784,7 +890,7 @@ namespace Timeline
                     items.Add(new MenuItem { label = "Rename", act = () => BeginRename(r) });
                     items.Add(new MenuItem { label = "Select its keys", act = () => T.SelectKeyframes(tracks.SelectMany(t => t.keyframes).ToList()) });
                     items.Add(new MenuItem { sep = true });
-                    items.Add(new MenuItem { label = "Group selected tracks", act = () => { T._interpolablesTree.GroupTogether(tracks, new InterpolableGroup { name = "New group" }); T.UpdateInterpolablesView(); } });
+                    items.Add(new MenuItem { label = "Group selected tracks", act = () => { T._interpolablesTree.GroupTogether(tracks, new InterpolableGroup { name = "New group" }); T.UpdateInterpolablesView(); NoteMixedGroup(); } });
                     bool inGroup = tracks.Any(t => { LeafNode<Interpolable> leaf = T._interpolablesTree.GetLeafNode(t); return leaf != null && leaf.parent != null; });
                     items.Add(new MenuItem { label = "Take selected out of their group", disabled = inGroup == false, act = () => { T._interpolablesTree.ParentTo(tracks.Select(t => (INode)T._interpolablesTree.GetLeafNode(t)), null); T.UpdateInterpolablesView(); } });
                     items.Add(new MenuItem { label = "Move up", act = () => { T._interpolablesTree.MoveUp(tracks.Select(t => (INode)T._interpolablesTree.GetLeafNode(t))); T.UpdateInterpolablesView(); } });

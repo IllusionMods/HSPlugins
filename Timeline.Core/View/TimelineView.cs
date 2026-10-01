@@ -50,6 +50,11 @@ namespace Timeline
             public bool showSummary = true;
             public bool compact;
             public string groupKeys = "collapsed";
+            /// <summary>
+            /// How the channel list is laid out: "object", each object and then its part of the groups, or
+            /// "tree", the groups as they were arranged, which a scene grouping several objects together needs.
+            /// </summary>
+            public string listMode = "object";
             public float chanW = 260f;
             public float winW = 1180f, winH = 590f;
             public string hover = "";

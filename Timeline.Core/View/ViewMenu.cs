@@ -347,6 +347,15 @@ namespace Timeline
                         new MenuItem { label = "Always", check = groupKeys == "always", act = () => groupKeys = "always" }
                     }
                 });
+                items.Add(new MenuItem
+                {
+                    label = "List tracks",
+                    sub = new List<MenuItem>
+                    {
+                        new MenuItem { label = "By object", check = Grouped == false, act = () => SetListMode("object") },
+                        new MenuItem { label = "As grouped", check = Grouped, act = () => SetListMode("tree") }
+                    }
+                });
                 items.Add(new MenuItem { sep = true });
                 items.Add(new MenuItem { label = "Motion path in the scene", check = showPath, act = () => showPath = !showPath });
                 items.Add(new MenuItem { label = "Picker dots in the scene", check = _showPickerNodes, act = () => { _showPickerNodes = !_showPickerNodes; RefreshFloats(); } });
