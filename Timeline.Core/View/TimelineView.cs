@@ -50,6 +50,8 @@ namespace Timeline
             public bool showSummary = true;
             public bool compact;
             public string groupKeys = "collapsed";
+            /// <summary>The ruler and the playhead count frames at the scene's rate rather than seconds; the fields stay in seconds.</summary>
+            public bool showFrames;
             /// <summary>
             /// How the channel list is laid out: "object", each object and then its part of the groups, or
             /// "tree", the groups as they were arranged, which a scene grouping several objects together needs.
@@ -546,6 +548,17 @@ namespace Timeline
             public static string Fmt(float t)
             {
                 return (Mathf.Round(t * 100f) / 100f).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            private float Fps
+            {
+                get { return Mathf.Max(T._desiredFrameRate, 1); }
+            }
+
+            /// <summary>A time as a frame at the scene's rate, as the ruler shows it: "24f".</summary>
+            private string FrameText(float t)
+            {
+                return Mathf.RoundToInt(t * Fps) + "f";
             }
 
             public static string Timecode(float t)

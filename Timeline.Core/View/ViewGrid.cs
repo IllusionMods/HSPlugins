@@ -306,6 +306,16 @@ namespace Timeline
             private float NiceStep()
             {
                 float fps = Mathf.Max(T._desiredFrameRate, 1);
+                // In frames the steps are whole frames, so every label is one.
+                if (showFrames)
+                {
+                    foreach (int f in new[] { 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000 })
+                    {
+                        if (f / fps * pps >= 48f)
+                            return f / fps;
+                    }
+                    return 2000f / fps;
+                }
                 foreach (float s in new[] { 1f / fps, 0.1f, 0.2f, 0.5f, 1f, 2f, 5f })
                 {
                     if (s * pps >= 48f)
@@ -314,10 +324,21 @@ namespace Timeline
                 return 10f;
             }
 
+            /// <summary>The lines between two labels: a fifth or a half of a step, and never a fraction of a frame when showing frames.</summary>
+            private float MinorStep(float st)
+            {
+                if (showFrames == false)
+                    return st * pps >= 90f ? st / 5f : st / 2f;
+                float fps = Mathf.Max(T._desiredFrameRate, 1);
+                int frames = Mathf.Max(1, Mathf.RoundToInt(st * fps));
+                int minor = st * pps >= 90f && frames % 5 == 0 ? frames / 5 : frames % 2 == 0 ? frames / 2 : frames;
+                return minor / fps;
+            }
+
             /// <summary>timeLines(): major and minor lines, and the time outside the scene darkened.</summary>
             private void TimeLines(Paint p, float w, float top, float GH)
             {
-                float st = NiceStep(), minor = st * pps >= 90f ? st / 5f : st / 2f;
+                float st = NiceStep(), minor = MinorStep(st);
                 int a = Mathf.FloorToInt(Tt(0f) / minor), b = Mathf.CeilToInt(Tt(w) / minor);
                 for (int i = a; i <= b; ++i)
                 {
@@ -348,7 +369,7 @@ namespace Timeline
             {
                 p.Rect(0f, 0f, w, RUL, Pal.C(0x181A1E));
                 p.Rect(0f, RUL - 1f, w, 1f, Pal.C(0x111215));
-                float st = NiceStep(), minor = st * pps >= 90f ? st / 5f : st / 2f;
+                float st = NiceStep(), minor = MinorStep(st);
                 int a = Mathf.FloorToInt(Tt(0f) / minor), b = Mathf.CeilToInt(Tt(w) / minor);
                 int digits = st < 0.1f ? 2 : st < 1f ? 1 : 0;
                 for (int i = a; i <= b; ++i)
@@ -358,7 +379,7 @@ namespace Timeline
                     p.Rect(x, RUL - (major ? 8f : 4f), 1f, major ? 8f : 4f, Pal.C(0x44474C));
                     if (major)
                     {
-                        string label = t.ToString("F" + digits, System.Globalization.CultureInfo.InvariantCulture) + "s";
+                        string label = showFrames ? FrameText(t) : t.ToString("F" + digits, System.Globalization.CultureInfo.InvariantCulture) + "s";
                         p.Label(label, x + 0.5f, 4f, 11, t < -1e-4f || t > T._duration + 1e-4f ? Pal.C(0x55585E) : Pal.C(0x9A9DA2), TextAnchor.UpperCenter);
                     }
                 }
@@ -392,7 +413,7 @@ namespace Timeline
                 float x = Mathf.Round(X(T._playbackTime));
                 Color c = Pal.playhead;
                 p.Rect(x - 1f, 0f, 2f, GH, c);
-                string label = Fmt(T._playbackTime);
+                string label = showFrames ? FrameText(T._playbackTime) : Fmt(T._playbackTime);
                 float w = Paint.Measure(label, 11) + 10f;
                 p.RoundRect(x - w / 2f, 3f, w, 18f, 3f, c);
                 p.Label(label, x, 12.5f, 11, Color.white, TextAnchor.MiddleCenter);

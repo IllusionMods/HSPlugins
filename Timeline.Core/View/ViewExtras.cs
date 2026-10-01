@@ -91,7 +91,7 @@ namespace Timeline
                     "x=" + F(_win.anchoredPosition.x), "y=" + F(_win.anchoredPosition.y), "w=" + F(winW), "h=" + F(winH),
                     "chan=" + F(chanW), "props=" + (props ? 1 : 0), "float=" + (_propsFloat ? 1 : 0),
                     "editor=" + editor, "compact=" + (compact ? 1 : 0), "summary=" + (showSummary ? 1 : 0),
-                    "groupKeys=" + groupKeys, "list=" + listMode, "snap=" + snap, "handles=" + (showHandles ? 1 : 0),
+                    "groupKeys=" + groupKeys, "list=" + listMode, "frames=" + (showFrames ? 1 : 0), "snap=" + snap, "handles=" + (showHandles ? 1 : 0),
                     "normalize=" + (normalize ? 1 : 0), "path=" + (showPath ? 1 : 0), "pathRange=" + F(pathRange)
                 };
                 if (_pwin != null)
@@ -151,6 +151,7 @@ namespace Timeline
                 compact = num("compact", 0) > 0.5f;
                 showSummary = num("summary", 1) > 0.5f;
                 groupKeys = str("groupKeys", groupKeys);
+                showFrames = num("frames", 0) > 0.5f;
                 listMode = str("list", listMode);
                 if (listMode != "object" && listMode != "tree")
                     listMode = "object";

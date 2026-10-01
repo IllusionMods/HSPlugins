@@ -349,6 +349,15 @@ namespace Timeline
                 });
                 items.Add(new MenuItem
                 {
+                    label = "Ruler shows",
+                    sub = new List<MenuItem>
+                    {
+                        new MenuItem { label = "Seconds", check = showFrames == false, act = () => { showFrames = false; Touch(); } },
+                        new MenuItem { label = "Frames", check = showFrames, act = () => { showFrames = true; Touch(); } }
+                    }
+                });
+                items.Add(new MenuItem
+                {
                     label = "List tracks",
                     sub = new List<MenuItem>
                     {
