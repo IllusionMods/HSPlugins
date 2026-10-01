@@ -43,7 +43,8 @@ namespace Timeline
                         _currentlyIsPlaying = null;
                     }
 
-                    if (value)
+                    // A hidden toolbar cannot run the blink; the next UpdateButton tries again.
+                    if (value && ButtonObject != null && ButtonObject.isActiveAndEnabled)
                         _currentlyIsPlaying = ButtonObject.StartCoroutine(BlinkerCo());
                 }
             }
