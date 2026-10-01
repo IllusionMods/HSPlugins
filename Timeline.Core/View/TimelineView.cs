@@ -278,7 +278,18 @@ namespace Timeline
                     RenderRows();
                 TickReveal();
                 if (_propsDirty)
+                {
                     RenderProps();
+                    _keyTimesDirty = false;
+                }
+                // Keys being dragged change their times every frame; the properties follow a few times a
+                // second instead, as rebuilding them each frame is what dragged the frame rate down.
+                else if (_keyTimesDirty && Time.unscaledTime - _keyTimesAt > 0.2f)
+                {
+                    _keyTimesDirty = false;
+                    _keyTimesAt = Time.unscaledTime;
+                    RenderProps();
+                }
                 TickFloats();
                 TickHeader();
                 DrawGrid();
@@ -293,6 +304,10 @@ namespace Timeline
 
             private bool _headerDirty = true, _rowsDirty = true, _propsDirty = true;
             private int _stateSignature;
+            /// <summary>The selected keys' times, kept apart: only the properties show them.</summary>
+            private int _keyTimeSignature;
+            private bool _keyTimesDirty;
+            private float _keyTimesAt = -1f;
 
             /// <summary>
             /// Notices changes made elsewhere: through the Classic code paths, by undo, by Studio. The grid
@@ -308,8 +323,17 @@ namespace Timeline
                     foreach (Interpolable i in T._selectedInterpolables)
                         s = s * 31 + i.GetHashCode();
                     s = s * 31 + T._selectedKeyframes.Count;
+                    int times = 17;
                     foreach (KeyValuePair<float, Keyframe> k in T._selectedKeyframes)
-                        s = s * 31 + k.Value.GetHashCode() + k.Key.GetHashCode();
+                    {
+                        s = s * 31 + k.Value.GetHashCode();
+                        times = times * 31 + k.Key.GetHashCode();
+                    }
+                    if (times != _keyTimeSignature)
+                    {
+                        _keyTimeSignature = times;
+                        _keyTimesDirty = true;
+                    }
                     s = s * 31 + (T._selectedOCI == null ? 0 : T._selectedOCI.GetHashCode());
                     s = s * 31 + T._undoStack.Count * 7 + T._redoStack.Count;
                     s = s * 31 + T._graphHiddenTracks.Count * 3 + T._graphLockedTracks.Count;

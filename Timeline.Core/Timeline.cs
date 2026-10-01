@@ -1450,12 +1450,24 @@ namespace Timeline
         // Destination times come from pixel round-trips, so a keyframe aimed exactly at another's
         // time can land ~2e-7 off. An exact SortedList lookup misses that and lets a near-duplicate
         // through, which is the collision this is meant to catch.
+        // The times are sorted, so only the few around where the time would go can match: found by halving,
+        // which matters while hundreds of keys are dragged and each one is checked every frame.
         private static Keyframe FindOccupant(Interpolable interpolable, float time, Keyframe self)
         {
             SortedList<float, Keyframe> keyframes = interpolable.keyframes;
-            for (int i = 0; i < keyframes.Count; i++)
+            IList<float> times = keyframes.Keys;
+            int lo = 0, hi = times.Count - 1;
+            while (lo <= hi)
             {
-                if (!Mathf.Approximately(keyframes.Keys[i], time))
+                int mid = (lo + hi) / 2;
+                if (times[mid] < time)
+                    lo = mid + 1;
+                else
+                    hi = mid - 1;
+            }
+            for (int i = Mathf.Max(0, lo - 2); i <= Mathf.Min(times.Count - 1, lo + 1); i++)
+            {
+                if (!Mathf.Approximately(times[i], time))
                     continue;
                 Keyframe candidate = keyframes.Values[i];
                 if (candidate != self)
@@ -1466,6 +1478,15 @@ namespace Timeline
 
         private bool TryMoveKeyframe(Keyframe keyframe, float destinationTime)
         {
+            return TryMoveKeyframe(keyframe, destinationTime, true);
+        }
+
+        /// <summary>
+        /// Moves one key. Without updateSelection the selected list keeps the old time for it, for a caller
+        /// moving many at once that puts the list right itself in one pass.
+        /// </summary>
+        private bool TryMoveKeyframe(Keyframe keyframe, float destinationTime, bool updateSelection)
+        {
             SortedList<float, Keyframe> keyframes = keyframe.parent.keyframes;
             if (FindOccupant(keyframe.parent, destinationTime, keyframe) != null)
                 return false; // slot held by another keyframe: don't remove, don't orphan
@@ -1474,6 +1495,8 @@ namespace Timeline
                 return false;
             keyframes.RemoveAt(index);
             keyframes.Add(destinationTime, keyframe);
+            if (updateSelection == false)
+                return true;
             int i = _selectedKeyframes.FindIndex(k => k.Value == keyframe);
             if (i != -1)
                 _selectedKeyframes[i] = new KeyValuePair<float, Keyframe>(destinationTime, keyframe);
