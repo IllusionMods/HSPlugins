@@ -511,6 +511,8 @@ namespace HSPE.AMModules
         private int _renameIndex = -1;
         private string _renameString = "";
         private int _lastEditedBlendShape = -1;
+        /// <summary>The mesh of the last moved blend shape, so picking another mesh to look at does not lose it.</summary>
+        private string _lastEditedRendererPath;
         private bool _isBusy = false;
 
         enum BlendPresetMixMode
@@ -799,7 +801,6 @@ namespace HSPE.AMModules
                 {
                     _nonMatchCorrectionMode = false;
                     _skinnedMeshTarget = currBlendRenderer.Value;
-                    _lastEditedBlendShape = -1;
                 }
                 GUI.color = c;
             }
@@ -1058,6 +1059,7 @@ namespace HSPE.AMModules
                         if (!Mathf.Approximately(weight, num1))
                         {
                             _lastEditedBlendShape = currBlend.Value;
+                            _lastEditedRendererPath = _skinnedMeshTarget._fullPath;
                             _skinnedMeshTarget.SetBlendShapeWeight(currBlend.Key, weight);
 
                             if (_linkEyesComponents)
@@ -2141,7 +2143,9 @@ namespace HSPE.AMModules
                         getParameter: oci =>
                         {
                             PoseController controller = oci.guideObject.transformTarget.GetComponent<PoseController>();
-                            return new IndividualParameter(controller._blendShapesEditor, MeshTargetOf(controller._blendShapesEditor), controller._blendShapesEditor._lastEditedBlendShape);
+                            int index;
+                            BlendRenderer renderer = LastEdited(controller._blendShapesEditor, out index);
+                            return new IndividualParameter(controller._blendShapesEditor, renderer, index);
                         },
                         readParameterFromXml: (oci, node) => new IndividualParameter(oci.guideObject.transformTarget.GetComponent<PoseController>()._blendShapesEditor, node.Attributes["parameter1"].Value, node.ReadInt("parameter2")),
                         writeParameterToXml: (oci, writer, o) =>
@@ -2281,7 +2285,9 @@ namespace HSPE.AMModules
                         getParameter: oci =>
                         {
                             PoseController controller = oci.guideObject.transformTarget.GetComponent<PoseController>();
-                            return new IndividualParameter(controller._blendShapesEditor, MeshTargetOf(controller._blendShapesEditor), controller._blendShapesEditor._lastEditedBlendShape);
+                            int index;
+                            BlendRenderer renderer = LastEdited(controller._blendShapesEditor, out index);
+                            return new IndividualParameter(controller._blendShapesEditor, renderer, index);
                         },
                         readParameterFromXml: (oci, node) => new IndividualParameter(oci.guideObject.transformTarget.GetComponent<PoseController>()._blendShapesEditor, node.Attributes["parameter1"].Value, node.ReadInt("parameter2")),
                         writeParameterToXml: (oci, writer, o) =>
@@ -2374,6 +2380,22 @@ namespace HSPE.AMModules
                 foreach (KeyValuePair<string, BlendRenderer> pair in editor._blendRenderers)
                     return pair.Value;
                 return null;
+            }
+
+            /// <summary>
+            /// The mesh and blend shape last moved in the Blend Shapes tab, even when another mesh is picked
+            /// now; the picked mesh and -1 when nothing was moved yet or that mesh is gone.
+            /// </summary>
+            private static BlendRenderer LastEdited(BlendShapesEditor editor, out int index)
+            {
+                BlendRenderer renderer;
+                if (editor != null && editor._lastEditedRendererPath != null && editor._blendRenderers.TryGetValue(editor._lastEditedRendererPath, out renderer) && renderer._renderer != null)
+                {
+                    index = editor._lastEditedBlendShape;
+                    return renderer;
+                }
+                index = -1;
+                return MeshTargetOf(editor);
             }
 
             /// <summary>Blend shape tracks are offered for what has a mesh with blend shapes to make them for.</summary>
