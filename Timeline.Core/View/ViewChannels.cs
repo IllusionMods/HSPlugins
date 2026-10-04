@@ -538,6 +538,7 @@ namespace Timeline
                 public Text count;
                 public IconView eye;
                 public IconView lockIcon;
+                public IconView onIcon;
                 public IconView solo;
                 public Row row;
                 public int version = -1;
@@ -579,6 +580,7 @@ namespace Timeline
                 v.count = Kit.Text("Cnt", v.rect, "", 10, Pal.C(0x6B6E74), TextAnchor.MiddleRight);
 
                 v.eye = RowIcon(v, "Eye", () => ToggleEye(captured.row), "Show in Graph");
+                v.onIcon = RowIcon(v, "On", () => ToggleOn(captured.row), "Switch off: the track stops playing");
                 v.lockIcon = RowIcon(v, "Lock", () => ToggleLock(captured.row), "Lock against edits");
                 v.solo = RowIcon(v, "Solo", () => ToggleSolo(captured.row), "Solo: only the soloed lanes of this object play");
 
@@ -714,7 +716,7 @@ namespace Timeline
                 bool icons = (r.type == RowType.Track || r.type == RowType.Object || r.type == RowType.Group || r.type == RowType.Axis) && editor != "nla";
                 // A lane with strips mutes, solos and locks, as Blender's NLA tracks do.
                 bool laneIcons = r.type == RowType.Lane && r.lane <= T.TopLane(r.oci);
-                float right = 6f + (icons ? 36f : 0f) + (laneIcons ? 54f : 0f);
+                float right = 6f + (icons ? 54f : 0f) + (laneIcons ? 54f : 0f);
                 bool showCount = twisty && axisTwisty == false && IsCollapsed(r);
                 v.count.gameObject.SetActive(showCount);
                 if (showCount)
@@ -782,13 +784,20 @@ namespace Timeline
 
                 v.eye.transform.parent.gameObject.SetActive(icons);
                 v.lockIcon.transform.parent.gameObject.SetActive(icons);
+                // Eye, then on/off, then lock; an axis row has the eye only, the rest is the whole track's.
+                v.onIcon.transform.parent.gameObject.SetActive(icons && r.type != RowType.Axis);
                 if (icons)
                 {
                     List<Interpolable> set = track || r.type == RowType.Axis ? new List<Interpolable> { r.tr } : r.tracks;
                     bool allHidden = set.Count != 0 && set.TrueForAll(T._graphHiddenTracks.Contains);
                     bool allLocked = set.Count != 0 && set.TrueForAll(T._graphLockedTracks.Contains);
-                    ((RectTransform)v.eye.transform.parent).Css(float.NaN, (h - 18f) / 2f, 6f + 18f, float.NaN, 18f, 18f);
+                    bool anyOn = set.Count == 0 || set.Exists(t => t.enabled), allOn = set.Count != 0 && set.TrueForAll(t => t.enabled);
+                    ((RectTransform)v.eye.transform.parent).Css(float.NaN, (h - 18f) / 2f, 6f + 36f, float.NaN, 18f, 18f);
+                    ((RectTransform)v.onIcon.transform.parent).Css(float.NaN, (h - 18f) / 2f, 6f + 18f, float.NaN, 18f, 18f);
                     ((RectTransform)v.lockIcon.transform.parent).Css(float.NaN, (h - 18f) / 2f, 6f, float.NaN, 18f, 18f);
+                    // ✓ while it plays, ✕ once switched off; a dim ✓ when only some of a group's tracks play.
+                    v.onIcon.Set(anyOn ? "check" : "close", anyOn == false ? Pal.C(0x6B6E74) : allOn ? Pal.C(0xC9CDD3) : Pal.C(0x6B6E74));
+                    v.onIcon.transform.parent.GetComponent<Clickable>().tooltip = anyOn ? "Switch off: the track stops playing" : "Switch on: the track plays again";
                     if (r.type == RowType.Axis)
                         allHidden = T.IsComponentHidden(r.tr, r.c);
                     v.eye.Set(allHidden ? "eyeoff" : "eye", allHidden ? Pal.C(0x6B6E74) : Pal.C(0xC9CDD3));
@@ -1044,6 +1053,22 @@ namespace Timeline
                     return;
                 }
                 ToggleSet(r, T._graphLockedTracks);
+            }
+
+            /// <summary>Switches tracks off so they stop playing, or back on; a group switches all of its tracks, on when any is off.</summary>
+            private void ToggleOn(Row r)
+            {
+                if (r == null || r.type == RowType.Axis)
+                    return;
+                List<Interpolable> tracks = r.type == RowType.Track ? new List<Interpolable> { r.tr } : r.tracks;
+                if (tracks.Count == 0)
+                    return;
+                bool on = tracks.TrueForAll(t => t.enabled) == false;
+                T.RecordUndo(on ? "Switch tracks on" : "Switch tracks off");
+                foreach (Interpolable t in tracks)
+                    t.enabled = on;
+                ++_rowsVersion;
+                Touch();
             }
 
             private void ToggleSet(Row r, HashSet<Interpolable> set)
