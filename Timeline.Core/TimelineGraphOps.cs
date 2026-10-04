@@ -114,6 +114,57 @@ namespace Timeline
         }
 
         /// <summary>
+        /// Spreads the selected keyframes out, or draws them together, around the first of them: a factor
+        /// of 2 doubles every gap. Timeline 1 did this with Alt and the wheel. All or nothing: false, and
+        /// nothing moves, when a keyframe would land on one that is not moving or is on a locked track.
+        /// </summary>
+        private bool ScaleSelectedSpacing(float factor, bool recordUndo)
+        {
+            if (_selectedKeyframes.Count < 2 || factor <= 0f)
+                return false;
+            float min = _selectedKeyframes.Min(k => k.Key);
+            var moves = new Dictionary<Keyframe, float>();
+            foreach (KeyValuePair<float, Keyframe> pair in _selectedKeyframes)
+                moves[pair.Value] = min + (pair.Key - min) * factor;
+            foreach (KeyValuePair<Keyframe, float> move in moves)
+            {
+                if (_graphLockedTracks.Contains(move.Key.parent))
+                    return false;
+                Keyframe occupant = FindOccupant(move.Key.parent, move.Value, move.Key);
+                if (occupant != null && moves.ContainsKey(occupant) == false)
+                    return false;
+            }
+            // Two keys of one track drawn so close they would be one.
+            foreach (IGrouping<Interpolable, KeyValuePair<Keyframe, float>> track in moves.GroupBy(m => m.Key.parent))
+            {
+                List<float> times = track.Select(m => m.Value).OrderBy(t => t).ToList();
+                for (int i = 1; i < times.Count; ++i)
+                {
+                    if (Mathf.Approximately(times[i - 1], times[i]))
+                        return false;
+                }
+            }
+
+            if (recordUndo)
+                RecordUndo("Scale key spacing");
+            // Spreading moves the furthest first and drawing together the nearest first, so no key
+            // lands on a selected one that has not moved yet.
+            var ordered = _selectedKeyframes.Select(p => p.Value).ToList();
+            ordered.Sort((a, b) => factor > 1f ? moves[b].CompareTo(moves[a]) : moves[a].CompareTo(moves[b]));
+            foreach (Keyframe k in ordered)
+                TryMoveKeyframe(k, moves[k], false);
+            for (int i = 0; i < _selectedKeyframes.Count; i++)
+            {
+                Keyframe k = _selectedKeyframes[i].Value;
+                _selectedKeyframes[i] = new KeyValuePair<float, Keyframe>(moves[k], k);
+            }
+            UpdateGrid();
+            UpdateKeyframeWindow(false);
+            RefreshInterpolation();
+            return true;
+        }
+
+        /// <summary>
         /// Takes the slope out of every selected keyframe, both sides of it.
         ///
         /// A keyframe's easing lives on the segment that leaves it, so flattening one means zeroing the

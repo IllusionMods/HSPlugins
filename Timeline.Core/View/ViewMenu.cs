@@ -519,6 +519,7 @@ namespace Timeline
                     new MenuItem { label = "Key type", sub = types, disabled = any == false },
                     new MenuItem { label = "Handle type", sub = handles, disabled = any == false },
                     new MenuItem { sep = true },
+                    new MenuItem { label = "Scale spacing…", kb = "Alt+Wheel", act = OpenSpacing, disabled = T._selectedKeyframes.Count < 2 },
                     new MenuItem { label = "Snap selected keys to frames", act = () => T.SnapSelectedKeyframes(GraphSnap.Frame, false), disabled = any == false },
                     new MenuItem { label = "Smooth selected keys", act = () => { T.SmoothSelectedKeyframes(); Touch(); }, disabled = any == false },
                     new MenuItem { label = "Flatten their handles", act = () => { T.FlattenSelectedHandles(); Touch(); }, disabled = any == false },

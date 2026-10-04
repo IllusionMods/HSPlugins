@@ -661,6 +661,7 @@ namespace Timeline
                 new[] { "Shift while dragging", "Flip snapping for this drag" },
                 new[] { "Ctrl / Alt while dragging (Graph)", "Time only / value only" },
                 new[] { "Scroll · Ctrl+scroll · Shift+scroll", "Scroll the rows · zoom time (Graph: scroll zooms) · scroll sideways" },
+                new[] { "Alt+scroll", "Spread the selected keys out or draw them together, a tenth at a time" },
                 new[] { "Alt+drag, middle-drag", "Pan the Graph view" },
                 new[] { "Home · F", "Fit everything · fit the selection" },
                 new[] { "A · Alt+A · Ctrl+I", "Select all · none · invert" },

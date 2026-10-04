@@ -814,6 +814,9 @@ namespace Timeline
                 float f = Mathf.Exp(-dy * 0.0015f);
                 bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
                 bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                bool alt = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+                if (alt && editor != "nla" && SpacingWheel(e.scrollDelta.y))
+                    return;
                 if (shift)
                     t0 += dy / pps * 0.6f;
                 else if (editor == "graph")
@@ -826,6 +829,83 @@ namespace Timeline
                     pps = Mathf.Clamp(pps * f, 8f, 4000f);
                     t0 = t - p.x / pps;
                 }
+            }
+
+            private int _spacingSelection;
+            private float _spacingBase;
+            private float _spacingAt = -10f;
+
+            /// <summary>
+            /// Alt and the wheel, as in Timeline 1: each notch spreads the selected keys by a tenth of how
+            /// long the selection was when it was picked, or draws them together by as much, down to a
+            /// tenth. A notch that would make keys land on others goes on to the next one that does not.
+            /// </summary>
+            private bool SpacingWheel(float delta)
+            {
+                List<KeyValuePair<float, Keyframe>> selected = T._selectedKeyframes;
+                if (selected.Count < 2 || Mathf.Approximately(delta, 0f))
+                    return false;
+                float size = selected.Max(k => k.Key) - selected.Min(k => k.Key);
+                if (size < 0.0001f)
+                    return false;
+                int signature = selected.Count;
+                unchecked
+                {
+                    foreach (KeyValuePair<float, Keyframe> k in selected)
+                        signature += System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(k.Value);
+                }
+                if (signature != _spacingSelection)
+                {
+                    _spacingSelection = signature;
+                    _spacingBase = size;
+                }
+                int dir = delta > 0f ? 1 : -1;
+                int steps = Mathf.RoundToInt(size / _spacingBase * 10f);
+                // Notches close together are one step to undo.
+                bool undo = Time.realtimeSinceStartup - _spacingAt > 0.6f;
+                for (int m = 1; m <= 50; ++m)
+                {
+                    int target = Mathf.Max(1, steps + m * dir);
+                    float factor = target * _spacingBase / 10f / size;
+                    if (Mathf.Approximately(factor, 1f))
+                        break;
+                    if (T.ScaleSelectedSpacing(factor, undo))
+                    {
+                        _spacingAt = Time.realtimeSinceStartup;
+                        Touch();
+                        break;
+                    }
+                    if (target == 1)
+                        break;
+                }
+                return true;
+            }
+
+            /// <summary>Scale spacing… from the keys' menu: the selected keys' gaps times a percentage.</summary>
+            private void OpenSpacing()
+            {
+                RectTransform dialog = OpenDialog("Scale spacing", winW / 2f - 140f, 60f);
+                RectTransform line = Line(dialog);
+                InputField amount = Fld(line, "Gaps", 0x9A9DA2, "200", "%", null);
+                Note(dialog, "Around the first selected key. Alt and the wheel over the keys does it a tenth at a time.");
+                RectTransform buttons = DialogButtons(dialog);
+                Btn(buttons, "Cancel", false, CloseMenu, null);
+                Clickable ok = Btn(buttons, "Scale", false, () =>
+                {
+                    float percent;
+                    if (float.TryParse(amount.text.Trim().TrimEnd('%'), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out percent) == false || percent <= 0f)
+                        return;
+                    CloseMenu();
+                    if (T.ScaleSelectedSpacing(percent / 100f, true) == false)
+                        Toast("Nothing moved: some keys would land on others, or on a locked track.");
+                    Touch();
+                }, null);
+                ok.normal = Pal.accent;
+                ok.hover = Pal.C(0xF0B558);
+                ok.GetComponentInChildren<Text>().color = Pal.onAccent;
+                ok.Refresh();
+                PlaceDialog(dialog);
+                amount.ActivateInputField();
             }
 
             /// <summary>The grid's right click menu: the ruler's, or the keys'.</summary>
