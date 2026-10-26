@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AMModules\AdvancedModeModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AMModules\BlendShapesEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AMModules\BonesEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AMModules\BodyHeadingReference.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AMModules\BoobsEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AMModules\ClothesTransformEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AMModules\CollidersEditor.cs" />

@@ -24,14 +24,23 @@ namespace HSPE.AMModules
         #endregion
 
         #region Private Types
+        private enum DirectionSpace
+        {
+            World,
+            Heading,
+            Bone
+        }
+
         private class DynamicBoneData
         {
             public EditableValue<bool> originalEnabled;
             public bool currentEnabled;
             public EditableValue<Vector3> originalGravity;
             public Vector3 currentGravity;
+            public DirectionSpace gravitySpace;
             public EditableValue<Vector3> originalForce;
             public Vector3 currentForce;
+            public DirectionSpace forceSpace;
 #if AISHOUJO || HONEYSELECT2
             public EditableValue<DynamicBone.UpdateMode> originalUpdateMode;
             public DynamicBone.UpdateMode currentUpdateMode;
@@ -75,6 +84,8 @@ namespace HSPE.AMModules
                 currentWeight = other.currentWeight;
                 currentGravity = other.currentGravity;
                 currentForce = other.currentForce;
+                gravitySpace = other.gravitySpace;
+                forceSpace = other.forceSpace;
 #if AISHOUJO || HONEYSELECT2
                 this.currentUpdateMode= other.currentUpdateMode;
 #endif
@@ -260,6 +271,7 @@ namespace HSPE.AMModules
         private DynamicBone _dynamicBoneTarget;
         internal readonly List<DynamicBone> _dynamicBones = new List<DynamicBone>();
         private readonly Dictionary<DynamicBone, DynamicBoneData> _dirtyDynamicBones = new Dictionary<DynamicBone, DynamicBoneData>();
+        private static readonly Dictionary<DynamicBone, DynamicBonesEditor> _relativeDirectionOwners = new Dictionary<DynamicBone, DynamicBonesEditor>();
         private Vector3 _dragDynamicBoneStartPosition;
         private Vector3 _dragDynamicBoneEndPosition;
         private Vector3 _lastDynamicBoneGravity;
@@ -267,6 +279,7 @@ namespace HSPE.AMModules
         private static DebugLines _debugLines;
         private bool _firstRefresh;
         private readonly GenericOCITarget _target;
+        private readonly BodyHeadingReference _bodyHeading;
         private Vector2 _dynamicBonesScroll2;
         private readonly Dictionary<Transform, DynamicBoneData> _headlessDirtyDynamicBones = new Dictionary<Transform, DynamicBoneData>();
         private int _headlessReconstructionTimeout;
@@ -309,6 +322,7 @@ namespace HSPE.AMModules
         public DynamicBonesEditor(PoseController parent, GenericOCITarget target) : base(parent)
         {
             _target = target;
+            _bodyHeading = new BodyHeadingReference(parent, target);
             _parent.onUpdate += Update;
             _parent.onLateUpdate += LateUpdate;
             if (_debugLines == null)
@@ -450,6 +464,8 @@ namespace HSPE.AMModules
                                 db.m_Radius = pair.Value.currentRadius;
                             }
                             _headlessDirtyDynamicBones.Remove(pair.Key);
+                            UpdateRelativeDirectionRegistration(db, pair.Value);
+                            ApplyRelativeDirections(db);
                             NotifyDynamicBoneForUpdate(db);
                             break;
                         }
@@ -464,6 +480,7 @@ namespace HSPE.AMModules
 
         public override void OnDestroy()
         {
+            UnregisterRelativeDirections();
             base.OnDestroy();
             if (_parent != null)
             {
@@ -562,6 +579,11 @@ namespace HSPE.AMModules
 
             _dynamicBonesScroll2 = GUILayout.BeginScrollView(_dynamicBonesScroll2, false, true);
 
+            if (_dynamicBoneTarget != null &&
+                (GetGravitySpace(_dynamicBoneTarget) == DirectionSpace.Heading || GetForceSpace(_dynamicBoneTarget) == DirectionSpace.Heading) &&
+                _bodyHeading.UsesObjectTransform)
+                GUILayout.Label("Following object heading.");
+
             {
                 GUILayout.BeginHorizontal();
                 bool e = false;
@@ -590,21 +612,21 @@ namespace HSPE.AMModules
                 GUILayout.Label("Gravity");
                 GUILayout.FlexibleSpace();
                 GUI.color = Color.red;
-                if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)) && _dynamicBoneTarget != null && IsDynamicBoneDirty(_dynamicBoneTarget))
-                {
-                    DynamicBoneData data = _dirtyDynamicBones[_dynamicBoneTarget];
-                    _dynamicBoneTarget.m_Gravity = data.originalGravity;
-                    data.currentGravity = data.originalGravity;
-                    data.originalGravity.Reset();
-                }
+                if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)) && _dynamicBoneTarget != null)
+                    ResetGravity(_dynamicBoneTarget);
                 GUI.color = c;
                 GUILayout.EndHorizontal();
 
+                DirectionSpace gravitySpace = GetGravitySpace(_dynamicBoneTarget);
+                DirectionSpace newGravitySpace = DirectionSpaceEditor(gravitySpace);
+                if (_dynamicBoneTarget != null && newGravitySpace != gravitySpace)
+                    SetGravitySpace(_dynamicBoneTarget, newGravitySpace);
+
                 Vector3 g = Vector3.zero;
                 if (_dynamicBoneTarget != null)
-                    g = _dynamicBoneTarget.m_Gravity;
+                    g = GetDynamicBoneGravity(_dynamicBoneTarget);
                 g = Vector3Editor(g, _redColor);
-                if (_dynamicBoneTarget != null && _dynamicBoneTarget.m_Gravity != g)
+                if (_dynamicBoneTarget != null && GetDynamicBoneGravity(_dynamicBoneTarget) != g)
                     SetDynamicBoneGravity(_dynamicBoneTarget, g);
                 GUILayout.EndVertical();
             }
@@ -616,21 +638,21 @@ namespace HSPE.AMModules
                 GUILayout.Label("Force");
                 GUILayout.FlexibleSpace();
                 GUI.color = Color.red;
-                if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)) && _dynamicBoneTarget != null && IsDynamicBoneDirty(_dynamicBoneTarget))
-                {
-                    DynamicBoneData data = _dirtyDynamicBones[_dynamicBoneTarget];
-                    _dynamicBoneTarget.m_Force = data.originalForce;
-                    data.currentForce = data.originalForce;
-                    data.originalForce.Reset();
-                }
+                if (GUILayout.Button("Reset", GUILayout.ExpandWidth(false)) && _dynamicBoneTarget != null)
+                    ResetForce(_dynamicBoneTarget);
                 GUI.color = c;
                 GUILayout.EndHorizontal();
 
+                DirectionSpace forceSpace = GetForceSpace(_dynamicBoneTarget);
+                DirectionSpace newForceSpace = DirectionSpaceEditor(forceSpace);
+                if (_dynamicBoneTarget != null && newForceSpace != forceSpace)
+                    SetForceSpace(_dynamicBoneTarget, newForceSpace);
+
                 Vector3 f = Vector3.zero;
                 if (_dynamicBoneTarget != null)
-                    f = _dynamicBoneTarget.m_Force;
+                    f = GetDynamicBoneForce(_dynamicBoneTarget);
                 f = Vector3Editor(f, _blueColor);
-                if (_dynamicBoneTarget != null && _dynamicBoneTarget.m_Force != f)
+                if (_dynamicBoneTarget != null && GetDynamicBoneForce(_dynamicBoneTarget) != f)
                     SetDynamicBoneForce(_dynamicBoneTarget, f);
 
                 GUILayout.EndVertical();
@@ -846,8 +868,10 @@ namespace HSPE.AMModules
                     _copiedDynamicBoneData = new DynamicBoneData();
                     _copiedDynamicBoneData.currentEnabled = _dynamicBoneTarget.enabled;
                     _copiedDynamicBoneData.currentWeight = _dynamicBoneTarget.GetWeight();
-                    _copiedDynamicBoneData.currentGravity = _dynamicBoneTarget.m_Gravity;
-                    _copiedDynamicBoneData.currentForce = _dynamicBoneTarget.m_Force;
+                    _copiedDynamicBoneData.currentGravity = GetDynamicBoneGravity(_dynamicBoneTarget);
+                    _copiedDynamicBoneData.currentForce = GetDynamicBoneForce(_dynamicBoneTarget);
+                    _copiedDynamicBoneData.gravitySpace = GetGravitySpace(_dynamicBoneTarget);
+                    _copiedDynamicBoneData.forceSpace = GetForceSpace(_dynamicBoneTarget);
 #if AISHOUJO || HONEYSELECT2
                     _copiedDynamicBoneData.currentUpdateMode = this._dynamicBoneTarget.m_UpdateMode;
 #endif
@@ -869,9 +893,11 @@ namespace HSPE.AMModules
                         SetDynamicBoneEnabled(_dynamicBoneTarget, _copiedDynamicBoneData.currentEnabled);
                     if (_dynamicBoneTarget.GetWeight() != _copiedDynamicBoneData.currentWeight)
                         SetDynamicBoneWeight(_dynamicBoneTarget, _copiedDynamicBoneData.currentWeight);
-                    if (_dynamicBoneTarget.m_Gravity != _copiedDynamicBoneData.currentGravity)
+                    SetGravitySpace(_dynamicBoneTarget, _copiedDynamicBoneData.gravitySpace);
+                    SetForceSpace(_dynamicBoneTarget, _copiedDynamicBoneData.forceSpace);
+                    if (GetDynamicBoneGravity(_dynamicBoneTarget) != _copiedDynamicBoneData.currentGravity)
                         SetDynamicBoneGravity(_dynamicBoneTarget, _copiedDynamicBoneData.currentGravity);
-                    if (_dynamicBoneTarget.m_Force != _copiedDynamicBoneData.currentForce)
+                    if (GetDynamicBoneForce(_dynamicBoneTarget) != _copiedDynamicBoneData.currentForce)
                         SetDynamicBoneForce(_dynamicBoneTarget, _copiedDynamicBoneData.currentForce);
 #if AISHOUJO || HONEYSELECT2
                     if (this._dynamicBoneTarget.m_UpdateMode != _copiedDynamicBoneData.currentUpdateMode)
@@ -1008,7 +1034,7 @@ namespace HSPE.AMModules
             if (data.originalForce.hasValue == false)
                 data.originalForce = db.m_Force;
             data.currentForce = f;
-            db.m_Force = f;
+            db.m_Force = GetReferenceRotation(db, data.forceSpace) * f;
         }
 
 #if AISHOUJO || HONEYSELECT2
@@ -1028,7 +1054,148 @@ namespace HSPE.AMModules
             if (data.originalGravity.hasValue == false)
                 data.originalGravity = db.m_Gravity;
             data.currentGravity = g;
-            db.m_Gravity = g;
+            db.m_Gravity = GetReferenceRotation(db, data.gravitySpace) * g;
+        }
+
+        private static DirectionSpace DirectionSpaceEditor(DirectionSpace space)
+        {
+            bool heading = GUILayout.Toggle(space == DirectionSpace.Heading, "Follow horizontal rotation");
+            if (heading != (space == DirectionSpace.Heading))
+                space = heading ? DirectionSpace.Heading : DirectionSpace.World;
+            bool bone = GUILayout.Toggle(space == DirectionSpace.Bone, "Follow body movement");
+            if (bone != (space == DirectionSpace.Bone))
+                space = bone ? DirectionSpace.Bone : DirectionSpace.World;
+            return space;
+        }
+
+        // Use the attachment frame, not the simulated root, to avoid feeding physics
+        // motion back into its own force. Quaternion rotation deliberately ignores scale.
+        private Quaternion GetReferenceRotation(DynamicBone db, DirectionSpace space)
+        {
+            if (space == DirectionSpace.World)
+                return Quaternion.identity;
+            if (space == DirectionSpace.Heading)
+                return _bodyHeading.Rotation;
+            Transform reference = db.m_Root != null ? db.m_Root.parent : null;
+            return (reference != null ? reference : db.transform).rotation;
+        }
+
+        private DirectionSpace GetGravitySpace(DynamicBone db)
+        {
+            DynamicBoneData data;
+            return db != null && _dirtyDynamicBones.TryGetValue(db, out data) ? data.gravitySpace : DirectionSpace.World;
+        }
+
+        private DirectionSpace GetForceSpace(DynamicBone db)
+        {
+            DynamicBoneData data;
+            return db != null && _dirtyDynamicBones.TryGetValue(db, out data) ? data.forceSpace : DirectionSpace.World;
+        }
+
+        private bool IsGravityRelative(DynamicBone db)
+        {
+            return GetGravitySpace(db) != DirectionSpace.World;
+        }
+
+        private bool IsForceRelative(DynamicBone db)
+        {
+            return GetForceSpace(db) != DirectionSpace.World;
+        }
+
+        private Vector3 GetDynamicBoneGravity(DynamicBone db)
+        {
+            return IsGravityRelative(db) ? _dirtyDynamicBones[db].currentGravity : db.m_Gravity;
+        }
+
+        private Vector3 GetDynamicBoneForce(DynamicBone db)
+        {
+            return IsForceRelative(db) ? _dirtyDynamicBones[db].currentForce : db.m_Force;
+        }
+
+        private void SetGravitySpace(DynamicBone db, DirectionSpace space)
+        {
+            if (space == GetGravitySpace(db))
+                return;
+            ApplyRelativeDirections(db);
+            DynamicBoneData data = SetDynamicBoneDirty(db);
+            if (!data.originalGravity.hasValue)
+                data.originalGravity = db.m_Gravity;
+            data.currentGravity = Quaternion.Inverse(GetReferenceRotation(db, space)) * db.m_Gravity;
+            data.gravitySpace = space;
+            UpdateRelativeDirectionRegistration(db, data);
+        }
+
+        private void SetForceSpace(DynamicBone db, DirectionSpace space)
+        {
+            if (space == GetForceSpace(db))
+                return;
+            ApplyRelativeDirections(db);
+            DynamicBoneData data = SetDynamicBoneDirty(db);
+            if (!data.originalForce.hasValue)
+                data.originalForce = db.m_Force;
+            data.currentForce = Quaternion.Inverse(GetReferenceRotation(db, space)) * db.m_Force;
+            data.forceSpace = space;
+            UpdateRelativeDirectionRegistration(db, data);
+        }
+
+        private void UpdateRelativeDirectionRegistration(DynamicBone db, DynamicBoneData data)
+        {
+            if (data.gravitySpace != DirectionSpace.World || data.forceSpace != DirectionSpace.World)
+                _relativeDirectionOwners[db] = this;
+            else
+                _relativeDirectionOwners.Remove(db);
+        }
+
+        private void UnregisterRelativeDirections()
+        {
+            foreach (DynamicBone bone in _relativeDirectionOwners.Where(pair => pair.Value == this).Select(pair => pair.Key).ToArray())
+                _relativeDirectionOwners.Remove(bone);
+        }
+
+        internal static void ApplyRelativeDirections(DynamicBone db)
+        {
+            DynamicBonesEditor editor;
+            DynamicBoneData data;
+            if (!_relativeDirectionOwners.TryGetValue(db, out editor))
+                return;
+            if (db == null || editor._parent == null || !editor._dirtyDynamicBones.TryGetValue(db, out data))
+            {
+                _relativeDirectionOwners.Remove(db);
+                return;
+            }
+            Quaternion gravityRotation = editor.GetReferenceRotation(db, data.gravitySpace);
+            if (data.gravitySpace != DirectionSpace.World)
+                db.m_Gravity = gravityRotation * data.currentGravity;
+            if (data.forceSpace != DirectionSpace.World)
+            {
+                Quaternion forceRotation = data.forceSpace == data.gravitySpace ? gravityRotation :
+                    editor.GetReferenceRotation(db, data.forceSpace);
+                db.m_Force = forceRotation * data.currentForce;
+            }
+        }
+
+        private void ResetGravity(DynamicBone db)
+        {
+            DynamicBoneData data;
+            if (!_dirtyDynamicBones.TryGetValue(db, out data) || !data.originalGravity.hasValue)
+                return;
+            db.m_Gravity = data.originalGravity;
+            data.currentGravity = data.originalGravity;
+            data.originalGravity.Reset();
+            data.gravitySpace = DirectionSpace.World;
+            UpdateRelativeDirectionRegistration(db, data);
+        }
+
+        private void ResetForce(DynamicBone db)
+        {
+            DynamicBoneData data;
+            if (!_dirtyDynamicBones.TryGetValue(db, out data) || !data.originalForce.hasValue)
+                return;
+            db.m_Force = data.originalForce;
+            data.currentForce = data.originalForce;
+            data.originalForce.Reset();
+            data.forceSpace = DirectionSpace.World;
+            UpdateRelativeDirectionRegistration(db, data);
         }
 
         public void LoadFrom(DynamicBonesEditor other)
@@ -1084,6 +1251,8 @@ namespace HSPE.AMModules
                         if (kvp.Value.originalRadius.hasValue)
                             db.m_Radius = kvp.Key.m_Radius;
                         _dirtyDynamicBones.Add(db, new DynamicBoneData(kvp.Value));
+                        UpdateRelativeDirectionRegistration(db, _dirtyDynamicBones[db]);
+                        ApplyRelativeDirections(db);
                     }
                     _dynamicBonesScroll = other._dynamicBonesScroll;
                 }
@@ -1100,6 +1269,7 @@ namespace HSPE.AMModules
                 {
                     if (kvp.Key == null)
                         continue;
+                    ApplyRelativeDirections(kvp.Key);
                     xmlWriter.WriteStartElement("dynamicBone");
                     xmlWriter.WriteAttributeString("root", CalculateRoot(kvp.Key));
 
@@ -1112,12 +1282,14 @@ namespace HSPE.AMModules
                         xmlWriter.WriteAttributeString("gravityX", XmlConvert.ToString(kvp.Key.m_Gravity.x));
                         xmlWriter.WriteAttributeString("gravityY", XmlConvert.ToString(kvp.Key.m_Gravity.y));
                         xmlWriter.WriteAttributeString("gravityZ", XmlConvert.ToString(kvp.Key.m_Gravity.z));
+                        WriteRelativeDirection(xmlWriter, "gravity", kvp.Value.gravitySpace, kvp.Value.currentGravity);
                     }
                     if (kvp.Value.originalForce.hasValue)
                     {
                         xmlWriter.WriteAttributeString("forceX", XmlConvert.ToString(kvp.Key.m_Force.x));
                         xmlWriter.WriteAttributeString("forceY", XmlConvert.ToString(kvp.Key.m_Force.y));
                         xmlWriter.WriteAttributeString("forceZ", XmlConvert.ToString(kvp.Key.m_Force.z));
+                        WriteRelativeDirection(xmlWriter, "force", kvp.Value.forceSpace, kvp.Value.currentForce);
                     }
 #if AISHOUJO || HONEYSELECT2
                     if (kvp.Value.originalUpdateMode.hasValue)
@@ -1214,6 +1386,7 @@ namespace HSPE.AMModules
                 db.m_Gravity = data.originalGravity;
                 db.SetupParticles();
                 db.m_Gravity = data.currentGravity;
+                ApplyRelativeDirections(db);
             }
             else
                 db.SetupParticles();
@@ -1226,6 +1399,42 @@ namespace HSPE.AMModules
             _dynamicBonesDragRadius = _dynamicBonesDragRadiusBase * Studio.Studio.optionSystem.manipulateSize;
             DynamicBoneDraggingLogic();
             _debugLines.Draw(_dynamicBones, _dynamicBoneTarget, _dirtyDynamicBones);
+        }
+
+        private static void WriteRelativeDirection(XmlTextWriter writer, string prefix, DirectionSpace space, Vector3 value)
+        {
+            if (space == DirectionSpace.World)
+                return;
+            writer.WriteAttributeString(prefix + "Space", space.ToString());
+            writer.WriteAttributeString(prefix + "LocalX", XmlConvert.ToString(value.x));
+            writer.WriteAttributeString(prefix + "LocalY", XmlConvert.ToString(value.y));
+            writer.WriteAttributeString(prefix + "LocalZ", XmlConvert.ToString(value.z));
+        }
+
+        private static bool TryReadRelativeDirection(XmlNode node, string prefix, out DirectionSpace space, out Vector3 value)
+        {
+            space = DirectionSpace.World;
+            value = Vector3.zero;
+            DirectionSpace savedSpace = ReadDirectionSpace(node, prefix + "Space");
+            XmlAttribute x = node.Attributes[prefix + "LocalX"];
+            XmlAttribute y = node.Attributes[prefix + "LocalY"];
+            XmlAttribute z = node.Attributes[prefix + "LocalZ"];
+            if (savedSpace == DirectionSpace.World || x == null || y == null || z == null)
+                return false;
+
+            space = savedSpace;
+            value = new Vector3(XmlConvert.ToSingle(x.Value), XmlConvert.ToSingle(y.Value), XmlConvert.ToSingle(z.Value));
+            return true;
+        }
+
+        private static DirectionSpace ReadDirectionSpace(XmlNode node, string attribute)
+        {
+            string value = node.Attributes[attribute]?.Value;
+            if (value == "Heading")
+                return DirectionSpace.Heading;
+            if (value == "Bone")
+                return DirectionSpace.Bone;
+            return DirectionSpace.World;
         }
 
         private bool LoadSingleBone(DynamicBone db, XmlNode node)
@@ -1256,6 +1465,13 @@ namespace HSPE.AMModules
                 data.originalGravity = db.m_Gravity;
                 data.currentGravity = gravity;
                 db.m_Gravity = gravity;
+                DirectionSpace gravitySpace;
+                Vector3 localGravity;
+                if (TryReadRelativeDirection(node, "gravity", out gravitySpace, out localGravity))
+                {
+                    data.gravitySpace = gravitySpace;
+                    data.currentGravity = localGravity;
+                }
             }
             if (node.Attributes["forceX"] != null && node.Attributes["forceY"] != null && node.Attributes["forceZ"] != null)
             {
@@ -1266,6 +1482,13 @@ namespace HSPE.AMModules
                 data.originalForce = db.m_Force;
                 data.currentForce = force;
                 db.m_Force = force;
+                DirectionSpace forceSpace;
+                Vector3 localForce;
+                if (TryReadRelativeDirection(node, "force", out forceSpace, out localForce))
+                {
+                    data.forceSpace = forceSpace;
+                    data.currentForce = localForce;
+                }
             }
 #if AISHOUJO || HONEYSELECT2
             if (node.Attributes["updateMode"] != null)
@@ -1336,6 +1559,8 @@ namespace HSPE.AMModules
                 loaded = true;
                 NotifyDynamicBoneForUpdate(db);
                 _dirtyDynamicBones.Add(db, data);
+                UpdateRelativeDirectionRegistration(db, data);
+                ApplyRelativeDirections(db);
             }
             return loaded;
         }
@@ -1344,6 +1569,8 @@ namespace HSPE.AMModules
         {
             foreach (DynamicBone bone in _dynamicBones)
                 SetDynamicBoneNotDirty(bone);
+            // Pending reconstruction must not resurrect edits after a reset/load.
+            _headlessDirtyDynamicBones.Clear();
         }
 
         private void CopyToFK()
@@ -1376,6 +1603,7 @@ namespace HSPE.AMModules
 
         private void SetDynamicBoneNotDirty(DynamicBone bone)
         {
+            _relativeDirectionOwners.Remove(bone);
             DynamicBoneData data;
             if (_dynamicBones.Contains(bone) && _dirtyDynamicBones.TryGetValue(bone, out data))
             {
@@ -1398,12 +1626,14 @@ namespace HSPE.AMModules
                     bone.m_Gravity = data.originalGravity;
                     data.currentGravity = data.originalGravity;
                     data.originalGravity.Reset();
+                    data.gravitySpace = DirectionSpace.World;
                 }
                 if (data.originalForce.hasValue)
                 {
                     bone.m_Force = data.originalForce;
-                    data.currentGravity = data.originalGravity;
+                    data.currentForce = data.originalForce;
                     data.originalForce.Reset();
+                    data.forceSpace = DirectionSpace.World;
                 }
 #if AISHOUJO || HONEYSELECT2
                 if (data.originalUpdateMode.hasValue)
@@ -1506,7 +1736,9 @@ namespace HSPE.AMModules
             else if (Input.GetMouseButton(0) && isDraggingDynamicBone)
             {
                 _dragDynamicBoneEndPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Vector3.Project(_dragDynamicBoneStartPosition - Camera.main.transform.position, Camera.main.transform.forward).magnitude));
-                SetDynamicBoneForce(_draggedDynamicBone, _lastDynamicBoneGravity + (_dragDynamicBoneEndPosition - _dragDynamicBoneStartPosition) * (_inc * 1000f) / 12f);
+                Vector3 worldForce = _lastDynamicBoneGravity + (_dragDynamicBoneEndPosition - _dragDynamicBoneStartPosition) * (_inc * 1000f) / 12f;
+                SetDynamicBoneForce(_draggedDynamicBone, IsForceRelative(_draggedDynamicBone)
+                    ? Quaternion.Inverse(GetReferenceRotation(_draggedDynamicBone, GetForceSpace(_draggedDynamicBone))) * worldForce : worldForce);
             }
             else if (Input.GetMouseButtonUp(0))
             {
@@ -1517,6 +1749,7 @@ namespace HSPE.AMModules
         private void RefreshDynamicBoneList()
         {
             if (_parent == null) return;
+            _bodyHeading.Reset();
             _parent._childObjects.RemoveWhere(gobj => gobj == null);
 
             _isBusy = true;
@@ -1541,6 +1774,7 @@ namespace HSPE.AMModules
                 }
             }
             _dirtyDynamicBones.Clear();
+            UnregisterRelativeDirections();
             if (toDelete != null)
             {
                 foreach (DynamicBone db in toDelete)
@@ -1713,13 +1947,13 @@ namespace HSPE.AMModules
                             if (p.editor._isBusy == false)
                             {
                                 Vector3 newValue = Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor);
-                                if (p.dynamicBone.m_Gravity != newValue)
+                                if (p.editor.GetDynamicBoneGravity(p.dynamicBone) != newValue)
                                     p.editor.SetDynamicBoneGravity(p.dynamicBone, newValue);
                             }
                         },
                         interpolateAfter: null,
                         isCompatibleWithTarget: IsCompatibleWithTarget,
-                        getValue: (oci, parameter) => ((Parameter)parameter).dynamicBone.m_Gravity,
+                        getValue: (oci, parameter) => ((Parameter)parameter).editor.GetDynamicBoneGravity(((Parameter)parameter).dynamicBone),
                         readValueFromXml: (parameter, node) => node.ReadVector3("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Vector3)o),
                         getParameter: GetParameter,
@@ -1738,13 +1972,13 @@ namespace HSPE.AMModules
                             if (p.editor._isBusy == false)
                             {
                                 Vector3 newValue = Vector3.LerpUnclamped((Vector3)leftValue, (Vector3)rightValue, factor);
-                                if (p.dynamicBone.m_Force != newValue)
+                                if (p.editor.GetDynamicBoneForce(p.dynamicBone) != newValue)
                                     p.editor.SetDynamicBoneForce(p.dynamicBone, newValue);
                             }
                         },
                         interpolateAfter: null,
                         isCompatibleWithTarget: IsCompatibleWithTarget,
-                        getValue: (oci, parameter) => ((Parameter)parameter).dynamicBone.m_Force,
+                        getValue: (oci, parameter) => ((Parameter)parameter).editor.GetDynamicBoneForce(((Parameter)parameter).dynamicBone),
                         readValueFromXml: (parameter, node) => node.ReadVector3("value"),
                         writeValueToXml: (parameter, writer, o) => writer.WriteValue("value", (Vector3)o),
                         getParameter: GetParameter,
