@@ -61,13 +61,25 @@ namespace HSPE.AMModules
 
         private static Quaternion ExtractHorizontalRotation(Quaternion rotation, Quaternion fallback)
         {
-            // Extract twist about world-up. Projecting forward onto the ground
-            // would flip the force by 180 degrees when a bend crosses vertical.
+            // Use world-up twist near inverted poses, where forward can cross
+            // vertical and its horizontal projection can reverse direction.
             float lengthSquared = rotation.y * rotation.y + rotation.w * rotation.w;
             if (lengthSquared < 0.00000001f)
                 return fallback; // A fully inverted swing has no unique heading.
             float inverseLength = 1f / Mathf.Sqrt(lengthSquared);
-            return new Quaternion(0f, rotation.y * inverseLength, 0f, rotation.w * inverseLength);
+            Quaternion twist = new Quaternion(0f, rotation.y * inverseLength, 0f, rotation.w * inverseLength);
+            float upright = (rotation * Vector3.up).y;
+            if (upright <= 0f)
+                return twist;
+
+            // Sufficiently upright poses use forward heading without pitch/roll
+            // bias. Blend as the body's up axis approaches the horizon.
+            Vector3 forward = rotation * Vector3.forward;
+            Quaternion heading = Quaternion.AngleAxis(Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg, Vector3.up);
+            const float uprightBlendEnd = 0.25f;
+            float weight = Mathf.Clamp01(upright / uprightBlendEnd);
+            weight = weight * weight * (3f - 2f * weight);
+            return Quaternion.Slerp(twist, heading, weight);
         }
     }
 }
