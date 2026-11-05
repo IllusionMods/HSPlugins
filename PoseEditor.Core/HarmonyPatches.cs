@@ -16,6 +16,17 @@ using SEXY;
 
 namespace HSPE
 {
+    // Resolve attachment rotation at the physics step, after animation/FK/IK has
+    // moved the model, even when its editor or advanced-mode window is inactive.
+    [HarmonyPatch(typeof(DynamicBone), "UpdateDynamicBones")]
+    internal static class DynamicBone_UpdateDynamicBones_Patches
+    {
+        private static void Prefix(DynamicBone __instance)
+        {
+            AMModules.DynamicBonesEditor.ApplyRelativeDirections(__instance);
+        }
+    }
+
     [HarmonyPatch(typeof(Studio.Studio), "Duplicate")]
     internal class Studio_Duplicate_Patches
     {
