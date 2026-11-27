@@ -1992,11 +1992,18 @@ namespace NodesConstraints
             KKAPI.Utilities.IMGUIUtils.DrawTooltip(_windowRect);
         }
 
+        // Another enabled constraint holding the same child on that channel, or null
+        private Constraint OtherDriver(Constraint constraint, Func<Constraint, bool> channel)
+        {
+            return _constraints.FirstOrDefault(c => c != constraint && c.enabled && c.childTransform == constraint.childTransform && channel(c));
+        }
+
         private void SetConstraintEnabled(Constraint constraint, bool newEnabled)
         {
             if (constraint.enabled && newEnabled == false)
             {
-                if (constraint.position)
+                // another constraint still holds the child: leave it to that one
+                if (constraint.position && OtherDriver(constraint, c => c.position) == null)
                 {
                     constraint.smoothPos.disConnectionCurrentTime = constraint.smoothPos.disConnectionTime;
                     constraint.smoothPos.connectionCurrentTime = 0.0f;
@@ -2010,7 +2017,7 @@ namespace NodesConstraints
                     }
                 }
 
-                if (constraint.rotation)
+                if (constraint.rotation && OtherDriver(constraint, c => c.rotation) == null)
                 {
                     constraint.smoothRot.disConnectionCurrentTime = constraint.smoothRot.disConnectionTime;
                     constraint.smoothRot.connectionCurrentTime = 0.0f;
@@ -2024,7 +2031,7 @@ namespace NodesConstraints
                     }
                 }
 
-                if (constraint.scale)
+                if (constraint.scale && OtherDriver(constraint, c => c.scale) == null)
                 {
                     constraint.smoothScale.disConnectionCurrentTime = constraint.smoothScale.disConnectionTime;
                     constraint.smoothScale.connectionCurrentTime = 0.0f;
@@ -2041,9 +2048,13 @@ namespace NodesConstraints
 
             if (constraint.enabled == false && newEnabled)
             {
-                constraint.originalChildPosition = constraint.childTransform.localPosition;
-                constraint.originalChildRotation = constraint.childTransform.localRotation;
-                constraint.originalChildScale = constraint.childTransform.localScale;
+                // another constraint already holds the child: its original is the real one
+                Constraint pos = OtherDriver(constraint, c => c.position);
+                Constraint rot = OtherDriver(constraint, c => c.rotation);
+                Constraint scale = OtherDriver(constraint, c => c.scale);
+                constraint.originalChildPosition = pos != null ? pos.originalChildPosition : constraint.childTransform.localPosition;
+                constraint.originalChildRotation = rot != null ? rot.originalChildRotation : constraint.childTransform.localRotation;
+                constraint.originalChildScale = scale != null ? scale.originalChildScale : constraint.childTransform.localScale;
 
                 if (constraint.position)
                 {
