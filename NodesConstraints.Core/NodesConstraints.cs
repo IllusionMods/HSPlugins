@@ -2420,6 +2420,9 @@ namespace NodesConstraints
             Dictionary<int, ObjectCtrlInfo> toIgnore = new Dictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl);
             Studio.Studio.Instance.ExecuteDelayed(() =>
             {
+                // ids left on constraints already in the scene would catch the imported scene's tracks
+                foreach (Constraint c in _constraints)
+                    c.uniqueLoadId = null;
                 LoadSceneGeneric(node.FirstChild, Studio.Studio.Instance.dicObjectCtrl.Where(e => toIgnore.ContainsKey(e.Key) == false).OrderBy(e => SceneInfo_Import_Patches._newToOldKeys[e.Key]).ToList());
             }, 8);
         }
