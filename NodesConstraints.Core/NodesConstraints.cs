@@ -166,6 +166,8 @@ namespace NodesConstraints
             public bool fixDynamicBone;
             public int? uniqueLoadId;
             public bool destroyed = false;
+            public ObjectCtrlInfo parentObject, childObject; // only while waiting for a missing bone
+            public string parentPath, childPath;
             private VectorLine _debugLine;
             private VectorLine DebugLine
             {
@@ -792,6 +794,8 @@ namespace NodesConstraints
         private readonly Constraint _displayedConstraint = new Constraint();
         private Constraint _selectedConstraint;
         private readonly List<Constraint> _constraints = new List<Constraint>();
+        // Loaded constraints whose bone is missing (another body or uncensor): kept, saved, attached when the bone appears
+        private readonly List<Constraint> _waiting = new List<Constraint>();
         private Vector2 _scroll;
         private HashSet<GuideObject> _selectedGuideObjects;
         private bool _initUI;
@@ -989,6 +993,8 @@ namespace NodesConstraints
             _deltaTime = Time.deltaTime;
             if (_studioLoaded == false)
                 return;
+            if (_waiting.Count > 0)
+                UpdateWaiting();
             _totalActiveExpressions = _allExpressions.Count(e => e.enabled && e.gameObject.activeInHierarchy);
             if (Camera.main.GetComponent<Expression>() != null)
                 _totalActiveExpressions += 1; // Expression is added to MainCamera in Init()
@@ -2247,8 +2253,52 @@ namespace NodesConstraints
             return null;
         }
 
+        // Drops waiting constraints whose object was deleted and attaches those whose bones have appeared
+        private void UpdateWaiting()
+        {
+            for (int i = _waiting.Count - 1; i >= 0; i--)
+            {
+                Constraint c = _waiting[i];
+                if (c.parentObject.guideObject == null || c.childObject.guideObject == null)
+                {
+                    _waiting.RemoveAt(i);
+                    c.Destroy();
+                    continue;
+                }
+                if (Time.frameCount % 30 != 0)
+                    continue;
+                c.parentTransform = c.parentObject.guideObject.transformTarget.Find(c.parentPath);
+                c.childTransform = c.childObject.guideObject.transformTarget.Find(c.childPath);
+                if (c.parentTransform == null || c.childTransform == null)
+                    continue;
+
+                _waiting.RemoveAt(i);
+                if (_constraints.Any(e => e.parentTransform == c.parentTransform && e.childTransform == c.childTransform))
+                {
+                    c.Destroy(); // made again meanwhile (e.g. by another plugin)
+                    continue;
+                }
+                if (_allGuideObjects.TryGetValue(c.parentTransform, out c.parent) == false)
+                    c.parent = null;
+                if (_allGuideObjects.TryGetValue(c.childTransform, out c.child) == false)
+                    c.child = null;
+                c.originalChildPosition = c.childTransform.localPosition;
+                c.originalChildRotation = c.childTransform.localRotation;
+                c.originalChildScale = c.childTransform.localScale;
+                if (c.originalParentScale == Vector3.zero) // not in the save
+                {
+                    c.originalParentPosition = c.parentTransform.position;
+                    c.originalParentRotation = c.parentTransform.rotation;
+                    c.originalParentScale = c.parentTransform.lossyScale;
+                }
+                _constraints.Add(c);
+                TimelineCompatibility.RefreshInterpolablesList();
+            }
+        }
+
         private void ClearAllConstraints()
         {
+            _waiting.Clear();
             _constraints.Clear();
             _selectedConstraint = null;
         }
@@ -2409,6 +2459,7 @@ namespace NodesConstraints
                 return;
             Studio.Studio.Instance.ExecuteDelayed(() =>
             {
+                _waiting.Clear();
                 LoadSceneGeneric(node.FirstChild, new SortedDictionary<int, ObjectCtrlInfo>(Studio.Studio.Instance.dicObjectCtrl).ToList());
             }, 8);
         }
@@ -2453,8 +2504,6 @@ namespace NodesConstraints
                     parentTransform = dic[parentObjectIndex].Value.guideObject.transformTarget;
                     parentTransform = parentTransform.Find(childNode.Attributes["parentPath"].Value);
                 }
-                if (parentTransform == null)
-                    continue;
 
                 int childObjectIndex = XmlConvert.ToInt32(childNode.Attributes["childObjectIndex"].Value);
                 if (childObjectIndex >= dic.Count)
@@ -2464,8 +2513,6 @@ namespace NodesConstraints
                 {
                     childTransform = dic[childObjectIndex].Value.guideObject.transformTarget;
                     childTransform = childTransform.Find(childNode.Attributes["childPath"].Value);
-                    if (childTransform == null)
-                        continue;
                 }
                 else
                 {
@@ -2474,11 +2521,15 @@ namespace NodesConstraints
                     if (childTransform == null)
                         continue;
                 }
+                if (childTransform == null && parentObjectIndex == MainCameraParenObjectIndex)
+                    continue;
+                bool waiting = parentTransform == null || childTransform == null;
 
+                // a missing bone stands in as its object until the constraint is moved to the waiting list below
                 Constraint c = AddConstraint(
                         childNode.Attributes["enabled"] == null || XmlConvert.ToBoolean(childNode.Attributes["enabled"].Value),
-                        parentTransform,
-                        childTransform,
+                        parentTransform ?? dic[parentObjectIndex].Value.guideObject.transformTarget,
+                        childTransform ?? dic[childObjectIndex].Value.guideObject.transformTarget,
                         XmlConvert.ToBoolean(childNode.Attributes["position"].Value),
                         new Vector3(
                                 XmlConvert.ToSingle(childNode.Attributes["positionOffsetX"].Value),
@@ -2502,6 +2553,19 @@ namespace NodesConstraints
                                 ),
                         childNode.Attributes["alias"] != null ? childNode.Attributes["alias"].Value : ""
                 );
+
+                if (c != null && waiting)
+                {
+                    _constraints.Remove(c);
+                    _waiting.Add(c);
+                    c.parentTransform = c.childTransform = null;
+                    c.parent = c.child = null;
+                    c.originalParentScale = Vector3.zero; // recorded on attach unless the save has it
+                    c.parentObject = dic[parentObjectIndex].Value;
+                    c.parentPath = childNode.Attributes["parentPath"].Value;
+                    c.childObject = dic[childObjectIndex].Value;
+                    c.childPath = childNode.Attributes["childPath"].Value;
+                }
 
                 if (c != null)
                 {
@@ -2722,23 +2786,30 @@ namespace NodesConstraints
 
             xmlWriter.WriteAttributeString("version", Version);
 
-            for (int i = 0; i < _constraints.Count; i++)
+            List<Constraint> all = _constraints.Concat(_waiting).ToList();
+            for (int i = 0; i < all.Count; i++)
             {
-                Constraint constraint = _constraints[i];
+                Constraint constraint = all[i];
+                bool waiting = i >= _constraints.Count;
                 int parentObjectIndex = -1;
                 Transform parentT = constraint.parentTransform;
-                if (parentT == Studio.Studio.Instance.cameraCtrl.mainCmaera.transform)
+                if (waiting)
+                    parentObjectIndex = dic.FindIndex(e => e.Value == constraint.parentObject);
+                else if (parentT == Studio.Studio.Instance.cameraCtrl.mainCmaera.transform)
                     parentObjectIndex = MainCameraParenObjectIndex;
                 else
                     while ((parentObjectIndex = dic.FindIndex(e => e.Value.guideObject.transformTarget == parentT)) == -1)
                         parentT = parentT.parent;
-                string parentPath = constraint.parentTransform.GetPathFrom(parentT);
+                string parentPath = waiting ? constraint.parentPath : constraint.parentTransform.GetPathFrom(parentT);
 
                 int childObjectIndex = -1;
                 Transform childT = constraint.childTransform;
-                while ((childObjectIndex = dic.FindIndex(e => e.Value.guideObject.transformTarget == childT)) == -1)
-                    childT = childT.parent;
-                string childPath = constraint.childTransform.GetPathFrom(childT);
+                if (waiting)
+                    childObjectIndex = dic.FindIndex(e => e.Value == constraint.childObject);
+                else
+                    while ((childObjectIndex = dic.FindIndex(e => e.Value.guideObject.transformTarget == childT)) == -1)
+                        childT = childT.parent;
+                string childPath = waiting ? constraint.childPath : constraint.childTransform.GetPathFrom(childT);
 
                 xmlWriter.WriteStartElement("constraint");
 
@@ -2834,7 +2905,9 @@ namespace NodesConstraints
                     {
                         Constraint c = (Constraint)parameter;
                         bool newEnabled = (bool)leftValue;
-                        if (c.enabled != newEnabled)
+                        if (_waiting.Contains(c))
+                            c.enabled = newEnabled;
+                        else if (c.enabled != newEnabled)
                             SetConstraintEnabled(c, newEnabled);
                     },
                     interpolateAfter: null,
@@ -2846,7 +2919,7 @@ namespace NodesConstraints
                     readParameterFromXml: (oci, node) =>
                     {
                         int uniqueLoadId = node.ReadInt("parameter");
-                        foreach (Constraint c in _constraints)
+                        foreach (Constraint c in _constraints.Concat(_waiting))
                             if (c.uniqueLoadId != null && c.uniqueLoadId.Value == uniqueLoadId)
                             {
                                 c.uniqueLoadId = null;
@@ -2858,6 +2931,8 @@ namespace NodesConstraints
                     {
                         Constraint c = (Constraint)parameter;
                         int uniqueLoadId = _self._constraints.IndexOf(c);
+                        if (uniqueLoadId == -1 && (uniqueLoadId = _self._waiting.IndexOf(c)) != -1)
+                            uniqueLoadId += _self._constraints.Count;
                         if (uniqueLoadId != -1) // Should never happen but just in case
                             writer.WriteValue("parameter", uniqueLoadId);
                     },
@@ -2866,7 +2941,7 @@ namespace NodesConstraints
                         if (parameter == null)
                             return false;
                         Constraint c = (Constraint)parameter;
-                        if (c.destroyed || c.parentTransform == null || c.childTransform == null)
+                        if (c.destroyed || (c.parentTransform == null || c.childTransform == null) && !_self._waiting.Contains(c))
                             return false;
                         return true;
                     },
